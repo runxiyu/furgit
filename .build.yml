@@ -1,0 +1,9 @@
+image: alpine/edge
+packages:
+  - golangci-lint
+  - go
+tasks:
+  - build: |
+      cd furgit
+      go test
+      golangci-lint run .
