@@ -18,8 +18,8 @@ const (
 	packVersion2 = 2
 )
 
-// PackLocation identifies the path to a pack file and an offset inside it.
-type PackLocation struct {
+// packlocation identifies the path to a pack file and an offset inside it.
+type packlocation struct {
 	PackPath string
 	Offset   uint64
 }
@@ -32,10 +32,10 @@ func (repo *Repository) packRead(id Hash) (Object, error) {
 	return repo.packReadAt(loc, id)
 }
 
-func (repo *Repository) packIndexFind(id Hash) (PackLocation, error) {
+func (repo *Repository) packIndexFind(id Hash) (packlocation, error) {
 	idxs, err := repo.packIndexes()
 	if err != nil {
-		return PackLocation{}, err
+		return packlocation{}, err
 	}
 	for _, idx := range idxs {
 		loc, err := idx.lookup(id)
@@ -43,14 +43,14 @@ func (repo *Repository) packIndexFind(id Hash) (PackLocation, error) {
 			continue
 		}
 		if err != nil {
-			return PackLocation{}, err
+			return packlocation{}, err
 		}
 		return loc, nil
 	}
-	return PackLocation{}, ErrNotFound
+	return packlocation{}, ErrNotFound
 }
 
-func (repo *Repository) packReadAt(loc PackLocation, want Hash) (Object, error) {
+func (repo *Repository) packReadAt(loc packlocation, want Hash) (Object, error) {
 	ty, body, err := repo.packBodyResolveAtLocation(loc)
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func (repo *Repository) packReadAt(loc PackLocation, want Hash) (Object, error) 
 	return obj, err
 }
 
-func (repo *Repository) packBodyResolveAtLocation(loc PackLocation) (ObjType, borrowedBody, error) {
+func (repo *Repository) packBodyResolveAtLocation(loc packlocation) (ObjType, borrowedBody, error) {
 	pf, err := repo.packFile(loc.PackPath)
 	if err != nil {
 		return ObjInvalid, borrowedBody{}, err
@@ -73,7 +73,7 @@ func (repo *Repository) packBodyResolveAtLocation(loc PackLocation) (ObjType, bo
 	return repo.packBodyResolveWithin(pf, loc.Offset)
 }
 
-func (repo *Repository) packTypeSizeAtLocation(loc PackLocation, seen map[packKey]struct{}) (ObjType, int64, error) {
+func (repo *Repository) packTypeSizeAtLocation(loc packlocation, seen map[packKey]struct{}) (ObjType, int64, error) {
 	pf, err := repo.packFile(loc.PackPath)
 	if err != nil {
 		return ObjInvalid, 0, err

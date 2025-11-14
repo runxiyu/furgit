@@ -238,10 +238,10 @@ func (pi *packIndex) offset(idx int) (uint64, error) {
 	return readBE64(pi.offset64[base : base+8]), nil
 }
 
-func (pi *packIndex) lookup(id Hash) (PackLocation, error) {
+func (pi *packIndex) lookup(id Hash) (packlocation, error) {
 	err := pi.ensureLoaded()
 	if err != nil {
-		return PackLocation{}, err
+		return packlocation{}, err
 	}
 	first := int(id[0])
 	var lo int
@@ -251,13 +251,13 @@ func (pi *packIndex) lookup(id Hash) (PackLocation, error) {
 	hi := int(pi.fanoutEntry(first))
 	idx, found := bsearchHash(pi.names, HashSize, lo, hi, id)
 	if !found {
-		return PackLocation{}, ErrNotFound
+		return packlocation{}, ErrNotFound
 	}
 	ofs, err := pi.offset(idx)
 	if err != nil {
-		return PackLocation{}, err
+		return packlocation{}, err
 	}
-	return PackLocation{
+	return packlocation{
 		PackPath: pi.packPath,
 		Offset:   ofs,
 	}, nil
