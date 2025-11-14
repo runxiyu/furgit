@@ -6,14 +6,13 @@
 Furgit is a fast implementation of Git in pure Go, extracted from
 [an internal package of Lindenii Villosa](https://codeberg.org/lindenii/villosa/src/branch/master/villosad/internal/common/git).
 
-Furgit is in initial development, does not have tagged releases yet, and
+Furgit is in initial development, does not have tagged releases yet, and we can
 guarantees that the API will break every now and then. Do not use in
 production.
 
-Furgit does not focus on command-line utilities; in particular,
-it does not intend to replace [upstream
-git](https://git-scm.com). It is intended to be used as a
-library.
+We do not focus on command-line utilities; in particular, Furgit does not
+intend to replace [upstream git](https://git-scm.com). It is intended to be
+used as a library.
 
 ## Features
 
@@ -24,6 +23,10 @@ packfiles in the tests but they need to be refactored.
 We intend for repository objects to be freely usable across goroutines, which
 may enable long-running applications such as forges to keep a pool of recently
 used repos (including their `.idx` and `.pack` cache) for rapid access.
+
+We currently do not intend to support flexible storage backends such as
+[storers in go-git](https://pkg.go.dev/github.com/go-git/go-git/v5/plumbing/storer);
+a standard UNIX-like filesystem is expected.
 
 ## Performance
 
