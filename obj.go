@@ -117,3 +117,22 @@ func (repo *Repository) ReadObject(id Hash) (Object, error) {
 	}
 	return obj, err
 }
+
+// ReadObjectTypeSize reports the object type and size without inflating the body.
+func (repo *Repository) ReadObjectTypeSize(id Hash) (ObjType, int64, error) {
+	ty, size, err := repo.looseTypeSize(id)
+	if err == nil {
+		return ty, size, nil
+	}
+	if !errors.Is(err, ErrNotFound) {
+		return ObjInvalid, 0, err
+	}
+	loc, err := repo.packIndexFind(id)
+	if err != nil {
+		if errors.Is(err, ErrNotFound) {
+			return ObjInvalid, 0, ErrInvalidObject
+		}
+		return ObjInvalid, 0, err
+	}
+	return repo.packTypeSizeAtLocation(loc, nil)
+}
