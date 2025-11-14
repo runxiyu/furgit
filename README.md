@@ -29,13 +29,13 @@ used repos (including their `.idx` and `.pack` cache) for rapid access.
 
 Furgit is aggressively optimized for performance.
 [As of November 2025](https://git.sr.ht/~runxiyu/gitbench),
-for large repos such as
+for the task of `git ls-tree --long HEAD` on large repos such as
 [Linux](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git),
 it is:
 
-* close to the performance of [upstream git](https://git-scm.com),
-* faster than [libgit2](https://libgit2.org), and
-* faster than [go-git](https://github.com/go-git/go-git) by 3 orders of magnitude.
+* approximately the same performance as [upstream git](https://git-scm.com),
+* approximately 10 times faster than [libgit2](https://libgit2.org), and
+* approximately 1000 times faster than [go-git](https://github.com/go-git/go-git).
 
 ## Compatibility
 
