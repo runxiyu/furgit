@@ -10,6 +10,11 @@ Furgit is in initial development, does not have tagged releases yet, and
 guarantees that the API will break every now and then. Do not use in
 production.
 
+Furgit does not focus on command-line utilities; in particular,
+it does not intend to replace [upstream
+git](https://git-scm.com). It is intended to be used as a
+library.
+
 ## Features
 
 Currently, Furgit is very basic; it supports reading objects from loose objects
