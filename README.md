@@ -41,9 +41,11 @@ it is:
 
 * We only aim to support UNIX-like operating systems that have
   [syscall.Mmap](https://pkg.go.dev/syscall#Mmap).
-* Currently, this version of Furgit only supports SHA-1 hashes. However, the
-  upstream Villosa project only uses SHA-256 hashes. You may edit two lines in
-  `hash.go` to trivially switch to SHA-256.
+* Currently, this version of Furgit only supports SHA-1 hashes.
+  You may edit two lines in `hash.go` to trivially switch to SHA-256.
+  The upstream Villosa project only uses SHA-256 hashes.
+  We intend to make this library easily interoperable across hash
+  formats, but that's not the primary goal for now.
 
 ## Development
 
