@@ -17,9 +17,13 @@ library.
 
 ## Features
 
-Currently, Furgit is very basic; it supports reading objects from loose objects
+Currently, furgit is very basic; it supports reading objects from loose objects
 and packfiles. There is some infrastructure for writing loose objects and
 packfiles in the tests but they need to be refactored.
+
+We intend for repository objects to be freely usable across goroutines, which
+may enable long-running applications such as forges to keep a pool of recently
+used repos (including their `.idx` and `.pack` cache) for rapid access.
 
 ## Performance
 
