@@ -19,7 +19,7 @@ packfiles in the tests but they need to be refactored.
 ## Performance
 
 Furgit is aggressively optimized for performance.
-[As of Novemeber 2025](https://git.sr.ht/~runxiyu/gitbench),
+[As of November 2025](https://git.sr.ht/~runxiyu/gitbench),
 for large repos such as
 [Linux](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git),
 it is:
@@ -48,3 +48,12 @@ it is:
 
 I was thinking of names and I accidentally typed "git" as "fur" (i.e., left
 shifted one key on my QWERTY keyboard).
+
+## License
+
+Currently, GNU Affero General Public License, version 3 only.
+
+As an exception, `pack_idx.go` (responsible for `.idx` files which index
+packfiles) is public domain; I'd be happy to see a port of it to
+[go-git](https://github.com/go-git/go-git), although achieving the same
+level of performance likely requires memory mapping.
