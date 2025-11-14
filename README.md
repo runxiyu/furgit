@@ -43,6 +43,8 @@ it is:
   for [patches](https://git-send-email.io/) and discussions
 * [GitHub mirror](https://github.com/runxiyu/furgit)
   (issues and PRs are welcome here too)
+* `#chat` on [irc.runxiyu.org](https://irc.runxiyu.org)
+  ([web chat](https://webirc.runxiyu.org/kiwiirc/#chat))
 
 ## Etymology
 
