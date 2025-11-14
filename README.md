@@ -50,8 +50,10 @@ it is:
 * [Main SourceHut repository](https://git.sr.ht/~runxiyu/furgit)
   and [public inbox](https://lists.sr.ht/~runxiyu/public-inbox)
   for [patches](https://git-send-email.io/) and discussions
-* [GitHub mirror](https://github.com/runxiyu/furgit)
+* [GitHub](https://github.com/runxiyu/furgit)
   (issues and PRs are welcome here too)
+* [tangled](https://tangled.org/@runxiyu.tngl.sh/furgit)
+  (issues and pulls are welcome here too)
 * `#chat` on [irc.runxiyu.org](https://irc.runxiyu.org)
   ([web chat](https://webirc.runxiyu.org/kiwiirc/#chat))
 
