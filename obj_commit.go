@@ -8,8 +8,7 @@ import (
 
 // Commit mirrors the structure of a Git commit object.
 type Commit struct {
-	Hash Hash
-
+	Hash         Hash
 	Tree         Hash
 	Parents      []Hash
 	Author       Ident

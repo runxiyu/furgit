@@ -8,8 +8,7 @@ import (
 
 // Tag models an annotated Git tag object.
 type Tag struct {
-	Hash Hash
-
+	Hash       Hash
 	Target     Hash
 	TargetType ObjType
 	Name       []byte

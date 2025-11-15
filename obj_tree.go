@@ -9,8 +9,7 @@ import (
 
 // Tree represents a Git tree object.
 type Tree struct {
-	Hash Hash
-
+	Hash    Hash
 	Entries []TreeEntry
 }
 
