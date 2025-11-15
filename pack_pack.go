@@ -33,6 +33,19 @@ func (repo *Repository) packRead(id Hash) (Object, error) {
 }
 
 func (repo *Repository) packIndexFind(id Hash) (packlocation, error) {
+	midx, err := repo.multiPackIndex()
+	if err == nil {
+		loc, err := midx.lookup(id)
+		if err == nil {
+			return loc, nil
+		}
+		if !errors.Is(err, ErrNotFound) {
+			return packlocation{}, err
+		}
+	} else if !errors.Is(err, ErrNotFound) {
+		return packlocation{}, err
+	}
+
 	idxs, err := repo.packIndexes()
 	if err != nil {
 		return packlocation{}, err

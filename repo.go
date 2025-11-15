@@ -14,6 +14,10 @@ type Repository struct {
 	packIdx     []*packIndex
 	packIdxErr  error
 
+	midxOnce sync.Once
+	midx     *multiPackIndex
+	midxErr  error
+
 	packFiles sync.Map // string, *packFile
 	closeOnce sync.Once
 }
@@ -49,6 +53,12 @@ func (r *Repository) Close() error {
 				if err != nil && closeErr == nil {
 					closeErr = err
 				}
+			}
+		}
+		if r.midx != nil {
+			err := r.midx.Close()
+			if err != nil && closeErr == nil {
+				closeErr = err
 			}
 		}
 	})
