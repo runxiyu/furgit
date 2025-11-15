@@ -3,12 +3,15 @@
 [![builds.sr.ht status](https://builds.sr.ht/~runxiyu/furgit.svg)](https://builds.sr.ht/~runxiyu/furgit?)
 [![Go Reference](https://pkg.go.dev/badge/git.sr.ht/~runxiyu/furgit.svg)](https://pkg.go.dev/git.sr.ht/~runxiyu/furgit)
 
-Furgit is a fast implementation of Git in pure Go, extracted from
-[an internal package of Lindenii Villosa](https://codeberg.org/lindenii/villosa/src/branch/master/villosad/internal/common/git).
+Furgit is a fast Git library in pure Go.
 
 Furgit is in initial development, does not have tagged releases yet, and we can
 guarantee that the API will break every now and then. Do not use in
 production.
+
+Furgit's lineage is from [Villosa](https://codeberg.org/lindenii/villosa), a
+new, work-in-progress software development forge. It started as an internal
+package inside Villosa, and was later extracted into a standalone module.
 
 We do not focus on command-line utilities; in particular, Furgit does not
 intend to replace [upstream git](https://git-scm.com). It is intended to be
