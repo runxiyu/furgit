@@ -30,9 +30,9 @@ used repos (including their `.idx` and `.pack` cache) for rapid access.
 
 There is no specific plan for features yet, but we'll initially focus on
 developing what forges like [Villosa](https://codeberg.org/lindenii/villosa) and
-[tangled](https://tangled.org/@tangled.org/core) requires. Afterwards, we'll take
-a look at what other usages (such as writing Git clients, IDE integration, etc)
-would need.
+[tangled](https://tangled.org/@tangled.org/core) (and other forges if
+interested) requires. Afterwards, we'll take a look at what other usages (such
+as writing Git clients, IDE integration, etc) would need.
 
 Furgit has no dependencies outside the standard library. In the future,
 packages from `golang.org/x` may be included. It is unlikely that other
