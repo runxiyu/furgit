@@ -89,7 +89,7 @@ above proxy designation pursuant to Section 14.
 
 All contributors are required to "sign-off" their commits (using `git commit
 -s`) to indicate that they have agreed to the [Developer Certificate of
-Origin][https://developercertificate.org], reproduced below.
+Origin](https://developercertificate.org), reproduced below.
 
 ```
 Developer Certificate of Origin
