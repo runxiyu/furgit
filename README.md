@@ -7,7 +7,7 @@ Furgit is a fast implementation of Git in pure Go, extracted from
 [an internal package of Lindenii Villosa](https://codeberg.org/lindenii/villosa/src/branch/master/villosad/internal/common/git).
 
 Furgit is in initial development, does not have tagged releases yet, and we can
-guarantees that the API will break every now and then. Do not use in
+guarantee that the API will break every now and then. Do not use in
 production.
 
 We do not focus on command-line utilities; in particular, Furgit does not
