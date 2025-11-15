@@ -78,14 +78,38 @@ newer language features.
 
 ## Repos and community resources
 
-* [Main SourceHut repository](https://git.sr.ht/~runxiyu/furgit)
-  and [public inbox](https://lists.sr.ht/~runxiyu/public-inbox)
-  for [patches](https://git-send-email.io/) and discussions
+The [main repository](https://forge.lindenii.org/furgit/-/repos/furgit/) is
+hosted on [Lindenii Forge](https://forge.lindenii.org/forge/-/repos/server/)
+(the previous iteration of [Villosa](https://codeberg.org/lindenii/villosa)).
+
+To contribute, clone the repository from the SSH remote
+`ssh://forge.lindenii.org/forge/-/repos/server`, create a unique branch that
+begins with `contrib/`, and push. Your branch will be associated with your SSH
+key and a merge request will be created, and the maintainers will be notified
+on IRC.
+
+Anonymous SSH cloning is supported with or without a key. Pushing requires an
+SSH key: no key pre-registration is required, but you have to ensure that your
+key is consistent throughout pushes if you push multiple times.
+
+```
+git clone ssh://forge.lindenii.org/furgit/-/repos/furgit
+cd furgit
+git checkout -b contrib/name_of_your_contribution
+# edit and commit stuff
+git push -u origin HEAD
+```
+
+There are also a few mirrors. The maintainer may poll them for
+issues/patches/PRs/etc., but pushing to Lindenii Forge is recommended.
+
+* [SourceHut](https://git.sr.ht/~runxiyu/furgit)
 * [Codeberg](https://codeberg.org/runxiyu/furgit)
 * [tangled](https://tangled.org/@runxiyu.tngl.sh/furgit)
 * [GitHub](https://github.com/runxiyu/furgit)
-* `#chat` on [irc.runxiyu.org](https://irc.runxiyu.org)
-  ([web chat](https://webirc.runxiyu.org/kiwiirc/#chat))
+
+We discuss in `#chat` on [irc.runxiyu.org](https://irc.runxiyu.org)
+([web chat](https://webirc.runxiyu.org/kiwiirc/#chat))
 
 The maintainer is working through college applications and IBDP coursework and
 may not necessarily respond in time.
