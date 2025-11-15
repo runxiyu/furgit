@@ -7,7 +7,8 @@ Furgit is a fast Git library in pure Go.
 
 Furgit is in initial development, does not have tagged releases yet, and we can
 guarantee that the API will break every now and then. Do not use in
-production.
+production. When we do have tagged releases, we will likely follow
+[Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html).
 
 Furgit's lineage is from [Villosa](https://codeberg.org/lindenii/villosa), a
 new, work-in-progress software development forge. It started as an internal
