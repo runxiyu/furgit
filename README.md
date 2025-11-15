@@ -41,6 +41,7 @@ a standard UNIX-like filesystem with
 ## Performance
 
 Furgit is aggressively optimized for performance.
+
 [As of November 2025](https://git.sr.ht/~runxiyu/gitbench),
 for the task of `git ls-tree --long HEAD` on large repos such as
 [Linux](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git),
@@ -50,6 +51,15 @@ it is:
 * approximately 10 times faster than [libgit2](https://libgit2.org), and
 * approximately 1000 times faster than [go-git](https://github.com/go-git/go-git).
 
+This primarily measures the performance of the packfile parser, which heavily
+affects the performance of most operations on large repos; however, there is no
+guarantee that this generalizes to *all* Git operations, individual profiling
+on specific workloads may be necessary.
+
+In the future we intend to support
+[commit-graph](https://git-scm.com/docs/commit-graph) and research
+optimizations thereof.
+
 ## Hash algorithm
 
 Furgit uses SHA-256 by default. To switch to SHA-1, use the `sha1` build tag.
@@ -57,19 +67,19 @@ Furgit uses SHA-256 by default. To switch to SHA-1, use the `sha1` build tag.
 There will be future research to investigate potentially supporting both
 algorithms in one build of the library (likely heavily using generics).
 
-## Development
+## Repos and community resources
 
 * [Main SourceHut repository](https://git.sr.ht/~runxiyu/furgit)
   and [public inbox](https://lists.sr.ht/~runxiyu/public-inbox)
   for [patches](https://git-send-email.io/) and discussions
 * [Codeberg](https://codeberg.org/runxiyu/furgit)
-  (issues and pulls are welcome here too)
 * [tangled](https://tangled.org/@runxiyu.tngl.sh/furgit)
-  (issues and pulls are welcome here too)
 * [GitHub](https://github.com/runxiyu/furgit)
-  (issues and PRs are welcome here too)
 * `#chat` on [irc.runxiyu.org](https://irc.runxiyu.org)
   ([web chat](https://webirc.runxiyu.org/kiwiirc/#chat))
+
+The maintainer is working through college applications and IBDP coursework and
+may not necessarily respond in time.
 
 ## Etymology
 
