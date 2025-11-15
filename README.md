@@ -29,7 +29,9 @@ used repos (including their `.idx` and `.pack` cache) for rapid access.
 
 There is no specific plan for features yet, but we'll initially focus on
 developing what forges like [Villosa](https://codeberg.org/lindenii/villosa) and
-[tangled](https://tangled.org/@tangled.org/core)requires.
+[tangled](https://tangled.org/@tangled.org/core)requires. Afterwards, we'll take
+a look at what other usages (such as writing Git clients, IDE integration, etc)
+would need.
 
 We currently do not intend to support flexible storage backends such as
 [storers in go-git](https://pkg.go.dev/github.com/go-git/go-git/v5/plumbing/storer);
