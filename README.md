@@ -69,9 +69,64 @@ shifted one key on my QWERTY keyboard).
 
 ## License
 
-Currently, GNU Affero General Public License, version 3 only.
+This project is licensed under the GNU Affero General Public License,
+Version 3.0 only.
 
-As an exception, `pack_idx.go` (responsible for `.idx` files which index
-packfiles) is public domain; I'd be happy to see a port of it to
-[go-git](https://github.com/go-git/go-git), although achieving the same
-level of performance likely requires memory mapping.
+Pursuant to Section 14 of the GNU Affero General Public License, Version 3.0,
+[Runxi Yu](https://runxiyu.org) is hereby designated as the proxy who is
+authorized to issue a public statement accepting any future version of the
+GNU Affero General Public License for use with this Program.
+
+Therefore, notwithstanding the specification that this Program is licensed
+under the GNU Affero General Public License, Version 3.0 only, a public
+acceptance by the Designated Proxy of any subsequent version of the GNU Affero
+General Public License shall permanently authorize the use of that accepted
+version for this Program.
+
+For the purposes of the Developer Certificate of Origin, the "open source
+license" refers to the GNU Affero General Public License, Version 3.0, with the
+above proxy designation pursuant to Section 14.
+
+All contributors are required to "sign-off" their commits (using `git commit
+-s`) to indicate that they have agreed to the [Developer Certificate of
+Origin][https://developercertificate.org], reproduced below.
+
+```
+Developer Certificate of Origin
+Version 1.1
+
+Copyright (C) 2004, 2006 The Linux Foundation and its contributors.
+1 Letterman Drive
+Suite D4700
+San Francisco, CA, 94129
+
+Everyone is permitted to copy and distribute verbatim copies of this
+license document, but changing it is not allowed.
+
+
+Developer's Certificate of Origin 1.1
+
+By making a contribution to this project, I certify that:
+
+(a) The contribution was created in whole or in part by me and I
+    have the right to submit it under the open source license
+    indicated in the file; or
+
+(b) The contribution is based upon previous work that, to the best
+    of my knowledge, is covered under an appropriate open source
+    license and I have the right under that license to submit that
+    work with modifications, whether created in whole or in part
+    by me, under the same open source license (unless I am
+    permitted to submit under a different license), as indicated
+    in the file; or
+
+(c) The contribution was provided directly to me by some other
+    person who certified (a), (b) or (c) and I have not modified
+    it.
+
+(d) I understand and agree that this project and the contribution
+    are public and that a record of the contribution (including all
+    personal information I submit with it, including my sign-off) is
+    maintained indefinitely and may be redistributed consistent with
+    this project or the open source license(s) involved.
+```
