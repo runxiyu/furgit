@@ -27,6 +27,10 @@ We intend for repository objects to be freely usable across goroutines, which
 may enable long-running applications such as forges to keep a pool of recently
 used repos (including their `.idx` and `.pack` cache) for rapid access.
 
+There is no specific plan for features yet, but we'll initially focus on
+developing what forges like [Villosa](https://codeberg.org/lindenii/villosa) and
+[tangled](https://tangled.org/@tangled.org/core)requires.
+
 We currently do not intend to support flexible storage backends such as
 [storers in go-git](https://pkg.go.dev/github.com/go-git/go-git/v5/plumbing/storer);
 a standard UNIX-like filesystem with
