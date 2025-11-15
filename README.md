@@ -53,10 +53,12 @@ algorithms in one build of the library (likely heavily using generics).
 * [Main SourceHut repository](https://git.sr.ht/~runxiyu/furgit)
   and [public inbox](https://lists.sr.ht/~runxiyu/public-inbox)
   for [patches](https://git-send-email.io/) and discussions
-* [GitHub](https://github.com/runxiyu/furgit)
-  (issues and PRs are welcome here too)
+* [Codeberg](https://codeberg.org/runxiyu/furgit)
+  (issues and pulls are welcome here too)
 * [tangled](https://tangled.org/@runxiyu.tngl.sh/furgit)
   (issues and pulls are welcome here too)
+* [GitHub](https://github.com/runxiyu/furgit)
+  (issues and PRs are welcome here too)
 * `#chat` on [irc.runxiyu.org](https://irc.runxiyu.org)
   ([web chat](https://webirc.runxiyu.org/kiwiirc/#chat))
 
