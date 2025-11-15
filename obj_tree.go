@@ -108,3 +108,20 @@ func (t *Tree) Serialize() ([]byte, error) {
 	copy(raw[len(header):], body)
 	return raw, nil
 }
+
+// Entry looks up a tree entry by name.
+func (t *Tree) Entry(name []byte) *TreeEntry {
+	low, high := 0, len(t.Entries)-1
+	for low <= high {
+		mid := (low + high) / 2
+		cmp := bytes.Compare(t.Entries[mid].Name, name)
+		if cmp == 0 {
+			return &t.Entries[mid]
+		} else if cmp < 0 {
+			low = mid + 1
+		} else {
+			high = mid - 1
+		}
+	}
+	return nil
+}
