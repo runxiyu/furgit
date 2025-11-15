@@ -66,7 +66,15 @@ optimizations thereof.
 Furgit uses SHA-256 by default. To switch to SHA-1, use the `sha1` build tag.
 
 There will be future research to investigate potentially supporting both
-algorithms in one build of the library (likely heavily using generics).
+algorithms in one build of the library.
+
+## Go versions
+
+We currently support Go 1.18 or later, in order to support
+[gccgo](https://gcc.gnu.org/onlinedocs/gccgo/).
+
+gccgo support may be dropped in the future if there is a strong reason to use
+newer language features.
 
 ## Repos and community resources
 
