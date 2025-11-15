@@ -5,6 +5,13 @@ packages:
 tasks:
   - build: |
       cd furgit
+      go build
+  - test-sha256: |
+      cd furgit
       go test -v
+  - test-sha1: |
+      cd furgit
       go test -v -tags sha1
+  - lint: |
+      cd furgit
       golangci-lint run .
