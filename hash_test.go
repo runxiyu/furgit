@@ -1,21 +1,30 @@
 package furgit
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestParseHashValidAndInvalid(t *testing.T) {
-	const hex40 = "0123456789abcdef0123456789abcdef01234567"
-	id, err := ParseHash(hex40)
+	pattern := "0123456789abcdef"
+	repeats := (HashSize*2 + len(pattern) - 1) / len(pattern)
+	hexStr := strings.Repeat(pattern, repeats)[:HashSize*2]
+
+	id, err := ParseHash(hexStr)
 	if err != nil {
 		t.Fatalf("ParseHash returned error: %v", err)
 	}
-	if got := id.String(); got != hex40 {
+
+	if got := id.String(); got != hexStr {
 		t.Fatalf("unexpected String result: %q", got)
 	}
 
 	if _, err := ParseHash("abcd"); err == nil {
 		t.Fatal("expected error for short hash")
 	}
-	if _, err := ParseHash("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"); err == nil {
+
+	badHex := strings.Repeat("z", HashSize*2)
+	if _, err := ParseHash(badHex); err == nil {
 		t.Fatal("expected error for non-hex input")
 	}
 }

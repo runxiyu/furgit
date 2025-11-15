@@ -1,16 +1,9 @@
 package furgit
 
 import (
-	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
 )
-
-// To change the hash algorithm you probably only need to change these two lines...
-
-const HashSize = sha1.Size
-
-var newHash = sha1.Sum
 
 // Hash represents a Git object identifier.
 type Hash [HashSize]byte

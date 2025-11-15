@@ -183,7 +183,7 @@ func buildTestPackIndexBuffer(hash Hash, offset uint32) []byte {
 	off32 := make([]byte, 4)
 	binary.BigEndian.PutUint32(off32, offset)
 	buf.Write(off32)
-	buf.Write(make([]byte, 40))
+	buf.Write(make([]byte, 2*HashSize))
 	return buf.Bytes()
 }
 

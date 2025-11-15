@@ -26,8 +26,11 @@ func hashWithByte(fill byte) Hash {
 }
 
 func TestLoosePathUsesExpectedLayout(t *testing.T) {
-	id := mustHash(t, "0123456789abcdef0123456789abcdef01234567")
-	expect := filepath.Join("objects", "01", "23456789abcdef0123456789abcdef01234567")
+	pattern := "0123456789abcdef"
+	repeats := (HashSize*2 + len(pattern) - 1) / len(pattern)
+	hexStr := strings.Repeat(pattern, repeats)[:HashSize*2]
+	id := mustHash(t, hexStr)
+	expect := filepath.Join("objects", hexStr[:2], hexStr[2:])
 	if got := loosePath(id); got != expect {
 		t.Fatalf("unexpected loose path: %q", got)
 	}

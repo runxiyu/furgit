@@ -6,4 +6,5 @@ tasks:
   - build: |
       cd furgit
       go test -v
+      go test -v -tags sha1
       golangci-lint run .

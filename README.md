@@ -26,7 +26,8 @@ used repos (including their `.idx` and `.pack` cache) for rapid access.
 
 We currently do not intend to support flexible storage backends such as
 [storers in go-git](https://pkg.go.dev/github.com/go-git/go-git/v5/plumbing/storer);
-a standard UNIX-like filesystem is expected.
+a standard UNIX-like filesystem with
+[syscall.Mmap](https://pkg.go.dev/syscall#Mmap) is expected.
 
 ## Performance
 
@@ -40,15 +41,12 @@ it is:
 * approximately 10 times faster than [libgit2](https://libgit2.org), and
 * approximately 1000 times faster than [go-git](https://github.com/go-git/go-git).
 
-## Compatibility
+## Hash algorithm
 
-* We only aim to support UNIX-like operating systems that have
-  [syscall.Mmap](https://pkg.go.dev/syscall#Mmap).
-* Currently, this version of Furgit only supports SHA-1 hashes.
-  You may edit two lines in `hash.go` to trivially switch to SHA-256.
-  The upstream Villosa project only uses SHA-256 hashes.
-  We intend to make this library easily interoperable across hash
-  formats, but that's not the primary goal for now.
+Furgit uses SHA-256 by default. To switch to SHA-1, use the `sha1` build tag.
+
+There will be future research to investigate potentially supporting both
+algorithms in one build of the library (likely heavily using generics).
 
 ## Development
 
