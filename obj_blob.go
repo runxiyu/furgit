@@ -2,7 +2,7 @@ package furgit
 
 // Blob represents the contents of a Git blob.
 type Blob struct {
-	objectBase
+	Hash Hash
 
 	Data []byte
 }
@@ -15,8 +15,8 @@ func (*Blob) ObjType() ObjType {
 func parseBlob(id Hash, body []byte) (*Blob, error) {
 	data := append([]byte(nil), body...)
 	return &Blob{
-		objectBase: objectBase{Hash: id},
-		Data:       data,
+		Hash: id,
+		Data: data,
 	}, nil
 }
 

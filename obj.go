@@ -33,10 +33,6 @@ type Object interface {
 	ObjType() ObjType
 }
 
-type objectBase struct {
-	Hash Hash
-}
-
 func computeRawHash(data []byte) Hash {
 	var id Hash
 	sum := newHash(data)

@@ -8,7 +8,7 @@ import (
 
 // Commit mirrors the structure of a Git commit object.
 type Commit struct {
-	objectBase
+	Hash Hash
 
 	Tree         Hash
 	Parents      []Hash
@@ -25,7 +25,7 @@ func (*Commit) ObjType() ObjType {
 
 func parseCommit(id Hash, body []byte) (*Commit, error) {
 	c := new(Commit)
-	c.objectBase = objectBase{Hash: id}
+	c.Hash = id
 	i := 0
 	for i < len(body) {
 		rel := bytes.IndexByte(body[i:], '\n')

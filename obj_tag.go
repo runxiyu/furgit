@@ -8,7 +8,7 @@ import (
 
 // Tag models an annotated Git tag object.
 type Tag struct {
-	objectBase
+	Hash Hash
 
 	Target     Hash
 	TargetType ObjType
@@ -25,7 +25,7 @@ func (*Tag) ObjType() ObjType {
 // parseTag parses a tag object body.
 func parseTag(id Hash, body []byte) (*Tag, error) {
 	t := new(Tag)
-	t.objectBase = objectBase{Hash: id}
+	t.Hash = id
 	i := 0
 	var haveTarget, haveType bool
 

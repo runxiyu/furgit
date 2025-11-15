@@ -9,7 +9,7 @@ import (
 
 // Tree represents a Git tree object.
 type Tree struct {
-	objectBase
+	Hash Hash
 
 	Entries []TreeEntry
 }
@@ -66,8 +66,8 @@ func parseTree(id Hash, body []byte) (*Tree, error) {
 	}
 
 	return &Tree{
-		objectBase: objectBase{Hash: id},
-		Entries:    entries,
+		Hash:    id,
+		Entries: entries,
 	}, nil
 }
 
