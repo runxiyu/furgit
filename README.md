@@ -81,7 +81,7 @@ algorithms in one build of the library.
 ## Go versions
 
 We currently support Go 1.18 or later, in order to support
-[gccgo](https://gcc.gnu.org/onlinedocs/gccgo/).
+ougccgo](https://gcc.gnu.org/onlinedocs/gccgo/).
 
 gccgo support may be dropped in the future if there is a strong reason to use
 newer language features.
@@ -133,6 +133,9 @@ shifted one key on my QWERTY keyboard).
 
 This project is licensed under the GNU Affero General Public License,
 Version 3.0 only.
+
+Proprietary commercial licenses may be requested but are unlikely to be
+granted. The minimum price is USD 1,000,000,000,000 per year.
 
 Pursuant to Section 14 of the GNU Affero General Public License, Version 3.0,
 [Runxi Yu](https://runxiyu.org) is hereby designated as the proxy who is
