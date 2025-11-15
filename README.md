@@ -5,24 +5,24 @@
 
 Furgit is a fast Git library in pure Go.
 
+## Project status
+
 Furgit is in initial development, does not have tagged releases yet, and we can
 guarantee that the API will break every now and then. Do not use in
 production. When we do have tagged releases, we will likely follow
 [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html).
 
+## History
+
 Furgit's lineage is from [Villosa](https://codeberg.org/lindenii/villosa), a
 new, work-in-progress software development forge. It started as an internal
 package inside Villosa, and was later extracted into a standalone module.
 
+## Goals and current features
+
 We do not focus on command-line utilities; in particular, Furgit does not
 intend to replace [upstream git](https://git-scm.com). It is intended to be
 used as a library.
-
-## Features
-
-Currently, furgit is very basic; it supports reading and writing loose objects
-and reading from packfiles. There is some infrastructure for writing packfiles
-in the tests but they need to be refactored.
 
 We intend for repository objects to be freely usable across goroutines, which
 may enable long-running applications such as forges to keep a pool of recently
@@ -33,6 +33,16 @@ developing what forges like [Villosa](https://codeberg.org/lindenii/villosa) and
 [tangled](https://tangled.org/@tangled.org/core)requires. Afterwards, we'll take
 a look at what other usages (such as writing Git clients, IDE integration, etc)
 would need.
+
+Furgit has no dependencies outside the standard library. In the future,
+packages from `golang.org/x` may be included. It is unlikely that other
+dependencies will be introduced.
+
+Currently, furgit is very basic; it supports reading and writing loose objects
+and reading from packfiles. There is some infrastructure for writing packfiles
+in the tests but they need to be refactored.
+
+## Environment requirements
 
 We currently do not intend to support flexible storage backends such as
 [storers in go-git](https://pkg.go.dev/github.com/go-git/go-git/v5/plumbing/storer);
