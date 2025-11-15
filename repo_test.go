@@ -2,7 +2,6 @@ package furgit
 
 import (
 	"bytes"
-	"compress/zlib"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -13,27 +12,11 @@ import (
 	"testing"
 )
 
-func writeLooseBlob(t *testing.T, root string, data []byte) Hash {
-	header, err := headerForType(ObjBlob, data)
+func writeLooseBlob(t *testing.T, repo *Repository, data []byte) Hash {
+	blob := &Blob{Data: data}
+	id, err := repo.WriteLooseObject(blob)
 	if err != nil {
-		t.Fatalf("headerForType: %v", err)
-	}
-	raw := append(append([]byte(nil), header...), data...)
-	id := computeRawHash(raw)
-	path := filepath.Join(root, loosePath(id))
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		t.Fatalf("mkdir for loose object: %v", err)
-	}
-	var buf bytes.Buffer
-	zw := zlib.NewWriter(&buf)
-	if _, err := zw.Write(raw); err != nil {
-		t.Fatalf("compress: %v", err)
-	}
-	if err := zw.Close(); err != nil {
-		t.Fatalf("close zlib: %v", err)
-	}
-	if err := os.WriteFile(path, buf.Bytes(), 0o644); err != nil {
-		t.Fatalf("write loose object: %v", err)
+		t.Fatalf("WriteLooseObject: %v", err)
 	}
 	return id
 }
@@ -46,7 +29,7 @@ func TestOpenRepositoryAndLooseRead(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = repo.Close() })
 
-	id := writeLooseBlob(t, root, []byte("loose blob payload"))
+	id := writeLooseBlob(t, repo, []byte("loose blob payload"))
 	obj, err := repo.looseRead(id)
 	if err != nil {
 		t.Fatalf("looseRead error: %v", err)
@@ -134,7 +117,7 @@ func TestReadObjectTypeSizeLoose(t *testing.T) {
 	t.Cleanup(func() { _ = repo.Close() })
 
 	data := []byte("header-only read")
-	id := writeLooseBlob(t, root, data)
+	id := writeLooseBlob(t, repo, data)
 	ty, size, err := repo.ReadObjectTypeSize(id)
 	if err != nil {
 		t.Fatalf("ReadObjectTypeSize loose error: %v", err)
@@ -186,8 +169,14 @@ func TestReadObjectTypeSizePackRefDeltaLooseBase(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 
+	repo, err := OpenRepository(root)
+	if err != nil {
+		t.Fatalf("OpenRepository error: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Close() })
+
 	looseBody := []byte("loose base for ref delta")
-	baseID := writeLooseBlob(t, root, looseBody)
+	baseID := writeLooseBlob(t, repo, looseBody)
 
 	objs := []testPackObject{
 		{
@@ -200,18 +189,115 @@ func TestReadObjectTypeSizePackRefDeltaLooseBase(t *testing.T) {
 	}
 	ids := writeTestPack(t, root, "pack-ref", objs)
 
-	repo, err := OpenRepository(root)
-	if err != nil {
-		t.Fatalf("OpenRepository error: %v", err)
-	}
-	t.Cleanup(func() { _ = repo.Close() })
-
 	ty, size, err := repo.ReadObjectTypeSize(ids[0])
 	if err != nil {
 		t.Fatalf("ReadObjectTypeSize ref delta error: %v", err)
 	}
 	if ty != ObjBlob || size != int64(len(objs[0].body)) {
 		t.Fatalf("unexpected ref delta metadata ty=%d size=%d", ty, size)
+	}
+}
+
+func TestWriteLooseObjectAllTypes(t *testing.T) {
+	root := t.TempDir()
+	repo, err := OpenRepository(root)
+	if err != nil {
+		t.Fatalf("OpenRepository error: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Close() })
+
+	// Blob
+	blob := &Blob{Data: []byte("test blob data")}
+	blobID, err := repo.WriteLooseObject(blob)
+	if err != nil {
+		t.Fatalf("WriteLooseObject Blob error: %v", err)
+	}
+	readBlob, err := repo.ReadObject(blobID)
+	if err != nil {
+		t.Fatalf("ReadObject Blob error: %v", err)
+	}
+	if rb, ok := readBlob.(*Blob); !ok {
+		t.Fatalf("expected Blob, got %T", readBlob)
+	} else if string(rb.Data) != "test blob data" {
+		t.Fatalf("blob data mismatch: %q", rb.Data)
+	}
+
+	// Tree
+	tree := &Tree{
+		Entries: []TreeEntry{
+			{Mode: 0100644, Name: []byte("file.txt"), ID: blobID},
+		},
+	}
+	treeID, err := repo.WriteLooseObject(tree)
+	if err != nil {
+		t.Fatalf("WriteLooseObject Tree error: %v", err)
+	}
+	readTree, err := repo.ReadObject(treeID)
+	if err != nil {
+		t.Fatalf("ReadObject Tree error: %v", err)
+	}
+	if rt, ok := readTree.(*Tree); !ok {
+		t.Fatalf("expected Tree, got %T", readTree)
+	} else if len(rt.Entries) != 1 {
+		t.Fatalf("tree entries mismatch: %d", len(rt.Entries))
+	}
+
+	// Commit
+	commit := &Commit{
+		Tree: treeID,
+		Author: Ident{
+			Name:          []byte("Test Author"),
+			Email:         []byte("test@example.com"),
+			WhenUnix:      1700000000,
+			OffsetMinutes: 0,
+		},
+		Committer: Ident{
+			Name:          []byte("Test Author"),
+			Email:         []byte("test@example.com"),
+			WhenUnix:      1700000000,
+			OffsetMinutes: 0,
+		},
+		Message: []byte("Test commit message\n"),
+	}
+	commitID, err := repo.WriteLooseObject(commit)
+	if err != nil {
+		t.Fatalf("WriteLooseObject Commit error: %v", err)
+	}
+	readCommit, err := repo.ReadObject(commitID)
+	if err != nil {
+		t.Fatalf("ReadObject Commit error: %v", err)
+	}
+	if rc, ok := readCommit.(*Commit); !ok {
+		t.Fatalf("expected Commit, got %T", readCommit)
+	} else if rc.Tree != treeID {
+		t.Fatalf("commit tree mismatch")
+	}
+
+	// Tag
+	tag := &Tag{
+		Target:     commitID,
+		TargetType: ObjCommit,
+		Name:       []byte("v1.0.0"),
+		Tagger: &Ident{
+			Name:          []byte("Test Tagger"),
+			Email:         []byte("tagger@example.com"),
+			WhenUnix:      1700000000,
+			OffsetMinutes: 0,
+		},
+		Message: []byte("Test tag message\n"),
+	}
+	tagID, err := repo.WriteLooseObject(tag)
+	if err != nil {
+		t.Fatalf("WriteLooseObject Tag error: %v", err)
+	}
+	readTag, err := repo.ReadObject(tagID)
+	if err != nil {
+		t.Fatalf("ReadObject Tag error: %v", err)
+	}
+	if rtag, ok := readTag.(*Tag); !ok {
+		t.Fatalf("expected Tag, got %T", readTag)
+	} else if rtag.Target != commitID {
+		t.Fatalf("tag target mismatch")
 	}
 }
 
