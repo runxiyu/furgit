@@ -5,5 +5,5 @@ packages:
 tasks:
   - build: |
       cd furgit
-      go test
+      go test -v
       golangci-lint run .
