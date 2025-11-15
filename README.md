@@ -170,6 +170,13 @@ ougccgo](https://gcc.gnu.org/onlinedocs/gccgo/).
 gccgo support may be dropped in the future if there is a strong reason to use
 newer language features.
 
+## Active services using Furgit
+
+There's an experimental instance of [Villosa](https://codeberg.org/lindenii/villosa)
+hosting [a copy of Linux](https://villosa.lindenii.org/benchmarking//repos/linux/)
+([tree](https://villosa.lindenii.org/benchmarking//repos/linux/HEAD/tree/)) using
+Furgit as the Git backend.
+
 ## Repos and community resources
 
 The [main repository](https://forge.lindenii.org/furgit/-/repos/furgit/) is
