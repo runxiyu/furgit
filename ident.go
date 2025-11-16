@@ -12,9 +12,14 @@ import (
 
 // Ident represents a Git identity (author/committer/tagger).
 type Ident struct {
-	Name          []byte
-	Email         []byte
-	WhenUnix      int64
+	// Name represents the person's name.
+	Name []byte
+	// Email represents the person's email.
+	Email []byte
+	// WhenUnix represents the timestamp as a Unix time.
+	// This value is in UTC.
+	WhenUnix int64
+	// The timezone offset in minutes.
 	OffsetMinutes int32
 }
 

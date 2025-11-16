@@ -9,6 +9,7 @@ import (
 
 // Tree represents a Git tree object.
 type Tree struct {
+	// Entries represents the entries in the tree.
 	Entries []TreeEntry
 }
 
@@ -41,9 +42,13 @@ const (
 
 // TreeEntry represents a single entry in a Git tree.
 type TreeEntry struct {
+	// Mode represents the file mode of the entry.
 	Mode FileMode
+	// Name represents the name of the entry.
 	Name []byte
-	ID   Hash
+	// ID represents the hash of the entry. This is typically
+	// either a blob or a tree.
+	ID Hash
 }
 
 // ObjectType returns the object type of the tree.

@@ -38,6 +38,7 @@ const (
 
 // Object represents a Git object.
 type Object interface {
+	// ObjectType returns the object's type.
 	ObjectType() ObjectType
 }
 
@@ -45,6 +46,7 @@ type Object interface {
 // one read from storage.
 type StoredObject interface {
 	Object
+	// Hash returns the object's hash.
 	Hash() Hash
 }
 

@@ -8,11 +8,19 @@ import (
 
 // Commit represents a Git commit object.
 type Commit struct {
-	Tree         Hash
-	Parents      []Hash
-	Author       Ident
-	Committer    Ident
-	Message      []byte
+	// Tree represents the tree hash referenced by the commit.
+	Tree Hash
+	// Parents represents the parent commit hashes.
+	// Commits that have 0 parents are root commits.
+	// Commits that have >= 2 parents are merge commits.
+	Parents []Hash
+	// Author represents the author of the commit.
+	Author Ident
+	// Committer represents the committer of the commit.
+	Committer Ident
+	// Message represents the commit message.
+	Message []byte
+	// ExtraHeaders holds any extra headers present in the commit.
 	ExtraHeaders []ExtraHeader
 }
 

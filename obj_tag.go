@@ -8,12 +8,19 @@ import (
 
 // Tag represents a Git annotated tag object.
 type Tag struct {
-	Target     Hash
+	// Target represents the hash of the object being tagged.
+	Target Hash
+	// TargetType represents the type of the object being tagged.
 	TargetType ObjectType
-	Name       []byte
-	Tagger     *Ident
-	Message    []byte
+	// Name represents the name of the tag.
+	Name []byte
+	// Tagger represents the identity of the tagger.
+	Tagger *Ident
+	// Message represents the tag message.
+	Message []byte
 }
+
+// TODO: ExtraHeaders and signatures
 
 // StoredTag represents a tag stored in the object database.
 type StoredTag struct {
