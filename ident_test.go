@@ -14,7 +14,11 @@ func TestParseIdentRoundTrip(t *testing.T) {
 	if got := string(id.Email); got != "alice@example.com" {
 		t.Fatalf("email mismatch: %q", got)
 	}
-	serialized := string(id.Serialize())
+	ids, err := id.Serialize()
+	if err != nil {
+		t.Fatalf("Serialize error: %v", err)
+	}
+	serialized := string(ids)
 	if !strings.Contains(serialized, "alice@example.com") {
 		t.Fatalf("Serialize missing email: %q", serialized)
 	}
@@ -47,7 +51,11 @@ func TestIdentSerializeUsesCanonicalSpacing(t *testing.T) {
 		WhenUnix:      1000,
 		OffsetMinutes: 90,
 	}
-	got := string(id.Serialize())
+	ids, err := id.Serialize()
+	if err != nil {
+		t.Fatalf("Serialize error: %v", err)
+	}
+	got := string(ids)
 	if !strings.Contains(got, "Bob <bob@example.com>") {
 		t.Fatalf("unexpected serialize output: %q", got)
 	}

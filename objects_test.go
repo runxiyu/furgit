@@ -119,10 +119,14 @@ func TestParseCommitWithExtraHeader(t *testing.T) {
 	fmt.Fprintf(&buf, "tree %s\n", treeID.String())
 	fmt.Fprintf(&buf, "parent %s\n", parent.String())
 	buf.WriteString("author ")
-	buf.Write(ident.Serialize())
+	ids, err := ident.Serialize()
+	if err != nil {
+		t.Fatalf("Serialize error: %v", err)
+	}
+	buf.Write(ids)
 	buf.WriteByte('\n')
 	buf.WriteString("committer ")
-	buf.Write(ident.Serialize())
+	buf.Write(ids)
 	buf.WriteByte('\n')
 	buf.WriteString("extra data\n\nMessage body\n")
 	repo := testRepo(t)
@@ -174,7 +178,11 @@ func TestParseTagAndSerialize(t *testing.T) {
 	buf.WriteString("type commit\n")
 	buf.WriteString("tag v1.0\n")
 	buf.WriteString("tagger ")
-	buf.Write(tagger.Serialize())
+	tgs, err := tagger.Serialize()
+	if err != nil {
+		t.Fatalf("Serialize error: %v", err)
+	}
+	buf.Write(tgs)
 	buf.WriteString("\n\nannotated tag\n")
 	body := append([]byte(nil), buf.Bytes()...)
 	repo := testRepo(t)
