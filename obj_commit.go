@@ -22,7 +22,7 @@ func (*Commit) ObjType() ObjType {
 	return ObjCommit
 }
 
-func parseCommit(id Hash, body []byte) (*Commit, error) {
+func parseCommit(id Hash, body []byte, hashSize int) (*Commit, error) {
 	c := new(Commit)
 	c.Hash = id
 	i := 0
@@ -39,13 +39,13 @@ func parseCommit(id Hash, body []byte) (*Commit, error) {
 
 		switch {
 		case bytes.HasPrefix(line, []byte("tree ")):
-			treeID, err := ParseHash(string(line[5:]))
+			treeID, err := ParseHashWithSize(string(line[5:]), hashSize)
 			if err != nil {
 				return nil, fmt.Errorf("furgit: commit: tree: %w", err)
 			}
 			c.Tree = treeID
 		case bytes.HasPrefix(line, []byte("parent ")):
-			parent, err := ParseHash(string(line[7:]))
+			parent, err := ParseHashWithSize(string(line[7:]), hashSize)
 			if err != nil {
 				return nil, fmt.Errorf("furgit: commit: parent: %w", err)
 			}
@@ -91,11 +91,11 @@ func parseCommit(id Hash, body []byte) (*Commit, error) {
 	return c, nil
 }
 
-func commitBody(c *Commit) []byte {
+func commitBody(c *Commit, hashSize int) []byte {
 	var buf bytes.Buffer
-	fmt.Fprintf(&buf, "tree %s\n", c.Tree.String())
+	fmt.Fprintf(&buf, "tree %s\n", c.Tree.StringWithSize(hashSize))
 	for _, p := range c.Parents {
-		fmt.Fprintf(&buf, "parent %s\n", p.String())
+		fmt.Fprintf(&buf, "parent %s\n", p.StringWithSize(hashSize))
 	}
 	buf.WriteString("author ")
 	buf.Write(c.Author.Serialize())
@@ -110,8 +110,8 @@ func commitBody(c *Commit) []byte {
 }
 
 // Serialize renders a Commit into canonical Git format.
-func (c *Commit) Serialize() ([]byte, error) {
-	body := commitBody(c)
+func (c *Commit) Serialize(hashSize int) ([]byte, error) {
+	body := commitBody(c, hashSize)
 	header, err := headerForType(ObjCommit, body)
 	if err != nil {
 		return nil, err

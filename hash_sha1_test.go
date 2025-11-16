@@ -6,6 +6,4 @@ import (
 	"crypto/sha1"
 )
 
-const HashSize = sha1.Size
-
-var newHash = sha1.Sum
+const testHashSize = sha1.Size

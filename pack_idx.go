@@ -162,7 +162,7 @@ func (pi *packIndex) parse(buf []byte) error {
 	nobj := int(readBE32(pi.fanout[len(pi.fanout)-4:]))
 
 	namesStart := fanoutEnd
-	namesEnd := namesStart + nobj*HashSize
+	namesEnd := namesStart + nobj*pi.repo.HashSize
 	if namesEnd > len(buf) {
 		return ErrInvalidObject
 	}
@@ -182,7 +182,7 @@ func (pi *packIndex) parse(buf []byte) error {
 	pi.offset32 = buf[off32Start:off32End]
 
 	off64Start := off32End
-	trailerStart := len(buf) - 2*HashSize
+	trailerStart := len(buf) - 2*pi.repo.HashSize
 	if trailerStart < off64Start {
 		return ErrInvalidObject
 	}
@@ -249,7 +249,7 @@ func (pi *packIndex) lookup(id Hash) (packlocation, error) {
 		lo = int(pi.fanoutEntry(first - 1))
 	}
 	hi := int(pi.fanoutEntry(first))
-	idx, found := bsearchHash(pi.names, HashSize, lo, hi, id)
+	idx, found := bsearchHash(pi.names, pi.repo.HashSize, lo, hi, id)
 	if !found {
 		return packlocation{}, ErrNotFound
 	}
@@ -266,7 +266,7 @@ func (pi *packIndex) lookup(id Hash) (packlocation, error) {
 func bsearchHash(names []byte, stride, lo, hi int, want Hash) (int, bool) {
 	for lo < hi {
 		mid := lo + (hi-lo)/2
-		cmp := compareHash(names, stride, mid, want[:])
+		cmp := compareHash(names, stride, mid, want[:stride])
 		if cmp == 0 {
 			return mid, true
 		}

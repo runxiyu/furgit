@@ -22,7 +22,7 @@ func (*Tag) ObjType() ObjType {
 }
 
 // parseTag parses a tag object body.
-func parseTag(id Hash, body []byte) (*Tag, error) {
+func parseTag(id Hash, body []byte, hashSize int) (*Tag, error) {
 	t := new(Tag)
 	t.Hash = id
 	i := 0
@@ -41,7 +41,7 @@ func parseTag(id Hash, body []byte) (*Tag, error) {
 
 		switch {
 		case bytes.HasPrefix(line, []byte("object ")):
-			hash, err := ParseHash(string(line[7:]))
+			hash, err := ParseHashWithSize(string(line[7:]), hashSize)
 			if err != nil {
 				return nil, fmt.Errorf("furgit: tag: object: %w", err)
 			}
@@ -94,9 +94,9 @@ func parseTag(id Hash, body []byte) (*Tag, error) {
 	return t, nil
 }
 
-func tagBody(t *Tag) ([]byte, error) {
+func tagBody(t *Tag, hashSize int) ([]byte, error) {
 	var buf bytes.Buffer
-	fmt.Fprintf(&buf, "object %s\n", t.Target.String())
+	fmt.Fprintf(&buf, "object %s\n", t.Target.StringWithSize(hashSize))
 	buf.WriteString("type ")
 	switch t.TargetType {
 	case ObjCommit:
@@ -128,8 +128,8 @@ func tagBody(t *Tag) ([]byte, error) {
 }
 
 // Serialize renders a Tag into canonical Git format.
-func (t *Tag) Serialize() ([]byte, error) {
-	body, err := tagBody(t)
+func (t *Tag) Serialize(hashSize int) ([]byte, error) {
+	body, err := tagBody(t, hashSize)
 	if err != nil {
 		return nil, err
 	}

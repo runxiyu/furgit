@@ -12,8 +12,8 @@ import (
 
 const looseHeaderLimit = 4096
 
-func loosePath(id Hash) string {
-	hex := id.String()
+func loosePath(id Hash, hashSize int) string {
+	hex := id.StringWithSize(hashSize)
 	return filepath.Join("objects", hex[:2], hex[2:])
 }
 
@@ -22,11 +22,11 @@ func (repo *Repository) looseRead(id Hash) (Object, error) {
 	if err != nil {
 		return nil, err
 	}
-	return parseObjectBody(ty, id, body)
+	return parseObjectBody(ty, id, body, repo.HashSize)
 }
 
 func (repo *Repository) looseReadTyped(id Hash) (ObjType, []byte, error) {
-	path := repo.repoPath(loosePath(id))
+	path := repo.repoPath(loosePath(id, repo.HashSize))
 	f, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -62,7 +62,7 @@ func (repo *Repository) looseReadTyped(id Hash) (ObjType, []byte, error) {
 	if declaredSize != int64(len(body)) {
 		return ObjInvalid, nil, ErrInvalidObject
 	}
-	if !verifyRawObject(raw, id) {
+	if !verifyRawObject(raw, id, repo.HashSize) {
 		return ObjInvalid, nil, ErrInvalidObject
 	}
 
@@ -71,7 +71,7 @@ func (repo *Repository) looseReadTyped(id Hash) (ObjType, []byte, error) {
 }
 
 func (repo *Repository) looseTypeSize(id Hash) (ObjType, int64, error) {
-	path := repo.repoPath(loosePath(id))
+	path := repo.repoPath(loosePath(id, repo.HashSize))
 	// #nosec G304
 	f, err := os.Open(path)
 	if err != nil {
@@ -161,13 +161,13 @@ func (repo *Repository) WriteLooseObject(obj Object) (Hash, error) {
 
 	switch o := obj.(type) {
 	case *Blob:
-		raw, err = o.Serialize()
+		raw, err = o.Serialize(repo.HashSize)
 	case *Tree:
-		raw, err = o.Serialize()
+		raw, err = o.Serialize(repo.HashSize)
 	case *Commit:
-		raw, err = o.Serialize()
+		raw, err = o.Serialize(repo.HashSize)
 	case *Tag:
-		raw, err = o.Serialize()
+		raw, err = o.Serialize(repo.HashSize)
 	default:
 		return Hash{}, fmt.Errorf("furgit: unsupported object type for writing: %T", obj)
 	}
@@ -177,8 +177,8 @@ func (repo *Repository) WriteLooseObject(obj Object) (Hash, error) {
 		return Hash{}, err
 	}
 
-	id := computeRawHash(raw)
-	path := repo.repoPath(loosePath(id))
+	id := computeRawHash(raw, repo.HashSize)
+	path := repo.repoPath(loosePath(id, repo.HashSize))
 
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return Hash{}, err

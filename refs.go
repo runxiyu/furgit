@@ -29,7 +29,7 @@ func (repo *Repository) resolveLooseRef(refname string) (Hash, error) {
 		return Hash{}, err
 	}
 	line := strings.TrimSpace(string(data))
-	id, err := ParseHash(line)
+	id, err := ParseHashWithSize(line, repo.HashSize)
 	if err != nil {
 		return Hash{}, err
 	}
@@ -55,13 +55,13 @@ func (repo *Repository) resolvePackedRef(refname string) (Hash, error) {
 			continue
 		}
 		sp := bytes.IndexByte(line, ' ')
-		if sp != HashSize*2 {
+		if sp != repo.HashSize*2 {
 			continue
 		}
 		name := line[sp+1:]
 		if bytes.Equal(name, want) {
 			hex := string(line[:sp])
-			id, err := ParseHash(hex)
+			id, err := ParseHashWithSize(hex, repo.HashSize)
 			if err != nil {
 				return Hash{}, err
 			}

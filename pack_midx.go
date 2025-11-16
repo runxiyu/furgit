@@ -197,7 +197,7 @@ func (midx *multiPackIndex) parse(buf []byte) error {
 	if !ok {
 		return ErrInvalidObject
 	}
-	oidlSize := int64(numObjects) * int64(HashSize)
+	oidlSize := int64(numObjects) * int64(midx.repo.HashSize)
 	if oidlOffset < 0 || oidlOffset+oidlSize > int64(len(buf)) {
 		return ErrInvalidObject
 	}
@@ -252,7 +252,7 @@ func (midx *multiPackIndex) lookup(id Hash) (packlocation, error) {
 	}
 	hi := int(readBE32(midx.fanout[first*4 : (first+1)*4]))
 
-	idx, found := bsearchHash(midx.oids, HashSize, lo, hi, id)
+	idx, found := bsearchHash(midx.oids, midx.repo.HashSize, lo, hi, id)
 	if !found {
 		return packlocation{}, ErrNotFound
 	}

@@ -33,11 +33,9 @@ type Object interface {
 	ObjType() ObjType
 }
 
-func computeRawHash(data []byte) Hash {
-	var id Hash
-	sum := newHash(data)
-	copy(id[:], sum[:])
-	return id
+func computeRawHash(data []byte, hashSize int) Hash {
+	hashFunc := hashFuncs[hashSize]
+	return hashFunc(data)
 }
 
 func headerForType(ty ObjType, body []byte) ([]byte, error) {
@@ -66,11 +64,11 @@ func headerForType(ty ObjType, body []byte) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func verifyRawObject(buf []byte, want Hash) bool {
-	return computeRawHash(buf) == want
+func verifyRawObject(buf []byte, want Hash, hashSize int) bool {
+	return computeRawHash(buf, hashSize) == want
 }
 
-func verifyTypedObject(ty ObjType, body []byte, want Hash) bool {
+func verifyTypedObject(ty ObjType, body []byte, want Hash, hashSize int) bool {
 	header, err := headerForType(ty, body)
 	if err != nil {
 		return false
@@ -78,19 +76,19 @@ func verifyTypedObject(ty ObjType, body []byte, want Hash) bool {
 	raw := make([]byte, len(header)+len(body))
 	copy(raw, header)
 	copy(raw[len(header):], body)
-	return computeRawHash(raw) == want
+	return computeRawHash(raw, hashSize) == want
 }
 
-func parseObjectBody(ty ObjType, id Hash, body []byte) (Object, error) {
+func parseObjectBody(ty ObjType, id Hash, body []byte, hashSize int) (Object, error) {
 	switch ty {
 	case ObjBlob:
 		return parseBlob(id, body)
 	case ObjTree:
-		return parseTree(id, body)
+		return parseTree(id, body, hashSize)
 	case ObjCommit:
-		return parseCommit(id, body)
+		return parseCommit(id, body, hashSize)
 	case ObjTag:
-		return parseTag(id, body)
+		return parseTag(id, body, hashSize)
 	case ObjInvalid, ObjFuture, ObjOfsDelta, ObjRefDelta:
 		return nil, fmt.Errorf("furgit: object: unsupported type %d", ty)
 	default:

@@ -1,6 +1,7 @@
 package furgit
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -9,6 +10,7 @@ import (
 // Repository represents the root of a Git repository.
 type Repository struct {
 	rootPath string
+	HashSize int
 
 	packIdxOnce sync.Once
 	packIdx     []*packIndex
@@ -22,8 +24,10 @@ type Repository struct {
 	closeOnce sync.Once
 }
 
-// OpenRepository opens the repository at the provided path.
-func OpenRepository(path string) (*Repository, error) {
+// OpenRepository opens the repository at the provided path with the specified hash size.
+// This will be replaced later with a function that auto-detects the hash size based
+// on the git configuration.
+func OpenRepository(path string, hashSize int) (*Repository, error) {
 	fi, err := os.Stat(path)
 	if err != nil {
 		return nil, err
@@ -31,7 +35,10 @@ func OpenRepository(path string) (*Repository, error) {
 	if !fi.IsDir() {
 		return nil, ErrInvalidObject
 	}
-	return &Repository{rootPath: path}, nil
+	if _, ok := hashFuncs[hashSize]; !ok {
+		return nil, fmt.Errorf("furgit: unsupported hash size %d", hashSize)
+	}
+	return &Repository{rootPath: path, HashSize: hashSize}, nil
 }
 
 func (r *Repository) Close() error {

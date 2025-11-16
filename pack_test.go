@@ -153,12 +153,12 @@ func TestPackDeltaReadOfsDistance(t *testing.T) {
 func TestBsearchHash(t *testing.T) {
 	h1 := hashWithByte(0x01)
 	h2 := hashWithByte(0x03)
-	names := append(append([]byte(nil), h1[:]...), h2[:]...)
-	idx, found := bsearchHash(names, HashSize, 0, 2, h2)
+	names := append(append([]byte(nil), h1[:testHashSize]...), h2[:testHashSize]...)
+	idx, found := bsearchHash(names, testHashSize, 0, 2, h2)
 	if !found || idx != 1 {
 		t.Fatalf("expected to find second hash, idx=%d found=%v", idx, found)
 	}
-	_, found = bsearchHash(names, HashSize, 0, 2, hashWithByte(0x05))
+	_, found = bsearchHash(names, testHashSize, 0, 2, hashWithByte(0x05))
 	if found {
 		t.Fatalf("did not expect to find unknown hash")
 	}
@@ -178,19 +178,19 @@ func buildTestPackIndexBuffer(hash Hash, offset uint32) []byte {
 	_ = binary.Write(&buf, binary.BigEndian, uint32(idxMagic))
 	_ = binary.Write(&buf, binary.BigEndian, uint32(idxVersion2))
 	buf.Write(fanout)
-	buf.Write(hash[:])
+	buf.Write(hash[:testHashSize])
 	buf.Write(make([]byte, 4))
 	off32 := make([]byte, 4)
 	binary.BigEndian.PutUint32(off32, offset)
 	buf.Write(off32)
-	buf.Write(make([]byte, 2*HashSize))
+	buf.Write(make([]byte, 2*testHashSize))
 	return buf.Bytes()
 }
 
 func TestPackIndexParse(t *testing.T) {
 	h := hashWithByte(0x11)
 	data := buildTestPackIndexBuffer(h, 0x12345678)
-	pi := &packIndex{}
+	pi := &packIndex{repo: &Repository{HashSize: testHashSize}}
 	if err := pi.parse(data); err != nil {
 		t.Fatalf("parse error: %v", err)
 	}

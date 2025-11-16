@@ -69,11 +69,11 @@ func (repo *Repository) packReadAt(loc packlocation, want Hash) (Object, error) 
 		return nil, err
 	}
 	data := body.Bytes()
-	if !verifyTypedObject(ty, data, want) {
+	if !verifyTypedObject(ty, data, want, repo.HashSize) {
 		body.Release()
 		return nil, ErrInvalidObject
 	}
-	obj, err := parseObjectBody(ty, want, data)
+	obj, err := parseObjectBody(ty, want, data, repo.HashSize)
 	body.Release()
 	return obj, err
 }

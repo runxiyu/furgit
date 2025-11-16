@@ -21,7 +21,7 @@ func parseBlob(id Hash, body []byte) (*Blob, error) {
 }
 
 // Serialize renders the full "blob size\\0body" representation.
-func (b *Blob) Serialize() ([]byte, error) {
+func (b *Blob) Serialize(hashSize int) ([]byte, error) {
 	header, err := headerForType(ObjBlob, b.Data)
 	if err != nil {
 		return nil, err
