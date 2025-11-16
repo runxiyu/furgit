@@ -89,8 +89,8 @@ newer language features.
 ## Active services using Furgit
 
 There's an experimental instance of [Villosa](https://codeberg.org/lindenii/villosa)
-hosting [a copy of Linux](https://villosa.lindenii.org/benchmarking//repos/linux/)
-([tree](https://villosa.lindenii.org/benchmarking//repos/linux/HEAD/tree/)) using
+hosting [a copy of Linux](https://villosa.lindenii.org/test//repos/linux/)
+([tree](https://villosa.lindenii.org/test//repos/linux/HEAD/tree/)) using
 Furgit as the Git backend.
 
 ## Repos and community resources
