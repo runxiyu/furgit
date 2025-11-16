@@ -148,7 +148,6 @@ func (tree *Tree) Entry(name []byte) *TreeEntry {
 // EntryRecursive looks up a tree entry by path.
 //
 // Lookups are recursive.
-// It returns nil if no such entry exists.
 func (sTree *StoredTree) EntryRecursive(repo *Repository, path [][]byte) (*TreeEntry, error) {
 	if len(path) == 0 {
 		return nil, errors.New("furgit: tree: empty path")
@@ -158,7 +157,7 @@ func (sTree *StoredTree) EntryRecursive(repo *Repository, path [][]byte) (*TreeE
 	for i, part := range path {
 		entry := currentTree.Entry(part)
 		if entry == nil {
-			return nil, nil
+			return nil, ErrNotFound
 		}
 		if i == len(path)-1 {
 			return entry, nil
@@ -176,5 +175,5 @@ func (sTree *StoredTree) EntryRecursive(repo *Repository, path [][]byte) (*TreeE
 		currentTree = nextTree
 	}
 
-	return nil, nil
+	return nil, ErrNotFound
 }
