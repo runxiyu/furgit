@@ -37,9 +37,9 @@ func TestOpenRepositoryAndLooseRead(t *testing.T) {
 	if err != nil {
 		t.Fatalf("looseRead error: %v", err)
 	}
-	blob, ok := obj.(*Blob)
+	blob, ok := obj.(*StoredBlob)
 	if !ok {
-		t.Fatalf("expected Blob, got %T", obj)
+		t.Fatalf("expected StoredBlob, got %T", obj)
 	}
 	if string(blob.Data) != "loose blob payload" {
 		t.Fatalf("blob data mismatch: %q", blob.Data)
@@ -225,8 +225,8 @@ func TestWriteLooseObjectAllTypes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadObject Blob error: %v", err)
 	}
-	if rb, ok := readBlob.(*Blob); !ok {
-		t.Fatalf("expected Blob, got %T", readBlob)
+	if rb, ok := readBlob.(*StoredBlob); !ok {
+		t.Fatalf("expected StoredBlob, got %T", readBlob)
 	} else if string(rb.Data) != "test blob data" {
 		t.Fatalf("blob data mismatch: %q", rb.Data)
 	}
@@ -245,8 +245,8 @@ func TestWriteLooseObjectAllTypes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadObject Tree error: %v", err)
 	}
-	if rt, ok := readTree.(*Tree); !ok {
-		t.Fatalf("expected Tree, got %T", readTree)
+	if rt, ok := readTree.(*StoredTree); !ok {
+		t.Fatalf("expected StoredTree, got %T", readTree)
 	} else if len(rt.Entries) != 1 {
 		t.Fatalf("tree entries mismatch: %d", len(rt.Entries))
 	}
@@ -276,8 +276,8 @@ func TestWriteLooseObjectAllTypes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadObject Commit error: %v", err)
 	}
-	if rc, ok := readCommit.(*Commit); !ok {
-		t.Fatalf("expected Commit, got %T", readCommit)
+	if rc, ok := readCommit.(*StoredCommit); !ok {
+		t.Fatalf("expected StoredCommit, got %T", readCommit)
 	} else if rc.Tree != treeID {
 		t.Fatalf("commit tree mismatch")
 	}
@@ -303,8 +303,8 @@ func TestWriteLooseObjectAllTypes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadObject Tag error: %v", err)
 	}
-	if rtag, ok := readTag.(*Tag); !ok {
-		t.Fatalf("expected Tag, got %T", readTag)
+	if rtag, ok := readTag.(*StoredTag); !ok {
+		t.Fatalf("expected StoredTag, got %T", readTag)
 	} else if rtag.Target != commitID {
 		t.Fatalf("tag target mismatch")
 	}

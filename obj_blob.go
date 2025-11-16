@@ -2,9 +2,18 @@ package furgit
 
 // Blob represents the contents of a Git blob.
 type Blob struct {
-	Hash Hash
-
 	Data []byte
+}
+
+// StoredBlob represents a blob stored in the object database.
+type StoredBlob struct {
+	Blob
+	hash Hash
+}
+
+// Hash returns the hash of the stored blob.
+func (sBlob *StoredBlob) Hash() Hash {
+	return sBlob.hash
 }
 
 // ObjectType allows Blob to satisfy the Object interface.
@@ -13,11 +22,13 @@ func (blob *Blob) ObjectType() ObjectType {
 	return ObjectTypeBlob
 }
 
-func parseBlob(id Hash, body []byte) (*Blob, error) {
+func parseBlob(id Hash, body []byte) (*StoredBlob, error) {
 	data := append([]byte(nil), body...)
-	return &Blob{
-		Hash: id,
-		Data: data,
+	return &StoredBlob{
+		hash: id,
+		Blob: Blob{
+			Data: data,
+		},
 	}, nil
 }
 

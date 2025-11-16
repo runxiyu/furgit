@@ -9,8 +9,18 @@ import (
 
 // Tree represents a Git tree object.
 type Tree struct {
-	Hash    Hash
 	Entries []TreeEntry
+}
+
+// StoredTree represents a tree stored in the object database.
+type StoredTree struct {
+	Tree
+	hash Hash
+}
+
+// Hash returns the hash of the stored tree.
+func (sTree *StoredTree) Hash() Hash {
+	return sTree.hash
 }
 
 // TreeEntry represents a single entry in a Git tree.
@@ -27,7 +37,7 @@ func (tree *Tree) ObjectType() ObjectType {
 }
 
 // parseTree decodes a tree body.
-func parseTree(id Hash, body []byte, repo *Repository) (*Tree, error) {
+func parseTree(id Hash, body []byte, repo *Repository) (*StoredTree, error) {
 	var entries []TreeEntry
 	i := 0
 	for i < len(body) {
@@ -66,9 +76,11 @@ func parseTree(id Hash, body []byte, repo *Repository) (*Tree, error) {
 		entries = append(entries, entry)
 	}
 
-	return &Tree{
-		Hash:    id,
-		Entries: entries,
+	return &StoredTree{
+		hash: id,
+		Tree: Tree{
+			Entries: entries,
+		},
 	}, nil
 }
 

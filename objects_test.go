@@ -58,8 +58,8 @@ func TestParseBlobAndSerialize(t *testing.T) {
 	if !bytes.Equal(blob.Data, data) {
 		t.Fatalf("blob data mismatch: %q", blob.Data)
 	}
-	if blob.Hash != id {
-		t.Fatalf("blob hash mismatch: %v", blob.Hash)
+	if blob.Hash() != id {
+		t.Fatalf("blob hash mismatch: %v", blob.Hash())
 	}
 	raw, err := blob.Serialize()
 	if err != nil {

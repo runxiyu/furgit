@@ -6,9 +6,8 @@ import (
 	"fmt"
 )
 
-// Commit mirrors the structure of a Git commit object.
+// Commit represents a Git commit object.
 type Commit struct {
-	Hash         Hash
 	Tree         Hash
 	Parents      []Hash
 	Author       Ident
@@ -17,15 +16,26 @@ type Commit struct {
 	ExtraHeaders []ExtraHeader
 }
 
+// StoredCommit represents a commit stored in the object database.
+type StoredCommit struct {
+	Commit
+	hash Hash
+}
+
+// Hash returns the hash of the stored commit.
+func (sCommit *StoredCommit) Hash() Hash {
+	return sCommit.hash
+}
+
 // ObjectType allows Commit to satisfy the Object interface.
 func (commit *Commit) ObjectType() ObjectType {
 	_ = commit
 	return ObjectTypeCommit
 }
 
-func parseCommit(id Hash, body []byte, repo *Repository) (*Commit, error) {
-	c := new(Commit)
-	c.Hash = id
+func parseCommit(id Hash, body []byte, repo *Repository) (*StoredCommit, error) {
+	c := new(StoredCommit)
+	c.hash = id
 	i := 0
 	for i < len(body) {
 		rel := bytes.IndexByte(body[i:], '\n')

@@ -33,6 +33,12 @@ type Object interface {
 	ObjectType() ObjectType
 }
 
+// StoredObject describes a Git object with a known hash.
+type StoredObject interface {
+	Object
+	Hash() Hash
+}
+
 func headerForType(ty ObjectType, body []byte) ([]byte, error) {
 	var tyStr string
 	switch ty {
@@ -59,7 +65,7 @@ func headerForType(ty ObjectType, body []byte) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func parseObjectBody(ty ObjectType, id Hash, body []byte, repo *Repository) (Object, error) {
+func parseObjectBody(ty ObjectType, id Hash, body []byte, repo *Repository) (StoredObject, error) {
 	switch ty {
 	case ObjectTypeBlob:
 		return parseBlob(id, body)

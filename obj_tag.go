@@ -6,14 +6,24 @@ import (
 	"fmt"
 )
 
-// Tag models an annotated Git tag object.
+// Tag represents an annotated Git tag object.
 type Tag struct {
-	Hash       Hash
 	Target     Hash
 	TargetType ObjectType
 	Name       []byte
 	Tagger     *Ident
 	Message    []byte
+}
+
+// StoredTag represents a tag stored in the object database.
+type StoredTag struct {
+	Tag
+	hash Hash
+}
+
+// Hash returns the hash of the stored tag.
+func (sTag *StoredTag) Hash() Hash {
+	return sTag.hash
 }
 
 // ObjectType allows Tag to satisfy the Object interface.
@@ -23,9 +33,9 @@ func (tag *Tag) ObjectType() ObjectType {
 }
 
 // parseTag parses a tag object body.
-func parseTag(id Hash, body []byte, repo *Repository) (*Tag, error) {
-	t := new(Tag)
-	t.Hash = id
+func parseTag(id Hash, body []byte, repo *Repository) (*StoredTag, error) {
+	t := new(StoredTag)
+	t.hash = id
 	i := 0
 	var haveTarget, haveType bool
 
