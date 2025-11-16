@@ -24,7 +24,7 @@ type packlocation struct {
 	Offset   uint64
 }
 
-func (repo *Repository) packRead(id Hash) (Object, error) {
+func (repo *Repository[T]) packRead(id Hash[T]) (Object[T], error) {
 	loc, err := repo.packIndexFind(id)
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func (repo *Repository) packRead(id Hash) (Object, error) {
 	return repo.packReadAt(loc, id)
 }
 
-func (repo *Repository) packIndexFind(id Hash) (packlocation, error) {
+func (repo *Repository[T]) packIndexFind(id Hash[T]) (packlocation, error) {
 	midx, err := repo.multiPackIndex()
 	if err == nil {
 		loc, err := midx.lookup(id)
@@ -63,22 +63,22 @@ func (repo *Repository) packIndexFind(id Hash) (packlocation, error) {
 	return packlocation{}, ErrNotFound
 }
 
-func (repo *Repository) packReadAt(loc packlocation, want Hash) (Object, error) {
+func (repo *Repository[T]) packReadAt(loc packlocation, want Hash[T]) (Object[T], error) {
 	ty, body, err := repo.packBodyResolveAtLocation(loc)
 	if err != nil {
 		return nil, err
 	}
 	data := body.Bytes()
-	if !verifyTypedObject(ty, data, want, repo.HashSize) {
+	if !verifyTypedObject[T](ty, data, want) {
 		body.Release()
 		return nil, ErrInvalidObject
 	}
-	obj, err := parseObjectBody(ty, want, data, repo.HashSize)
+	obj, err := parseObjectBody[T](ty, want, data)
 	body.Release()
 	return obj, err
 }
 
-func (repo *Repository) packBodyResolveAtLocation(loc packlocation) (ObjType, borrowedBody, error) {
+func (repo *Repository[T]) packBodyResolveAtLocation(loc packlocation) (ObjType, borrowedBody, error) {
 	pf, err := repo.packFile(loc.PackPath)
 	if err != nil {
 		return ObjInvalid, borrowedBody{}, err
@@ -86,7 +86,7 @@ func (repo *Repository) packBodyResolveAtLocation(loc packlocation) (ObjType, bo
 	return repo.packBodyResolveWithin(pf, loc.Offset)
 }
 
-func (repo *Repository) packTypeSizeAtLocation(loc packlocation, seen map[packKey]struct{}) (ObjType, int64, error) {
+func (repo *Repository[T]) packTypeSizeAtLocation(loc packlocation, seen map[packKey]struct{}) (ObjType, int64, error) {
 	pf, err := repo.packFile(loc.PackPath)
 	if err != nil {
 		return ObjInvalid, 0, err
@@ -94,7 +94,7 @@ func (repo *Repository) packTypeSizeAtLocation(loc packlocation, seen map[packKe
 	return repo.packTypeSizeWithin(pf, loc.Offset, seen)
 }
 
-func (repo *Repository) packTypeSizeByID(id Hash, seen map[packKey]struct{}) (ObjType, int64, error) {
+func (repo *Repository[T]) packTypeSizeByID(id Hash[T], seen map[packKey]struct{}) (ObjType, int64, error) {
 	loc, err := repo.packIndexFind(id)
 	if err == nil {
 		return repo.packTypeSizeAtLocation(loc, seen)
@@ -172,7 +172,7 @@ func packSectionInflate(r io.Reader, sizeHint int) (borrowedBody, error) {
 	}
 }
 
-func (repo *Repository) packDeltaResolveOfs(pf *packFile, deltaOffset uint64, r io.Reader) (ObjType, borrowedBody, error) {
+func (repo *Repository[T]) packDeltaResolveOfs(pf *packFile, deltaOffset uint64, r io.Reader) (ObjType, borrowedBody, error) {
 	dist, err := packDeltaReadOfsDistance(r)
 	if err != nil {
 		return ObjInvalid, borrowedBody{}, err
@@ -220,7 +220,7 @@ func packDeltaReadOfsDistance(r io.Reader) (uint64, error) {
 	return dist, nil
 }
 
-func (repo *Repository) packBodyResolveByID(id Hash) (ObjType, borrowedBody, error) {
+func (repo *Repository[T]) packBodyResolveByID(id Hash[T]) (ObjType, borrowedBody, error) {
 	loc, err := repo.packIndexFind(id)
 	if err == nil {
 		return repo.packBodyResolveAtLocation(loc)
@@ -240,7 +240,7 @@ type packKey struct {
 	ofs  uint64
 }
 
-func (repo *Repository) packTypeSizeWithin(pf *packFile, ofs uint64, seen map[packKey]struct{}) (ObjType, int64, error) {
+func (repo *Repository[T]) packTypeSizeWithin(pf *packFile, ofs uint64, seen map[packKey]struct{}) (ObjType, int64, error) {
 	if pf == nil {
 		return ObjInvalid, 0, ErrInvalidObject
 	}
@@ -268,8 +268,8 @@ func (repo *Repository) packTypeSizeWithin(pf *packFile, ofs uint64, seen map[pa
 	case ObjCommit, ObjTree, ObjBlob, ObjTag:
 		return ty, declaredSize, nil
 	case ObjRefDelta:
-		var base Hash
-		_, err := io.ReadFull(r, base[:])
+		var base Hash[T]
+		_, err := io.ReadFull(r, base.Slice())
 		if err != nil {
 			return ObjInvalid, 0, err
 		}
@@ -299,7 +299,7 @@ func (repo *Repository) packTypeSizeWithin(pf *packFile, ofs uint64, seen map[pa
 	}
 }
 
-func (repo *Repository) packBodyResolveWithin(pf *packFile, ofs uint64) (ObjType, borrowedBody, error) {
+func (repo *Repository[T]) packBodyResolveWithin(pf *packFile, ofs uint64) (ObjType, borrowedBody, error) {
 	r, err := pf.cursor(ofs)
 	if err != nil {
 		return ObjInvalid, borrowedBody{}, err
@@ -314,8 +314,8 @@ func (repo *Repository) packBodyResolveWithin(pf *packFile, ofs uint64) (ObjType
 		body, err := packSectionInflate(r, size)
 		return ty, body, err
 	case ObjRefDelta:
-		var base Hash
-		_, err := io.ReadFull(r, base[:])
+		var base Hash[T]
+		_, err := io.ReadFull(r, base.Slice())
 		if err != nil {
 			return ObjInvalid, borrowedBody{}, err
 		}

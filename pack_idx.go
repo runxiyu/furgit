@@ -15,8 +15,8 @@ const (
 	idxVersion2 = 2
 )
 
-type packIndex struct {
-	repo     *Repository
+type packIndex[T HashType] struct {
+	repo     *Repository[T]
 	idxRel   string
 	packPath string
 
@@ -34,7 +34,7 @@ type packIndex struct {
 	closeOnce sync.Once
 }
 
-func (pi *packIndex) Close() error {
+func (pi *packIndex[T]) Close() error {
 	if pi == nil {
 		return nil
 	}
@@ -56,14 +56,14 @@ func (pi *packIndex) Close() error {
 	return closeErr
 }
 
-func (pi *packIndex) ensureLoaded() error {
+func (pi *packIndex[T]) ensureLoaded() error {
 	pi.loadOnce.Do(func() {
 		pi.loadErr = pi.load()
 	})
 	return pi.loadErr
 }
 
-func (pi *packIndex) load() error {
+func (pi *packIndex[T]) load() error {
 	if pi.repo == nil {
 		return ErrInvalidObject
 	}
@@ -105,14 +105,14 @@ func (pi *packIndex) load() error {
 	return nil
 }
 
-func (r *Repository) packIndexes() ([]*packIndex, error) {
+func (r *Repository[T]) packIndexes() ([]*packIndex[T], error) {
 	r.packIdxOnce.Do(func() {
 		r.packIdx, r.packIdxErr = r.loadPackIndexes()
 	})
 	return r.packIdx, r.packIdxErr
 }
 
-func (repo *Repository) loadPackIndexes() ([]*packIndex, error) {
+func (repo *Repository[T]) loadPackIndexes() ([]*packIndex[T], error) {
 	dir := filepath.Join(repo.rootPath, "objects", "pack")
 	entries, err := os.ReadDir(dir)
 	if err != nil {
@@ -122,14 +122,14 @@ func (repo *Repository) loadPackIndexes() ([]*packIndex, error) {
 		return nil, err
 	}
 
-	idxs := make([]*packIndex, 0, len(entries))
+	idxs := make([]*packIndex[T], 0, len(entries))
 	for _, entry := range entries {
 		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".idx") {
 			continue
 		}
 		rel := filepath.Join("objects", "pack", entry.Name())
 		packRel := strings.TrimSuffix(rel, ".idx") + ".pack"
-		idxs = append(idxs, &packIndex{
+		idxs = append(idxs, &packIndex[T]{
 			repo:     repo,
 			idxRel:   rel,
 			packPath: packRel,
@@ -141,7 +141,7 @@ func (repo *Repository) loadPackIndexes() ([]*packIndex, error) {
 	return idxs, nil
 }
 
-func (pi *packIndex) parse(buf []byte) error {
+func (pi *packIndex[T]) parse(buf []byte) error {
 	if len(buf) < 8+256*4 {
 		return ErrInvalidObject
 	}
@@ -161,8 +161,9 @@ func (pi *packIndex) parse(buf []byte) error {
 	pi.fanout = buf[fanoutStart:fanoutEnd]
 	nobj := int(readBE32(pi.fanout[len(pi.fanout)-4:]))
 
+	hashSize := pi.repo.hashSize()
 	namesStart := fanoutEnd
-	namesEnd := namesStart + nobj*pi.repo.HashSize
+	namesEnd := namesStart + nobj*hashSize
 	if namesEnd > len(buf) {
 		return ErrInvalidObject
 	}
@@ -182,7 +183,7 @@ func (pi *packIndex) parse(buf []byte) error {
 	pi.offset32 = buf[off32Start:off32End]
 
 	off64Start := off32End
-	trailerStart := len(buf) - 2*pi.repo.HashSize
+	trailerStart := len(buf) - 2*hashSize
 	if trailerStart < off64Start {
 		return ErrInvalidObject
 	}
@@ -211,7 +212,7 @@ func readBE64(b []byte) uint64 {
 		(uint64(b[6]) << 8) | uint64(b[7])
 }
 
-func (pi *packIndex) fanoutEntry(i int) uint32 {
+func (pi *packIndex[T]) fanoutEntry(i int) uint32 {
 	if len(pi.fanout) == 0 {
 		return 0
 	}
@@ -223,7 +224,7 @@ func (pi *packIndex) fanoutEntry(i int) uint32 {
 	return readBE32(pi.fanout[start : start+4])
 }
 
-func (pi *packIndex) offset(idx int) (uint64, error) {
+func (pi *packIndex[T]) offset(idx int) (uint64, error) {
 	start := idx * 4
 	word := readBE32(pi.offset32[start : start+4])
 	if word&0x80000000 == 0 {
@@ -238,18 +239,20 @@ func (pi *packIndex) offset(idx int) (uint64, error) {
 	return readBE64(pi.offset64[base : base+8]), nil
 }
 
-func (pi *packIndex) lookup(id Hash) (packlocation, error) {
+func (pi *packIndex[T]) lookup(id Hash[T]) (packlocation, error) {
 	err := pi.ensureLoaded()
 	if err != nil {
 		return packlocation{}, err
 	}
-	first := int(id[0])
+	idSlice := id.Slice()
+	first := int(idSlice[0])
 	var lo int
 	if first > 0 {
 		lo = int(pi.fanoutEntry(first - 1))
 	}
 	hi := int(pi.fanoutEntry(first))
-	idx, found := bsearchHash(pi.names, pi.repo.HashSize, lo, hi, id)
+	stride := hashLen[T]()
+	idx, found := bsearchHash(pi.names, stride, lo, hi, idSlice)
 	if !found {
 		return packlocation{}, ErrNotFound
 	}
@@ -263,10 +266,10 @@ func (pi *packIndex) lookup(id Hash) (packlocation, error) {
 	}, nil
 }
 
-func bsearchHash(names []byte, stride, lo, hi int, want Hash) (int, bool) {
+func bsearchHash(names []byte, stride, lo, hi int, want []byte) (int, bool) {
 	for lo < hi {
 		mid := lo + (hi-lo)/2
-		cmp := compareHash(names, stride, mid, want[:stride])
+		cmp := compareHash(names, stride, mid, want)
 		if cmp == 0 {
 			return mid, true
 		}

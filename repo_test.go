@@ -12,8 +12,8 @@ import (
 	"testing"
 )
 
-func writeLooseBlob(t *testing.T, repo *Repository, data []byte) Hash {
-	blob := &Blob{Data: data}
+func writeLooseBlob(t *testing.T, repo *TestRepository, data []byte) TestHash {
+	blob := &TestBlob{Data: data}
 	id, err := repo.WriteLooseObject(blob)
 	if err != nil {
 		t.Fatalf("WriteLooseObject: %v", err)
@@ -23,7 +23,7 @@ func writeLooseBlob(t *testing.T, repo *Repository, data []byte) Hash {
 
 func TestOpenRepositoryAndLooseRead(t *testing.T) {
 	root := t.TempDir()
-	repo, err := OpenRepository(root, testHashSize)
+	repo, err := OpenRepository[testHashType](root)
 	if err != nil {
 		t.Fatalf("OpenRepository error: %v", err)
 	}
@@ -34,7 +34,7 @@ func TestOpenRepositoryAndLooseRead(t *testing.T) {
 	if err != nil {
 		t.Fatalf("looseRead error: %v", err)
 	}
-	blob, ok := obj.(*Blob)
+	blob, ok := obj.(*TestBlob)
 	if !ok {
 		t.Fatalf("expected Blob, got %T", obj)
 	}
@@ -45,7 +45,7 @@ func TestOpenRepositoryAndLooseRead(t *testing.T) {
 
 func TestResolveRefLooseAndPacked(t *testing.T) {
 	root := t.TempDir()
-	repo, err := OpenRepository(root, testHashSize)
+	repo, err := OpenRepository[testHashType](root)
 	if err != nil {
 		t.Fatalf("OpenRepository error: %v", err)
 	}
@@ -56,7 +56,7 @@ func TestResolveRefLooseAndPacked(t *testing.T) {
 	if err := os.MkdirAll(loosePath, 0o755); err != nil {
 		t.Fatalf("mkdir refs: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(loosePath, "master"), []byte(looseID.StringWithSize(testHashSize)+"\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(loosePath, "master"), []byte(looseID.String()+"\n"), 0o644); err != nil {
 		t.Fatalf("write ref: %v", err)
 	}
 	id, err := repo.ResolveRef("refs/heads/master")
@@ -65,7 +65,7 @@ func TestResolveRefLooseAndPacked(t *testing.T) {
 	}
 
 	packedID := hashWithByte(0xb0)
-	packed := fmt.Sprintf("%s refs/tags/v1\n", packedID.StringWithSize(testHashSize))
+	packed := fmt.Sprintf("%s refs/tags/v1\n", packedID.String())
 	if err := os.WriteFile(filepath.Join(root, "packed-refs"), []byte(packed), 0o644); err != nil {
 		t.Fatalf("write packed refs: %v", err)
 	}
@@ -85,7 +85,7 @@ func TestResolveRefLooseAndPacked(t *testing.T) {
 
 func TestResolveHEAD(t *testing.T) {
 	root := t.TempDir()
-	repo, err := OpenRepository(root, testHashSize)
+	repo, err := OpenRepository[testHashType](root)
 	if err != nil {
 		t.Fatalf("OpenRepository error: %v", err)
 	}
@@ -110,7 +110,7 @@ func TestResolveHEAD(t *testing.T) {
 func TestReadObjectTypeSizeLoose(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	repo, err := OpenRepository(root, testHashSize)
+	repo, err := OpenRepository[testHashType](root)
 	if err != nil {
 		t.Fatalf("OpenRepository error: %v", err)
 	}
@@ -142,7 +142,7 @@ func TestReadObjectTypeSizePackedObjects(t *testing.T) {
 	}
 	ids := writeTestPack(t, root, "pack-basic", objs)
 
-	repo, err := OpenRepository(root, testHashSize)
+	repo, err := OpenRepository[testHashType](root)
 	if err != nil {
 		t.Fatalf("OpenRepository error: %v", err)
 	}
@@ -169,7 +169,7 @@ func TestReadObjectTypeSizePackRefDeltaLooseBase(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 
-	repo, err := OpenRepository(root, testHashSize)
+	repo, err := OpenRepository[testHashType](root)
 	if err != nil {
 		t.Fatalf("OpenRepository error: %v", err)
 	}
@@ -200,14 +200,14 @@ func TestReadObjectTypeSizePackRefDeltaLooseBase(t *testing.T) {
 
 func TestWriteLooseObjectAllTypes(t *testing.T) {
 	root := t.TempDir()
-	repo, err := OpenRepository(root, testHashSize)
+	repo, err := OpenRepository[testHashType](root)
 	if err != nil {
 		t.Fatalf("OpenRepository error: %v", err)
 	}
 	t.Cleanup(func() { _ = repo.Close() })
 
 	// Blob
-	blob := &Blob{Data: []byte("test blob data")}
+	blob := &TestBlob{Data: []byte("test blob data")}
 	blobID, err := repo.WriteLooseObject(blob)
 	if err != nil {
 		t.Fatalf("WriteLooseObject Blob error: %v", err)
@@ -216,15 +216,15 @@ func TestWriteLooseObjectAllTypes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadObject Blob error: %v", err)
 	}
-	if rb, ok := readBlob.(*Blob); !ok {
+	if rb, ok := readBlob.(*TestBlob); !ok {
 		t.Fatalf("expected Blob, got %T", readBlob)
 	} else if string(rb.Data) != "test blob data" {
 		t.Fatalf("blob data mismatch: %q", rb.Data)
 	}
 
 	// Tree
-	tree := &Tree{
-		Entries: []TreeEntry{
+	tree := &TestTree{
+		Entries: []TestTreeEntry{
 			{Mode: 0100644, Name: []byte("file.txt"), ID: blobID},
 		},
 	}
@@ -236,14 +236,14 @@ func TestWriteLooseObjectAllTypes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadObject Tree error: %v", err)
 	}
-	if rt, ok := readTree.(*Tree); !ok {
+	if rt, ok := readTree.(*TestTree); !ok {
 		t.Fatalf("expected Tree, got %T", readTree)
 	} else if len(rt.Entries) != 1 {
 		t.Fatalf("tree entries mismatch: %d", len(rt.Entries))
 	}
 
 	// Commit
-	commit := &Commit{
+	commit := &TestCommit{
 		Tree: treeID,
 		Author: Ident{
 			Name:          []byte("Test Author"),
@@ -267,14 +267,14 @@ func TestWriteLooseObjectAllTypes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadObject Commit error: %v", err)
 	}
-	if rc, ok := readCommit.(*Commit); !ok {
+	if rc, ok := readCommit.(*TestCommit); !ok {
 		t.Fatalf("expected Commit, got %T", readCommit)
 	} else if rc.Tree != treeID {
 		t.Fatalf("commit tree mismatch")
 	}
 
 	// Tag
-	tag := &Tag{
+	tag := &TestTag{
 		Target:     commitID,
 		TargetType: ObjCommit,
 		Name:       []byte("v1.0.0"),
@@ -294,7 +294,7 @@ func TestWriteLooseObjectAllTypes(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadObject Tag error: %v", err)
 	}
-	if rtag, ok := readTag.(*Tag); !ok {
+	if rtag, ok := readTag.(*TestTag); !ok {
 		t.Fatalf("expected Tag, got %T", readTag)
 	} else if rtag.Target != commitID {
 		t.Fatalf("tag target mismatch")
@@ -314,11 +314,11 @@ type testPackObject struct {
 	body      []byte
 	encoding  packObjectEncoding
 	baseIndex int
-	baseHash  Hash
+	baseHash  TestHash
 	baseBody  []byte
 }
 
-func writeTestPack(t *testing.T, root, name string, objs []testPackObject) []Hash {
+func writeTestPack(t *testing.T, root, name string, objs []testPackObject) []TestHash {
 	t.Helper()
 	packDir := filepath.Join(root, "objects", "pack")
 	err := os.MkdirAll(packDir, 0o750)
@@ -343,7 +343,7 @@ func writeTestPack(t *testing.T, root, name string, objs []testPackObject) []Has
 	}
 
 	offsets := make([]uint64, len(objs))
-	ids := make([]Hash, len(objs))
+	ids := make([]TestHash, len(objs))
 
 	for i, obj := range objs {
 		offset := buf.Len()
@@ -358,7 +358,7 @@ func writeTestPack(t *testing.T, root, name string, objs []testPackObject) []Has
 		raw := make([]byte, len(header)+len(obj.body))
 		copy(raw, header)
 		copy(raw[len(header):], obj.body)
-		ids[i] = computeRawHash(raw, testHashSize)
+		ids[i] = computeRawHash[testHashType](raw)
 
 		switch obj.encoding {
 		case packEncodingFull:
@@ -375,7 +375,7 @@ func writeTestPack(t *testing.T, root, name string, objs []testPackObject) []Has
 			delta := buildInsertOnlyDelta(len(baseBody), obj.body)
 			buf.Write(compressBytes(t, delta))
 		case packEncodingRefDelta:
-			if obj.baseHash == (Hash{}) {
+			if obj.baseHash == (TestHash{}) {
 				t.Fatalf("ref delta %d missing base hash", i)
 			}
 			baseBody := obj.baseBody
@@ -383,7 +383,7 @@ func writeTestPack(t *testing.T, root, name string, objs []testPackObject) []Has
 				t.Fatalf("ref delta %d missing base body", i)
 			}
 			buf.Write(encodePackHeader(ObjRefDelta, len(obj.body)))
-			buf.Write(obj.baseHash[:])
+			buf.Write(obj.baseHash.Slice())
 			delta := buildInsertOnlyDelta(len(baseBody), obj.body)
 			buf.Write(compressBytes(t, delta))
 		default:
@@ -392,8 +392,8 @@ func writeTestPack(t *testing.T, root, name string, objs []testPackObject) []Has
 	}
 
 	packContent := append([]byte(nil), buf.Bytes()...)
-	packChecksum := computeRawHash(packContent, testHashSize)
-	buf.Write(packChecksum[:testHashSize])
+	packChecksum := computeRawHash[testHashType](packContent)
+	buf.Write(packChecksum.Slice()[:testHashSize])
 	packBytes := buf.Bytes()
 
 	packPath := filepath.Join(packDir, name+".pack")
@@ -406,10 +406,10 @@ func writeTestPack(t *testing.T, root, name string, objs []testPackObject) []Has
 	return ids
 }
 
-func writeTestPackIndex(t *testing.T, packDir, name string, ids []Hash, offsets []uint64, packChecksum Hash) {
+func writeTestPackIndex(t *testing.T, packDir, name string, ids []TestHash, offsets []uint64, packChecksum TestHash) {
 	t.Helper()
 	type idxEntry struct {
-		id     Hash
+		id     TestHash
 		offset uint64
 	}
 	entries := make([]idxEntry, len(ids))
@@ -417,7 +417,7 @@ func writeTestPackIndex(t *testing.T, packDir, name string, ids []Hash, offsets 
 		entries[i] = idxEntry{id: ids[i], offset: offsets[i]}
 	}
 	sort.Slice(entries, func(i, j int) bool {
-		return bytes.Compare(entries[i].id[:], entries[j].id[:]) < 0
+		return bytes.Compare(entries[i].id.Slice(), entries[j].id.Slice()) < 0
 	})
 
 	var buf bytes.Buffer
@@ -432,7 +432,8 @@ func writeTestPackIndex(t *testing.T, packDir, name string, ids []Hash, offsets 
 
 	var fanout [256]uint32
 	for _, entry := range entries {
-		first := int(entry.id[0])
+		entrySlice := entry.id.Slice()
+		first := int(entrySlice[0])
 		for i := first; i < len(fanout); i++ {
 			fanout[i]++
 		}
@@ -445,7 +446,7 @@ func writeTestPackIndex(t *testing.T, packDir, name string, ids []Hash, offsets 
 	}
 
 	for _, entry := range entries {
-		buf.Write(entry.id[:testHashSize])
+		buf.Write(entry.id.Slice()[:testHashSize])
 	}
 
 	buf.Write(make([]byte, len(entries)*4))
@@ -460,9 +461,9 @@ func writeTestPackIndex(t *testing.T, packDir, name string, ids []Hash, offsets 
 	}
 
 	idxData := append([]byte(nil), buf.Bytes()...)
-	idxChecksum := computeRawHash(idxData, testHashSize)
-	buf.Write(packChecksum[:testHashSize])
-	buf.Write(idxChecksum[:testHashSize])
+	idxChecksum := computeRawHash[testHashType](idxData)
+	buf.Write(packChecksum.Slice()[:testHashSize])
+	buf.Write(idxChecksum.Slice()[:testHashSize])
 
 	idxPath := filepath.Join(packDir, name+".idx")
 	err = os.WriteFile(idxPath, buf.Bytes(), 0o600)

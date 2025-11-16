@@ -1,6 +1,8 @@
 package furgit
 
 import (
+	"crypto/sha1"
+	"crypto/sha256"
 	"os"
 	"path/filepath"
 	"strings"
@@ -22,8 +24,8 @@ const (
 	chunkLOFF = 0x4c4f4646 // LOFF
 )
 
-type multiPackIndex struct {
-	repo *Repository
+type multiPackIndex[T HashType] struct {
+	repo *Repository[T]
 
 	loadOnce sync.Once
 	loadErr  error
@@ -40,7 +42,7 @@ type multiPackIndex struct {
 	closeOnce sync.Once
 }
 
-func (midx *multiPackIndex) Close() error {
+func (midx *multiPackIndex[T]) Close() error {
 	if midx == nil {
 		return nil
 	}
@@ -63,14 +65,14 @@ func (midx *multiPackIndex) Close() error {
 	return closeErr
 }
 
-func (midx *multiPackIndex) ensureLoaded() error {
+func (midx *multiPackIndex[T]) ensureLoaded() error {
 	midx.loadOnce.Do(func() {
 		midx.loadErr = midx.load()
 	})
 	return midx.loadErr
 }
 
-func (midx *multiPackIndex) load() error {
+func (midx *multiPackIndex[T]) load() error {
 	if midx.repo == nil {
 		return ErrInvalidObject
 	}
@@ -113,7 +115,18 @@ func (midx *multiPackIndex) load() error {
 	return nil
 }
 
-func (midx *multiPackIndex) parse(buf []byte) error {
+func oidVersionFor[T HashType]() byte {
+	switch hashLen[T]() {
+	case sha1.Size:
+		return midxOIDVersionSHA1
+	case sha256.Size:
+		return midxOIDVersionSHA256
+	default:
+		panic("furgit: unsupported hash len")
+	}
+}
+
+func (midx *multiPackIndex[T]) parse(buf []byte) error {
 	if len(buf) < 12 {
 		return ErrInvalidObject
 	}
@@ -125,7 +138,7 @@ func (midx *multiPackIndex) parse(buf []byte) error {
 		return ErrInvalidObject
 	}
 	oidVersion := buf[5]
-	if oidVersion != midxOIDVersionSHA1 && oidVersion != midxOIDVersionSHA256 {
+	if oidVersion != oidVersionFor[T]() {
 		return ErrInvalidObject
 	}
 	numChunks := int(buf[6])
@@ -197,7 +210,8 @@ func (midx *multiPackIndex) parse(buf []byte) error {
 	if !ok {
 		return ErrInvalidObject
 	}
-	oidlSize := int64(numObjects) * int64(midx.repo.HashSize)
+	hashSize := midx.repo.hashSize()
+	oidlSize := int64(numObjects) * int64(hashSize)
 	if oidlOffset < 0 || oidlOffset+oidlSize > int64(len(buf)) {
 		return ErrInvalidObject
 	}
@@ -237,7 +251,7 @@ func (midx *multiPackIndex) parse(buf []byte) error {
 	return nil
 }
 
-func (midx *multiPackIndex) lookup(id Hash) (packlocation, error) {
+func (midx *multiPackIndex[T]) lookup(id Hash[T]) (packlocation, error) {
 	if len(midx.data) == 0 {
 		err := midx.ensureLoaded()
 		if err != nil {
@@ -245,14 +259,16 @@ func (midx *multiPackIndex) lookup(id Hash) (packlocation, error) {
 		}
 	}
 
-	first := int(id[0])
+	idSlice := id.Slice()
+	first := int(idSlice[0])
 	var lo int
 	if first > 0 {
 		lo = int(readBE32(midx.fanout[(first-1)*4 : first*4]))
 	}
 	hi := int(readBE32(midx.fanout[first*4 : (first+1)*4]))
 
-	idx, found := bsearchHash(midx.oids, midx.repo.HashSize, lo, hi, id)
+	stride := hashLen[T]()
+	idx, found := bsearchHash(midx.oids, stride, lo, hi, idSlice)
 	if !found {
 		return packlocation{}, ErrNotFound
 	}
@@ -288,15 +304,15 @@ func (midx *multiPackIndex) lookup(id Hash) (packlocation, error) {
 	}, nil
 }
 
-func (repo *Repository) multiPackIndex() (*multiPackIndex, error) {
+func (repo *Repository[T]) multiPackIndex() (*multiPackIndex[T], error) {
 	repo.midxOnce.Do(func() {
 		repo.midx, repo.midxErr = repo.loadMultiPackIndex()
 	})
 	return repo.midx, repo.midxErr
 }
 
-func (repo *Repository) loadMultiPackIndex() (*multiPackIndex, error) {
-	midx := &multiPackIndex{repo: repo}
+func (repo *Repository[T]) loadMultiPackIndex() (*multiPackIndex[T], error) {
+	midx := &multiPackIndex[T]{repo: repo}
 	err := midx.ensureLoaded()
 	if err != nil {
 		if os.IsNotExist(err) {

@@ -73,7 +73,8 @@ optimizations thereof.
 
 ## Hash algorithm
 
-Furgit supports both SHA-256 and SHA-1.
+Furgit supports both SHA-256 and SHA-1 wit ha generics API. But it's broken and
+being refactored.
 
 The default tests run with SHA-256. To run tests with SHA-1, use the `sha1`
 build tag.

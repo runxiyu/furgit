@@ -153,20 +153,22 @@ func TestPackDeltaReadOfsDistance(t *testing.T) {
 func TestBsearchHash(t *testing.T) {
 	h1 := hashWithByte(0x01)
 	h2 := hashWithByte(0x03)
-	names := append(append([]byte(nil), h1[:testHashSize]...), h2[:testHashSize]...)
-	idx, found := bsearchHash(names, testHashSize, 0, 2, h2)
+	names := append(append([]byte(nil), h1.Slice()[:testHashSize]...), h2.Slice()[:testHashSize]...)
+	idx, found := bsearchHash(names, testHashSize, 0, 2, h2.Slice())
 	if !found || idx != 1 {
 		t.Fatalf("expected to find second hash, idx=%d found=%v", idx, found)
 	}
-	_, found = bsearchHash(names, testHashSize, 0, 2, hashWithByte(0x05))
+	h3 := hashWithByte(0x05)
+	_, found = bsearchHash(names, testHashSize, 0, 2, h3.Slice())
 	if found {
 		t.Fatalf("did not expect to find unknown hash")
 	}
 }
 
-func buildTestPackIndexBuffer(hash Hash, offset uint32) []byte {
+func buildTestPackIndexBuffer(hash TestHash, offset uint32) []byte {
 	fanout := make([]byte, 256*4)
-	first := int(hash[0])
+	hashSlice := hash.Slice()
+	first := int(hashSlice[0])
 	for i := 0; i < 256; i++ {
 		var val uint32
 		if i >= first {
@@ -178,7 +180,7 @@ func buildTestPackIndexBuffer(hash Hash, offset uint32) []byte {
 	_ = binary.Write(&buf, binary.BigEndian, uint32(idxMagic))
 	_ = binary.Write(&buf, binary.BigEndian, uint32(idxVersion2))
 	buf.Write(fanout)
-	buf.Write(hash[:testHashSize])
+	buf.Write(hashSlice[:testHashSize])
 	buf.Write(make([]byte, 4))
 	off32 := make([]byte, 4)
 	binary.BigEndian.PutUint32(off32, offset)
@@ -190,7 +192,7 @@ func buildTestPackIndexBuffer(hash Hash, offset uint32) []byte {
 func TestPackIndexParse(t *testing.T) {
 	h := hashWithByte(0x11)
 	data := buildTestPackIndexBuffer(h, 0x12345678)
-	pi := &packIndex{repo: &Repository{HashSize: testHashSize}}
+	pi := &packIndex[testHashType]{repo: &TestRepository{}}
 	if err := pi.parse(data); err != nil {
 		t.Fatalf("parse error: %v", err)
 	}
@@ -203,7 +205,7 @@ func TestPackIndexParse(t *testing.T) {
 }
 
 func TestPackIndexOffset64(t *testing.T) {
-	pi := &packIndex{}
+	pi := &packIndex[testHashType]{}
 	pi.offset32 = make([]byte, 4)
 	binary.BigEndian.PutUint32(pi.offset32, 0x80000000)
 	pi.offset64 = make([]byte, 8)
