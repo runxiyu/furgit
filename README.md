@@ -157,10 +157,10 @@ optimizations thereof.
 
 ## Hash algorithm
 
-Furgit uses SHA-256 by default. To switch to SHA-1, use the `sha1` build tag.
+Furgit supports both SHA-256 and SHA-1.
 
-There will be future research to investigate potentially supporting both
-algorithms in one build of the library.
+The default tests run with SHA-256. To run tests with SHA-1, use the `sha1`
+build tag.
 
 ## Go versions
 
