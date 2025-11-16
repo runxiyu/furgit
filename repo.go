@@ -12,7 +12,7 @@ import (
 	"git.sr.ht/~runxiyu/furgit/config"
 )
 
-// Repository represents the root of a Git repository.
+// Repository represents a Git repository.
 type Repository struct {
 	rootPath string
 	hashSize int
@@ -29,9 +29,11 @@ type Repository struct {
 	closeOnce sync.Once
 }
 
-// OpenRepository opens the repository at the provided path. The path is expected to be
-// the actual repository directory, i.e., the repository itself for bare repositories,
-// or the .git subdirectory for non-bare repositories.
+// OpenRepository opens the repository at the provided path.
+//
+// The path is expected to be the actual repository directory, i.e.,
+// the repository itself for bare repositories, or the .git
+// subdirectory for non-bare repositories.
 func OpenRepository(path string) (*Repository, error) {
 	fi, err := os.Stat(path)
 	if err != nil {
@@ -129,7 +131,8 @@ func (repo *Repository) packFile(rel string) (*packFile, error) {
 	return pf, nil
 }
 
-// ParseHash converts a hex string into a Hash, validating it matches the repository's hash size.
+// ParseHash converts a hex string into a Hash, validating
+// it matches the repository's hash size.
 func (repo *Repository) ParseHash(s string) (Hash, error) {
 	var id Hash
 	if len(s)%2 != 0 {

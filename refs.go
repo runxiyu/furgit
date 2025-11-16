@@ -75,7 +75,8 @@ func (repo *Repository) resolvePackedRef(refname string) (Hash, error) {
 	return Hash{}, ErrInvalidObject
 }
 
-// ResolveHEAD reads HEAD and returns the ref that HEAD points to.
+// ResolveHEAD reads HEAD and returns the fully qualified
+// ref name it points to.
 func (repo *Repository) ResolveHEAD() (string, error) {
 	data, err := os.ReadFile(repo.repoPath("HEAD"))
 	if err != nil {

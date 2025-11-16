@@ -1,6 +1,6 @@
 package furgit
 
-// Blob represents the contents of a Git blob.
+// Blob represents a Git blob object.
 type Blob struct {
 	Data []byte
 }
@@ -16,7 +16,9 @@ func (sBlob *StoredBlob) Hash() Hash {
 	return sBlob.hash
 }
 
-// ObjectType allows Blob to satisfy the Object interface.
+// ObjectType returns the object type of the blob.
+//
+// It always returns ObjectTypeBlob.
 func (blob *Blob) ObjectType() ObjectType {
 	_ = blob
 	return ObjectTypeBlob
@@ -32,7 +34,8 @@ func parseBlob(id Hash, body []byte) (*StoredBlob, error) {
 	}, nil
 }
 
-// Serialize renders the full "blob size\\0body" representation.
+// Serialize renders the blob into its raw byte representation,
+// including the header (i.e., "type size\0").
 func (blob *Blob) Serialize() ([]byte, error) {
 	header, err := headerForType(ObjectTypeBlob, blob.Data)
 	if err != nil {

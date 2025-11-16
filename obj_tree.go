@@ -30,7 +30,9 @@ type TreeEntry struct {
 	ID   Hash
 }
 
-// ObjectType allows Tree to satisfy the Object interface.
+// ObjectType returns the object type of the tree.
+//
+// It always returns ObjectTypeTree.
 func (tree *Tree) ObjectType() ObjectType {
 	_ = tree
 	return ObjectTypeTree
@@ -108,7 +110,8 @@ func treeBody(t *Tree) []byte {
 	return body
 }
 
-// Serialize renders a Tree into canonical Git format.
+// Serialize renders the tree into its raw byte representation,
+// including the header (i.e., "type size\0").
 func (tree *Tree) Serialize() ([]byte, error) {
 	body := treeBody(tree)
 	header, err := headerForType(ObjectTypeTree, body)
@@ -123,6 +126,9 @@ func (tree *Tree) Serialize() ([]byte, error) {
 }
 
 // Entry looks up a tree entry by name.
+//
+// Lookups are not recursive.
+// It returns nil if no such entry exists.
 func (tree *Tree) Entry(name []byte) *TreeEntry {
 	low, high := 0, len(tree.Entries)-1
 	for low <= high {
@@ -137,4 +143,38 @@ func (tree *Tree) Entry(name []byte) *TreeEntry {
 		}
 	}
 	return nil
+}
+
+// EntryRecursive looks up a tree entry by path.
+//
+// Lookups are recursive.
+// It returns nil if no such entry exists.
+func (tree *Tree) EntryRecursive(repo *Repository, path [][]byte) (*TreeEntry, error) {
+	if len(path) == 0 {
+		return nil, errors.New("furgit: tree: empty path")
+	}
+
+	currentTree := tree
+	for i, part := range path {
+		entry := currentTree.Entry(part)
+		if entry == nil {
+			return nil, nil
+		}
+		if i == len(path)-1 {
+			return entry, nil
+		}
+		obj, err := repo.ReadObject(entry.ID)
+		if err != nil {
+			return nil, err
+		}
+		nextTree, ok := obj.(*Tree)
+		if !ok {
+			return nil, fmt.Errorf("furgit: tree: expected tree object at %s, got %T", part, obj)
+			// TODO: It may be useful to check the mode instead of reporting
+			// an object type error.
+		}
+		currentTree = nextTree
+	}
+
+	return nil, nil
 }

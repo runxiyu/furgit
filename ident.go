@@ -10,8 +10,7 @@ import (
 	"time"
 )
 
-// Ident models an author/committer identity together with its timestamp
-// and timezone offset, mirroring the fields that appear in Git objects.
+// Ident represents a Git identity (author/committer/tagger).
 type Ident struct {
 	Name          []byte
 	Email         []byte
@@ -116,7 +115,7 @@ func (ident Ident) Serialize() ([]byte, error) {
 	return []byte(b.String()), nil
 }
 
-// When returns the timestamp as time.Time using the embedded offset.
+// When returns the ident's time.Time with the correct timezone.
 func (ident Ident) When() time.Time {
 	loc := time.FixedZone("git", int(ident.OffsetMinutes)*60)
 	return time.Unix(ident.WhenUnix, 0).In(loc)

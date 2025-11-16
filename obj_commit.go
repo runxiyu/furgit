@@ -27,7 +27,9 @@ func (sCommit *StoredCommit) Hash() Hash {
 	return sCommit.hash
 }
 
-// ObjectType allows Commit to satisfy the Object interface.
+// ObjectType returns the object type of the commit.
+//
+// It always returns ObjectTypeCommit.
 func (commit *Commit) ObjectType() ObjectType {
 	_ = commit
 	return ObjectTypeCommit
@@ -128,7 +130,8 @@ func commitBody(c *Commit) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// Serialize renders a Commit into canonical Git format.
+// Serialize renders the commit into its raw byte representation,
+// including the header (i.e., "type size\0").
 func (commit *Commit) Serialize() ([]byte, error) {
 	body, err := commitBody(commit)
 	if err != nil {

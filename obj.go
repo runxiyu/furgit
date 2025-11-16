@@ -11,13 +11,21 @@ import (
 type ObjectType uint8
 
 const (
-	ObjectTypeInvalid  ObjectType = 0
-	ObjectTypeCommit   ObjectType = 1
-	ObjectTypeTree     ObjectType = 2
-	ObjectTypeBlob     ObjectType = 3
-	ObjectTypeTag      ObjectType = 4
-	ObjectTypeFuture   ObjectType = 5
+	// An invalid object.
+	ObjectTypeInvalid ObjectType = 0
+	// A commit object.
+	ObjectTypeCommit ObjectType = 1
+	// A tree object.
+	ObjectTypeTree ObjectType = 2
+	// A blob object.
+	ObjectTypeBlob ObjectType = 3
+	// An annotated tag object.
+	ObjectTypeTag ObjectType = 4
+	// An object type reserved for future use.
+	ObjectTypeFuture ObjectType = 5
+	// A packfile offset delta object. This is not typically exposed.
 	ObjectTypeOfsDelta ObjectType = 6
+	// A packfile reference delta object. This is not typically exposed.
 	ObjectTypeRefDelta ObjectType = 7
 )
 
@@ -28,12 +36,13 @@ const (
 	objectTypeNameTag    = "tag"
 )
 
-// Object describes any Git object variant.
+// Object represents a Git object.
 type Object interface {
 	ObjectType() ObjectType
 }
 
-// StoredObject describes a Git object with a known hash.
+// StoredObject describes a Git object with a known hash, such as
+// one read from storage.
 type StoredObject interface {
 	Object
 	Hash() Hash
@@ -82,7 +91,7 @@ func parseObjectBody(ty ObjectType, id Hash, body []byte, repo *Repository) (Sto
 	}
 }
 
-// ReadObject resolves an ID by consulting loose then packed storage.
+// ReadObject resolves an ID.
 func (repo *Repository) ReadObject(id Hash) (Object, error) {
 	obj, err := repo.looseRead(id)
 	if err == nil {
@@ -98,7 +107,10 @@ func (repo *Repository) ReadObject(id Hash) (Object, error) {
 	return obj, err
 }
 
-// ReadObjectTypeSize reports the object type and size without inflating the body.
+// ReadObjectTypeSize reports the object type and size.
+//
+// Typicall, this is more efficient than reading the full object,
+// as it avoids decompressing the entire object body.
 func (repo *Repository) ReadObjectTypeSize(id Hash) (ObjectType, int64, error) {
 	ty, size, err := repo.looseTypeSize(id)
 	if err == nil {

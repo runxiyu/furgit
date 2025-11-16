@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-// Tag represents an annotated Git tag object.
+// Tag represents a Git annotated tag object.
 type Tag struct {
 	Target     Hash
 	TargetType ObjectType
@@ -26,7 +26,9 @@ func (sTag *StoredTag) Hash() Hash {
 	return sTag.hash
 }
 
-// ObjectType allows Tag to satisfy the Object interface.
+// ObjectType returns the object type of the tag.
+//
+// It always returns ObjectTypeTag.
 func (tag *Tag) ObjectType() ObjectType {
 	_ = tag
 	return ObjectTypeTag
@@ -142,7 +144,8 @@ func tagBody(t *Tag) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// Serialize renders a Tag into canonical Git format.
+// Serialize renders the tag into its raw byte representation,
+// including the header (i.e., "type size\0").
 func (tag *Tag) Serialize() ([]byte, error) {
 	body, err := tagBody(tag)
 	if err != nil {

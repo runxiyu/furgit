@@ -20,7 +20,6 @@ const (
 	packVersion2 = 2
 )
 
-// packlocation identifies the path to a pack file and an offset inside it.
 type packlocation struct {
 	PackPath string
 	Offset   uint64

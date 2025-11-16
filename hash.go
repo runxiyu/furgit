@@ -8,7 +8,7 @@ import (
 
 const maxHashSize = 32
 
-// Hash represents a Git object identifier.
+// Hash represents a Git object ID.
 type Hash struct {
 	data [maxHashSize]byte
 	size int
@@ -35,12 +35,12 @@ var hashFuncs = map[int]hashFunc{
 	},
 }
 
-// String returns the ID as hex using its internal size.
+// String returns a hexadecimal string representation of the hash.
 func (hash Hash) String() string {
 	return hex.EncodeToString(hash.data[:hash.size])
 }
 
-// Bytes returns a mutable copy of the underlying bytes using its internal size.
+// Bytes returns a mutable copy of the hash bytes.
 func (hash Hash) Bytes() []byte {
 	return append([]byte(nil), hash.data[:hash.size]...)
 }
