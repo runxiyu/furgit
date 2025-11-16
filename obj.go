@@ -7,18 +7,18 @@ import (
 	"strconv"
 )
 
-// ObjType mirrors Git's object type tags.
-type ObjType uint8
+// ObjectType mirrors Git's object type tags.
+type ObjectType uint8
 
 const (
-	ObjInvalid  ObjType = 0
-	ObjCommit   ObjType = 1
-	ObjTree     ObjType = 2
-	ObjBlob     ObjType = 3
-	ObjTag      ObjType = 4
-	ObjFuture   ObjType = 5
-	ObjOfsDelta ObjType = 6
-	ObjRefDelta ObjType = 7
+	ObjInvalid  ObjectType = 0
+	ObjCommit   ObjectType = 1
+	ObjTree     ObjectType = 2
+	ObjBlob     ObjectType = 3
+	ObjTag      ObjectType = 4
+	ObjFuture   ObjectType = 5
+	ObjOfsDelta ObjectType = 6
+	ObjRefDelta ObjectType = 7
 )
 
 const (
@@ -30,10 +30,10 @@ const (
 
 // Object describes any Git object variant.
 type Object interface {
-	ObjType() ObjType
+	ObjectType() ObjectType
 }
 
-func headerForType(ty ObjType, body []byte) ([]byte, error) {
+func headerForType(ty ObjectType, body []byte) ([]byte, error) {
 	var tyStr string
 	switch ty {
 	case ObjBlob:
@@ -59,7 +59,7 @@ func headerForType(ty ObjType, body []byte) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func parseObjectBody(ty ObjType, id Hash, body []byte, repo *Repository) (Object, error) {
+func parseObjectBody(ty ObjectType, id Hash, body []byte, repo *Repository) (Object, error) {
 	switch ty {
 	case ObjBlob:
 		return parseBlob(id, body)
@@ -93,7 +93,7 @@ func (repo *Repository) ReadObject(id Hash) (Object, error) {
 }
 
 // ReadObjectTypeSize reports the object type and size without inflating the body.
-func (repo *Repository) ReadObjectTypeSize(id Hash) (ObjType, int64, error) {
+func (repo *Repository) ReadObjectTypeSize(id Hash) (ObjectType, int64, error) {
 	ty, size, err := repo.looseTypeSize(id)
 	if err == nil {
 		return ty, size, nil

@@ -17,8 +17,8 @@ type Commit struct {
 	ExtraHeaders []ExtraHeader
 }
 
-// ObjType allows Commit to satisfy the Object interface.
-func (*Commit) ObjType() ObjType {
+// ObjectType allows Commit to satisfy the Object interface.
+func (*Commit) ObjectType() ObjectType {
 	return ObjCommit
 }
 

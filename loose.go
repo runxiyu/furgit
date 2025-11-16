@@ -29,7 +29,7 @@ func (repo *Repository) looseRead(id Hash) (Object, error) {
 	return parseObjectBody(ty, id, body, repo)
 }
 
-func (repo *Repository) looseReadTyped(id Hash) (ObjType, []byte, error) {
+func (repo *Repository) looseReadTyped(id Hash) (ObjectType, []byte, error) {
 	path, err := repo.loosePath(id)
 	if err != nil {
 		return ObjInvalid, nil, err
@@ -78,7 +78,7 @@ func (repo *Repository) looseReadTyped(id Hash) (ObjType, []byte, error) {
 	return ty, out, nil
 }
 
-func (repo *Repository) looseTypeSize(id Hash) (ObjType, int64, error) {
+func (repo *Repository) looseTypeSize(id Hash) (ObjectType, int64, error) {
 	path, err := repo.loosePath(id)
 	if err != nil {
 		return ObjInvalid, 0, err
@@ -128,7 +128,7 @@ func (repo *Repository) looseTypeSize(id Hash) (ObjType, int64, error) {
 	return parseLooseHeader(header)
 }
 
-func parseLooseHeader(header []byte) (ObjType, int64, error) {
+func parseLooseHeader(header []byte) (ObjectType, int64, error) {
 	space := bytes.IndexByte(header, ' ')
 	if space < 0 {
 		return ObjInvalid, 0, ErrInvalidObject
@@ -151,7 +151,7 @@ func parseLooseHeader(header []byte) (ObjType, int64, error) {
 	return ty, size, nil
 }
 
-func objTypeFromName(name string) (ObjType, error) {
+func objTypeFromName(name string) (ObjectType, error) {
 	switch name {
 	case objNameBlob:
 		return ObjBlob, nil

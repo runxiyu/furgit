@@ -20,8 +20,8 @@ type TreeEntry struct {
 	ID   Hash
 }
 
-// ObjType allows Tree to satisfy the Object interface.
-func (*Tree) ObjType() ObjType {
+// ObjectType allows Tree to satisfy the Object interface.
+func (*Tree) ObjectType() ObjectType {
 	return ObjTree
 }
 

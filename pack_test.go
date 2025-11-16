@@ -41,7 +41,7 @@ func TestPackSectionInflate(t *testing.T) {
 	body.Release()
 }
 
-func encodePackHeader(ty ObjType, size int) []byte {
+func encodePackHeader(ty ObjectType, size int) []byte {
 	first := byte((ty & 0x7) << 4)
 	first |= byte(size & 0x0f)
 	size >>= 4

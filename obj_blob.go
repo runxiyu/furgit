@@ -7,8 +7,8 @@ type Blob struct {
 	Data []byte
 }
 
-// ObjType allows Blob to satisfy the Object interface.
-func (*Blob) ObjType() ObjType {
+// ObjectType allows Blob to satisfy the Object interface.
+func (*Blob) ObjectType() ObjectType {
 	return ObjBlob
 }
 

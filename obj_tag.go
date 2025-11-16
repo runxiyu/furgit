@@ -10,14 +10,14 @@ import (
 type Tag struct {
 	Hash       Hash
 	Target     Hash
-	TargetType ObjType
+	TargetType ObjectType
 	Name       []byte
 	Tagger     *Ident
 	Message    []byte
 }
 
-// ObjType allows Tag to satisfy the Object interface.
-func (*Tag) ObjType() ObjType {
+// ObjectType allows Tag to satisfy the Object interface.
+func (*Tag) ObjectType() ObjectType {
 	return ObjTag
 }
 

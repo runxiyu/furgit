@@ -166,7 +166,7 @@ func (repo *Repository) verifyRawObject(buf []byte, want Hash) bool {
 }
 
 // verifyTypedObject verifies a typed object against its expected hash.
-func (repo *Repository) verifyTypedObject(ty ObjType, body []byte, want Hash) bool {
+func (repo *Repository) verifyTypedObject(ty ObjectType, body []byte, want Hash) bool {
 	if want.size != repo.HashSize {
 		return false
 	}

@@ -319,7 +319,7 @@ const (
 )
 
 type testPackObject struct {
-	finalType ObjType
+	finalType ObjectType
 	body      []byte
 	encoding  packObjectEncoding
 	baseIndex int
