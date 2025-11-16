@@ -8,10 +8,10 @@ tasks:
       go build
   - test-sha256: |
       cd furgit
-      go test -v
+      go test -v ./...
   - test-sha1: |
       cd furgit
-      go test -v -tags sha1
+      go test -v -tags sha1 ./...
   - lint: |
       cd furgit
-      golangci-lint run .
+      golangci-lint run ./...

@@ -23,9 +23,25 @@ func (sTree *StoredTree) Hash() Hash {
 	return sTree.hash
 }
 
+// FileMode represents the mode of a file in a Git tree.
+type FileMode uint32
+
+const (
+	// FileModeDir represents a directory (tree) in a Git tree.
+	FileModeDir FileMode = 0o40000
+	// FileModeRegular represents a regular file (blob) in a Git tree.
+	FileModeRegular FileMode = 0o100644
+	// FileModeExecutable represents an executable file (blob) in a Git tree.
+	FileModeExecutable FileMode = 0o100755
+	// FileModeSymlink represents a symbolic link (blob) in a Git tree.
+	FileModeSymlink FileMode = 0o120000
+	// FileModeGitlink represents a Git link (submodule) in a Git tree.
+	FileModeGitlink FileMode = 0o160000
+)
+
 // TreeEntry represents a single entry in a Git tree.
 type TreeEntry struct {
-	Mode uint32
+	Mode FileMode
 	Name []byte
 	ID   Hash
 }
@@ -71,7 +87,7 @@ func parseTree(id Hash, body []byte, repo *Repository) (*StoredTree, error) {
 		}
 
 		entry := TreeEntry{
-			Mode: uint32(mode),
+			Mode: FileMode(mode),
 			Name: append([]byte(nil), nameBytes...),
 			ID:   child,
 		}

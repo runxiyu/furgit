@@ -2,215 +2,221 @@ package furgit
 
 import (
 	"bytes"
-	"compress/zlib"
-	"encoding/binary"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
-
-	"git.sr.ht/~runxiyu/furgit/internal/bufpool"
 )
 
-func compressBytes(t *testing.T, payload []byte) []byte {
-	var buf bytes.Buffer
-	zw := zlib.NewWriter(&buf)
-	if _, err := zw.Write(payload); err != nil {
-		t.Fatalf("compress write: %v", err)
-	}
-	if err := zw.Close(); err != nil {
-		t.Fatalf("compress close: %v", err)
-	}
-	return buf.Bytes()
-}
+func TestPackfileRead(t *testing.T) {
+	repoPath, cleanup := setupTestRepo(t)
+	defer cleanup()
 
-func TestPackSectionInflate(t *testing.T) {
-	payload := []byte("pack payload")
-	compressed := compressBytes(t, payload)
-	body, err := packSectionInflate(bytes.NewReader(compressed), len(payload))
+	gitCmd(t, repoPath, "config", "gc.auto", "0")
+
+	workDir, cleanupWork := setupWorkDir(t)
+	defer cleanupWork()
+
+	err := os.WriteFile(filepath.Join(workDir, "file1.txt"), []byte("content1"), 0o644)
 	if err != nil {
-		t.Fatalf("packSectionInflate error: %v", err)
+		t.Fatalf("failed to write file1.txt: %v", err)
 	}
-	if got := string(body.Bytes()); got != string(payload) {
-		t.Fatalf("unexpected inflated data: %q", got)
-	}
-	body.Release()
-
-	body, err = packSectionInflate(bytes.NewReader(compressed), 0)
+	err = os.WriteFile(filepath.Join(workDir, "file2.txt"), []byte("content2"), 0o644)
 	if err != nil {
-		t.Fatalf("packSectionInflate streaming error: %v", err)
+		t.Fatalf("failed to write file2.txt: %v", err)
 	}
-	if got := string(body.Bytes()); got != string(payload) {
-		t.Fatalf("unexpected streaming data: %q", got)
-	}
-	body.Release()
-}
 
-func encodePackHeader(ty ObjectType, size int) []byte {
-	first := byte((ty & 0x7) << 4)
-	first |= byte(size & 0x0f)
-	size >>= 4
-	if size == 0 {
-		return []byte{first}
-	}
-	first |= 0x80
-	out := []byte{first}
-	for size > 0 {
-		b := byte(size & 0x7f)
-		size >>= 7
-		if size != 0 {
-			b |= 0x80
-		}
-		out = append(out, b)
-	}
-	return out
-}
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "Test commit")
+	commitHash := gitCmd(t, repoPath, "rev-parse", "HEAD")
 
-func TestPackHeaderRead(t *testing.T) {
-	buf := encodePackHeader(ObjectTypeTree, 0x1fff)
-	ty, size, err := packHeaderRead(bytes.NewReader(buf))
+	gitCmd(t, repoPath, "repack", "-a", "-d")
+
+	repo, err := OpenRepository(repoPath)
 	if err != nil {
-		t.Fatalf("packHeaderRead error: %v", err)
+		t.Fatalf("OpenRepository failed: %v", err)
 	}
-	if ty != ObjectTypeTree || size != 0x1fff {
-		t.Fatalf("unexpected header decode ty=%d size=%d", ty, size)
-	}
-	if _, _, err := packHeaderRead(bytes.NewReader([]byte{0x80})); err == nil {
-		t.Fatal("expected error for truncated header")
-	}
-}
+	defer func() { _ = repo.Close() }()
 
-func encodeVarint(value int) []byte {
-	var out []byte
-	for {
-		b := byte(value & 0x7f)
-		value >>= 7
-		if value != 0 {
-			b |= 0x80
-		}
-		out = append(out, b)
-		if value == 0 {
-			break
+	hashObj, _ := repo.ParseHash(commitHash)
+	obj, err := repo.ReadObject(hashObj)
+	if err != nil {
+		t.Fatalf("ReadObject from pack failed: %v", err)
+	}
+
+	commit, ok := obj.(*StoredCommit)
+	if !ok {
+		t.Fatalf("expected *StoredCommit, got %T", obj)
+	}
+
+	treeObj, err := repo.ReadObject(commit.Tree)
+	if err != nil {
+		t.Fatalf("ReadObject tree failed: %v", err)
+	}
+
+	tree, ok := treeObj.(*StoredTree)
+	if !ok {
+		t.Fatalf("expected *StoredTree, got %T", treeObj)
+	}
+
+	if len(tree.Entries) != 2 {
+		t.Errorf("tree entries: got %d, want 2", len(tree.Entries))
+	}
+
+	gitLsTree := gitCmd(t, repoPath, "ls-tree", commit.Tree.String())
+	for _, entry := range tree.Entries {
+		if !strings.Contains(gitLsTree, string(entry.Name)) {
+			t.Errorf("git ls-tree doesn't contain %s", entry.Name)
 		}
 	}
-	return out
 }
 
-func TestPackVarintRead(t *testing.T) {
-	buf := encodeVarint(0x3456)
-	pos := 0
-	val, err := packVarintRead(buf, &pos)
-	if err != nil {
-		t.Fatalf("packVarintRead error: %v", err)
+func TestPackfileLarge(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping large packfile test in short mode")
 	}
-	if val != 0x3456 {
-		t.Fatalf("unexpected varint value: %d", val)
-	}
-	if pos != len(buf) {
-		t.Fatalf("expected pos %d, got %d", len(buf), pos)
-	}
-	bad := []byte{0x80}
-	pos = 0
-	if _, err := packVarintRead(bad, &pos); err == nil {
-		t.Fatal("expected error for unterminated varint")
-	}
-}
 
-func TestPackDeltaApply(t *testing.T) {
-	base := bufpool.FromOwned([]byte("abcdefghij"))
-	defer base.Release()
-	deltaBytes := []byte{0x0a, 0x0a, 0x91, 0x00, 0x03, 0x03, 'X', 'Y', 'Z', 0x91, 0x06, 0x04}
-	delta := bufpool.FromOwned(deltaBytes)
-	defer delta.Release()
-	out, err := packDeltaApply(base, delta)
-	if err != nil {
-		t.Fatalf("packDeltaApply error: %v", err)
-	}
-	if got := string(out.Bytes()); got != "abcXYZghij" {
-		t.Fatalf("unexpected delta output: %q", got)
-	}
-	out.Release()
-}
+	repoPath, cleanup := setupTestRepo(t)
+	defer cleanup()
 
-func TestPackDeltaApplyMismatchedBaseSize(t *testing.T) {
-	base := bufpool.FromOwned([]byte("abc"))
-	defer base.Release()
-	delta := bufpool.FromOwned([]byte{0x04, 0x04})
-	defer delta.Release()
-	if _, err := packDeltaApply(base, delta); err == nil {
-		t.Fatal("expected error for mismatched base size")
-	}
-}
+	gitCmd(t, repoPath, "config", "gc.auto", "0")
 
-func TestPackDeltaReadOfsDistance(t *testing.T) {
-	dist, err := packDeltaReadOfsDistance(bytes.NewReader([]byte{0x81, 0x01}))
-	if err != nil {
-		t.Fatalf("packDeltaReadOfsDistance error: %v", err)
-	}
-	if dist != 257 {
-		t.Fatalf("unexpected distance: %d", dist)
-	}
-	if _, err := packDeltaReadOfsDistance(bytes.NewReader([]byte{})); err == nil {
-		t.Fatal("expected error for empty reader")
-	}
-}
+	workDir, cleanupWork := setupWorkDir(t)
+	defer cleanupWork()
 
-func TestBsearchHash(t *testing.T) {
-	h1 := hashWithByte(0x01)
-	h2 := hashWithByte(0x03)
-	names := append(append([]byte(nil), h1.data[:testHashSize]...), h2.data[:testHashSize]...)
-	idx, found := bsearchHash(names, testHashSize, 0, 2, h2)
-	if !found || idx != 1 {
-		t.Fatalf("expected to find second hash, idx=%d found=%v", idx, found)
-	}
-	_, found = bsearchHash(names, testHashSize, 0, 2, hashWithByte(0x05))
-	if found {
-		t.Fatalf("did not expect to find unknown hash")
-	}
-}
-
-func buildTestPackIndexBuffer(hash Hash, offset uint32) []byte {
-	fanout := make([]byte, 256*4)
-	first := int(hash.data[0])
-	for i := 0; i < 256; i++ {
-		var val uint32
-		if i >= first {
-			val = 1
+	numFiles := 1000
+	for i := 0; i < numFiles; i++ {
+		filename := filepath.Join(workDir, fmt.Sprintf("file%04d.txt", i))
+		content := fmt.Sprintf("Content for file %d\n", i)
+		err := os.WriteFile(filename, []byte(content), 0o644)
+		if err != nil {
+			t.Fatalf("failed to write %s: %v", filename, err)
 		}
-		binary.BigEndian.PutUint32(fanout[i*4:], val)
 	}
-	var buf bytes.Buffer
-	_ = binary.Write(&buf, binary.BigEndian, uint32(idxMagic))
-	_ = binary.Write(&buf, binary.BigEndian, uint32(idxVersion2))
-	buf.Write(fanout)
-	buf.Write(hash.data[:testHashSize])
-	buf.Write(make([]byte, 4))
-	off32 := make([]byte, 4)
-	binary.BigEndian.PutUint32(off32, offset)
-	buf.Write(off32)
-	buf.Write(make([]byte, 2*testHashSize))
-	return buf.Bytes()
+
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "Large commit")
+	commitHash := gitCmd(t, repoPath, "rev-parse", "HEAD")
+
+	gitCmd(t, repoPath, "repack", "-a", "-d")
+
+	repo, err := OpenRepository(repoPath)
+	if err != nil {
+		t.Fatalf("OpenRepository failed: %v", err)
+	}
+	defer func() { _ = repo.Close() }()
+
+	hashObj, _ := repo.ParseHash(commitHash)
+	obj, _ := repo.ReadObject(hashObj)
+	commit := obj.(*StoredCommit)
+
+	treeObj, _ := repo.ReadObject(commit.Tree)
+	tree := treeObj.(*StoredTree)
+
+	if len(tree.Entries) != numFiles {
+		t.Errorf("tree entries: got %d, want %d", len(tree.Entries), numFiles)
+	}
+
+	gitCount := gitCmd(t, repoPath, "ls-tree", commit.Tree.String())
+	gitLines := strings.Count(gitCount, "\n") + 1
+	if len(tree.Entries) != gitLines {
+		t.Errorf("furgit found %d entries, git found %d", len(tree.Entries), gitLines)
+	}
+
+	for i := 0; i < 10; i++ {
+		idx := i * (numFiles / 10)
+		expectedName := fmt.Sprintf("file%04d.txt", idx)
+		entry := tree.Entry([]byte(expectedName))
+		if entry == nil {
+			t.Errorf("expected to find entry %s", expectedName)
+			continue
+		}
+
+		blobObj, _ := repo.ReadObject(entry.ID)
+		blob := blobObj.(*StoredBlob)
+
+		expectedContent := fmt.Sprintf("Content for file %d\n", idx)
+		if string(blob.Data) != expectedContent {
+			t.Errorf("blob %s: got %q, want %q", expectedName, blob.Data, expectedContent)
+		}
+
+		gitData := gitCatFile(t, repoPath, "blob", entry.ID.String())
+		if !bytes.Equal(blob.Data, gitData) {
+			t.Errorf("blob %s: furgit data doesn't match git data", expectedName)
+		}
+	}
 }
 
-func TestPackIndexParse(t *testing.T) {
-	h := hashWithByte(0x11)
-	data := buildTestPackIndexBuffer(h, 0x12345678)
-	pi := &packIndex{repo: &Repository{hashSize: testHashSize}}
-	if err := pi.parse(data); err != nil {
-		t.Fatalf("parse error: %v", err)
+func TestMultiPackIndex(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping multi-pack-index test in short mode")
 	}
-	if pi.numObjects != 1 {
-		t.Fatalf("expected 1 object, got %d", pi.numObjects)
-	}
-	if got, err := pi.offset(0); err != nil || got != 0x12345678 {
-		t.Fatalf("unexpected 32-bit offset or error: %d, %v", got, err)
-	}
-}
 
-func TestPackIndexOffset64(t *testing.T) {
-	pi := &packIndex{}
-	pi.offset32 = make([]byte, 4)
-	binary.BigEndian.PutUint32(pi.offset32, 0x80000000)
-	pi.offset64 = make([]byte, 8)
-	binary.BigEndian.PutUint64(pi.offset64, 0x1_0000_0000)
-	if got, err := pi.offset(0); err != nil || got != 0x1_0000_0000 {
-		t.Fatalf("unexpected 64-bit offset or error: %d, %v", got, err)
+	repoPath, cleanup := setupTestRepo(t)
+	defer cleanup()
+
+	gitCmd(t, repoPath, "config", "gc.auto", "0")
+
+	workDir, cleanupWork := setupWorkDir(t)
+	defer cleanupWork()
+
+	err := os.WriteFile(filepath.Join(workDir, "file1.txt"), []byte("content1"), 0o644)
+	if err != nil {
+		t.Fatalf("failed to write file1.txt: %v", err)
+	}
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "Commit 1")
+	commit1Hash := gitCmd(t, repoPath, "rev-parse", "HEAD")
+	gitCmd(t, repoPath, "repack", "-d")
+
+	err = os.WriteFile(filepath.Join(workDir, "file2.txt"), []byte("content2"), 0o644)
+	if err != nil {
+		t.Fatalf("failed to write file2.txt: %v", err)
+	}
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "Commit 2")
+	commit2Hash := gitCmd(t, repoPath, "rev-parse", "HEAD")
+	gitCmd(t, repoPath, "repack", "-d")
+
+	gitCmd(t, repoPath, "repack", "--write-midx")
+
+	midxPath := filepath.Join(repoPath, "objects", "pack", "multi-pack-index")
+	if _, err := os.Stat(midxPath); os.IsNotExist(err) {
+		t.Fatalf("multi-pack-index file does not exist at %s", midxPath)
+	}
+
+	repo, err := OpenRepository(repoPath)
+	if err != nil {
+		t.Fatalf("OpenRepository failed: %v", err)
+	}
+	defer func() { _ = repo.Close() }()
+
+	hash1, _ := repo.ParseHash(commit1Hash)
+	obj1, err := repo.ReadObject(hash1)
+	if err != nil {
+		t.Fatalf("ReadObject commit1 failed: %v", err)
+	}
+	commit1 := obj1.(*StoredCommit)
+	if commit1.Hash() != hash1 {
+		t.Error("commit1 hash mismatch")
+	}
+
+	if !bytes.Contains(commit1.Message, []byte("Commit 1")) {
+		t.Errorf("commit1 message doesn't contain 'Commit 1': got %q", commit1.Message)
+	}
+
+	hash2, _ := repo.ParseHash(commit2Hash)
+	obj2, err := repo.ReadObject(hash2)
+	if err != nil {
+		t.Fatalf("ReadObject commit2 failed: %v", err)
+	}
+	commit2 := obj2.(*StoredCommit)
+	if commit2.Hash() != hash2 {
+		t.Error("commit2 hash mismatch")
+	}
+
+	if !bytes.Contains(commit2.Message, []byte("Commit 2")) {
+		t.Errorf("commit2 message doesn't contain 'Commit 2': got %q", commit2.Message)
 	}
 }

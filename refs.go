@@ -75,21 +75,45 @@ func (repo *Repository) resolvePackedRef(refname string) (Hash, error) {
 	return Hash{}, ErrInvalidObject
 }
 
-// ResolveHEAD reads HEAD and returns the fully qualified
-// ref name it points to.
-func (repo *Repository) ResolveHEAD() (string, error) {
+// HeadKind represents the kind of HEAD reference.
+type HeadKind int
+
+const (
+	// The HEAD reference is invalid.
+	HeadKindInvalid HeadKind = iota
+	// The HEAD reference points to a detached commit hash.
+	HeadKindDetached
+	// The HEAD reference points to a symbolic ref.
+	HeadKindSymbolic
+)
+
+// HeadRef represents a HEAD reference.
+type HeadRef struct {
+	// Kind is the kind of HEAD reference.
+	Kind HeadKind
+	// When Kind is HeadSymbolic, Ref is the fully qualified ref name.
+	Ref string
+	// When Kind is HeadDetached, Hash is the commit hash.
+	Hash Hash
+}
+
+// ResolveHead reads HEAD into a HEAD reference.
+func (repo *Repository) ResolveHead() (HeadRef, error) {
 	data, err := os.ReadFile(repo.repoPath("HEAD"))
 	if err != nil {
-		return "", err
+		return HeadRef{Kind: HeadKindInvalid}, err
 	}
-	line := strings.TrimSpace(string(data))
-	const prefix = "ref: "
-	if strings.HasPrefix(line, prefix) {
-		ref := strings.TrimSpace(line[len(prefix):])
-		if ref == "" {
-			return "", ErrInvalidRef
+	line := strings.TrimSuffix(string(data), "\n")
+	if strings.HasPrefix(line, "ref: ") {
+		refname := strings.TrimSpace(line[5:])
+		if !strings.HasPrefix(refname, "refs/") {
+			return HeadRef{Kind: HeadKindSymbolic, Ref: refname}, ErrInvalidRef
 		}
-		return ref, nil
+		return HeadRef{Kind: HeadKindSymbolic, Ref: refname}, nil
 	}
-	return "", ErrInvalidRef
+	id, err := repo.ParseHash(line)
+	if err != nil {
+		return HeadRef{Kind: HeadKindInvalid}, err
+	}
+	return HeadRef{Kind: HeadKindDetached, Hash: id}, nil
 }

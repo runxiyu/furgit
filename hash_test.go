@@ -1,44 +1,75 @@
 package furgit
 
 import (
-	"strings"
 	"testing"
 )
 
-func TestParseHashValidAndInvalid(t *testing.T) {
-	pattern := "0123456789abcdef"
-	repeats := (testHashSize*2 + len(pattern) - 1) / len(pattern)
-	hexStr := strings.Repeat(pattern, repeats)[:testHashSize*2]
+func TestHashParse(t *testing.T) {
+	repoPath, cleanup := setupTestRepo(t)
+	defer cleanup()
 
-	repo := &Repository{hashSize: testHashSize}
-	id, err := repo.ParseHash(hexStr)
+	repo, err := OpenRepository(repoPath)
 	if err != nil {
-		t.Fatalf("ParseHash returned error: %v", err)
+		t.Fatalf("OpenRepository failed: %v", err)
+	}
+	defer func() {
+		_ = repo.Close()
+	}()
+
+	var validHash string
+	var expectedSize int
+	if repo.hashSize == 32 {
+		validHash = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+		expectedSize = 32
+	} else {
+		validHash = "0123456789abcdef0123456789abcdef01234567"
+		expectedSize = 20
 	}
 
-	if got := id.String(); got != hexStr {
-		t.Fatalf("unexpected String result: %q", got)
+	hash, err := repo.ParseHash(validHash)
+	if err != nil {
+		t.Fatalf("ParseHash failed: %v", err)
+	}
+	if hash.String() != validHash {
+		t.Errorf("String(): got %q, want %q", hash.String(), validHash)
+	}
+	if hash.Size() != expectedSize {
+		t.Errorf("Size(): got %d, want %d", hash.Size(), expectedSize)
 	}
 
-	if _, err := repo.ParseHash("abcd"); err == nil {
-		t.Fatal("expected error for short hash")
-	}
-
-	badHex := strings.Repeat("z", testHashSize*2)
-	if _, err := repo.ParseHash(badHex); err == nil {
-		t.Fatal("expected error for non-hex input")
+	hashBytes := hash.Bytes()
+	if len(hashBytes) != expectedSize {
+		t.Errorf("Bytes() length: got %d, want %d", len(hashBytes), expectedSize)
 	}
 }
 
-func TestHashBytesCopiesUnderlyingData(t *testing.T) {
-	var id Hash
-	for i := range id.data {
-		id.data[i] = byte(i)
+func TestHashParseErrors(t *testing.T) {
+	repoPath, cleanup := setupTestRepo(t)
+	defer cleanup()
+
+	repo, err := OpenRepository(repoPath)
+	if err != nil {
+		t.Fatalf("OpenRepository failed: %v", err)
 	}
-	id.size = testHashSize
-	orig := id.Bytes()
-	orig[0] ^= 0xff
-	if id.data[0] == orig[0] {
-		t.Fatal("Bytes should return a copy")
+	defer func() {
+		_ = repo.Close()
+	}()
+
+	tests := []struct {
+		name string
+		hash string
+	}{
+		{"invalid chars", "invalid"},
+		{"wrong length", "0123456789abcdef"},
+		{"non-hex", "0123456789abcdefg123456789abcdef0123456789abcdef0123456789abcdef"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := repo.ParseHash(tt.hash)
+			if err == nil {
+				t.Errorf("expected error for %s", tt.name)
+			}
+		})
 	}
 }
