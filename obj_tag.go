@@ -17,7 +17,8 @@ type Tag struct {
 }
 
 // ObjectType allows Tag to satisfy the Object interface.
-func (*Tag) ObjectType() ObjectType {
+func (tag *Tag) ObjectType() ObjectType {
+	_ = tag
 	return ObjTag
 }
 

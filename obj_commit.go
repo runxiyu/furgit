@@ -18,7 +18,8 @@ type Commit struct {
 }
 
 // ObjectType allows Commit to satisfy the Object interface.
-func (*Commit) ObjectType() ObjectType {
+func (commit *Commit) ObjectType() ObjectType {
+	_ = commit
 	return ObjCommit
 }
 

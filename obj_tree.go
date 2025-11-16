@@ -21,7 +21,8 @@ type TreeEntry struct {
 }
 
 // ObjectType allows Tree to satisfy the Object interface.
-func (*Tree) ObjectType() ObjectType {
+func (tree *Tree) ObjectType() ObjectType {
+	_ = tree
 	return ObjTree
 }
 

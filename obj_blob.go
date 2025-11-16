@@ -8,7 +8,8 @@ type Blob struct {
 }
 
 // ObjectType allows Blob to satisfy the Object interface.
-func (*Blob) ObjectType() ObjectType {
+func (blob *Blob) ObjectType() ObjectType {
+	_ = blob
 	return ObjBlob
 }
 
