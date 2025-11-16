@@ -1,6 +1,8 @@
 package furgit
 
 import (
+	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"os"
@@ -25,10 +27,10 @@ type Repository struct {
 	closeOnce sync.Once
 }
 
-// OpenRepository opens the repository at the provided path with the specified hash size.
-// This will be replaced later with a function that auto-detects the hash size based
-// on the git configuration.
-func OpenRepository(path string, hashSize int) (*Repository, error) {
+// OpenRepository opens the repository at the provided path. The path is expected to be
+// the actual repository directory, i.e., the repository itself for bare repositories,
+// or the .git subdirectory for non-bare repositories.
+func OpenRepository(path string) (*Repository, error) {
 	fi, err := os.Stat(path)
 	if err != nil {
 		return nil, err
@@ -36,9 +38,38 @@ func OpenRepository(path string, hashSize int) (*Repository, error) {
 	if !fi.IsDir() {
 		return nil, ErrInvalidObject
 	}
-	if _, ok := hashFuncs[hashSize]; !ok {
-		return nil, fmt.Errorf("furgit: unsupported hash size %d", hashSize)
+
+	cfgPath := filepath.Join(path, "config")
+	f, err := os.Open(cfgPath)
+	if err != nil {
+		return nil, fmt.Errorf("furgit: unable to open config: %w", err)
 	}
+	defer f.Close()
+
+	cfg, err := ParseConfig(f)
+	if err != nil {
+		return nil, fmt.Errorf("furgit: failed to parse config: %w", err)
+	}
+
+	algo := cfg.Get("extensions", "", "objectformat")
+	if algo == "" {
+		algo = "sha1"
+	}
+
+	var hashSize int
+	switch algo {
+	case "sha1":
+		hashSize = sha1.Size
+	case "sha256":
+		hashSize = sha256.Size
+	default:
+		return nil, fmt.Errorf("furgit: unsupported hash algorithm %q", algo)
+	}
+
+	if _, ok := hashFuncs[hashSize]; !ok {
+		return nil, fmt.Errorf("furgit: hash algorithm %q is not supported by the hash functions provided by this build", algo)
+	}
+
 	return &Repository{rootPath: path, HashSize: hashSize}, nil
 }
 

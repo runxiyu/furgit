@@ -2,6 +2,8 @@ package furgit
 
 import (
 	"bytes"
+	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -23,7 +25,8 @@ func writeLooseBlob(t *testing.T, repo *Repository, data []byte) Hash {
 
 func TestOpenRepositoryAndLooseRead(t *testing.T) {
 	root := t.TempDir()
-	repo, err := OpenRepository(root, testHashSize)
+	setupRepoConfig(t, root)
+	repo, err := OpenRepository(root)
 	if err != nil {
 		t.Fatalf("OpenRepository error: %v", err)
 	}
@@ -45,7 +48,8 @@ func TestOpenRepositoryAndLooseRead(t *testing.T) {
 
 func TestResolveRefLooseAndPacked(t *testing.T) {
 	root := t.TempDir()
-	repo, err := OpenRepository(root, testHashSize)
+	setupRepoConfig(t, root)
+	repo, err := OpenRepository(root)
 	if err != nil {
 		t.Fatalf("OpenRepository error: %v", err)
 	}
@@ -85,7 +89,8 @@ func TestResolveRefLooseAndPacked(t *testing.T) {
 
 func TestResolveHEAD(t *testing.T) {
 	root := t.TempDir()
-	repo, err := OpenRepository(root, testHashSize)
+	setupRepoConfig(t, root)
+	repo, err := OpenRepository(root)
 	if err != nil {
 		t.Fatalf("OpenRepository error: %v", err)
 	}
@@ -110,7 +115,8 @@ func TestResolveHEAD(t *testing.T) {
 func TestReadObjectTypeSizeLoose(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	repo, err := OpenRepository(root, testHashSize)
+	setupRepoConfig(t, root)
+	repo, err := OpenRepository(root)
 	if err != nil {
 		t.Fatalf("OpenRepository error: %v", err)
 	}
@@ -130,6 +136,7 @@ func TestReadObjectTypeSizeLoose(t *testing.T) {
 func TestReadObjectTypeSizePackedObjects(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
+	setupRepoConfig(t, root)
 
 	objs := []testPackObject{
 		{finalType: ObjBlob, body: []byte("packed base payload")},
@@ -142,7 +149,7 @@ func TestReadObjectTypeSizePackedObjects(t *testing.T) {
 	}
 	ids := writeTestPack(t, root, "pack-basic", objs)
 
-	repo, err := OpenRepository(root, testHashSize)
+	repo, err := OpenRepository(root)
 	if err != nil {
 		t.Fatalf("OpenRepository error: %v", err)
 	}
@@ -168,8 +175,9 @@ func TestReadObjectTypeSizePackedObjects(t *testing.T) {
 func TestReadObjectTypeSizePackRefDeltaLooseBase(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
+	setupRepoConfig(t, root)
 
-	repo, err := OpenRepository(root, testHashSize)
+	repo, err := OpenRepository(root)
 	if err != nil {
 		t.Fatalf("OpenRepository error: %v", err)
 	}
@@ -200,7 +208,8 @@ func TestReadObjectTypeSizePackRefDeltaLooseBase(t *testing.T) {
 
 func TestWriteLooseObjectAllTypes(t *testing.T) {
 	root := t.TempDir()
-	repo, err := OpenRepository(root, testHashSize)
+	setupRepoConfig(t, root)
+	repo, err := OpenRepository(root)
 	if err != nil {
 		t.Fatalf("OpenRepository error: %v", err)
 	}
@@ -503,4 +512,28 @@ func encodeOfsDistance(dist uint64) []byte {
 		out[i], out[j] = out[j], out[i]
 	}
 	return out
+}
+
+func setupRepoConfig(t *testing.T, root string) {
+	var algo string
+	switch testHashSize {
+	case sha1.Size:
+		algo = "sha1"
+	case sha256.Size:
+		algo = "sha256"
+	default:
+		t.Fatalf("unsupported testHashSize: %d", testHashSize)
+	}
+
+	cfg := fmt.Sprintf(`
+[core]
+	repositoryformatversion = 0
+[extensions]
+	objectformat = %s
+`, algo)
+
+	err := os.WriteFile(filepath.Join(root, "config"), []byte(cfg), 0o644)
+	if err != nil {
+		t.Fatalf("write config: %v", err)
+	}
 }
