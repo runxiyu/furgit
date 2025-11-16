@@ -45,13 +45,13 @@ func parseTree(id Hash, body []byte, repo *Repository) (*Tree, error) {
 		nameBytes := body[i : i+nul]
 		i += nul + 1
 
-		if i+repo.HashSize > len(body) {
+		if i+repo.hashSize > len(body) {
 			return nil, errors.New("furgit: tree: truncated child hash")
 		}
 		var child Hash
-		copy(child.data[:], body[i:i+repo.HashSize])
-		child.size = repo.HashSize
-		i += repo.HashSize
+		copy(child.data[:], body[i:i+repo.hashSize])
+		child.size = repo.hashSize
+		i += repo.hashSize
 
 		mode, err := strconv.ParseUint(string(modeBytes), 8, 32)
 		if err != nil {

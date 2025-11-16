@@ -13,7 +13,7 @@ import (
 // Repository represents the root of a Git repository.
 type Repository struct {
 	rootPath string
-	HashSize int
+	hashSize int
 
 	packIdxOnce sync.Once
 	packIdx     []*packIndex
@@ -72,7 +72,7 @@ func OpenRepository(path string) (*Repository, error) {
 		return nil, fmt.Errorf("furgit: hash algorithm %q is not supported by the hash functions provided by this build", algo)
 	}
 
-	return &Repository{rootPath: path, HashSize: hashSize}, nil
+	return &Repository{rootPath: path, hashSize: hashSize}, nil
 }
 
 func (repo *Repository) Close() error {
@@ -133,9 +133,9 @@ func (repo *Repository) ParseHash(s string) (Hash, error) {
 	if len(s)%2 != 0 {
 		return id, fmt.Errorf("furgit: invalid hash length %d, it has to be even at the very least", len(s))
 	}
-	expectedLen := repo.HashSize * 2
+	expectedLen := repo.hashSize * 2
 	if len(s) != expectedLen {
-		return id, fmt.Errorf("furgit: hash length mismatch: got %d chars, expected %d for hash size %d", len(s), expectedLen, repo.HashSize)
+		return id, fmt.Errorf("furgit: hash length mismatch: got %d chars, expected %d for hash size %d", len(s), expectedLen, repo.hashSize)
 	}
 	data, err := hex.DecodeString(s)
 	if err != nil {
@@ -148,13 +148,13 @@ func (repo *Repository) ParseHash(s string) (Hash, error) {
 
 // computeRawHash computes a hash from raw data using the repository's hash algorithm.
 func (repo *Repository) computeRawHash(data []byte) Hash {
-	hashFunc := hashFuncs[repo.HashSize]
+	hashFunc := hashFuncs[repo.hashSize]
 	return hashFunc(data)
 }
 
 // verifyRawObject verifies a raw object against its expected hash.
 func (repo *Repository) verifyRawObject(buf []byte, want Hash) bool {
-	if want.size != repo.HashSize {
+	if want.size != repo.hashSize {
 		return false
 	}
 	return repo.computeRawHash(buf) == want
@@ -162,7 +162,7 @@ func (repo *Repository) verifyRawObject(buf []byte, want Hash) bool {
 
 // verifyTypedObject verifies a typed object against its expected hash.
 func (repo *Repository) verifyTypedObject(ty ObjectType, body []byte, want Hash) bool {
-	if want.size != repo.HashSize {
+	if want.size != repo.hashSize {
 		return false
 	}
 	header, err := headerForType(ty, body)

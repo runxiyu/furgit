@@ -10,7 +10,7 @@ import (
 
 func testRepo(t *testing.T) *Repository {
 	t.Helper()
-	return &Repository{HashSize: testHashSize}
+	return &Repository{hashSize: testHashSize}
 }
 
 func mustHash(t *testing.T, hex string) Hash {

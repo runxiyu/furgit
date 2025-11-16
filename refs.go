@@ -55,7 +55,7 @@ func (repo *Repository) resolvePackedRef(refname string) (Hash, error) {
 			continue
 		}
 		sp := bytes.IndexByte(line, ' ')
-		if sp != repo.HashSize*2 {
+		if sp != repo.hashSize*2 {
 			continue
 		}
 		name := line[sp+1:]

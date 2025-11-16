@@ -329,7 +329,7 @@ type testPackObject struct {
 
 func writeTestPack(t *testing.T, root, name string, objs []testPackObject) []Hash {
 	t.Helper()
-	repo := &Repository{HashSize: testHashSize}
+	repo := &Repository{hashSize: testHashSize}
 	packDir := filepath.Join(root, "objects", "pack")
 	err := os.MkdirAll(packDir, 0o750)
 	if err != nil {
@@ -418,7 +418,7 @@ func writeTestPack(t *testing.T, root, name string, objs []testPackObject) []Has
 
 func writeTestPackIndex(t *testing.T, packDir, name string, ids []Hash, offsets []uint64, packChecksum Hash) {
 	t.Helper()
-	repo := &Repository{HashSize: testHashSize}
+	repo := &Repository{hashSize: testHashSize}
 	type idxEntry struct {
 		id     Hash
 		offset uint64

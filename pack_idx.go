@@ -163,7 +163,7 @@ func (pi *packIndex) parse(buf []byte) error {
 	nobj := int(readBE32(pi.fanout[len(pi.fanout)-4:]))
 
 	namesStart := fanoutEnd
-	namesEnd := namesStart + nobj*pi.repo.HashSize
+	namesEnd := namesStart + nobj*pi.repo.hashSize
 	if namesEnd > len(buf) {
 		return ErrInvalidObject
 	}
@@ -183,7 +183,7 @@ func (pi *packIndex) parse(buf []byte) error {
 	pi.offset32 = buf[off32Start:off32End]
 
 	off64Start := off32End
-	trailerStart := len(buf) - 2*pi.repo.HashSize
+	trailerStart := len(buf) - 2*pi.repo.hashSize
 	if trailerStart < off64Start {
 		return ErrInvalidObject
 	}
@@ -245,8 +245,8 @@ func (pi *packIndex) lookup(id Hash) (packlocation, error) {
 		return packlocation{}, err
 	}
 	// Verify hash size matches repository hash size
-	if id.size != pi.repo.HashSize {
-		return packlocation{}, fmt.Errorf("furgit: hash size mismatch: got %d, expected %d", id.size, pi.repo.HashSize)
+	if id.size != pi.repo.hashSize {
+		return packlocation{}, fmt.Errorf("furgit: hash size mismatch: got %d, expected %d", id.size, pi.repo.hashSize)
 	}
 	first := int(id.data[0])
 	var lo int
@@ -254,7 +254,7 @@ func (pi *packIndex) lookup(id Hash) (packlocation, error) {
 		lo = int(pi.fanoutEntry(first - 1))
 	}
 	hi := int(pi.fanoutEntry(first))
-	idx, found := bsearchHash(pi.names, pi.repo.HashSize, lo, hi, id)
+	idx, found := bsearchHash(pi.names, pi.repo.hashSize, lo, hi, id)
 	if !found {
 		return packlocation{}, ErrNotFound
 	}

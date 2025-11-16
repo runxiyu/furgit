@@ -198,7 +198,7 @@ func (midx *multiPackIndex) parse(buf []byte) error {
 	if !ok {
 		return ErrInvalidObject
 	}
-	oidlSize := int64(numObjects) * int64(midx.repo.HashSize)
+	oidlSize := int64(numObjects) * int64(midx.repo.hashSize)
 	if oidlOffset < 0 || oidlOffset+oidlSize > int64(len(buf)) {
 		return ErrInvalidObject
 	}
@@ -247,8 +247,8 @@ func (midx *multiPackIndex) lookup(id Hash) (packlocation, error) {
 	}
 
 	// Verify hash size matches repository hash size
-	if id.size != midx.repo.HashSize {
-		return packlocation{}, fmt.Errorf("furgit: hash size mismatch: got %d, expected %d", id.size, midx.repo.HashSize)
+	if id.size != midx.repo.hashSize {
+		return packlocation{}, fmt.Errorf("furgit: hash size mismatch: got %d, expected %d", id.size, midx.repo.hashSize)
 	}
 
 	first := int(id.data[0])
@@ -258,7 +258,7 @@ func (midx *multiPackIndex) lookup(id Hash) (packlocation, error) {
 	}
 	hi := int(readBE32(midx.fanout[first*4 : (first+1)*4]))
 
-	idx, found := bsearchHash(midx.oids, midx.repo.HashSize, lo, hi, id)
+	idx, found := bsearchHash(midx.oids, midx.repo.hashSize, lo, hi, id)
 	if !found {
 		return packlocation{}, ErrNotFound
 	}

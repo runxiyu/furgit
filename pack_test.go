@@ -190,7 +190,7 @@ func buildTestPackIndexBuffer(hash Hash, offset uint32) []byte {
 func TestPackIndexParse(t *testing.T) {
 	h := hashWithByte(0x11)
 	data := buildTestPackIndexBuffer(h, 0x12345678)
-	pi := &packIndex{repo: &Repository{HashSize: testHashSize}}
+	pi := &packIndex{repo: &Repository{hashSize: testHashSize}}
 	if err := pi.parse(data); err != nil {
 		t.Fatalf("parse error: %v", err)
 	}

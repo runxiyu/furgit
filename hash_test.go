@@ -9,8 +9,8 @@ func TestParseHashValidAndInvalid(t *testing.T) {
 	pattern := "0123456789abcdef"
 	repeats := (testHashSize*2 + len(pattern) - 1) / len(pattern)
 	hexStr := strings.Repeat(pattern, repeats)[:testHashSize*2]
-	
-	repo := &Repository{HashSize: testHashSize}
+
+	repo := &Repository{hashSize: testHashSize}
 	id, err := repo.ParseHash(hexStr)
 	if err != nil {
 		t.Fatalf("ParseHash returned error: %v", err)
