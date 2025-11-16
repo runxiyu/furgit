@@ -1,6 +1,7 @@
 package furgit
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -245,7 +246,12 @@ func (midx *multiPackIndex) lookup(id Hash) (packlocation, error) {
 		}
 	}
 
-	first := int(id[0])
+	// Verify hash size matches repository hash size
+	if id.size != midx.repo.HashSize {
+		return packlocation{}, fmt.Errorf("furgit: hash size mismatch: got %d, expected %d", id.size, midx.repo.HashSize)
+	}
+
+	first := int(id.data[0])
 	var lo int
 	if first > 0 {
 		lo = int(readBE32(midx.fanout[(first-1)*4 : first*4]))

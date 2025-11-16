@@ -26,7 +26,7 @@ func (*Tree) ObjType() ObjType {
 }
 
 // parseTree decodes a tree body.
-func parseTree(id Hash, body []byte, hashSize int) (*Tree, error) {
+func parseTree(id Hash, body []byte, repo *Repository) (*Tree, error) {
 	var entries []TreeEntry
 	i := 0
 	for i < len(body) {
@@ -44,12 +44,13 @@ func parseTree(id Hash, body []byte, hashSize int) (*Tree, error) {
 		nameBytes := body[i : i+nul]
 		i += nul + 1
 
-		if i+hashSize > len(body) {
+		if i+repo.HashSize > len(body) {
 			return nil, errors.New("furgit: tree: truncated child hash")
 		}
 		var child Hash
-		copy(child[:], body[i:i+hashSize])
-		i += hashSize
+		copy(child.data[:], body[i:i+repo.HashSize])
+		child.size = repo.HashSize
+		i += repo.HashSize
 
 		mode, err := strconv.ParseUint(string(modeBytes), 8, 32)
 		if err != nil {
@@ -71,11 +72,11 @@ func parseTree(id Hash, body []byte, hashSize int) (*Tree, error) {
 }
 
 // treeBody builds the entry list for a tree without the Git header.
-func treeBody(t *Tree, hashSize int) []byte {
+func treeBody(t *Tree) []byte {
 	var bodyLen int
 	for _, e := range t.Entries {
 		mode := strconv.FormatUint(uint64(e.Mode), 8)
-		bodyLen += len(mode) + 1 + len(e.Name) + 1 + hashSize
+		bodyLen += len(mode) + 1 + len(e.Name) + 1 + e.ID.size
 	}
 
 	body := make([]byte, bodyLen)
@@ -88,15 +89,15 @@ func treeBody(t *Tree, hashSize int) []byte {
 		pos += copy(body[pos:], e.Name)
 		body[pos] = 0
 		pos++
-		pos += copy(body[pos:], e.ID[:hashSize])
+		pos += copy(body[pos:], e.ID.data[:e.ID.size])
 	}
 
 	return body
 }
 
 // Serialize renders a Tree into canonical Git format.
-func (t *Tree) Serialize(hashSize int) ([]byte, error) {
-	body := treeBody(t, hashSize)
+func (t *Tree) Serialize() ([]byte, error) {
+	body := treeBody(t)
 	header, err := headerForType(ObjTree, body)
 	if err != nil {
 		return nil, err

@@ -4,53 +4,48 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 )
 
 const maxHashSize = 32
 
 // Hash represents a Git object identifier.
-type Hash [maxHashSize]byte
+type Hash struct {
+	data [maxHashSize]byte
+	size int
+}
 
 // hashFunc is a function that computes a hash from input data.
-type hashFunc func([]byte) [maxHashSize]byte
+type hashFunc func([]byte) Hash
 
 // hashFuncs maps hash size to hash function.
 var hashFuncs = map[int]hashFunc{
-	sha1.Size: func(data []byte) [maxHashSize]byte {
-		var result [maxHashSize]byte
+	sha1.Size: func(data []byte) Hash {
 		sum := sha1.Sum(data)
-		copy(result[:], sum[:])
-		return result
+		var h Hash
+		copy(h.data[:], sum[:])
+		h.size = sha1.Size
+		return h
 	},
-	sha256.Size: func(data []byte) [maxHashSize]byte {
-		var result [maxHashSize]byte
+	sha256.Size: func(data []byte) Hash {
 		sum := sha256.Sum256(data)
-		copy(result[:], sum[:])
-		return result
+		var h Hash
+		copy(h.data[:], sum[:])
+		h.size = sha256.Size
+		return h
 	},
 }
 
-// ParseHashWithSize converts a hex string into a Hash for a given hash size.
-func ParseHashWithSize(s string, hashSize int) (Hash, error) {
-	var id Hash
-	if len(s) != hashSize*2 {
-		return id, fmt.Errorf("furgit: invalid hash length %d", len(s))
-	}
-	data, err := hex.DecodeString(s)
-	if err != nil {
-		return id, fmt.Errorf("furgit: decode hash: %w", err)
-	}
-	copy(id[:], data)
-	return id, nil
+// String returns the ID as hex using its internal size.
+func (id Hash) String() string {
+	return hex.EncodeToString(id.data[:id.size])
 }
 
-// StringWithSize returns the ID as hex for a given hash size.
-func (id Hash) StringWithSize(hashSize int) string {
-	return hex.EncodeToString(id[:hashSize])
+// Bytes returns a mutable copy of the underlying bytes using its internal size.
+func (id Hash) Bytes() []byte {
+	return append([]byte(nil), id.data[:id.size]...)
 }
 
-// BytesWithSize returns a mutable copy of the underlying bytes for a given hash size.
-func (id Hash) BytesWithSize(hashSize int) []byte {
-	return append([]byte(nil), id[:hashSize]...)
+// Size returns the hash size.
+func (id Hash) Size() int {
+	return id.size
 }

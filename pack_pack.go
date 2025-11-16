@@ -69,11 +69,11 @@ func (repo *Repository) packReadAt(loc packlocation, want Hash) (Object, error) 
 		return nil, err
 	}
 	data := body.Bytes()
-	if !verifyTypedObject(ty, data, want, repo.HashSize) {
+	if !repo.verifyTypedObject(ty, data, want) {
 		body.Release()
 		return nil, ErrInvalidObject
 	}
-	obj, err := parseObjectBody(ty, want, data, repo.HashSize)
+	obj, err := parseObjectBody(ty, want, data, repo)
 	body.Release()
 	return obj, err
 }
@@ -269,10 +269,11 @@ func (repo *Repository) packTypeSizeWithin(pf *packFile, ofs uint64, seen map[pa
 		return ty, declaredSize, nil
 	case ObjRefDelta:
 		var base Hash
-		_, err := io.ReadFull(r, base[:])
+		_, err := io.ReadFull(r, base.data[:repo.HashSize])
 		if err != nil {
 			return ObjInvalid, 0, err
 		}
+		base.size = repo.HashSize
 		baseTy, _, err := repo.packTypeSizeByID(base, seen)
 		if err != nil {
 			return ObjInvalid, 0, err
@@ -315,10 +316,11 @@ func (repo *Repository) packBodyResolveWithin(pf *packFile, ofs uint64) (ObjType
 		return ty, body, err
 	case ObjRefDelta:
 		var base Hash
-		_, err := io.ReadFull(r, base[:])
+		_, err := io.ReadFull(r, base.data[:repo.HashSize])
 		if err != nil {
 			return ObjInvalid, borrowedBody{}, err
 		}
+		base.size = repo.HashSize
 		delta, err := packSectionInflate(r, 0)
 		if err != nil {
 			return ObjInvalid, borrowedBody{}, err

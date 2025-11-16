@@ -153,7 +153,7 @@ func TestPackDeltaReadOfsDistance(t *testing.T) {
 func TestBsearchHash(t *testing.T) {
 	h1 := hashWithByte(0x01)
 	h2 := hashWithByte(0x03)
-	names := append(append([]byte(nil), h1[:testHashSize]...), h2[:testHashSize]...)
+	names := append(append([]byte(nil), h1.data[:testHashSize]...), h2.data[:testHashSize]...)
 	idx, found := bsearchHash(names, testHashSize, 0, 2, h2)
 	if !found || idx != 1 {
 		t.Fatalf("expected to find second hash, idx=%d found=%v", idx, found)
@@ -166,7 +166,7 @@ func TestBsearchHash(t *testing.T) {
 
 func buildTestPackIndexBuffer(hash Hash, offset uint32) []byte {
 	fanout := make([]byte, 256*4)
-	first := int(hash[0])
+	first := int(hash.data[0])
 	for i := 0; i < 256; i++ {
 		var val uint32
 		if i >= first {
@@ -178,7 +178,7 @@ func buildTestPackIndexBuffer(hash Hash, offset uint32) []byte {
 	_ = binary.Write(&buf, binary.BigEndian, uint32(idxMagic))
 	_ = binary.Write(&buf, binary.BigEndian, uint32(idxVersion2))
 	buf.Write(fanout)
-	buf.Write(hash[:testHashSize])
+	buf.Write(hash.data[:testHashSize])
 	buf.Write(make([]byte, 4))
 	off32 := make([]byte, 4)
 	binary.BigEndian.PutUint32(off32, offset)

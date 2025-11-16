@@ -1,6 +1,7 @@
 package furgit
 
 import (
+	"encoding/hex"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -96,4 +97,52 @@ func (r *Repository) packFile(rel string) (*packFile, error) {
 		return actual.(*packFile), nil
 	}
 	return pf, nil
+}
+
+// ParseHash converts a hex string into a Hash, validating it matches the repository's hash size.
+func (r *Repository) ParseHash(s string) (Hash, error) {
+	var id Hash
+	if len(s)%2 != 0 {
+		return id, fmt.Errorf("furgit: invalid hash length %d, it has to be even at the very least", len(s))
+	}
+	expectedLen := r.HashSize * 2
+	if len(s) != expectedLen {
+		return id, fmt.Errorf("furgit: hash length mismatch: got %d chars, expected %d for hash size %d", len(s), expectedLen, r.HashSize)
+	}
+	data, err := hex.DecodeString(s)
+	if err != nil {
+		return id, fmt.Errorf("furgit: decode hash: %w", err)
+	}
+	copy(id.data[:], data)
+	id.size = len(s) / 2
+	return id, nil
+}
+
+// computeRawHash computes a hash from raw data using the repository's hash algorithm.
+func (r *Repository) computeRawHash(data []byte) Hash {
+	hashFunc := hashFuncs[r.HashSize]
+	return hashFunc(data)
+}
+
+// verifyRawObject verifies a raw object against its expected hash.
+func (r *Repository) verifyRawObject(buf []byte, want Hash) bool {
+	if want.size != r.HashSize {
+		return false
+	}
+	return r.computeRawHash(buf) == want
+}
+
+// verifyTypedObject verifies a typed object against its expected hash.
+func (r *Repository) verifyTypedObject(ty ObjType, body []byte, want Hash) bool {
+	if want.size != r.HashSize {
+		return false
+	}
+	header, err := headerForType(ty, body)
+	if err != nil {
+		return false
+	}
+	raw := make([]byte, len(header)+len(body))
+	copy(raw, header)
+	copy(raw[len(header):], body)
+	return r.computeRawHash(raw) == want
 }

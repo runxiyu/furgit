@@ -3,6 +3,7 @@ package furgit
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -243,7 +244,11 @@ func (pi *packIndex) lookup(id Hash) (packlocation, error) {
 	if err != nil {
 		return packlocation{}, err
 	}
-	first := int(id[0])
+	// Verify hash size matches repository hash size
+	if id.size != pi.repo.HashSize {
+		return packlocation{}, fmt.Errorf("furgit: hash size mismatch: got %d, expected %d", id.size, pi.repo.HashSize)
+	}
+	first := int(id.data[0])
 	var lo int
 	if first > 0 {
 		lo = int(pi.fanoutEntry(first - 1))
@@ -266,7 +271,7 @@ func (pi *packIndex) lookup(id Hash) (packlocation, error) {
 func bsearchHash(names []byte, stride, lo, hi int, want Hash) (int, bool) {
 	for lo < hi {
 		mid := lo + (hi-lo)/2
-		cmp := compareHash(names, stride, mid, want[:stride])
+		cmp := compareHash(names, stride, mid, want.data[:stride])
 		if cmp == 0 {
 			return mid, true
 		}

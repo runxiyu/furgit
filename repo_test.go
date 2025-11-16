@@ -56,7 +56,7 @@ func TestResolveRefLooseAndPacked(t *testing.T) {
 	if err := os.MkdirAll(loosePath, 0o755); err != nil {
 		t.Fatalf("mkdir refs: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(loosePath, "master"), []byte(looseID.StringWithSize(testHashSize)+"\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(loosePath, "master"), []byte(looseID.String()+"\n"), 0o644); err != nil {
 		t.Fatalf("write ref: %v", err)
 	}
 	id, err := repo.ResolveRef("refs/heads/master")
@@ -65,7 +65,7 @@ func TestResolveRefLooseAndPacked(t *testing.T) {
 	}
 
 	packedID := hashWithByte(0xb0)
-	packed := fmt.Sprintf("%s refs/tags/v1\n", packedID.StringWithSize(testHashSize))
+	packed := fmt.Sprintf("%s refs/tags/v1\n", packedID.String())
 	if err := os.WriteFile(filepath.Join(root, "packed-refs"), []byte(packed), 0o644); err != nil {
 		t.Fatalf("write packed refs: %v", err)
 	}
@@ -320,6 +320,7 @@ type testPackObject struct {
 
 func writeTestPack(t *testing.T, root, name string, objs []testPackObject) []Hash {
 	t.Helper()
+	repo := &Repository{HashSize: testHashSize}
 	packDir := filepath.Join(root, "objects", "pack")
 	err := os.MkdirAll(packDir, 0o750)
 	if err != nil {
@@ -358,7 +359,7 @@ func writeTestPack(t *testing.T, root, name string, objs []testPackObject) []Has
 		raw := make([]byte, len(header)+len(obj.body))
 		copy(raw, header)
 		copy(raw[len(header):], obj.body)
-		ids[i] = computeRawHash(raw, testHashSize)
+		ids[i] = repo.computeRawHash(raw)
 
 		switch obj.encoding {
 		case packEncodingFull:
@@ -383,7 +384,7 @@ func writeTestPack(t *testing.T, root, name string, objs []testPackObject) []Has
 				t.Fatalf("ref delta %d missing base body", i)
 			}
 			buf.Write(encodePackHeader(ObjRefDelta, len(obj.body)))
-			buf.Write(obj.baseHash[:])
+			buf.Write(obj.baseHash.data[:testHashSize])
 			delta := buildInsertOnlyDelta(len(baseBody), obj.body)
 			buf.Write(compressBytes(t, delta))
 		default:
@@ -392,8 +393,8 @@ func writeTestPack(t *testing.T, root, name string, objs []testPackObject) []Has
 	}
 
 	packContent := append([]byte(nil), buf.Bytes()...)
-	packChecksum := computeRawHash(packContent, testHashSize)
-	buf.Write(packChecksum[:testHashSize])
+	packChecksum := repo.computeRawHash(packContent)
+	buf.Write(packChecksum.data[:testHashSize])
 	packBytes := buf.Bytes()
 
 	packPath := filepath.Join(packDir, name+".pack")
@@ -408,6 +409,7 @@ func writeTestPack(t *testing.T, root, name string, objs []testPackObject) []Has
 
 func writeTestPackIndex(t *testing.T, packDir, name string, ids []Hash, offsets []uint64, packChecksum Hash) {
 	t.Helper()
+	repo := &Repository{HashSize: testHashSize}
 	type idxEntry struct {
 		id     Hash
 		offset uint64
@@ -417,7 +419,7 @@ func writeTestPackIndex(t *testing.T, packDir, name string, ids []Hash, offsets 
 		entries[i] = idxEntry{id: ids[i], offset: offsets[i]}
 	}
 	sort.Slice(entries, func(i, j int) bool {
-		return bytes.Compare(entries[i].id[:], entries[j].id[:]) < 0
+		return bytes.Compare(entries[i].id.data[:testHashSize], entries[j].id.data[:testHashSize]) < 0
 	})
 
 	var buf bytes.Buffer
@@ -432,7 +434,7 @@ func writeTestPackIndex(t *testing.T, packDir, name string, ids []Hash, offsets 
 
 	var fanout [256]uint32
 	for _, entry := range entries {
-		first := int(entry.id[0])
+		first := int(entry.id.data[0])
 		for i := first; i < len(fanout); i++ {
 			fanout[i]++
 		}
@@ -445,7 +447,7 @@ func writeTestPackIndex(t *testing.T, packDir, name string, ids []Hash, offsets 
 	}
 
 	for _, entry := range entries {
-		buf.Write(entry.id[:testHashSize])
+		buf.Write(entry.id.data[:testHashSize])
 	}
 
 	buf.Write(make([]byte, len(entries)*4))
@@ -460,9 +462,9 @@ func writeTestPackIndex(t *testing.T, packDir, name string, ids []Hash, offsets 
 	}
 
 	idxData := append([]byte(nil), buf.Bytes()...)
-	idxChecksum := computeRawHash(idxData, testHashSize)
-	buf.Write(packChecksum[:testHashSize])
-	buf.Write(idxChecksum[:testHashSize])
+	idxChecksum := repo.computeRawHash(idxData)
+	buf.Write(packChecksum.data[:testHashSize])
+	buf.Write(idxChecksum.data[:testHashSize])
 
 	idxPath := filepath.Join(packDir, name+".idx")
 	err = os.WriteFile(idxPath, buf.Bytes(), 0o600)

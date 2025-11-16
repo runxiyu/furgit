@@ -8,8 +8,14 @@ import (
 	"testing"
 )
 
+func testRepo(t *testing.T) *Repository {
+	t.Helper()
+	return &Repository{HashSize: testHashSize}
+}
+
 func mustHash(t *testing.T, hex string) Hash {
-	id, err := ParseHashWithSize(hex, testHashSize)
+	repo := testRepo(t)
+	id, err := repo.ParseHash(hex)
 	if err != nil {
 		t.Fatalf("ParseHash failed: %v", err)
 	}
@@ -19,9 +25,10 @@ func mustHash(t *testing.T, hex string) Hash {
 func hashWithByte(fill byte) Hash {
 	var h Hash
 	for i := 0; i < testHashSize; i++ {
-		h[i] = fill
+		h.data[i] = fill
 		fill++
 	}
+	h.size = testHashSize
 	return h
 }
 
@@ -30,8 +37,13 @@ func TestLoosePathUsesExpectedLayout(t *testing.T) {
 	repeats := (testHashSize*2 + len(pattern) - 1) / len(pattern)
 	hexStr := strings.Repeat(pattern, repeats)[:testHashSize*2]
 	id := mustHash(t, hexStr)
+	repo := testRepo(t)
 	expect := filepath.Join("objects", hexStr[:2], hexStr[2:])
-	if got := loosePath(id, testHashSize); got != expect {
+	got, err := repo.loosePath(id)
+	if err != nil {
+		t.Fatalf("loosePath error: %v", err)
+	}
+	if got != expect {
 		t.Fatalf("unexpected loose path: %q", got)
 	}
 }
@@ -49,7 +61,7 @@ func TestParseBlobAndSerialize(t *testing.T) {
 	if blob.Hash != id {
 		t.Fatalf("blob hash mismatch: %v", blob.Hash)
 	}
-	raw, err := blob.Serialize(testHashSize)
+	raw, err := blob.Serialize()
 	if err != nil {
 		t.Fatalf("Serialize error: %v", err)
 	}
@@ -64,13 +76,14 @@ func TestParseBlobAndSerialize(t *testing.T) {
 }
 
 func TestParseTreeAndSerialize(t *testing.T) {
+	repo := testRepo(t)
 	entries := []TreeEntry{
 		{Mode: 0100644, Name: []byte("file.txt"), ID: hashWithByte(0x20)},
 		{Mode: 040000, Name: []byte("subdir"), ID: hashWithByte(0x30)},
 	}
-	body := treeBody(&Tree{Entries: entries}, testHashSize)
+	body := treeBody(&Tree{Entries: entries})
 	id := hashWithByte(0x40)
-	tree, err := parseTree(id, body, testHashSize)
+	tree, err := parseTree(id, body, repo)
 	if err != nil {
 		t.Fatalf("parseTree error: %v", err)
 	}
@@ -82,7 +95,7 @@ func TestParseTreeAndSerialize(t *testing.T) {
 			t.Fatalf("entry %d mismatch", i)
 		}
 	}
-	serialized, err := (&Tree{Entries: entries}).Serialize(testHashSize)
+	serialized, err := (&Tree{Entries: entries}).Serialize()
 	if err != nil {
 		t.Fatalf("Serialize error: %v", err)
 	}
@@ -103,8 +116,8 @@ func TestParseCommitWithExtraHeader(t *testing.T) {
 		OffsetMinutes: -420,
 	}
 	var buf bytes.Buffer
-	fmt.Fprintf(&buf, "tree %s\n", treeID.StringWithSize(testHashSize))
-	fmt.Fprintf(&buf, "parent %s\n", parent.StringWithSize(testHashSize))
+	fmt.Fprintf(&buf, "tree %s\n", treeID.String())
+	fmt.Fprintf(&buf, "parent %s\n", parent.String())
 	buf.WriteString("author ")
 	buf.Write(ident.Serialize())
 	buf.WriteByte('\n')
@@ -112,7 +125,8 @@ func TestParseCommitWithExtraHeader(t *testing.T) {
 	buf.Write(ident.Serialize())
 	buf.WriteByte('\n')
 	buf.WriteString("extra data\n\nMessage body\n")
-	commit, err := parseCommit(hashWithByte(0x70), buf.Bytes(), testHashSize)
+	repo := testRepo(t)
+	commit, err := parseCommit(hashWithByte(0x70), buf.Bytes(), repo)
 	if err != nil {
 		t.Fatalf("parseCommit error: %v", err)
 	}
@@ -136,11 +150,11 @@ func TestParseCommitWithExtraHeader(t *testing.T) {
 		Committer: ident,
 		Message:   []byte("Message body\n"),
 	}
-	raw, err := roundTrip.Serialize(testHashSize)
+	raw, err := roundTrip.Serialize()
 	if err != nil {
 		t.Fatalf("Serialize error: %v", err)
 	}
-	if !strings.Contains(string(raw), "tree "+treeID.StringWithSize(testHashSize)) {
+	if !strings.Contains(string(raw), "tree "+treeID.String()) {
 		t.Fatalf("serialized commit missing tree header")
 	}
 }
@@ -155,7 +169,7 @@ func TestParseTagAndSerialize(t *testing.T) {
 	}
 	var buf bytes.Buffer
 	buf.WriteString("object ")
-	buf.WriteString(target.StringWithSize(testHashSize))
+	buf.WriteString(target.String())
 	buf.WriteByte('\n')
 	buf.WriteString("type commit\n")
 	buf.WriteString("tag v1.0\n")
@@ -163,7 +177,8 @@ func TestParseTagAndSerialize(t *testing.T) {
 	buf.Write(tagger.Serialize())
 	buf.WriteString("\n\nannotated tag\n")
 	body := append([]byte(nil), buf.Bytes()...)
-	tag, err := parseTag(hashWithByte(0x90), body, testHashSize)
+	repo := testRepo(t)
+	tag, err := parseTag(hashWithByte(0x90), body, repo)
 	if err != nil {
 		t.Fatalf("parseTag error: %v", err)
 	}
@@ -179,7 +194,7 @@ func TestParseTagAndSerialize(t *testing.T) {
 	if string(tag.Name) != "v1.0" {
 		t.Fatalf("tag name mismatch: %q", tag.Name)
 	}
-	serialized, err := tag.Serialize(testHashSize)
+	serialized, err := tag.Serialize()
 	if err != nil {
 		t.Fatalf("Serialize error: %v", err)
 	}
