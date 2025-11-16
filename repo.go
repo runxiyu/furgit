@@ -13,6 +13,9 @@ import (
 )
 
 // Repository represents a Git repository.
+//
+// It is safe to access the same Repository from multiple goroutines
+// without additional synchronization.
 type Repository struct {
 	rootPath string
 	hashSize int
