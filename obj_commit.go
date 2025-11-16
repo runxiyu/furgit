@@ -7,10 +7,10 @@ import (
 )
 
 // Commit mirrors the structure of a Git commit object.
-type Commit[T HashType] struct {
-	Hash         Hash[T]
-	Tree         Hash[T]
-	Parents      []Hash[T]
+type Commit struct {
+	Hash         Hash
+	Tree         Hash
+	Parents      []Hash
 	Author       Ident
 	Committer    Ident
 	Message      []byte
@@ -18,12 +18,12 @@ type Commit[T HashType] struct {
 }
 
 // ObjType allows Commit to satisfy the Object interface.
-func (*Commit[T]) ObjType() ObjType {
+func (*Commit) ObjType() ObjType {
 	return ObjCommit
 }
 
-func parseCommit[T HashType](id Hash[T], body []byte) (*Commit[T], error) {
-	c := new(Commit[T])
+func parseCommit(id Hash, body []byte, hashSize int) (*Commit, error) {
+	c := new(Commit)
 	c.Hash = id
 	i := 0
 	for i < len(body) {
@@ -39,13 +39,13 @@ func parseCommit[T HashType](id Hash[T], body []byte) (*Commit[T], error) {
 
 		switch {
 		case bytes.HasPrefix(line, []byte("tree ")):
-			treeID, err := ParseHash[T](string(line[5:]))
+			treeID, err := ParseHashWithSize(string(line[5:]), hashSize)
 			if err != nil {
 				return nil, fmt.Errorf("furgit: commit: tree: %w", err)
 			}
 			c.Tree = treeID
 		case bytes.HasPrefix(line, []byte("parent ")):
-			parent, err := ParseHash[T](string(line[7:]))
+			parent, err := ParseHashWithSize(string(line[7:]), hashSize)
 			if err != nil {
 				return nil, fmt.Errorf("furgit: commit: parent: %w", err)
 			}
@@ -91,11 +91,11 @@ func parseCommit[T HashType](id Hash[T], body []byte) (*Commit[T], error) {
 	return c, nil
 }
 
-func commitBody[T HashType](c *Commit[T]) []byte {
+func commitBody(c *Commit, hashSize int) []byte {
 	var buf bytes.Buffer
-	fmt.Fprintf(&buf, "tree %s\n", c.Tree.String())
+	fmt.Fprintf(&buf, "tree %s\n", c.Tree.StringWithSize(hashSize))
 	for _, p := range c.Parents {
-		fmt.Fprintf(&buf, "parent %s\n", p.String())
+		fmt.Fprintf(&buf, "parent %s\n", p.StringWithSize(hashSize))
 	}
 	buf.WriteString("author ")
 	buf.Write(c.Author.Serialize())
@@ -110,8 +110,8 @@ func commitBody[T HashType](c *Commit[T]) []byte {
 }
 
 // Serialize renders a Commit into canonical Git format.
-func (c *Commit[T]) Serialize() ([]byte, error) {
-	body := commitBody(c)
+func (c *Commit) Serialize(hashSize int) ([]byte, error) {
+	body := commitBody(c, hashSize)
 	header, err := headerForType(ObjCommit, body)
 	if err != nil {
 		return nil, err

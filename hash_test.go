@@ -10,34 +10,33 @@ func TestParseHashValidAndInvalid(t *testing.T) {
 	repeats := (testHashSize*2 + len(pattern) - 1) / len(pattern)
 	hexStr := strings.Repeat(pattern, repeats)[:testHashSize*2]
 
-	id, err := ParseHash[testHashType](hexStr)
+	id, err := ParseHashWithSize(hexStr, testHashSize)
 	if err != nil {
 		t.Fatalf("ParseHash returned error: %v", err)
 	}
 
-	if got := id.String(); got != hexStr {
+	if got := id.StringWithSize(testHashSize); got != hexStr {
 		t.Fatalf("unexpected String result: %q", got)
 	}
 
-	if _, err := ParseHash[testHashType]("abcd"); err == nil {
+	if _, err := ParseHashWithSize("abcd", testHashSize); err == nil {
 		t.Fatal("expected error for short hash")
 	}
 
 	badHex := strings.Repeat("z", testHashSize*2)
-	if _, err := ParseHash[testHashType](badHex); err == nil {
+	if _, err := ParseHashWithSize(badHex, testHashSize); err == nil {
 		t.Fatal("expected error for non-hex input")
 	}
 }
 
-func TestHashTypeCopiesUnderlyingData(t *testing.T) {
-	var id TestHash
-	idSlice := id.Slice()
-	for i := range idSlice {
-		idSlice[i] = byte(i)
+func TestHashBytesCopiesUnderlyingData(t *testing.T) {
+	var id Hash
+	for i := range id {
+		id[i] = byte(i)
 	}
-	orig := id.Bytes()
+	orig := id.BytesWithSize(testHashSize)
 	orig[0] ^= 0xff
-	if idSlice[0] == orig[0] {
+	if id[0] == orig[0] {
 		t.Fatal("Bytes should return a copy")
 	}
 }

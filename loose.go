@@ -12,21 +12,21 @@ import (
 
 const looseHeaderLimit = 4096
 
-func loosePath[T HashType](id Hash[T]) string {
-	hex := id.String()
+func loosePath(id Hash, hashSize int) string {
+	hex := id.StringWithSize(hashSize)
 	return filepath.Join("objects", hex[:2], hex[2:])
 }
 
-func (repo *Repository[T]) looseRead(id Hash[T]) (Object[T], error) {
+func (repo *Repository) looseRead(id Hash) (Object, error) {
 	ty, body, err := repo.looseReadTyped(id)
 	if err != nil {
 		return nil, err
 	}
-	return parseObjectBody[T](ty, id, body)
+	return parseObjectBody(ty, id, body, repo.HashSize)
 }
 
-func (repo *Repository[T]) looseReadTyped(id Hash[T]) (ObjType, []byte, error) {
-	path := repo.repoPath(loosePath(id))
+func (repo *Repository) looseReadTyped(id Hash) (ObjType, []byte, error) {
+	path := repo.repoPath(loosePath(id, repo.HashSize))
 	f, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -62,7 +62,7 @@ func (repo *Repository[T]) looseReadTyped(id Hash[T]) (ObjType, []byte, error) {
 	if declaredSize != int64(len(body)) {
 		return ObjInvalid, nil, ErrInvalidObject
 	}
-	if !verifyRawObject[T](raw, id) {
+	if !verifyRawObject(raw, id, repo.HashSize) {
 		return ObjInvalid, nil, ErrInvalidObject
 	}
 
@@ -70,8 +70,8 @@ func (repo *Repository[T]) looseReadTyped(id Hash[T]) (ObjType, []byte, error) {
 	return ty, out, nil
 }
 
-func (repo *Repository[T]) looseTypeSize(id Hash[T]) (ObjType, int64, error) {
-	path := repo.repoPath(loosePath(id))
+func (repo *Repository) looseTypeSize(id Hash) (ObjType, int64, error) {
+	path := repo.repoPath(loosePath(id, repo.HashSize))
 	// #nosec G304
 	f, err := os.Open(path)
 	if err != nil {
@@ -155,46 +155,46 @@ func objTypeFromName(name string) (ObjType, error) {
 }
 
 // WriteLooseObject writes an object to the repository as a loose object.
-func (repo *Repository[T]) WriteLooseObject(obj Object[T]) (Hash[T], error) {
+func (repo *Repository) WriteLooseObject(obj Object) (Hash, error) {
 	var raw []byte
 	var err error
 
 	switch o := obj.(type) {
-	case *Blob[T]:
-		raw, err = o.Serialize()
-	case *Tree[T]:
-		raw, err = o.Serialize()
-	case *Commit[T]:
-		raw, err = o.Serialize()
-	case *Tag[T]:
-		raw, err = o.Serialize()
+	case *Blob:
+		raw, err = o.Serialize(repo.HashSize)
+	case *Tree:
+		raw, err = o.Serialize(repo.HashSize)
+	case *Commit:
+		raw, err = o.Serialize(repo.HashSize)
+	case *Tag:
+		raw, err = o.Serialize(repo.HashSize)
 	default:
-		return Hash[T]{}, fmt.Errorf("furgit: unsupported object type for writing: %T", obj)
+		return Hash{}, fmt.Errorf("furgit: unsupported object type for writing: %T", obj)
 	}
 	// TODO: Consider adding serialize to the interface?
 
 	if err != nil {
-		return Hash[T]{}, err
+		return Hash{}, err
 	}
 
-	id := computeRawHash[T](raw)
-	path := repo.repoPath(loosePath(id))
+	id := computeRawHash(raw, repo.HashSize)
+	path := repo.repoPath(loosePath(id, repo.HashSize))
 
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		return Hash[T]{}, err
+		return Hash{}, err
 	}
 
 	var buf bytes.Buffer
 	zw := zlib.NewWriter(&buf)
 	if _, err := zw.Write(raw); err != nil {
-		return Hash[T]{}, err
+		return Hash{}, err
 	}
 	if err := zw.Close(); err != nil {
-		return Hash[T]{}, err
+		return Hash{}, err
 	}
 
 	if err := os.WriteFile(path, buf.Bytes(), 0o644); err != nil {
-		return Hash[T]{}, err
+		return Hash{}, err
 	}
 
 	return id, nil

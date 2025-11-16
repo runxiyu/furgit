@@ -1,31 +1,33 @@
 package furgit
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
 )
 
 // Repository represents the root of a Git repository.
-type Repository[T HashType] struct {
+type Repository struct {
 	rootPath string
+	HashSize int
 
 	packIdxOnce sync.Once
-	packIdx     []*packIndex[T]
+	packIdx     []*packIndex
 	packIdxErr  error
 
 	midxOnce sync.Once
-	midx     *multiPackIndex[T]
+	midx     *multiPackIndex
 	midxErr  error
 
 	packFiles sync.Map // string, *packFile
 	closeOnce sync.Once
 }
 
-// OpenRepository opens the repository at the provided path with the specified hash type.
+// OpenRepository opens the repository at the provided path with the specified hash size.
 // This will be replaced later with a function that auto-detects the hash size based
 // on the git configuration.
-func OpenRepository[T HashType](path string) (*Repository[T], error) {
+func OpenRepository(path string, hashSize int) (*Repository, error) {
 	fi, err := os.Stat(path)
 	if err != nil {
 		return nil, err
@@ -33,20 +35,13 @@ func OpenRepository[T HashType](path string) (*Repository[T], error) {
 	if !fi.IsDir() {
 		return nil, ErrInvalidObject
 	}
-	return &Repository[T]{rootPath: path}, nil
+	if _, ok := hashFuncs[hashSize]; !ok {
+		return nil, fmt.Errorf("furgit: unsupported hash size %d", hashSize)
+	}
+	return &Repository{rootPath: path, HashSize: hashSize}, nil
 }
 
-// hashSize returns the hash size for this repository.
-func (r *Repository[T]) hashSize() int {
-	return hashLen[T]()
-}
-
-// ParseHash is a convenience method for parsing hashes in the context of this repository.
-func (r *Repository[T]) ParseHash(s string) (Hash[T], error) {
-	return ParseHash[T](s)
-}
-
-func (r *Repository[T]) Close() error {
+func (r *Repository) Close() error {
 	var closeErr error
 	r.closeOnce.Do(func() {
 		r.packFiles.Range(func(keya any, pfa any) bool {
@@ -78,16 +73,16 @@ func (r *Repository[T]) Close() error {
 }
 
 // Root returns the repository root path.
-func (r *Repository[T]) Root() string {
+func (r *Repository) Root() string {
 	return r.rootPath
 }
 
 // repoPath joins the root with a relative path.
-func (r *Repository[T]) repoPath(rel string) string {
+func (r *Repository) repoPath(rel string) string {
 	return filepath.Join(r.rootPath, rel)
 }
 
-func (r *Repository[T]) packFile(rel string) (*packFile, error) {
+func (r *Repository) packFile(rel string) (*packFile, error) {
 	if pf, ok := r.packFiles.Load(rel); ok {
 		return pf.(*packFile), nil
 	}

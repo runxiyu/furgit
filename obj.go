@@ -29,8 +29,13 @@ const (
 )
 
 // Object describes any Git object variant.
-type Object[T HashType] interface {
+type Object interface {
 	ObjType() ObjType
+}
+
+func computeRawHash(data []byte, hashSize int) Hash {
+	hashFunc := hashFuncs[hashSize]
+	return hashFunc(data)
 }
 
 func headerForType(ty ObjType, body []byte) ([]byte, error) {
@@ -59,11 +64,11 @@ func headerForType(ty ObjType, body []byte) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func verifyRawObject[T HashType](buf []byte, want Hash[T]) bool {
-	return computeRawHash[T](buf) == want
+func verifyRawObject(buf []byte, want Hash, hashSize int) bool {
+	return computeRawHash(buf, hashSize) == want
 }
 
-func verifyTypedObject[T HashType](ty ObjType, body []byte, want Hash[T]) bool {
+func verifyTypedObject(ty ObjType, body []byte, want Hash, hashSize int) bool {
 	header, err := headerForType(ty, body)
 	if err != nil {
 		return false
@@ -71,19 +76,19 @@ func verifyTypedObject[T HashType](ty ObjType, body []byte, want Hash[T]) bool {
 	raw := make([]byte, len(header)+len(body))
 	copy(raw, header)
 	copy(raw[len(header):], body)
-	return computeRawHash[T](raw) == want
+	return computeRawHash(raw, hashSize) == want
 }
 
-func parseObjectBody[T HashType](ty ObjType, id Hash[T], body []byte) (Object[T], error) {
+func parseObjectBody(ty ObjType, id Hash, body []byte, hashSize int) (Object, error) {
 	switch ty {
 	case ObjBlob:
-		return parseBlob[T](id, body)
+		return parseBlob(id, body)
 	case ObjTree:
-		return parseTree[T](id, body)
+		return parseTree(id, body, hashSize)
 	case ObjCommit:
-		return parseCommit[T](id, body)
+		return parseCommit(id, body, hashSize)
 	case ObjTag:
-		return parseTag[T](id, body)
+		return parseTag(id, body, hashSize)
 	case ObjInvalid, ObjFuture, ObjOfsDelta, ObjRefDelta:
 		return nil, fmt.Errorf("furgit: object: unsupported type %d", ty)
 	default:
@@ -92,7 +97,7 @@ func parseObjectBody[T HashType](ty ObjType, id Hash[T], body []byte) (Object[T]
 }
 
 // ReadObject resolves an ID by consulting loose then packed storage.
-func (repo *Repository[T]) ReadObject(id Hash[T]) (Object[T], error) {
+func (repo *Repository) ReadObject(id Hash) (Object, error) {
 	obj, err := repo.looseRead(id)
 	if err == nil {
 		return obj, nil
@@ -108,7 +113,7 @@ func (repo *Repository[T]) ReadObject(id Hash[T]) (Object[T], error) {
 }
 
 // ReadObjectTypeSize reports the object type and size without inflating the body.
-func (repo *Repository[T]) ReadObjectTypeSize(id Hash[T]) (ObjType, int64, error) {
+func (repo *Repository) ReadObjectTypeSize(id Hash) (ObjType, int64, error) {
 	ty, size, err := repo.looseTypeSize(id)
 	if err == nil {
 		return ty, size, nil

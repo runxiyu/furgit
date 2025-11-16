@@ -1,26 +1,27 @@
 package furgit
 
 // Blob represents the contents of a Git blob.
-type Blob[T HashType] struct {
-	Hash Hash[T]
+type Blob struct {
+	Hash Hash
+
 	Data []byte
 }
 
 // ObjType allows Blob to satisfy the Object interface.
-func (*Blob[T]) ObjType() ObjType {
+func (*Blob) ObjType() ObjType {
 	return ObjBlob
 }
 
-func parseBlob[T HashType](id Hash[T], body []byte) (*Blob[T], error) {
+func parseBlob(id Hash, body []byte) (*Blob, error) {
 	data := append([]byte(nil), body...)
-	return &Blob[T]{
+	return &Blob{
 		Hash: id,
 		Data: data,
 	}, nil
 }
 
 // Serialize renders the full "blob size\\0body" representation.
-func (b *Blob[T]) Serialize() ([]byte, error) {
+func (b *Blob) Serialize(hashSize int) ([]byte, error) {
 	header, err := headerForType(ObjBlob, b.Data)
 	if err != nil {
 		return nil, err

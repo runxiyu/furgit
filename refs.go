@@ -9,45 +9,44 @@ import (
 )
 
 // ResolveRef resolves a fully qualified ref name to its object ID.
-func (repo *Repository[T]) ResolveRef(refname string) (Hash[T], error) {
+func (repo *Repository) ResolveRef(refname string) (Hash, error) {
 	id, err := repo.resolveLooseRef(refname)
 	if err == nil {
 		return id, nil
 	} else if !errors.Is(err, ErrNotFound) {
-		return Hash[T]{}, err
+		return Hash{}, err
 	}
 
 	return repo.resolvePackedRef(refname)
 }
 
-func (repo *Repository[T]) resolveLooseRef(refname string) (Hash[T], error) {
+func (repo *Repository) resolveLooseRef(refname string) (Hash, error) {
 	data, err := os.ReadFile(repo.repoPath(refname))
 	if err != nil {
 		if os.IsNotExist(err) {
-			return Hash[T]{}, ErrNotFound
+			return Hash{}, ErrNotFound
 		}
-		return Hash[T]{}, err
+		return Hash{}, err
 	}
 	line := strings.TrimSpace(string(data))
-	id, err := ParseHash[T](line)
+	id, err := ParseHashWithSize(line, repo.HashSize)
 	if err != nil {
-		return Hash[T]{}, err
+		return Hash{}, err
 	}
 	return id, nil
 }
 
-func (repo *Repository[T]) resolvePackedRef(refname string) (Hash[T], error) {
+func (repo *Repository) resolvePackedRef(refname string) (Hash, error) {
 	path := repo.repoPath("packed-refs")
 	f, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return Hash[T]{}, ErrInvalidObject
+			return Hash{}, ErrInvalidObject
 		}
-		return Hash[T]{}, err
+		return Hash{}, err
 	}
 	defer func() { _ = f.Close() }()
 
-	hashSize := repo.hashSize()
 	want := []byte(refname)
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
@@ -56,28 +55,28 @@ func (repo *Repository[T]) resolvePackedRef(refname string) (Hash[T], error) {
 			continue
 		}
 		sp := bytes.IndexByte(line, ' ')
-		if sp != hashSize*2 {
+		if sp != repo.HashSize*2 {
 			continue
 		}
 		name := line[sp+1:]
 		if bytes.Equal(name, want) {
 			hex := string(line[:sp])
-			id, err := ParseHash[T](hex)
+			id, err := ParseHashWithSize(hex, repo.HashSize)
 			if err != nil {
-				return Hash[T]{}, err
+				return Hash{}, err
 			}
 			return id, nil
 		}
 	}
 	scanErr := scanner.Err()
 	if scanErr != nil {
-		return Hash[T]{}, scanErr
+		return Hash{}, scanErr
 	}
-	return Hash[T]{}, ErrInvalidObject
+	return Hash{}, ErrInvalidObject
 }
 
 // ResolveHEAD reads HEAD and returns the ref that HEAD points to.
-func (repo *Repository[T]) ResolveHEAD() (string, error) {
+func (repo *Repository) ResolveHEAD() (string, error) {
 	data, err := os.ReadFile(repo.repoPath("HEAD"))
 	if err != nil {
 		return "", err

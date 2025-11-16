@@ -7,9 +7,9 @@ import (
 )
 
 // Tag models an annotated Git tag object.
-type Tag[T HashType] struct {
-	Hash       Hash[T]
-	Target     Hash[T]
+type Tag struct {
+	Hash       Hash
+	Target     Hash
 	TargetType ObjType
 	Name       []byte
 	Tagger     *Ident
@@ -17,13 +17,13 @@ type Tag[T HashType] struct {
 }
 
 // ObjType allows Tag to satisfy the Object interface.
-func (*Tag[T]) ObjType() ObjType {
+func (*Tag) ObjType() ObjType {
 	return ObjTag
 }
 
 // parseTag parses a tag object body.
-func parseTag[T HashType](id Hash[T], body []byte) (*Tag[T], error) {
-	t := new(Tag[T])
+func parseTag(id Hash, body []byte, hashSize int) (*Tag, error) {
+	t := new(Tag)
 	t.Hash = id
 	i := 0
 	var haveTarget, haveType bool
@@ -41,7 +41,7 @@ func parseTag[T HashType](id Hash[T], body []byte) (*Tag[T], error) {
 
 		switch {
 		case bytes.HasPrefix(line, []byte("object ")):
-			hash, err := ParseHash[T](string(line[7:]))
+			hash, err := ParseHashWithSize(string(line[7:]), hashSize)
 			if err != nil {
 				return nil, fmt.Errorf("furgit: tag: object: %w", err)
 			}
@@ -94,9 +94,9 @@ func parseTag[T HashType](id Hash[T], body []byte) (*Tag[T], error) {
 	return t, nil
 }
 
-func tagBody[T HashType](t *Tag[T]) ([]byte, error) {
+func tagBody(t *Tag, hashSize int) ([]byte, error) {
 	var buf bytes.Buffer
-	fmt.Fprintf(&buf, "object %s\n", t.Target.String())
+	fmt.Fprintf(&buf, "object %s\n", t.Target.StringWithSize(hashSize))
 	buf.WriteString("type ")
 	switch t.TargetType {
 	case ObjCommit:
@@ -128,8 +128,8 @@ func tagBody[T HashType](t *Tag[T]) ([]byte, error) {
 }
 
 // Serialize renders a Tag into canonical Git format.
-func (t *Tag[T]) Serialize() ([]byte, error) {
-	body, err := tagBody(t)
+func (t *Tag) Serialize(hashSize int) ([]byte, error) {
+	body, err := tagBody(t, hashSize)
 	if err != nil {
 		return nil, err
 	}
