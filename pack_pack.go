@@ -25,7 +25,7 @@ type packlocation struct {
 	Offset   uint64
 }
 
-func (repo *Repository) packRead(id Hash) (Object, error) {
+func (repo *Repository) packRead(id Hash) (StoredObject, error) {
 	loc, err := repo.packIndexFind(id)
 	if err != nil {
 		return nil, err
@@ -64,7 +64,7 @@ func (repo *Repository) packIndexFind(id Hash) (packlocation, error) {
 	return packlocation{}, ErrNotFound
 }
 
-func (repo *Repository) packReadAt(loc packlocation, want Hash) (Object, error) {
+func (repo *Repository) packReadAt(loc packlocation, want Hash) (StoredObject, error) {
 	ty, body, err := repo.packBodyResolveAtLocation(loc)
 	if err != nil {
 		return nil, err

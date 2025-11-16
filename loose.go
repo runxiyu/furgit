@@ -21,7 +21,7 @@ func (repo *Repository) loosePath(id Hash) (string, error) {
 	return filepath.Join("objects", hex[:2], hex[2:]), nil
 }
 
-func (repo *Repository) looseRead(id Hash) (Object, error) {
+func (repo *Repository) looseRead(id Hash) (StoredObject, error) {
 	ty, body, err := repo.looseReadTyped(id)
 	if err != nil {
 		return nil, err

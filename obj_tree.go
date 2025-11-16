@@ -149,12 +149,12 @@ func (tree *Tree) Entry(name []byte) *TreeEntry {
 //
 // Lookups are recursive.
 // It returns nil if no such entry exists.
-func (tree *Tree) EntryRecursive(repo *Repository, path [][]byte) (*TreeEntry, error) {
+func (sTree *StoredTree) EntryRecursive(repo *Repository, path [][]byte) (*TreeEntry, error) {
 	if len(path) == 0 {
 		return nil, errors.New("furgit: tree: empty path")
 	}
 
-	currentTree := tree
+	currentTree := sTree
 	for i, part := range path {
 		entry := currentTree.Entry(part)
 		if entry == nil {
@@ -167,7 +167,7 @@ func (tree *Tree) EntryRecursive(repo *Repository, path [][]byte) (*TreeEntry, e
 		if err != nil {
 			return nil, err
 		}
-		nextTree, ok := obj.(*Tree)
+		nextTree, ok := obj.(*StoredTree)
 		if !ok {
 			return nil, fmt.Errorf("furgit: tree: expected tree object at %s, got %T", part, obj)
 			// TODO: It may be useful to check the mode instead of reporting

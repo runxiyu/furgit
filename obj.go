@@ -92,7 +92,7 @@ func parseObjectBody(ty ObjectType, id Hash, body []byte, repo *Repository) (Sto
 }
 
 // ReadObject resolves an ID.
-func (repo *Repository) ReadObject(id Hash) (Object, error) {
+func (repo *Repository) ReadObject(id Hash) (StoredObject, error) {
 	obj, err := repo.looseRead(id)
 	if err == nil {
 		return obj, nil

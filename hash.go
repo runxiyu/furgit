@@ -40,7 +40,7 @@ func (hash Hash) String() string {
 	return hex.EncodeToString(hash.data[:hash.size])
 }
 
-// Bytes returns a mutable copy of the hash bytes.
+// Bytes returns a copy of the hash's bytes.
 func (hash Hash) Bytes() []byte {
 	return append([]byte(nil), hash.data[:hash.size]...)
 }

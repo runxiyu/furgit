@@ -16,6 +16,9 @@ import (
 //
 // It is safe to access the same Repository from multiple goroutines
 // without additional synchronization.
+//
+// Objects derived from a Repository must not be used after the Repository
+// has been closed.
 type Repository struct {
 	rootPath string
 	hashSize int
@@ -82,6 +85,13 @@ func OpenRepository(path string) (*Repository, error) {
 	return &Repository{rootPath: path, hashSize: hashSize}, nil
 }
 
+// Close closes the repository, releasing any resources associated with it.
+//
+// It is safe to call Close multiple times; subsequent calls will have no
+// effect.
+//
+// Close invalidates any objects derived from the Repository as it;
+// using them may cause segmentation faults or other undefined behavior.
 func (repo *Repository) Close() error {
 	var closeErr error
 	repo.closeOnce.Do(func() {
