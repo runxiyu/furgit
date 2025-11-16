@@ -62,12 +62,12 @@ func encodePackHeader(ty ObjectType, size int) []byte {
 }
 
 func TestPackHeaderRead(t *testing.T) {
-	buf := encodePackHeader(ObjTree, 0x1fff)
+	buf := encodePackHeader(ObjectTypeTree, 0x1fff)
 	ty, size, err := packHeaderRead(bytes.NewReader(buf))
 	if err != nil {
 		t.Fatalf("packHeaderRead error: %v", err)
 	}
-	if ty != ObjTree || size != 0x1fff {
+	if ty != ObjectTypeTree || size != 0x1fff {
 		t.Fatalf("unexpected header decode ty=%d size=%d", ty, size)
 	}
 	if _, _, err := packHeaderRead(bytes.NewReader([]byte{0x80})); err == nil {

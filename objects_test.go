@@ -65,7 +65,7 @@ func TestParseBlobAndSerialize(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Serialize error: %v", err)
 	}
-	header, err := headerForType(ObjBlob, data)
+	header, err := headerForType(ObjectTypeBlob, data)
 	if err != nil {
 		t.Fatalf("headerForType: %v", err)
 	}
@@ -99,7 +99,7 @@ func TestParseTreeAndSerialize(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Serialize error: %v", err)
 	}
-	header, _ := headerForType(ObjTree, body)
+	header, _ := headerForType(ObjectTypeTree, body)
 	want := append(append([]byte(nil), header...), body...)
 	if !bytes.Equal(serialized, want) {
 		t.Fatalf("serialized tree mismatch")
@@ -190,7 +190,7 @@ func TestParseTagAndSerialize(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parseTag error: %v", err)
 	}
-	if tag.Target != target || tag.TargetType != ObjCommit {
+	if tag.Target != target || tag.TargetType != ObjectTypeCommit {
 		t.Fatalf("tag target mismatch")
 	}
 	if tag.Tagger == nil {

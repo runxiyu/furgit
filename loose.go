@@ -32,32 +32,32 @@ func (repo *Repository) looseRead(id Hash) (Object, error) {
 func (repo *Repository) looseReadTyped(id Hash) (ObjectType, []byte, error) {
 	path, err := repo.loosePath(id)
 	if err != nil {
-		return ObjInvalid, nil, err
+		return ObjectTypeInvalid, nil, err
 	}
 	path = repo.repoPath(path)
 	f, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return ObjInvalid, nil, ErrNotFound
+			return ObjectTypeInvalid, nil, ErrNotFound
 		}
-		return ObjInvalid, nil, err
+		return ObjectTypeInvalid, nil, err
 	}
 	defer func() { _ = f.Close() }()
 
 	zr, err := zlib.NewReader(f)
 	if err != nil {
-		return ObjInvalid, nil, err
+		return ObjectTypeInvalid, nil, err
 	}
 	defer func() { _ = zr.Close() }()
 
 	raw, err := io.ReadAll(zr)
 	if err != nil {
-		return ObjInvalid, nil, err
+		return ObjectTypeInvalid, nil, err
 	}
 
 	nul := bytes.IndexByte(raw, 0)
 	if nul < 0 {
-		return ObjInvalid, nil, ErrInvalidObject
+		return ObjectTypeInvalid, nil, ErrInvalidObject
 	}
 
 	header := raw[:nul]
@@ -65,13 +65,13 @@ func (repo *Repository) looseReadTyped(id Hash) (ObjectType, []byte, error) {
 
 	ty, declaredSize, err := parseLooseHeader(header)
 	if err != nil {
-		return ObjInvalid, nil, err
+		return ObjectTypeInvalid, nil, err
 	}
 	if declaredSize != int64(len(body)) {
-		return ObjInvalid, nil, ErrInvalidObject
+		return ObjectTypeInvalid, nil, ErrInvalidObject
 	}
 	if !repo.verifyRawObject(raw, id) {
-		return ObjInvalid, nil, ErrInvalidObject
+		return ObjectTypeInvalid, nil, ErrInvalidObject
 	}
 
 	out := append([]byte(nil), body...)
@@ -81,22 +81,22 @@ func (repo *Repository) looseReadTyped(id Hash) (ObjectType, []byte, error) {
 func (repo *Repository) looseTypeSize(id Hash) (ObjectType, int64, error) {
 	path, err := repo.loosePath(id)
 	if err != nil {
-		return ObjInvalid, 0, err
+		return ObjectTypeInvalid, 0, err
 	}
 	path = repo.repoPath(path)
 	// #nosec G304
 	f, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return ObjInvalid, 0, ErrNotFound
+			return ObjectTypeInvalid, 0, ErrNotFound
 		}
-		return ObjInvalid, 0, err
+		return ObjectTypeInvalid, 0, err
 	}
 	defer func() { _ = f.Close() }()
 
 	zr, err := zlib.NewReader(f)
 	if err != nil {
-		return ObjInvalid, 0, err
+		return ObjectTypeInvalid, 0, err
 	}
 	defer func() { _ = zr.Close() }()
 
@@ -109,20 +109,20 @@ func (repo *Repository) looseTypeSize(id Hash) (ObjectType, int64, error) {
 			if nul := bytes.IndexByte(data, 0); nul >= 0 {
 				header = append(header, data[:nul]...)
 				if len(header) > looseHeaderLimit {
-					return ObjInvalid, 0, ErrInvalidObject
+					return ObjectTypeInvalid, 0, ErrInvalidObject
 				}
 				break
 			}
 			header = append(header, data...)
 			if len(header) > looseHeaderLimit {
-				return ObjInvalid, 0, ErrInvalidObject
+				return ObjectTypeInvalid, 0, ErrInvalidObject
 			}
 		}
 		if readErr != nil {
 			if readErr == io.EOF {
-				return ObjInvalid, 0, ErrInvalidObject
+				return ObjectTypeInvalid, 0, ErrInvalidObject
 			}
-			return ObjInvalid, 0, readErr
+			return ObjectTypeInvalid, 0, readErr
 		}
 	}
 	return parseLooseHeader(header)
@@ -131,38 +131,38 @@ func (repo *Repository) looseTypeSize(id Hash) (ObjectType, int64, error) {
 func parseLooseHeader(header []byte) (ObjectType, int64, error) {
 	space := bytes.IndexByte(header, ' ')
 	if space < 0 {
-		return ObjInvalid, 0, ErrInvalidObject
+		return ObjectTypeInvalid, 0, ErrInvalidObject
 	}
 	ty, err := objTypeFromName(string(header[:space]))
 	if err != nil {
-		return ObjInvalid, 0, err
+		return ObjectTypeInvalid, 0, err
 	}
 	expect := header[space+1:]
 	if len(expect) == 0 {
-		return ObjInvalid, 0, ErrInvalidObject
+		return ObjectTypeInvalid, 0, ErrInvalidObject
 	}
 	size, err := strconv.ParseInt(string(expect), 10, 64)
 	if err != nil {
-		return ObjInvalid, 0, fmt.Errorf("furgit: loose: size parse: %w", err)
+		return ObjectTypeInvalid, 0, fmt.Errorf("furgit: loose: size parse: %w", err)
 	}
 	if size < 0 {
-		return ObjInvalid, 0, ErrInvalidObject
+		return ObjectTypeInvalid, 0, ErrInvalidObject
 	}
 	return ty, size, nil
 }
 
 func objTypeFromName(name string) (ObjectType, error) {
 	switch name {
-	case objNameBlob:
-		return ObjBlob, nil
-	case objNameTree:
-		return ObjTree, nil
-	case objNameCommit:
-		return ObjCommit, nil
-	case objNameTag:
-		return ObjTag, nil
+	case objectTypeNameBlob:
+		return ObjectTypeBlob, nil
+	case objectTypeNameTree:
+		return ObjectTypeTree, nil
+	case objectTypeNameCommit:
+		return ObjectTypeCommit, nil
+	case objectTypeNameTag:
+		return ObjectTypeTag, nil
 	default:
-		return ObjInvalid, ErrInvalidObject
+		return ObjectTypeInvalid, ErrInvalidObject
 	}
 }
 

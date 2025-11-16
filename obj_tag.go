@@ -19,7 +19,7 @@ type Tag struct {
 // ObjectType allows Tag to satisfy the Object interface.
 func (tag *Tag) ObjectType() ObjectType {
 	_ = tag
-	return ObjTag
+	return ObjectTypeTag
 }
 
 // parseTag parses a tag object body.
@@ -51,15 +51,15 @@ func parseTag(id Hash, body []byte, repo *Repository) (*Tag, error) {
 		case bytes.HasPrefix(line, []byte("type ")):
 			switch string(line[5:]) {
 			case "commit":
-				t.TargetType = ObjCommit
+				t.TargetType = ObjectTypeCommit
 			case "tree":
-				t.TargetType = ObjTree
+				t.TargetType = ObjectTypeTree
 			case "blob":
-				t.TargetType = ObjBlob
+				t.TargetType = ObjectTypeBlob
 			case "tag":
-				t.TargetType = ObjTag
+				t.TargetType = ObjectTypeTag
 			default:
-				t.TargetType = ObjInvalid
+				t.TargetType = ObjectTypeInvalid
 				return nil, errors.New("furgit: tag: unknown target type")
 			}
 			haveType = true
@@ -100,15 +100,15 @@ func tagBody(t *Tag) ([]byte, error) {
 	fmt.Fprintf(&buf, "object %s\n", t.Target.String())
 	buf.WriteString("type ")
 	switch t.TargetType {
-	case ObjCommit:
+	case ObjectTypeCommit:
 		buf.WriteString("commit")
-	case ObjTree:
+	case ObjectTypeTree:
 		buf.WriteString("tree")
-	case ObjBlob:
+	case ObjectTypeBlob:
 		buf.WriteString("blob")
-	case ObjTag:
+	case ObjectTypeTag:
 		buf.WriteString("tag")
-	case ObjInvalid, ObjFuture, ObjOfsDelta, ObjRefDelta:
+	case ObjectTypeInvalid, ObjectTypeFuture, ObjectTypeOfsDelta, ObjectTypeRefDelta:
 		return nil, fmt.Errorf("furgit: tag: invalid target type %d", t.TargetType)
 	default:
 		return nil, fmt.Errorf("furgit: tag: invalid target type %d", t.TargetType)
@@ -138,7 +138,7 @@ func (tag *Tag) Serialize() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	header, err := headerForType(ObjTag, body)
+	header, err := headerForType(ObjectTypeTag, body)
 	if err != nil {
 		return nil, err
 	}

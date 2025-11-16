@@ -23,7 +23,7 @@ type TreeEntry struct {
 // ObjectType allows Tree to satisfy the Object interface.
 func (tree *Tree) ObjectType() ObjectType {
 	_ = tree
-	return ObjTree
+	return ObjectTypeTree
 }
 
 // parseTree decodes a tree body.
@@ -99,7 +99,7 @@ func treeBody(t *Tree) []byte {
 // Serialize renders a Tree into canonical Git format.
 func (tree *Tree) Serialize() ([]byte, error) {
 	body := treeBody(tree)
-	header, err := headerForType(ObjTree, body)
+	header, err := headerForType(ObjectTypeTree, body)
 	if err != nil {
 		return nil, err
 	}

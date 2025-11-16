@@ -128,7 +128,7 @@ func TestReadObjectTypeSizeLoose(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadObjectTypeSize loose error: %v", err)
 	}
-	if ty != ObjBlob || size != int64(len(data)) {
+	if ty != ObjectTypeBlob || size != int64(len(data)) {
 		t.Fatalf("unexpected loose metadata ty=%d size=%d", ty, size)
 	}
 }
@@ -139,9 +139,9 @@ func TestReadObjectTypeSizePackedObjects(t *testing.T) {
 	setupRepoConfig(t, root)
 
 	objs := []testPackObject{
-		{finalType: ObjBlob, body: []byte("packed base payload")},
+		{finalType: ObjectTypeBlob, body: []byte("packed base payload")},
 		{
-			finalType: ObjBlob,
+			finalType: ObjectTypeBlob,
 			body:      []byte("packed delta payload with extra bytes"),
 			encoding:  packEncodingOfsDelta,
 			baseIndex: 0,
@@ -159,7 +159,7 @@ func TestReadObjectTypeSizePackedObjects(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadObjectTypeSize base error: %v", err)
 	}
-	if ty != ObjBlob || size != int64(len(objs[0].body)) {
+	if ty != ObjectTypeBlob || size != int64(len(objs[0].body)) {
 		t.Fatalf("unexpected base metadata ty=%d size=%d", ty, size)
 	}
 
@@ -167,7 +167,7 @@ func TestReadObjectTypeSizePackedObjects(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadObjectTypeSize delta error: %v", err)
 	}
-	if ty != ObjBlob || size != int64(len(objs[1].body)) {
+	if ty != ObjectTypeBlob || size != int64(len(objs[1].body)) {
 		t.Fatalf("unexpected delta metadata ty=%d size=%d", ty, size)
 	}
 }
@@ -188,7 +188,7 @@ func TestReadObjectTypeSizePackRefDeltaLooseBase(t *testing.T) {
 
 	objs := []testPackObject{
 		{
-			finalType: ObjBlob,
+			finalType: ObjectTypeBlob,
 			body:      []byte("ref delta rewritten body"),
 			encoding:  packEncodingRefDelta,
 			baseHash:  baseID,
@@ -201,7 +201,7 @@ func TestReadObjectTypeSizePackRefDeltaLooseBase(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadObjectTypeSize ref delta error: %v", err)
 	}
-	if ty != ObjBlob || size != int64(len(objs[0].body)) {
+	if ty != ObjectTypeBlob || size != int64(len(objs[0].body)) {
 		t.Fatalf("unexpected ref delta metadata ty=%d size=%d", ty, size)
 	}
 }
@@ -285,7 +285,7 @@ func TestWriteLooseObjectAllTypes(t *testing.T) {
 	// Tag
 	tag := &Tag{
 		Target:     commitID,
-		TargetType: ObjCommit,
+		TargetType: ObjectTypeCommit,
 		Name:       []byte("v1.0.0"),
 		Tagger: &Ident{
 			Name:          []byte("Test Tagger"),
@@ -378,7 +378,7 @@ func writeTestPack(t *testing.T, root, name string, objs []testPackObject) []Has
 			if obj.baseIndex < 0 || obj.baseIndex >= i {
 				t.Fatalf("invalid base index %d for ofs delta %d", obj.baseIndex, i)
 			}
-			buf.Write(encodePackHeader(ObjOfsDelta, len(obj.body)))
+			buf.Write(encodePackHeader(ObjectTypeOfsDelta, len(obj.body)))
 			dist := offsets[i] - offsets[obj.baseIndex]
 			buf.Write(encodeOfsDistance(dist))
 			baseBody := objs[obj.baseIndex].body
@@ -392,7 +392,7 @@ func writeTestPack(t *testing.T, root, name string, objs []testPackObject) []Has
 			if len(baseBody) == 0 {
 				t.Fatalf("ref delta %d missing base body", i)
 			}
-			buf.Write(encodePackHeader(ObjRefDelta, len(obj.body)))
+			buf.Write(encodePackHeader(ObjectTypeRefDelta, len(obj.body)))
 			buf.Write(obj.baseHash.data[:testHashSize])
 			delta := buildInsertOnlyDelta(len(baseBody), obj.body)
 			buf.Write(compressBytes(t, delta))

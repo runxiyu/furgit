@@ -10,7 +10,7 @@ type Blob struct {
 // ObjectType allows Blob to satisfy the Object interface.
 func (blob *Blob) ObjectType() ObjectType {
 	_ = blob
-	return ObjBlob
+	return ObjectTypeBlob
 }
 
 func parseBlob(id Hash, body []byte) (*Blob, error) {
@@ -23,7 +23,7 @@ func parseBlob(id Hash, body []byte) (*Blob, error) {
 
 // Serialize renders the full "blob size\\0body" representation.
 func (blob *Blob) Serialize() ([]byte, error) {
-	header, err := headerForType(ObjBlob, blob.Data)
+	header, err := headerForType(ObjectTypeBlob, blob.Data)
 	if err != nil {
 		return nil, err
 	}

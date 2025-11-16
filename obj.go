@@ -11,21 +11,21 @@ import (
 type ObjectType uint8
 
 const (
-	ObjInvalid  ObjectType = 0
-	ObjCommit   ObjectType = 1
-	ObjTree     ObjectType = 2
-	ObjBlob     ObjectType = 3
-	ObjTag      ObjectType = 4
-	ObjFuture   ObjectType = 5
-	ObjOfsDelta ObjectType = 6
-	ObjRefDelta ObjectType = 7
+	ObjectTypeInvalid  ObjectType = 0
+	ObjectTypeCommit   ObjectType = 1
+	ObjectTypeTree     ObjectType = 2
+	ObjectTypeBlob     ObjectType = 3
+	ObjectTypeTag      ObjectType = 4
+	ObjectTypeFuture   ObjectType = 5
+	ObjectTypeOfsDelta ObjectType = 6
+	ObjectTypeRefDelta ObjectType = 7
 )
 
 const (
-	objNameBlob   = "blob"
-	objNameTree   = "tree"
-	objNameCommit = "commit"
-	objNameTag    = "tag"
+	objectTypeNameBlob   = "blob"
+	objectTypeNameTree   = "tree"
+	objectTypeNameCommit = "commit"
+	objectTypeNameTag    = "tag"
 )
 
 // Object describes any Git object variant.
@@ -36,15 +36,15 @@ type Object interface {
 func headerForType(ty ObjectType, body []byte) ([]byte, error) {
 	var tyStr string
 	switch ty {
-	case ObjBlob:
-		tyStr = objNameBlob
-	case ObjTree:
-		tyStr = objNameTree
-	case ObjCommit:
-		tyStr = objNameCommit
-	case ObjTag:
-		tyStr = objNameTag
-	case ObjInvalid, ObjFuture, ObjOfsDelta, ObjRefDelta:
+	case ObjectTypeBlob:
+		tyStr = objectTypeNameBlob
+	case ObjectTypeTree:
+		tyStr = objectTypeNameTree
+	case ObjectTypeCommit:
+		tyStr = objectTypeNameCommit
+	case ObjectTypeTag:
+		tyStr = objectTypeNameTag
+	case ObjectTypeInvalid, ObjectTypeFuture, ObjectTypeOfsDelta, ObjectTypeRefDelta:
 		return nil, fmt.Errorf("furgit: object: unsupported type %d", ty)
 	default:
 		return nil, fmt.Errorf("furgit: object: unsupported type %d", ty)
@@ -61,15 +61,15 @@ func headerForType(ty ObjectType, body []byte) ([]byte, error) {
 
 func parseObjectBody(ty ObjectType, id Hash, body []byte, repo *Repository) (Object, error) {
 	switch ty {
-	case ObjBlob:
+	case ObjectTypeBlob:
 		return parseBlob(id, body)
-	case ObjTree:
+	case ObjectTypeTree:
 		return parseTree(id, body, repo)
-	case ObjCommit:
+	case ObjectTypeCommit:
 		return parseCommit(id, body, repo)
-	case ObjTag:
+	case ObjectTypeTag:
 		return parseTag(id, body, repo)
-	case ObjInvalid, ObjFuture, ObjOfsDelta, ObjRefDelta:
+	case ObjectTypeInvalid, ObjectTypeFuture, ObjectTypeOfsDelta, ObjectTypeRefDelta:
 		return nil, fmt.Errorf("furgit: object: unsupported type %d", ty)
 	default:
 		return nil, fmt.Errorf("furgit: object: unknown type %d", ty)
@@ -99,14 +99,14 @@ func (repo *Repository) ReadObjectTypeSize(id Hash) (ObjectType, int64, error) {
 		return ty, size, nil
 	}
 	if !errors.Is(err, ErrNotFound) {
-		return ObjInvalid, 0, err
+		return ObjectTypeInvalid, 0, err
 	}
 	loc, err := repo.packIndexFind(id)
 	if err != nil {
 		if errors.Is(err, ErrNotFound) {
-			return ObjInvalid, 0, ErrInvalidObject
+			return ObjectTypeInvalid, 0, ErrInvalidObject
 		}
-		return ObjInvalid, 0, err
+		return ObjectTypeInvalid, 0, err
 	}
 	return repo.packTypeSizeAtLocation(loc, nil)
 }

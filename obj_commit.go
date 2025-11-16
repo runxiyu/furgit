@@ -20,7 +20,7 @@ type Commit struct {
 // ObjectType allows Commit to satisfy the Object interface.
 func (commit *Commit) ObjectType() ObjectType {
 	_ = commit
-	return ObjCommit
+	return ObjectTypeCommit
 }
 
 func parseCommit(id Hash, body []byte, repo *Repository) (*Commit, error) {
@@ -124,7 +124,7 @@ func (commit *Commit) Serialize() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	header, err := headerForType(ObjCommit, body)
+	header, err := headerForType(ObjectTypeCommit, body)
 	if err != nil {
 		return nil, err
 	}
