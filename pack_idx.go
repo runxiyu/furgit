@@ -106,11 +106,11 @@ func (pi *packIndex) load() error {
 	return nil
 }
 
-func (r *Repository) packIndexes() ([]*packIndex, error) {
-	r.packIdxOnce.Do(func() {
-		r.packIdx, r.packIdxErr = r.loadPackIndexes()
+func (repo *Repository) packIndexes() ([]*packIndex, error) {
+	repo.packIdxOnce.Do(func() {
+		repo.packIdx, repo.packIdxErr = repo.loadPackIndexes()
 	})
-	return r.packIdx, r.packIdxErr
+	return repo.packIdx, repo.packIdxErr
 }
 
 func (repo *Repository) loadPackIndexes() ([]*packIndex, error) {

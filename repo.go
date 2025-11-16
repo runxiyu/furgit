@@ -42,29 +42,29 @@ func OpenRepository(path string, hashSize int) (*Repository, error) {
 	return &Repository{rootPath: path, HashSize: hashSize}, nil
 }
 
-func (r *Repository) Close() error {
+func (repo *Repository) Close() error {
 	var closeErr error
-	r.closeOnce.Do(func() {
-		r.packFiles.Range(func(keya any, pfa any) bool {
+	repo.closeOnce.Do(func() {
+		repo.packFiles.Range(func(keya any, pfa any) bool {
 			key := keya.(string)
 			pf := pfa.(*packFile)
 			err := pf.Close()
 			if err != nil && closeErr == nil {
 				closeErr = err
 			}
-			r.packFiles.Delete(key)
+			repo.packFiles.Delete(key)
 			return true
 		})
-		if len(r.packIdx) > 0 {
-			for _, idx := range r.packIdx {
+		if len(repo.packIdx) > 0 {
+			for _, idx := range repo.packIdx {
 				err := idx.Close()
 				if err != nil && closeErr == nil {
 					closeErr = err
 				}
 			}
 		}
-		if r.midx != nil {
-			err := r.midx.Close()
+		if repo.midx != nil {
+			err := repo.midx.Close()
 			if err != nil && closeErr == nil {
 				closeErr = err
 			}
@@ -74,24 +74,24 @@ func (r *Repository) Close() error {
 }
 
 // Root returns the repository root path.
-func (r *Repository) Root() string {
-	return r.rootPath
+func (repo *Repository) Root() string {
+	return repo.rootPath
 }
 
 // repoPath joins the root with a relative path.
-func (r *Repository) repoPath(rel string) string {
-	return filepath.Join(r.rootPath, rel)
+func (repo *Repository) repoPath(rel string) string {
+	return filepath.Join(repo.rootPath, rel)
 }
 
-func (r *Repository) packFile(rel string) (*packFile, error) {
-	if pf, ok := r.packFiles.Load(rel); ok {
+func (repo *Repository) packFile(rel string) (*packFile, error) {
+	if pf, ok := repo.packFiles.Load(rel); ok {
 		return pf.(*packFile), nil
 	}
-	pf, err := openPackFile(r.repoPath(rel), rel)
+	pf, err := openPackFile(repo.repoPath(rel), rel)
 	if err != nil {
 		return nil, err
 	}
-	actual, loaded := r.packFiles.LoadOrStore(rel, pf)
+	actual, loaded := repo.packFiles.LoadOrStore(rel, pf)
 	if loaded {
 		_ = pf.Close()
 		return actual.(*packFile), nil
@@ -100,14 +100,14 @@ func (r *Repository) packFile(rel string) (*packFile, error) {
 }
 
 // ParseHash converts a hex string into a Hash, validating it matches the repository's hash size.
-func (r *Repository) ParseHash(s string) (Hash, error) {
+func (repo *Repository) ParseHash(s string) (Hash, error) {
 	var id Hash
 	if len(s)%2 != 0 {
 		return id, fmt.Errorf("furgit: invalid hash length %d, it has to be even at the very least", len(s))
 	}
-	expectedLen := r.HashSize * 2
+	expectedLen := repo.HashSize * 2
 	if len(s) != expectedLen {
-		return id, fmt.Errorf("furgit: hash length mismatch: got %d chars, expected %d for hash size %d", len(s), expectedLen, r.HashSize)
+		return id, fmt.Errorf("furgit: hash length mismatch: got %d chars, expected %d for hash size %d", len(s), expectedLen, repo.HashSize)
 	}
 	data, err := hex.DecodeString(s)
 	if err != nil {
@@ -119,22 +119,22 @@ func (r *Repository) ParseHash(s string) (Hash, error) {
 }
 
 // computeRawHash computes a hash from raw data using the repository's hash algorithm.
-func (r *Repository) computeRawHash(data []byte) Hash {
-	hashFunc := hashFuncs[r.HashSize]
+func (repo *Repository) computeRawHash(data []byte) Hash {
+	hashFunc := hashFuncs[repo.HashSize]
 	return hashFunc(data)
 }
 
 // verifyRawObject verifies a raw object against its expected hash.
-func (r *Repository) verifyRawObject(buf []byte, want Hash) bool {
-	if want.size != r.HashSize {
+func (repo *Repository) verifyRawObject(buf []byte, want Hash) bool {
+	if want.size != repo.HashSize {
 		return false
 	}
-	return r.computeRawHash(buf) == want
+	return repo.computeRawHash(buf) == want
 }
 
 // verifyTypedObject verifies a typed object against its expected hash.
-func (r *Repository) verifyTypedObject(ty ObjType, body []byte, want Hash) bool {
-	if want.size != r.HashSize {
+func (repo *Repository) verifyTypedObject(ty ObjType, body []byte, want Hash) bool {
+	if want.size != repo.HashSize {
 		return false
 	}
 	header, err := headerForType(ty, body)
@@ -144,5 +144,5 @@ func (r *Repository) verifyTypedObject(ty ObjType, body []byte, want Hash) bool 
 	raw := make([]byte, len(header)+len(body))
 	copy(raw, header)
 	copy(raw[len(header):], body)
-	return r.computeRawHash(raw) == want
+	return repo.computeRawHash(raw) == want
 }

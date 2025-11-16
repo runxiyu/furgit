@@ -37,54 +37,54 @@ func borrowedFromOwned(buf []byte) borrowedBody {
 	return borrowedBody{buf: buf}
 }
 
-func (b *borrowedBody) Resize(n int) {
+func (body *borrowedBody) Resize(n int) {
 	if n < 0 {
 		n = 0
 	}
-	b.ensureCapacity(n)
-	b.buf = b.buf[:n]
+	body.ensureCapacity(n)
+	body.buf = body.buf[:n]
 }
 
-func (b *borrowedBody) Append(src []byte) {
+func (body *borrowedBody) Append(src []byte) {
 	if len(src) == 0 {
 		return
 	}
-	start := len(b.buf)
-	b.ensureCapacity(start + len(src))
-	b.buf = b.buf[:start+len(src)]
-	copy(b.buf[start:], src)
+	start := len(body.buf)
+	body.ensureCapacity(start + len(src))
+	body.buf = body.buf[:start+len(src)]
+	copy(body.buf[start:], src)
 }
 
-func (b *borrowedBody) Bytes() []byte {
-	return b.buf
+func (body *borrowedBody) Bytes() []byte {
+	return body.buf
 }
 
-func (b *borrowedBody) Release() {
-	if b.buf == nil {
+func (body *borrowedBody) Release() {
+	if body.buf == nil {
 		return
 	}
-	if b.pooled && cap(b.buf) <= maxPooledBody {
-		tmp := b.buf[:0]
+	if body.pooled && cap(body.buf) <= maxPooledBody {
+		tmp := body.buf[:0]
 		bodyPool.Put(&tmp)
 	}
-	b.buf = nil
-	b.pooled = false
+	body.buf = nil
+	body.pooled = false
 }
 
-func (b *borrowedBody) ensureCapacity(needed int) {
-	if cap(b.buf) >= needed {
+func (body *borrowedBody) ensureCapacity(needed int) {
+	if cap(body.buf) >= needed {
 		return
 	}
-	old := b.buf
-	wasPooled := b.pooled
-	newCap := cap(b.buf) * 2
+	old := body.buf
+	wasPooled := body.pooled
+	newCap := cap(body.buf) * 2
 	if newCap < needed {
 		newCap = needed
 	}
-	newBuf := make([]byte, len(b.buf), newCap)
-	copy(newBuf, b.buf)
-	b.buf = newBuf
-	b.pooled = false
+	newBuf := make([]byte, len(body.buf), newCap)
+	copy(newBuf, body.buf)
+	body.buf = newBuf
+	body.pooled = false
 	if wasPooled && cap(old) <= maxPooledBody {
 		tmp := old[:0]
 		bodyPool.Put(&tmp)

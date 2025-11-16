@@ -21,13 +21,13 @@ func parseBlob(id Hash, body []byte) (*Blob, error) {
 }
 
 // Serialize renders the full "blob size\\0body" representation.
-func (b *Blob) Serialize() ([]byte, error) {
-	header, err := headerForType(ObjBlob, b.Data)
+func (blob *Blob) Serialize() ([]byte, error) {
+	header, err := headerForType(ObjBlob, blob.Data)
 	if err != nil {
 		return nil, err
 	}
-	raw := make([]byte, len(header)+len(b.Data))
+	raw := make([]byte, len(header)+len(blob.Data))
 	copy(raw, header)
-	copy(raw[len(header):], b.Data)
+	copy(raw[len(header):], blob.Data)
 	return raw, nil
 }

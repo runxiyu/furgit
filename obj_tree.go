@@ -96,8 +96,8 @@ func treeBody(t *Tree) []byte {
 }
 
 // Serialize renders a Tree into canonical Git format.
-func (t *Tree) Serialize() ([]byte, error) {
-	body := treeBody(t)
+func (tree *Tree) Serialize() ([]byte, error) {
+	body := treeBody(tree)
 	header, err := headerForType(ObjTree, body)
 	if err != nil {
 		return nil, err
@@ -110,13 +110,13 @@ func (t *Tree) Serialize() ([]byte, error) {
 }
 
 // Entry looks up a tree entry by name.
-func (t *Tree) Entry(name []byte) *TreeEntry {
-	low, high := 0, len(t.Entries)-1
+func (tree *Tree) Entry(name []byte) *TreeEntry {
+	low, high := 0, len(tree.Entries)-1
 	for low <= high {
 		mid := (low + high) / 2
-		cmp := bytes.Compare(t.Entries[mid].Name, name)
+		cmp := bytes.Compare(tree.Entries[mid].Name, name)
 		if cmp == 0 {
-			return &t.Entries[mid]
+			return &tree.Entries[mid]
 		} else if cmp < 0 {
 			low = mid + 1
 		} else {

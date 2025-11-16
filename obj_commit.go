@@ -110,8 +110,8 @@ func commitBody(c *Commit) []byte {
 }
 
 // Serialize renders a Commit into canonical Git format.
-func (c *Commit) Serialize() ([]byte, error) {
-	body := commitBody(c)
+func (commit *Commit) Serialize() ([]byte, error) {
+	body := commitBody(commit)
 	header, err := headerForType(ObjCommit, body)
 	if err != nil {
 		return nil, err

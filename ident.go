@@ -94,17 +94,17 @@ func parseIdent(line []byte) (*Ident, error) {
 }
 
 // Serialize renders an Ident into canonical Git format.
-func (id Ident) Serialize() []byte {
+func (ident Ident) Serialize() []byte {
 	var b strings.Builder
-	b.Grow(len(id.Name) + len(id.Email) + 32)
-	b.Write(id.Name)
+	b.Grow(len(ident.Name) + len(ident.Email) + 32)
+	b.Write(ident.Name)
 	b.WriteString(" <")
-	b.Write(id.Email)
+	b.Write(ident.Email)
 	b.WriteString("> ")
-	b.WriteString(strconv.FormatInt(id.WhenUnix, 10))
+	b.WriteString(strconv.FormatInt(ident.WhenUnix, 10))
 	b.WriteByte(' ')
 
-	offset := id.OffsetMinutes
+	offset := ident.OffsetMinutes
 	sign := '+'
 	if offset < 0 {
 		sign = '-'
@@ -117,7 +117,7 @@ func (id Ident) Serialize() []byte {
 }
 
 // When returns the timestamp as time.Time using the embedded offset.
-func (id Ident) When() time.Time {
-	loc := time.FixedZone("git", int(id.OffsetMinutes)*60)
-	return time.Unix(id.WhenUnix, 0).In(loc)
+func (ident Ident) When() time.Time {
+	loc := time.FixedZone("git", int(ident.OffsetMinutes)*60)
+	return time.Unix(ident.WhenUnix, 0).In(loc)
 }

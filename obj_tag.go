@@ -128,8 +128,8 @@ func tagBody(t *Tag) ([]byte, error) {
 }
 
 // Serialize renders a Tag into canonical Git format.
-func (t *Tag) Serialize() ([]byte, error) {
-	body, err := tagBody(t)
+func (tag *Tag) Serialize() ([]byte, error) {
+	body, err := tagBody(tag)
 	if err != nil {
 		return nil, err
 	}
