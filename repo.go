@@ -106,11 +106,6 @@ func (repo *Repository) Close() error {
 	return closeErr
 }
 
-// Root returns the repository root path.
-func (repo *Repository) Root() string {
-	return repo.rootPath
-}
-
 // repoPath joins the root with a relative path.
 func (repo *Repository) repoPath(rel string) string {
 	return filepath.Join(repo.rootPath, rel)
