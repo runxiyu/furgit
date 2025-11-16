@@ -1,4 +1,4 @@
-package furgit
+package config
 
 import (
 	"strings"

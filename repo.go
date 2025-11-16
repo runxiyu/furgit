@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+
+	"git.sr.ht/~runxiyu/furgit/config"
 )
 
 // Repository represents the root of a Git repository.
@@ -48,7 +50,7 @@ func OpenRepository(path string) (*Repository, error) {
 		_ = f.Close()
 	}()
 
-	cfg, err := ParseConfig(f)
+	cfg, err := config.ParseConfig(f)
 	if err != nil {
 		return nil, fmt.Errorf("furgit: failed to parse config: %w", err)
 	}

@@ -1,4 +1,4 @@
-package furgit
+package config
 
 import (
 	"bufio"
@@ -10,20 +10,30 @@ import (
 	"unicode"
 )
 
-// Config represents a parsed Git configuration.
+// Config holds all parsed configuration entries from a Git config file.
+//
+// A Config preserves the ordering of entries as they appeared in the source.
+//
+// Lookups are matched case-insensitively for section and key names, and
+// subsections must match exactly.
 type Config struct {
 	entries []ConfigEntry
 }
 
-// ConfigEntry represents a single configuration key-value pair.
+// ConfigEntry represents a single parsed configuration directive.
 type ConfigEntry struct {
-	Section    string
+	// The section name in canonical lowercase form.
+	Section string
+	// The subsection name, retaining the exact form parsed from the input.
 	Subsection string
-	Key        string
-	Value      string
+	// The key name in canonical lowercase form.
+	Key string
+	// The interpreted value of the configuration entry, including unescaped
+	// characters where appropriate.
+	Value string
 }
 
-// ParseConfig parses a Git configuration from a reader.
+// ParseConfig reads and parses Git configuration entries from r.
 func ParseConfig(r io.Reader) (*Config, error) {
 	parser := &configParser{
 		reader:  bufio.NewReader(r),
@@ -62,14 +72,14 @@ func (c *Config) GetAll(section, subsection, key string) []string {
 	return values
 }
 
-// Entries returns all configuration entries.
+// Entries returns a copy of all parsed configuration entries in the order they
+// appeared. Modifying the returned slice does not affect the Config.
 func (c *Config) Entries() []ConfigEntry {
 	result := make([]ConfigEntry, len(c.entries))
 	copy(result, c.entries)
 	return result
 }
 
-// configParser implements Git config file parsing using character-based reading.
 type configParser struct {
 	reader         *bufio.Reader
 	lineNum        int
