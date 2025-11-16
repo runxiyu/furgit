@@ -44,7 +44,9 @@ func OpenRepository(path string) (*Repository, error) {
 	if err != nil {
 		return nil, fmt.Errorf("furgit: unable to open config: %w", err)
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 
 	cfg, err := ParseConfig(f)
 	if err != nil {
