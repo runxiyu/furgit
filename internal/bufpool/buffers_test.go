@@ -1,13 +1,13 @@
-package furgit
+package bufpool
 
 import "testing"
 
-func TestBorrowBodyResizeAndAppend(t *testing.T) {
-	b := borrowBody(1)
+func TestBorrowBufferResizeAndAppend(t *testing.T) {
+	b := Borrow(1)
 	defer b.Release()
 
-	if cap(b.buf) < defaultBodyCap {
-		t.Fatalf("expected capacity >= %d, got %d", defaultBodyCap, cap(b.buf))
+	if cap(b.buf) < DefaultBufferCap {
+		t.Fatalf("expected capacity >= %d, got %d", DefaultBufferCap, cap(b.buf))
 	}
 
 	b.Append([]byte("alpha"))
@@ -30,8 +30,8 @@ func TestBorrowBodyResizeAndAppend(t *testing.T) {
 	}
 }
 
-func TestBorrowBodyRelease(t *testing.T) {
-	b := borrowBody(defaultBodyCap / 2)
+func TestBorrowBufferRelease(t *testing.T) {
+	b := Borrow(DefaultBufferCap / 2)
 	b.Append([]byte("data"))
 	b.Release()
 	if b.buf != nil {

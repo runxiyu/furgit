@@ -5,6 +5,8 @@ import (
 	"compress/zlib"
 	"encoding/binary"
 	"testing"
+
+	"git.sr.ht/~runxiyu/furgit/internal/bufpool"
 )
 
 func compressBytes(t *testing.T, payload []byte) []byte {
@@ -112,10 +114,10 @@ func TestPackVarintRead(t *testing.T) {
 }
 
 func TestPackDeltaApply(t *testing.T) {
-	base := borrowedFromOwned([]byte("abcdefghij"))
+	base := bufpool.FromOwned([]byte("abcdefghij"))
 	defer base.Release()
 	deltaBytes := []byte{0x0a, 0x0a, 0x91, 0x00, 0x03, 0x03, 'X', 'Y', 'Z', 0x91, 0x06, 0x04}
-	delta := borrowedFromOwned(deltaBytes)
+	delta := bufpool.FromOwned(deltaBytes)
 	defer delta.Release()
 	out, err := packDeltaApply(base, delta)
 	if err != nil {
@@ -128,9 +130,9 @@ func TestPackDeltaApply(t *testing.T) {
 }
 
 func TestPackDeltaApplyMismatchedBaseSize(t *testing.T) {
-	base := borrowedFromOwned([]byte("abc"))
+	base := bufpool.FromOwned([]byte("abc"))
 	defer base.Release()
-	delta := borrowedFromOwned([]byte{0x04, 0x04})
+	delta := bufpool.FromOwned([]byte{0x04, 0x04})
 	defer delta.Release()
 	if _, err := packDeltaApply(base, delta); err == nil {
 		t.Fatal("expected error for mismatched base size")
