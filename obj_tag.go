@@ -118,7 +118,11 @@ func tagBody(t *Tag) ([]byte, error) {
 	buf.WriteByte('\n')
 	if t.Tagger != nil {
 		buf.WriteString("tagger ")
-		buf.Write(t.Tagger.Serialize())
+		tb, err := t.Tagger.Serialize()
+		if err != nil {
+			return nil, err
+		}
+		buf.Write(tb)
 		buf.WriteByte('\n')
 	}
 	buf.WriteByte('\n')

@@ -91,27 +91,38 @@ func parseCommit(id Hash, body []byte, repo *Repository) (*Commit, error) {
 	return c, nil
 }
 
-func commitBody(c *Commit) []byte {
+func commitBody(c *Commit) ([]byte, error) {
 	var buf bytes.Buffer
 	fmt.Fprintf(&buf, "tree %s\n", c.Tree.String())
 	for _, p := range c.Parents {
 		fmt.Fprintf(&buf, "parent %s\n", p.String())
 	}
 	buf.WriteString("author ")
-	buf.Write(c.Author.Serialize())
+	ab, err := c.Author.Serialize()
+	if err != nil {
+		return nil, err
+	}
+	buf.Write(ab)
 	buf.WriteByte('\n')
 	buf.WriteString("committer ")
-	buf.Write(c.Committer.Serialize())
+	cb, err := c.Committer.Serialize()
+	if err != nil {
+		return nil, err
+	}
+	buf.Write(cb)
 	buf.WriteByte('\n')
 	buf.WriteByte('\n')
 	buf.Write(c.Message)
 
-	return buf.Bytes()
+	return buf.Bytes(), nil
 }
 
 // Serialize renders a Commit into canonical Git format.
 func (commit *Commit) Serialize() ([]byte, error) {
-	body := commitBody(commit)
+	body, err := commitBody(commit)
+	if err != nil {
+		return nil, err
+	}
 	header, err := headerForType(ObjCommit, body)
 	if err != nil {
 		return nil, err
