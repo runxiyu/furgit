@@ -487,7 +487,7 @@ type packFile struct {
 	closeMu sync.Once
 }
 
-func openPackFile(absPath, rel string) (*packFile, error) {
+func openPackFile(absPath, rel string, hashSize int) (*packFile, error) {
 	f, err := os.Open(absPath)
 	if err != nil {
 		return nil, err
@@ -498,7 +498,7 @@ func openPackFile(absPath, rel string) (*packFile, error) {
 		_ = f.Close()
 		return nil, err
 	}
-	if stat.Size() < 12 {
+	if stat.Size() < 12+int64(hashSize) {
 		_ = f.Close()
 		return nil, ErrInvalidObject
 	}
@@ -532,6 +532,26 @@ func openPackFile(absPath, rel string) (*packFile, error) {
 		_ = syscall.Munmap(region)
 		return nil, err
 	}
+
+	if len(region) < hashSize {
+		_ = syscall.Munmap(region)
+		return nil, ErrInvalidObject
+	}
+	dataEnd := len(region) - hashSize
+	checksumInFile := region[dataEnd:]
+
+	hashFn, ok := hashFuncs[hashSize]
+	if !ok {
+		_ = syscall.Munmap(region)
+		return nil, fmt.Errorf("furgit: unsupported hash size %d", hashSize)
+	}
+
+	computedHash := hashFn(region[:dataEnd])
+	if !bytes.Equal(computedHash.data[:hashSize], checksumInFile) {
+		_ = syscall.Munmap(region)
+		return nil, fmt.Errorf("furgit: pack checksum mismatch in %s", rel)
+	}
+
 	return &packFile{
 		relPath: rel,
 		size:    stat.Size(),
