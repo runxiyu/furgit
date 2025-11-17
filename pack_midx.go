@@ -246,7 +246,6 @@ func (midx *multiPackIndex) lookup(id Hash) (packlocation, error) {
 		}
 	}
 
-	// Verify hash size matches repository hash size
 	if id.size != midx.repo.hashSize {
 		return packlocation{}, fmt.Errorf("furgit: hash size mismatch: got %d, expected %d", id.size, midx.repo.hashSize)
 	}
