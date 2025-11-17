@@ -20,6 +20,9 @@ type Commit struct {
 	Committer Ident
 	// Message represents the commit message.
 	Message []byte
+	// ChangeID represents the change-id header used by
+	// Gerrit and Jujutsu.
+	ChangeID string
 	// ExtraHeaders holds any extra headers present in the commit.
 	ExtraHeaders []ExtraHeader
 }
@@ -71,6 +74,8 @@ func parseCommit(id Hash, body []byte, repo *Repository) (*StoredCommit, error) 
 				return nil, fmt.Errorf("furgit: commit: parent: %w", err)
 			}
 			c.Parents = append(c.Parents, parent)
+		case bytes.HasPrefix(line, []byte("change-id ")):
+			c.ChangeID = string(line)
 		case bytes.HasPrefix(line, []byte("author ")):
 			idt, err := parseIdent(line[7:])
 			if err != nil {
