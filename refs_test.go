@@ -89,7 +89,6 @@ func TestResolveHEAD(t *testing.T) {
 	default:
 		t.Errorf("HEAD kind: got %v, want %v", ref.Kind, HeadKindSymbolic)
 	}
-
 }
 
 func TestPackedRefs(t *testing.T) {

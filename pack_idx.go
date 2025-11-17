@@ -261,7 +261,6 @@ func (pi *packIndex) lookup(id Hash) (packlocation, error) {
 	if err != nil {
 		return packlocation{}, err
 	}
-	// Verify hash size matches repository hash size
 	if id.size != pi.repo.hashSize {
 		return packlocation{}, fmt.Errorf("furgit: hash size mismatch: got %d, expected %d", id.size, pi.repo.hashSize)
 	}
