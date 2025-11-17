@@ -41,7 +41,7 @@ func (repo *Repository) resolvePackedRef(refname string) (Hash, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return Hash{}, ErrInvalidObject
+			return Hash{}, ErrNotFound
 		}
 		return Hash{}, err
 	}
@@ -72,7 +72,7 @@ func (repo *Repository) resolvePackedRef(refname string) (Hash, error) {
 	if scanErr != nil {
 		return Hash{}, scanErr
 	}
-	return Hash{}, ErrInvalidObject
+	return Hash{}, ErrNotFound
 }
 
 // HeadKind represents the kind of HEAD reference.
