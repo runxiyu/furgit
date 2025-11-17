@@ -108,16 +108,16 @@ func parseTree(id Hash, body []byte, repo *Repository) (*StoredTree, error) {
 }
 
 // treeBody builds the entry list for a tree without the Git header.
-func treeBody(t *Tree) []byte {
+func (tree *Tree) serialize() []byte {
 	var bodyLen int
-	for _, e := range t.Entries {
+	for _, e := range tree.Entries {
 		mode := strconv.FormatUint(uint64(e.Mode), 8)
 		bodyLen += len(mode) + 1 + len(e.Name) + 1 + e.ID.size
 	}
 
 	body := make([]byte, bodyLen)
 	pos := 0
-	for _, e := range t.Entries {
+	for _, e := range tree.Entries {
 		mode := strconv.FormatUint(uint64(e.Mode), 8)
 		pos += copy(body[pos:], []byte(mode))
 		body[pos] = ' '
@@ -134,7 +134,7 @@ func treeBody(t *Tree) []byte {
 // Serialize renders the tree into its raw byte representation,
 // including the header (i.e., "type size\0").
 func (tree *Tree) Serialize() ([]byte, error) {
-	body := treeBody(tree)
+	body := tree.serialize()
 	header, err := headerForType(ObjectTypeTree, body)
 	if err != nil {
 		return nil, err

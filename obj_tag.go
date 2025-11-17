@@ -114,11 +114,11 @@ func parseTag(id Hash, body []byte, repo *Repository) (*StoredTag, error) {
 	return t, nil
 }
 
-func tagBody(t *Tag) ([]byte, error) {
+func (tag *Tag) serialize() ([]byte, error) {
 	var buf bytes.Buffer
-	fmt.Fprintf(&buf, "object %s\n", t.Target.String())
+	fmt.Fprintf(&buf, "object %s\n", tag.Target.String())
 	buf.WriteString("type ")
-	switch t.TargetType {
+	switch tag.TargetType {
 	case ObjectTypeCommit:
 		buf.WriteString("commit")
 	case ObjectTypeTree:
@@ -128,17 +128,17 @@ func tagBody(t *Tag) ([]byte, error) {
 	case ObjectTypeTag:
 		buf.WriteString("tag")
 	case ObjectTypeInvalid, ObjectTypeFuture, ObjectTypeOfsDelta, ObjectTypeRefDelta:
-		return nil, fmt.Errorf("furgit: tag: invalid target type %d", t.TargetType)
+		return nil, fmt.Errorf("furgit: tag: invalid target type %d", tag.TargetType)
 	default:
-		return nil, fmt.Errorf("furgit: tag: invalid target type %d", t.TargetType)
+		return nil, fmt.Errorf("furgit: tag: invalid target type %d", tag.TargetType)
 	}
 	buf.WriteByte('\n')
 	buf.WriteString("tag ")
-	buf.Write(t.Name)
+	buf.Write(tag.Name)
 	buf.WriteByte('\n')
-	if t.Tagger != nil {
+	if tag.Tagger != nil {
 		buf.WriteString("tagger ")
-		tb, err := t.Tagger.Serialize()
+		tb, err := tag.Tagger.Serialize()
 		if err != nil {
 			return nil, err
 		}
@@ -146,7 +146,7 @@ func tagBody(t *Tag) ([]byte, error) {
 		buf.WriteByte('\n')
 	}
 	buf.WriteByte('\n')
-	buf.Write(t.Message)
+	buf.Write(tag.Message)
 
 	return buf.Bytes(), nil
 }
@@ -154,7 +154,7 @@ func tagBody(t *Tag) ([]byte, error) {
 // Serialize renders the tag into its raw byte representation,
 // including the header (i.e., "type size\0").
 func (tag *Tag) Serialize() ([]byte, error) {
-	body, err := tagBody(tag)
+	body, err := tag.serialize()
 	if err != nil {
 		return nil, err
 	}

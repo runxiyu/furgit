@@ -112,28 +112,28 @@ func parseCommit(id Hash, body []byte, repo *Repository) (*StoredCommit, error) 
 	return c, nil
 }
 
-func commitBody(c *Commit) ([]byte, error) {
+func (commit *Commit) serialize() ([]byte, error) {
 	var buf bytes.Buffer
-	fmt.Fprintf(&buf, "tree %s\n", c.Tree.String())
-	for _, p := range c.Parents {
+	fmt.Fprintf(&buf, "tree %s\n", commit.Tree.String())
+	for _, p := range commit.Parents {
 		fmt.Fprintf(&buf, "parent %s\n", p.String())
 	}
 	buf.WriteString("author ")
-	ab, err := c.Author.Serialize()
+	ab, err := commit.Author.Serialize()
 	if err != nil {
 		return nil, err
 	}
 	buf.Write(ab)
 	buf.WriteByte('\n')
 	buf.WriteString("committer ")
-	cb, err := c.Committer.Serialize()
+	cb, err := commit.Committer.Serialize()
 	if err != nil {
 		return nil, err
 	}
 	buf.Write(cb)
 	buf.WriteByte('\n')
 	buf.WriteByte('\n')
-	buf.Write(c.Message)
+	buf.Write(commit.Message)
 
 	return buf.Bytes(), nil
 }
@@ -141,7 +141,7 @@ func commitBody(c *Commit) ([]byte, error) {
 // Serialize renders the commit into its raw byte representation,
 // including the header (i.e., "type size\0").
 func (commit *Commit) Serialize() ([]byte, error) {
-	body, err := commitBody(commit)
+	body, err := commit.serialize()
 	if err != nil {
 		return nil, err
 	}
