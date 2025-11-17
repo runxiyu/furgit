@@ -196,23 +196,6 @@ func (pi *packIndex) parse(buf []byte) error {
 	pi.numObjects = nobj
 	pi.names = buf[namesStart:namesEnd]
 	pi.crcs = buf[crcStart:crcEnd]
-
-	if len(buf) < 2*pi.repo.hashSize {
-		return ErrInvalidObject
-	}
-	idxChecksumStart := len(buf) - pi.repo.hashSize
-	idxChecksumInFile := buf[idxChecksumStart:]
-
-	hashFn, ok := hashFuncs[pi.repo.hashSize]
-	if !ok {
-		return fmt.Errorf("furgit: unsupported hash size %d", pi.repo.hashSize)
-	}
-
-	computedHash := hashFn(buf[:idxChecksumStart])
-	if !bytes.Equal(computedHash.data[:pi.repo.hashSize], idxChecksumInFile) {
-		return fmt.Errorf("furgit: index checksum mismatch in %s", pi.idxRel)
-	}
-
 	return nil
 }
 

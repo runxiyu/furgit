@@ -132,7 +132,7 @@ func (repo *Repository) packFile(rel string) (*packFile, error) {
 	if pf, ok := repo.packFiles.Load(rel); ok {
 		return pf.(*packFile), nil
 	}
-	pf, err := openPackFile(repo.repoPath(rel), rel, repo.hashSize)
+	pf, err := openPackFile(repo.repoPath(rel), rel)
 	if err != nil {
 		return nil, err
 	}

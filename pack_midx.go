@@ -1,7 +1,6 @@
 package furgit
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -236,23 +235,6 @@ func (midx *multiPackIndex) parse(buf []byte) error {
 	midx.oids = oids
 	midx.offsets = offsets
 	midx.largeOffs = largeOffs
-
-	if len(buf) < midx.repo.hashSize {
-		return ErrInvalidObject
-	}
-	midxChecksumStart := len(buf) - midx.repo.hashSize
-	midxChecksumInFile := buf[midxChecksumStart:]
-
-	hashFn, ok := hashFuncs[midx.repo.hashSize]
-	if !ok {
-		return fmt.Errorf("furgit: unsupported hash size %d", midx.repo.hashSize)
-	}
-
-	computedHash := hashFn(buf[:midxChecksumStart])
-	if !bytes.Equal(computedHash.data[:midx.repo.hashSize], midxChecksumInFile) {
-		return fmt.Errorf("furgit: multi-pack-index checksum mismatch")
-	}
-
 	return nil
 }
 
