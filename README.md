@@ -51,25 +51,29 @@ a standard UNIX-like filesystem with
 
 ## Performance
 
-Furgit is aggressively optimized for performance.
+Furgit is being aggressively optimized for performance.
 
-[As of November 2025](https://git.sr.ht/~runxiyu/gitbench),
-for the task of `git ls-tree --long HEAD` on large repos such as
-[Linux](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git),
-it is:
+It is difficult to optimize Go code to be as performant as libgit2 (or
+for that matter, upstream git). However, we are making tiny steps
+towards it.
 
-* approximately the same performance as [upstream git](https://git-scm.com),
-* approximately 10 times faster than [libgit2](https://libgit2.org), and
-* approximately 1000 times faster than [go-git](https://github.com/go-git/go-git).
+The first step that has been arguably a success is the packfile parser.
+By using memory-mapped I/O, relatively optimized delta resolution, and
+zero-copy techniques, Furgit is able to perform the equivalent to
+`git ls-tree --long HEAD` on the Linux repository in about 2ms on
+a ThinkPad T14, which is comparable to Git, faster than libgit2,
+and significantly faster than go-git.
 
-This primarily measures the performance of the packfile parser, which heavily
-affects the performance of most operations on large repos; however, there is no
-guarantee that this generalizes to *all* Git operations, individual profiling
-on specific workloads may be necessary.
+However this is a microbenchmark and does not reflect all real-world
+performance. For example, when recursively listing tree entires and
+commits, Furgit's performance is slightly slower than libgit2, both
+lack behind Git by multiple orders of magnitude.
 
-In the future we intend to support
-[commit-graph](https://git-scm.com/docs/commit-graph) and research
-optimizations thereof.
+Things we might consider in the future include:
+
+* [commit-graph](https://git-scm.com/docs/commit-graph)
+* Using a custom zlib implementation to amortize decompression overhead
+* More optimizations to delta resolution
 
 ## Hash algorithm
 
