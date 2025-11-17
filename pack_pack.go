@@ -570,3 +570,27 @@ func (pf *packFile) cursor(ofs uint64) (io.Reader, error) {
 	}
 	return bytes.NewReader(pf.data[ofs:]), nil
 }
+
+func (repo *Repository) packFile(rel string) (*packFile, error) {
+	repo.packFilesMu.RLock()
+	pf, ok := repo.packFiles[rel]
+	repo.packFilesMu.RUnlock()
+	if ok {
+		return pf, nil
+	}
+
+	pf, err := openPackFile(repo.repoPath(rel), rel)
+	if err != nil {
+		return nil, err
+	}
+
+	repo.packFilesMu.Lock()
+	if existing, ok := repo.packFiles[rel]; ok {
+		repo.packFilesMu.Unlock()
+		_ = pf.Close()
+		return existing, nil
+	}
+	repo.packFiles[rel] = pf
+	repo.packFilesMu.Unlock()
+	return pf, nil
+}

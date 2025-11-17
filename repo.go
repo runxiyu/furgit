@@ -31,8 +31,9 @@ type Repository struct {
 	midx     *multiPackIndex
 	midxErr  error
 
-	packFiles sync.Map // string, *packFile
-	closeOnce sync.Once
+	packFiles   map[string]*packFile
+	packFilesMu sync.RWMutex
+	closeOnce   sync.Once
 }
 
 // OpenRepository opens the repository at the provided path.
@@ -82,7 +83,11 @@ func OpenRepository(path string) (*Repository, error) {
 		return nil, fmt.Errorf("furgit: hash algorithm %q is not supported by the hash functions provided by this build", algo)
 	}
 
-	return &Repository{rootPath: path, hashSize: hashSize}, nil
+	return &Repository{
+		rootPath:  path,
+		hashSize:  hashSize,
+		packFiles: make(map[string]*packFile),
+	}, nil
 }
 
 // Close closes the repository, releasing any resources associated with it.
@@ -95,16 +100,15 @@ func OpenRepository(path string) (*Repository, error) {
 func (repo *Repository) Close() error {
 	var closeErr error
 	repo.closeOnce.Do(func() {
-		repo.packFiles.Range(func(keya any, pfa any) bool {
-			key := keya.(string)
-			pf := pfa.(*packFile)
+		repo.packFilesMu.Lock()
+		for key, pf := range repo.packFiles {
 			err := pf.Close()
 			if err != nil && closeErr == nil {
 				closeErr = err
 			}
-			repo.packFiles.Delete(key)
-			return true
-		})
+			delete(repo.packFiles, key)
+		}
+		repo.packFilesMu.Unlock()
 		if len(repo.packIdx) > 0 {
 			for _, idx := range repo.packIdx {
 				err := idx.Close()
@@ -126,22 +130,6 @@ func (repo *Repository) Close() error {
 // repoPath joins the root with a relative path.
 func (repo *Repository) repoPath(rel string) string {
 	return filepath.Join(repo.rootPath, rel)
-}
-
-func (repo *Repository) packFile(rel string) (*packFile, error) {
-	if pf, ok := repo.packFiles.Load(rel); ok {
-		return pf.(*packFile), nil
-	}
-	pf, err := openPackFile(repo.repoPath(rel), rel)
-	if err != nil {
-		return nil, err
-	}
-	actual, loaded := repo.packFiles.LoadOrStore(rel, pf)
-	if loaded {
-		_ = pf.Close()
-		return actual.(*packFile), nil
-	}
-	return pf, nil
 }
 
 // ParseHash converts a hex string into a Hash, validating
