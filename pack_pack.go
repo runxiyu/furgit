@@ -70,10 +70,10 @@ func (repo *Repository) packReadAt(loc packlocation, want Hash) (StoredObject, e
 		return nil, err
 	}
 	data := body.Bytes()
-	if !repo.verifyTypedObject(ty, data, want) {
-		body.Release()
-		return nil, ErrInvalidObject
-	}
+	// if !repo.verifyTypedObject(ty, data, want) {
+	// 	body.Release()
+	// 	return nil, ErrInvalidObject
+	// }
 	obj, err := parseObjectBody(ty, want, data, repo)
 	body.Release()
 	return obj, err

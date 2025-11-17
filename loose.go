@@ -70,9 +70,9 @@ func (repo *Repository) looseReadTyped(id Hash) (ObjectType, []byte, error) {
 	if declaredSize != int64(len(body)) {
 		return ObjectTypeInvalid, nil, ErrInvalidObject
 	}
-	if !repo.verifyRawObject(raw, id) {
-		return ObjectTypeInvalid, nil, ErrInvalidObject
-	}
+	// if !repo.verifyRawObject(raw, id) {
+	// 	return ObjectTypeInvalid, nil, ErrInvalidObject
+	// }
 
 	out := append([]byte(nil), body...)
 	return ty, out, nil

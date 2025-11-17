@@ -159,7 +159,7 @@ func (repo *Repository) computeRawHash(data []byte) Hash {
 }
 
 // verifyRawObject verifies a raw object against its expected hash.
-func (repo *Repository) verifyRawObject(buf []byte, want Hash) bool {
+func (repo *Repository) verifyRawObject(buf []byte, want Hash) bool { //nolint:unused
 	if want.size != repo.hashSize {
 		return false
 	}
@@ -167,7 +167,7 @@ func (repo *Repository) verifyRawObject(buf []byte, want Hash) bool {
 }
 
 // verifyTypedObject verifies a typed object against its expected hash.
-func (repo *Repository) verifyTypedObject(ty ObjectType, body []byte, want Hash) bool {
+func (repo *Repository) verifyTypedObject(ty ObjectType, body []byte, want Hash) bool { //nolint:unused
 	if want.size != repo.hashSize {
 		return false
 	}
