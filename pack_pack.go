@@ -2,7 +2,6 @@ package furgit
 
 import (
 	"bytes"
-	"git.sr.ht/~runxiyu/furgit/internal/zlib"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -11,6 +10,8 @@ import (
 	"os"
 	"sync"
 	"syscall"
+
+	"git.sr.ht/~runxiyu/furgit/internal/zlib"
 
 	"git.sr.ht/~runxiyu/furgit/internal/bufpool"
 )

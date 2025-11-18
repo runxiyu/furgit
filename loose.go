@@ -2,12 +2,13 @@ package furgit
 
 import (
 	"bytes"
-	"git.sr.ht/~runxiyu/furgit/internal/zlib"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"git.sr.ht/~runxiyu/furgit/internal/zlib"
 )
 
 const looseHeaderLimit = 4096
