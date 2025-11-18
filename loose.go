@@ -2,7 +2,7 @@ package furgit
 
 import (
 	"bytes"
-	"compress/zlib"
+	"git.sr.ht/~runxiyu/furgit/internal/zlib"
 	"fmt"
 	"io"
 	"os"
