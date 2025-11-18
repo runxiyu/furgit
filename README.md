@@ -82,14 +82,6 @@ Furgit supports both SHA-256 and SHA-1.
 The default tests run with SHA-256. To run tests with SHA-1, use the `sha1`
 build tag.
 
-## Go versions
-
-We currently support Go 1.18 or later, in order to support
-ougccgo](https://gcc.gnu.org/onlinedocs/gccgo/).
-
-gccgo support may be dropped in the future if there is a strong reason to use
-newer language features.
-
 ## Active services using Furgit
 
 There's an experimental instance of [Villosa](https://codeberg.org/lindenii/villosa)
