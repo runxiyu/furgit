@@ -74,8 +74,7 @@ func (repo *Repository) looseReadTyped(id Hash) (ObjectType, []byte, error) {
 	// 	return ObjectTypeInvalid, nil, ErrInvalidObject
 	// }
 
-	out := append([]byte(nil), body...)
-	return ty, out, nil
+	return ty, body, nil
 }
 
 func (repo *Repository) looseTypeSize(id Hash) (ObjectType, int64, error) {
