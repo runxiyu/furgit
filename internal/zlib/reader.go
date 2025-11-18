@@ -187,7 +187,10 @@ func (z *reader) Reset(r io.Reader, dict []byte) error {
 			z.decompressor = flate.NewReader(z.r)
 		}
 	} else {
-		z.decompressor.(flate.Resetter).Reset(z.r, dict)
+		z.err = z.decompressor.(flate.Resetter).Reset(z.r, dict)
+		if z.err != nil {
+			return z.err
+		}
 	}
 	z.digest = adler32.New()
 	return nil
