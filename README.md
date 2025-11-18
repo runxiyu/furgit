@@ -66,8 +66,8 @@ and significantly faster than go-git.
 
 However this is a microbenchmark and does not reflect all real-world
 performance. For example, when recursively listing tree entires and
-commits, Furgit's performance is slightly slower than libgit2, both
-lack behind Git by multiple orders of magnitude.
+commits, Furgit's performance is only slightly faster than libgit2;
+both lack behind Git by multiple orders of magnitude.
 
 Things we might consider in the future include:
 
