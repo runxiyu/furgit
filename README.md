@@ -18,6 +18,11 @@ Furgit's lineage is from [Villosa](https://codeberg.org/lindenii/villosa), a
 new, work-in-progress software development forge. It started as an internal
 package inside Villosa, and was later extracted into a standalone module.
 
+Villosa's old internal Git package, in turn, based on my work in
+[hare-git](https://forge.lindenii.org/hare/-/repos/hare-git/) for the Hare
+programming language. Features in here will likely be ported back to
+hare-git in the future.
+
 ## Goals and current features
 
 We do not focus on command-line utilities; in particular, Furgit does not
