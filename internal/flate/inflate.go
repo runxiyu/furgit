@@ -23,10 +23,9 @@ const (
 	// The next three numbers come from the RFC section 3.2.7, with the
 	// additional proviso in section 3.2.5 which implies that distance codes
 	// 30 and 31 should never occur in compressed data.
-	maxNumLit         = 286
-	maxNumDist        = 30
-	maxStoreBlockSize = 65535
-	numCodes          = 19 // number of codes in Huffman meta-code
+	maxNumLit  = 286
+	maxNumDist = 30
+	numCodes   = 19 // number of codes in Huffman meta-code
 )
 
 // Initialize the fixedHuffmanDecoder only once upon first use.
@@ -168,7 +167,7 @@ func (h *huffmanDecoder) init(lengths []int) bool {
 	// Exception: To be compatible with zlib, we also need to
 	// accept degenerate single-code codings. See also
 	// TestDegenerateHuffmanCoding.
-	if code != 1<<uint(max) && !(code == 1 && max == 1) {
+	if code != 1<<uint(max) && (code != 1 || max != 1) {
 		return false
 	}
 
