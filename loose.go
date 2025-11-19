@@ -2,7 +2,6 @@ package furgit
 
 import (
 	"bytes"
-	"compress/zlib"
 	"fmt"
 	"io"
 	"os"
@@ -10,6 +9,7 @@ import (
 	"strconv"
 
 	"git.sr.ht/~runxiyu/furgit/internal/bufpool"
+	"git.sr.ht/~runxiyu/furgit/internal/zlib"
 	"git.sr.ht/~runxiyu/furgit/internal/zlibx"
 )
 

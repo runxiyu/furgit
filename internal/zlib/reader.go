@@ -3,14 +3,11 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package zlibx implements reading of zlib format compressed data,
+Package zlib implements reading and writing of zlib format compressed data,
 as specified in RFC 1950.
 
 This package differs from the standard library's compress/zlib package
-in that it pools readers to reduce allocations. Writing is unsupported.
-
-THis package will likely be refactorered much more for our specific
-use case of only doing full decompressions to byte slices.
+in that it pools readers to reduce allocations. Writers are unchanged.
 
 Note that closing the reader causes it to be returned to a pool for
 reuse. Therefore, the caller must not retain references to the
@@ -33,10 +30,11 @@ and to read that data back:
 	io.Copy(os.Stdout, r)
 	r.Close()
 */
-package zlibx
+package zlib
 
 import (
 	"bufio"
+	"compress/flate"
 	"encoding/binary"
 	"errors"
 	"hash"
@@ -44,7 +42,6 @@ import (
 	"sync"
 
 	"git.sr.ht/~runxiyu/furgit/internal/adler32"
-	"git.sr.ht/~runxiyu/furgit/internal/flatex"
 )
 
 const (
@@ -69,7 +66,7 @@ var pool = sync.Pool{
 }
 
 type reader struct {
-	r            flatex.Reader
+	r            flate.Reader
 	decompressor io.ReadCloser
 	digest       hash.Hash32
 	err          error
@@ -149,7 +146,7 @@ func (z *reader) Close() error {
 
 func (z *reader) Reset(r io.Reader, dict []byte) error {
 	*z = reader{decompressor: z.decompressor}
-	if fr, ok := r.(flatex.Reader); ok {
+	if fr, ok := r.(flate.Reader); ok {
 		z.r = fr
 	} else {
 		z.r = bufio.NewReader(r)
@@ -186,12 +183,12 @@ func (z *reader) Reset(r io.Reader, dict []byte) error {
 
 	if z.decompressor == nil {
 		if haveDict {
-			z.decompressor = flatex.NewReaderDict(z.r, dict)
+			z.decompressor = flate.NewReaderDict(z.r, dict)
 		} else {
-			z.decompressor = flatex.NewReader(z.r)
+			z.decompressor = flate.NewReader(z.r)
 		}
 	} else {
-		z.err = z.decompressor.(flatex.Resetter).Reset(z.r, dict)
+		z.err = z.decompressor.(flate.Resetter).Reset(z.r, dict)
 		if z.err != nil {
 			return z.err
 		}
