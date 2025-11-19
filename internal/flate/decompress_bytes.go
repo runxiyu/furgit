@@ -7,49 +7,18 @@ import (
 	"git.sr.ht/~runxiyu/furgit/internal/bufpool"
 )
 
-// byteSliceReader implements Reader over an in-memory byte slice.
-type byteSliceReader struct {
-	data []byte
-	off  int
-}
-
-func (r *byteSliceReader) Reset(data []byte) {
-	r.data = data
-	r.off = 0
-}
-
-func (r *byteSliceReader) Read(p []byte) (int, error) {
-	if r.off >= len(r.data) {
-		return 0, io.EOF
-	}
-	n := copy(p, r.data[r.off:])
-	r.off += n
-	return n, nil
-}
-
-func (r *byteSliceReader) ReadByte() (byte, error) {
-	if r.off >= len(r.data) {
-		return 0, io.EOF
-	}
-	b := r.data[r.off]
-	r.off++
-	return b, nil
-}
-
-// bufferDecompressor wraps the core decompressor with pooling state so that
-// byte-slice decompressions avoid repeated allocations.
+// bufferDecompressor wraps the custom slice inflater so byte-slice
+// decompressions avoid repeated allocations.
 type bufferDecompressor struct {
-	dec    decompressor
-	reader byteSliceReader
+	inflater sliceInflater
 }
 
 var bufferDecompressorPool = sync.Pool{
 	New: func() any {
 		fixedHuffmanDecoderInit()
 		d := &bufferDecompressor{}
-		d.dec.bits = new([maxNumLit + maxNumDist]int)
-		d.dec.codebits = new([numCodes]int)
-		d.dec.step = (*decompressor).nextBlock
+		d.inflater.bits = new([maxNumLit + maxNumDist]int)
+		d.inflater.codebits = new([numCodes]int)
 		return d
 	},
 }
@@ -65,13 +34,9 @@ func Decompress(src []byte) (bufpool.Buffer, int, error) {
 // returned value reports how many bytes of src were consumed.
 func DecompressDict(src []byte, dict []byte) (bufpool.Buffer, int, error) {
 	d := bufferDecompressorPool.Get().(*bufferDecompressor)
-	defer func() {
-		d.reader.Reset(nil)
-		bufferDecompressorPool.Put(d)
-	}()
+	defer bufferDecompressorPool.Put(d)
 
-	d.reader.Reset(src)
-	if err := d.dec.Reset(&d.reader, dict); err != nil {
+	if err := d.inflater.reset(src, dict); err != nil {
 		return bufpool.Buffer{}, 0, err
 	}
 
@@ -79,21 +44,21 @@ func DecompressDict(src []byte, dict []byte) (bufpool.Buffer, int, error) {
 	out.Resize(0)
 
 	for {
-		if len(d.dec.toRead) > 0 {
-			out.Append(d.dec.toRead)
-			d.dec.toRead = nil
+		if len(d.inflater.toRead) > 0 {
+			out.Append(d.inflater.toRead)
+			d.inflater.toRead = nil
 			continue
 		}
-		if d.dec.err != nil {
-			if d.dec.err == io.EOF {
-				return out, d.reader.off, nil
+		if d.inflater.err != nil {
+			if d.inflater.err == io.EOF {
+				return out, d.inflater.pos, nil
 			}
 			out.Release()
-			return bufpool.Buffer{}, 0, d.dec.err
+			return bufpool.Buffer{}, 0, d.inflater.err
 		}
-		d.dec.step(&d.dec)
-		if d.dec.err != nil && len(d.dec.toRead) == 0 {
-			d.dec.toRead = d.dec.dict.readFlush()
+		d.inflater.step(&d.inflater)
+		if d.inflater.err != nil && len(d.inflater.toRead) == 0 {
+			d.inflater.toRead = d.inflater.dict.readFlush()
 		}
 	}
 }
