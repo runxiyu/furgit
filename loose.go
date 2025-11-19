@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"git.sr.ht/~runxiyu/furgit/internal/bufpool"
 	"git.sr.ht/~runxiyu/furgit/internal/zlib"
 )
 
@@ -28,55 +29,63 @@ func (repo *Repository) looseRead(id Hash) (StoredObject, error) {
 	if err != nil {
 		return nil, err
 	}
-	return parseObjectBody(ty, id, body, repo)
+	obj, err := parseObjectBody(ty, id, body.Bytes(), repo)
+	body.Release()
+	return obj, err
 }
 
-func (repo *Repository) looseReadTyped(id Hash) (ObjectType, []byte, error) {
+func (repo *Repository) looseReadTyped(id Hash) (ObjectType, bufpool.Buffer, error) {
 	path, err := repo.loosePath(id)
 	if err != nil {
-		return ObjectTypeInvalid, nil, err
+		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
 	path = repo.repoPath(path)
 	f, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return ObjectTypeInvalid, nil, ErrNotFound
+			return ObjectTypeInvalid, bufpool.Buffer{}, ErrNotFound
 		}
-		return ObjectTypeInvalid, nil, err
+		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
 	defer func() { _ = f.Close() }()
 
-	zr, err := zlib.NewReader(f)
+	compressed, err := io.ReadAll(f)
 	if err != nil {
-		return ObjectTypeInvalid, nil, err
-	}
-	defer func() { _ = zr.Close() }()
-
-	raw, err := io.ReadAll(zr)
-	if err != nil {
-		return ObjectTypeInvalid, nil, err
+		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
 
-	nul := bytes.IndexByte(raw, 0)
+	raw, err := zlib.Decompress(compressed)
+	if err != nil {
+		return ObjectTypeInvalid, bufpool.Buffer{}, err
+	}
+
+	rawBytes := raw.Bytes()
+	nul := bytes.IndexByte(rawBytes, 0)
 	if nul < 0 {
-		return ObjectTypeInvalid, nil, ErrInvalidObject
+		raw.Release()
+		return ObjectTypeInvalid, bufpool.Buffer{}, ErrInvalidObject
 	}
 
-	header := raw[:nul]
-	body := raw[nul+1:]
+	header := rawBytes[:nul]
+	body := rawBytes[nul+1:]
 
 	ty, declaredSize, err := parseLooseHeader(header)
 	if err != nil {
-		return ObjectTypeInvalid, nil, err
+		raw.Release()
+		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
 	if declaredSize != int64(len(body)) {
-		return ObjectTypeInvalid, nil, ErrInvalidObject
+		raw.Release()
+		return ObjectTypeInvalid, bufpool.Buffer{}, ErrInvalidObject
 	}
+
+	copy(rawBytes, body)
+	raw.Resize(len(body))
 	// if !repo.verifyRawObject(raw, id) {
 	// 	return ObjectTypeInvalid, nil, ErrInvalidObject
 	// }
 
-	return ty, body, nil
+	return ty, raw, nil
 }
 
 func (repo *Repository) looseTypeSize(id Hash) (ObjectType, int64, error) {

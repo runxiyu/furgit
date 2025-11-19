@@ -130,32 +130,33 @@ func packHeaderRead(r io.Reader) (ObjectType, int, error) {
 	return ty, size, nil
 }
 
-func packSectionInflate(r io.Reader, sizeHint int) (bufpool.Buffer, error) {
+func packSectionInflate(pf *packFile, objectOfs uint64, r io.Reader, sizeHint int) (bufpool.Buffer, error) {
+	if pf != nil {
+		if br, ok := r.(*bytes.Reader); ok {
+			total := br.Size()
+			remaining := int64(br.Len())
+			consumed := total - remaining
+			start := objectOfs + uint64(consumed)
+			if int64(consumed) < 0 || start > uint64(len(pf.data)) {
+				return bufpool.Buffer{}, ErrInvalidObject
+			}
+			body, err := zlib.Decompress(pf.data[start:])
+			if err != nil {
+				return bufpool.Buffer{}, err
+			}
+			if sizeHint > 0 && len(body.Bytes()) != sizeHint {
+				body.Release()
+				return bufpool.Buffer{}, ErrInvalidObject
+			}
+			return body, nil
+		}
+	}
+
 	zr, err := zlib.NewReader(r)
 	if err != nil {
 		return bufpool.Buffer{}, err
 	}
 	defer func() { _ = zr.Close() }()
-
-	if sizeHint > 0 {
-		body := bufpool.Borrow(sizeHint)
-		body.Resize(sizeHint)
-		_, err := io.ReadFull(zr, body.Bytes())
-		if err != nil {
-			body.Release()
-			return bufpool.Buffer{}, err
-		}
-		var extra [1]byte
-		_, err = zr.Read(extra[:])
-		if err != io.EOF {
-			body.Release()
-			if err == nil {
-				return bufpool.Buffer{}, ErrInvalidObject
-			}
-			return bufpool.Buffer{}, err
-		}
-		return body, nil
-	}
 
 	body := bufpool.Borrow(bufpool.DefaultBufferCap)
 	var scratch [32 * 1024]byte
@@ -165,6 +166,10 @@ func packSectionInflate(r io.Reader, sizeHint int) (bufpool.Buffer, error) {
 			body.Append(scratch[:n])
 		}
 		if err == io.EOF {
+			if sizeHint > 0 && len(body.Bytes()) != sizeHint {
+				body.Release()
+				return bufpool.Buffer{}, ErrInvalidObject
+			}
 			return body, nil
 		}
 		if err != nil {
@@ -190,7 +195,7 @@ func (repo *Repository) packDeltaResolveOfs(pf *packFile, deltaOffset uint64, r 
 	if err != nil {
 		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
-	delta, err := packSectionInflate(r, 0)
+	delta, err := packSectionInflate(pf, deltaOffset, r, 0)
 	if err != nil {
 		body.Release()
 		return ObjectTypeInvalid, bufpool.Buffer{}, err
@@ -234,7 +239,7 @@ func (repo *Repository) packBodyResolveByID(id Hash) (ObjectType, bufpool.Buffer
 	if err != nil {
 		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
-	return ty, bufpool.FromOwned(body), nil
+	return ty, body, nil
 }
 
 type packKey struct {
@@ -314,7 +319,7 @@ func (repo *Repository) packBodyResolveWithin(pf *packFile, ofs uint64) (ObjectT
 
 	switch ty {
 	case ObjectTypeCommit, ObjectTypeTree, ObjectTypeBlob, ObjectTypeTag:
-		body, err := packSectionInflate(r, size)
+		body, err := packSectionInflate(pf, ofs, r, size)
 		return ty, body, err
 	case ObjectTypeRefDelta:
 		var base Hash
@@ -323,7 +328,7 @@ func (repo *Repository) packBodyResolveWithin(pf *packFile, ofs uint64) (ObjectT
 			return ObjectTypeInvalid, bufpool.Buffer{}, err
 		}
 		base.size = repo.hashSize
-		delta, err := packSectionInflate(r, 0)
+		delta, err := packSectionInflate(pf, ofs, r, 0)
 		if err != nil {
 			return ObjectTypeInvalid, bufpool.Buffer{}, err
 		}
