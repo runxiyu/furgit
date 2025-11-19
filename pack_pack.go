@@ -179,37 +179,6 @@ func packSectionInflate(pf *packFile, objectOfs uint64, r io.Reader, sizeHint in
 	}
 }
 
-func (repo *Repository) packDeltaResolveOfs(pf *packFile, deltaOffset uint64, r io.Reader) (ObjectType, bufpool.Buffer, error) {
-	dist, err := packDeltaReadOfsDistance(r)
-	if err != nil {
-		return ObjectTypeInvalid, bufpool.Buffer{}, err
-	}
-	var baseOfs uint64
-	if deltaOffset > dist {
-		baseOfs = deltaOffset - dist
-	}
-	if baseOfs == 0 {
-		return ObjectTypeInvalid, bufpool.Buffer{}, ErrInvalidObject
-	}
-	ty, body, err := repo.packBodyResolveWithin(pf, baseOfs)
-	if err != nil {
-		return ObjectTypeInvalid, bufpool.Buffer{}, err
-	}
-	delta, err := packSectionInflate(pf, deltaOffset, r, 0)
-	if err != nil {
-		body.Release()
-		return ObjectTypeInvalid, bufpool.Buffer{}, err
-	}
-	out, err := packDeltaApply(body, delta)
-	delta.Release()
-	body.Release()
-	if err != nil {
-		out.Release()
-		return ObjectTypeInvalid, bufpool.Buffer{}, err
-	}
-	return ty, out, nil
-}
-
 func packDeltaReadOfsDistance(r io.Reader) (uint64, error) {
 	var b [1]byte
 	_, err := io.ReadFull(r, b[:])
@@ -227,21 +196,6 @@ func packDeltaReadOfsDistance(r io.Reader) (uint64, error) {
 	return dist, nil
 }
 
-func (repo *Repository) packBodyResolveByID(id Hash) (ObjectType, bufpool.Buffer, error) {
-	loc, err := repo.packIndexFind(id)
-	if err == nil {
-		return repo.packBodyResolveAtLocation(loc)
-	}
-	if !errors.Is(err, ErrNotFound) {
-		return ObjectTypeInvalid, bufpool.Buffer{}, err
-	}
-	ty, body, err := repo.looseReadTyped(id)
-	if err != nil {
-		return ObjectTypeInvalid, bufpool.Buffer{}, err
-	}
-	return ty, body, nil
-}
-
 type packKey struct {
 	path string
 	ofs  uint64
@@ -254,104 +208,194 @@ func (repo *Repository) packTypeSizeWithin(pf *packFile, ofs uint64, seen map[pa
 	if seen == nil {
 		seen = make(map[packKey]struct{})
 	}
-	key := packKey{path: pf.relPath, ofs: ofs}
-	if _, dup := seen[key]; dup {
-		return ObjectTypeInvalid, 0, ErrInvalidObject
-	}
-	seen[key] = struct{}{}
-	defer delete(seen, key)
+	var visited []packKey
+	defer func() {
+		for _, key := range visited {
+			delete(seen, key)
+		}
+	}()
 
-	r, err := pf.cursor(ofs)
-	if err != nil {
-		return ObjectTypeInvalid, 0, err
-	}
-	ty, size, err := packHeaderRead(r)
-	if err != nil {
-		return ObjectTypeInvalid, 0, err
-	}
-	declaredSize := int64(size)
+	var declaredSize int64
+	firstHeader := true
 
-	switch ty {
-	case ObjectTypeCommit, ObjectTypeTree, ObjectTypeBlob, ObjectTypeTag:
-		return ty, declaredSize, nil
-	case ObjectTypeRefDelta:
-		var base Hash
-		_, err := io.ReadFull(r, base.data[:repo.hashSize])
-		if err != nil {
-			return ObjectTypeInvalid, 0, err
-		}
-		base.size = repo.hashSize
-		baseTy, _, err := repo.packTypeSizeByID(base, seen)
-		if err != nil {
-			return ObjectTypeInvalid, 0, err
-		}
-		return baseTy, declaredSize, nil
-	case ObjectTypeOfsDelta:
-		dist, err := packDeltaReadOfsDistance(r)
-		if err != nil {
-			return ObjectTypeInvalid, 0, err
-		}
-		if ofs <= dist {
+	for {
+		key := packKey{path: pf.relPath, ofs: ofs}
+		if _, dup := seen[key]; dup {
 			return ObjectTypeInvalid, 0, ErrInvalidObject
 		}
-		baseOfs := ofs - dist
-		baseTy, _, err := repo.packTypeSizeWithin(pf, baseOfs, seen)
+		seen[key] = struct{}{}
+		visited = append(visited, key)
+
+		r, err := pf.cursor(ofs)
 		if err != nil {
 			return ObjectTypeInvalid, 0, err
 		}
-		return baseTy, declaredSize, nil
-	case ObjectTypeInvalid, ObjectTypeFuture:
-		return ObjectTypeInvalid, 0, ErrInvalidObject
-	default:
-		return ObjectTypeInvalid, 0, ErrInvalidObject
+		ty, size, err := packHeaderRead(r)
+		if err != nil {
+			return ObjectTypeInvalid, 0, err
+		}
+		if firstHeader {
+			declaredSize = int64(size)
+			firstHeader = false
+		}
+
+		switch ty {
+		case ObjectTypeCommit, ObjectTypeTree, ObjectTypeBlob, ObjectTypeTag:
+			return ty, declaredSize, nil
+		case ObjectTypeRefDelta:
+			var base Hash
+			_, err := io.ReadFull(r, base.data[:repo.hashSize])
+			if err != nil {
+				return ObjectTypeInvalid, 0, err
+			}
+			base.size = repo.hashSize
+			loc, err := repo.packIndexFind(base)
+			if err == nil {
+				pf, err = repo.packFile(loc.PackPath)
+				if err != nil {
+					return ObjectTypeInvalid, 0, err
+				}
+				ofs = loc.Offset
+				continue
+			}
+			if !errors.Is(err, ErrNotFound) {
+				return ObjectTypeInvalid, 0, err
+			}
+			baseTy, _, err := repo.looseTypeSize(base)
+			if err != nil {
+				return ObjectTypeInvalid, 0, err
+			}
+			return baseTy, declaredSize, nil
+		case ObjectTypeOfsDelta:
+			dist, err := packDeltaReadOfsDistance(r)
+			if err != nil {
+				return ObjectTypeInvalid, 0, err
+			}
+			if ofs <= dist {
+				return ObjectTypeInvalid, 0, ErrInvalidObject
+			}
+			ofs -= dist
+		case ObjectTypeInvalid, ObjectTypeFuture:
+			return ObjectTypeInvalid, 0, ErrInvalidObject
+		default:
+			return ObjectTypeInvalid, 0, ErrInvalidObject
+		}
 	}
 }
 
 func (repo *Repository) packBodyResolveWithin(pf *packFile, ofs uint64) (ObjectType, bufpool.Buffer, error) {
-	r, err := pf.cursor(ofs)
-	if err != nil {
-		return ObjectTypeInvalid, bufpool.Buffer{}, err
+	if pf == nil {
+		return ObjectTypeInvalid, bufpool.Buffer{}, ErrInvalidObject
 	}
-	ty, size, err := packHeaderRead(r)
-	if err != nil {
+
+	type deltaFrame struct {
+		delta bufpool.Buffer
+	}
+	var frames []deltaFrame
+	defer func() {
+		for i := range frames {
+			frames[i].delta.Release()
+		}
+	}()
+
+	var (
+		body      bufpool.Buffer
+		bodyReady bool
+		resultTy  ObjectType
+	)
+	fail := func(err error) (ObjectType, bufpool.Buffer, error) {
+		if bodyReady {
+			body.Release()
+			bodyReady = false
+		}
 		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
 
-	switch ty {
-	case ObjectTypeCommit, ObjectTypeTree, ObjectTypeBlob, ObjectTypeTag:
-		body, err := packSectionInflate(pf, ofs, r, size)
-		return ty, body, err
-	case ObjectTypeRefDelta:
-		var base Hash
-		_, err := io.ReadFull(r, base.data[:repo.hashSize])
+	resolved := false
+	for !resolved {
+		r, err := pf.cursor(ofs)
 		if err != nil {
-			return ObjectTypeInvalid, bufpool.Buffer{}, err
+			return fail(err)
 		}
-		base.size = repo.hashSize
-		delta, err := packSectionInflate(pf, ofs, r, 0)
+		ty, size, err := packHeaderRead(r)
 		if err != nil {
-			return ObjectTypeInvalid, bufpool.Buffer{}, err
+			return fail(err)
 		}
-		bt, body, err := repo.packBodyResolveByID(base)
-		if err != nil {
-			delta.Release()
-			return ObjectTypeInvalid, bufpool.Buffer{}, err
+
+		switch ty {
+		case ObjectTypeCommit, ObjectTypeTree, ObjectTypeBlob, ObjectTypeTag:
+			body, err = packSectionInflate(pf, ofs, r, size)
+			if err != nil {
+				return fail(err)
+			}
+			bodyReady = true
+			resultTy = ty
+			resolved = true
+		case ObjectTypeRefDelta:
+			var base Hash
+			_, err := io.ReadFull(r, base.data[:repo.hashSize])
+			if err != nil {
+				return fail(err)
+			}
+			base.size = repo.hashSize
+			delta, err := packSectionInflate(pf, ofs, r, 0)
+			if err != nil {
+				return fail(err)
+			}
+			frames = append(frames, deltaFrame{delta: delta})
+
+			loc, err := repo.packIndexFind(base)
+			if err == nil {
+				pf, err = repo.packFile(loc.PackPath)
+				if err != nil {
+					return fail(err)
+				}
+				ofs = loc.Offset
+				continue
+			}
+			if !errors.Is(err, ErrNotFound) {
+				return fail(err)
+			}
+			resultTy, body, err = repo.looseReadTyped(base)
+			if err != nil {
+				return fail(err)
+			}
+			bodyReady = true
+			resolved = true
+		case ObjectTypeOfsDelta:
+			dist, err := packDeltaReadOfsDistance(r)
+			if err != nil {
+				return fail(err)
+			}
+			if ofs <= dist {
+				return fail(ErrInvalidObject)
+			}
+			delta, err := packSectionInflate(pf, ofs, r, 0)
+			if err != nil {
+				return fail(err)
+			}
+			frames = append(frames, deltaFrame{delta: delta})
+			ofs -= dist
+		case ObjectTypeInvalid, ObjectTypeFuture:
+			return fail(ErrInvalidObject)
+		default:
+			return fail(ErrInvalidObject)
 		}
-		out, err := packDeltaApply(body, delta)
-		delta.Release()
-		body.Release()
-		if err != nil {
-			out.Release()
-			return ObjectTypeInvalid, bufpool.Buffer{}, err
-		}
-		return bt, out, nil
-	case ObjectTypeOfsDelta:
-		return repo.packDeltaResolveOfs(pf, ofs, r)
-	case ObjectTypeInvalid, ObjectTypeFuture:
-		return ObjectTypeInvalid, bufpool.Buffer{}, ErrInvalidObject
-	default:
-		return ObjectTypeInvalid, bufpool.Buffer{}, ErrInvalidObject
 	}
+
+	for i := len(frames) - 1; i >= 0; i-- {
+		out, err := packDeltaApply(body, frames[i].delta)
+		body.Release()
+		bodyReady = false
+		frames[i].delta.Release()
+		if err != nil {
+			return fail(err)
+		}
+		body = out
+		bodyReady = true
+	}
+	frames = nil
+	return resultTy, body, nil
 }
 
 func packDeltaApply(base, delta bufpool.Buffer) (bufpool.Buffer, error) {
