@@ -37,10 +37,10 @@ import (
 	"encoding/binary"
 	"errors"
 	"hash"
-	"hash/adler32"
 	"io"
 	"sync"
 
+	"git.sr.ht/~runxiyu/furgit/internal/adler32"
 	"git.sr.ht/~runxiyu/furgit/internal/flate"
 )
 
