@@ -1,3 +1,5 @@
+//go:build arm64 && !purego
+
 package adler32
 
 import (
