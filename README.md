@@ -78,6 +78,7 @@ Things we might consider in the future include:
 
 * [commit-graph](https://git-scm.com/docs/commit-graph)
 * Using a custom zlib implementation to amortize decompression overhead
+  (see the `zlib` branch)
 * More optimizations to delta resolution
 
 ## Hash algorithm
