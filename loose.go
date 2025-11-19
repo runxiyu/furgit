@@ -2,6 +2,7 @@ package furgit
 
 import (
 	"bytes"
+	stdzlib "compress/zlib"
 	"fmt"
 	"io"
 	"os"
@@ -201,7 +202,7 @@ func (repo *Repository) WriteLooseObject(obj Object) (Hash, error) {
 	}
 
 	var buf bytes.Buffer
-	zw := zlib.NewWriter(&buf)
+	zw := stdzlib.NewWriter(&buf)
 	if _, err := zw.Write(raw); err != nil {
 		return Hash{}, err
 	}

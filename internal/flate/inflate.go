@@ -16,13 +16,17 @@ import (
 )
 
 const (
-	maxCodeLen = 16 // max length of Huffman code
+	// The special code used to mark the end of a block.
+	endBlockMarker = 256
+	maxCodeLen     = 16      // max length of Huffman code
+	maxMatchOffset = 1 << 15 // The largest match offset
 	// The next three numbers come from the RFC section 3.2.7, with the
 	// additional proviso in section 3.2.5 which implies that distance codes
 	// 30 and 31 should never occur in compressed data.
-	maxNumLit  = 286
-	maxNumDist = 30
-	numCodes   = 19 // number of codes in Huffman meta-code
+	maxNumLit         = 286
+	maxNumDist        = 30
+	maxStoreBlockSize = 65535
+	numCodes          = 19 // number of codes in Huffman meta-code
 )
 
 // Initialize the fixedHuffmanDecoder only once upon first use.
