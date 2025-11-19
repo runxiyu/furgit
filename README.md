@@ -81,8 +81,7 @@ both lack behind Git by multiple orders of magnitude.
 Things we might consider in the future include:
 
 * [commit-graph](https://git-scm.com/docs/commit-graph)
-* Using a custom zlib implementation to amortize decompression overhead
-  (see the `zlib` branch)
+* Improving the custom zlib implementation with more SIMD
 * More optimizations to delta resolution
 
 ## Hash algorithm
