@@ -18,6 +18,9 @@ tasks:
   - test-race-sha1: |
       cd furgit
       go test -race -v -tags sha1 ./...
+  - test-purego-sha256: |
+      cd furgit
+      go test -v -tags purego ./...
   - lint: |
       cd furgit
       golangci-lint run ./...
