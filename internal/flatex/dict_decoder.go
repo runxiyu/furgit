@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package flate
+package flatex
 
 // dictDecoder implements the LZ77 sliding dictionary as used in decompression.
 // LZ77 decompresses data through sequences of two forms of commands:

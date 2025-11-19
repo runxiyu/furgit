@@ -1,4 +1,4 @@
-package zlib
+package zlibx
 
 import (
 	"encoding/binary"
@@ -6,7 +6,7 @@ import (
 
 	"git.sr.ht/~runxiyu/furgit/internal/adler32"
 	"git.sr.ht/~runxiyu/furgit/internal/bufpool"
-	"git.sr.ht/~runxiyu/furgit/internal/flate"
+	"git.sr.ht/~runxiyu/furgit/internal/flatex"
 )
 
 // Decompress inflates the provided zlib wrapped stream and returns the
@@ -50,7 +50,7 @@ func DecompressDict(src []byte, dict []byte) (bufpool.Buffer, error) {
 	}
 
 	deflateData := src[offset:]
-	out, consumed, err := flate.DecompressDict(deflateData, dict)
+	out, consumed, err := flatex.DecompressDict(deflateData, dict)
 	if err != nil {
 		return bufpool.Buffer{}, err
 	}

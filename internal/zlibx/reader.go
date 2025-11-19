@@ -30,7 +30,7 @@ and to read that data back:
 	io.Copy(os.Stdout, r)
 	r.Close()
 */
-package zlib
+package zlibx
 
 import (
 	"bufio"
@@ -41,7 +41,7 @@ import (
 	"sync"
 
 	"git.sr.ht/~runxiyu/furgit/internal/adler32"
-	"git.sr.ht/~runxiyu/furgit/internal/flate"
+	"git.sr.ht/~runxiyu/furgit/internal/flatex"
 )
 
 const (
@@ -66,7 +66,7 @@ var pool = sync.Pool{
 }
 
 type reader struct {
-	r            flate.Reader
+	r            flatex.Reader
 	decompressor io.ReadCloser
 	digest       hash.Hash32
 	err          error
@@ -146,7 +146,7 @@ func (z *reader) Close() error {
 
 func (z *reader) Reset(r io.Reader, dict []byte) error {
 	*z = reader{decompressor: z.decompressor}
-	if fr, ok := r.(flate.Reader); ok {
+	if fr, ok := r.(flatex.Reader); ok {
 		z.r = fr
 	} else {
 		z.r = bufio.NewReader(r)
@@ -183,12 +183,12 @@ func (z *reader) Reset(r io.Reader, dict []byte) error {
 
 	if z.decompressor == nil {
 		if haveDict {
-			z.decompressor = flate.NewReaderDict(z.r, dict)
+			z.decompressor = flatex.NewReaderDict(z.r, dict)
 		} else {
-			z.decompressor = flate.NewReader(z.r)
+			z.decompressor = flatex.NewReader(z.r)
 		}
 	} else {
-		z.err = z.decompressor.(flate.Resetter).Reset(z.r, dict)
+		z.err = z.decompressor.(flatex.Resetter).Reset(z.r, dict)
 		if z.err != nil {
 			return z.err
 		}

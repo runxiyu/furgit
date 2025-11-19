@@ -2,7 +2,7 @@ package furgit
 
 import (
 	"bytes"
-	stdzlib "compress/zlib"
+	"compress/zlib"
 	"fmt"
 	"io"
 	"os"
@@ -10,7 +10,7 @@ import (
 	"strconv"
 
 	"git.sr.ht/~runxiyu/furgit/internal/bufpool"
-	"git.sr.ht/~runxiyu/furgit/internal/zlib"
+	"git.sr.ht/~runxiyu/furgit/internal/zlibx"
 )
 
 const looseHeaderLimit = 4096
@@ -54,7 +54,7 @@ func (repo *Repository) looseReadTyped(id Hash) (ObjectType, bufpool.Buffer, err
 		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
 
-	raw, err := zlib.Decompress(compressed)
+	raw, err := zlibx.Decompress(compressed)
 	if err != nil {
 		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
@@ -104,7 +104,7 @@ func (repo *Repository) looseTypeSize(id Hash) (ObjectType, int64, error) {
 	}
 	defer func() { _ = f.Close() }()
 
-	zr, err := stdzlib.NewReader(f)
+	zr, err := zlib.NewReader(f)
 	if err != nil {
 		return ObjectTypeInvalid, 0, err
 	}
@@ -211,7 +211,7 @@ func (repo *Repository) WriteLooseObject(obj Object) (Hash, error) {
 	}
 
 	var buf bytes.Buffer
-	zw := stdzlib.NewWriter(&buf)
+	zw := zlib.NewWriter(&buf)
 	if _, err := zw.Write(raw); err != nil {
 		return Hash{}, err
 	}

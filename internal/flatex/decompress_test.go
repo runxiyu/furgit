@@ -1,4 +1,4 @@
-package flate
+package flatex
 
 import (
 	"bytes"

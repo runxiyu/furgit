@@ -1,4 +1,4 @@
-package zlib
+package zlibx
 
 import (
 	"bytes"

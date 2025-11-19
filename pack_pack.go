@@ -11,9 +11,8 @@ import (
 	"sync"
 	"syscall"
 
-	"git.sr.ht/~runxiyu/furgit/internal/zlib"
-
 	"git.sr.ht/~runxiyu/furgit/internal/bufpool"
+	"git.sr.ht/~runxiyu/furgit/internal/zlibx"
 )
 
 const (
@@ -127,7 +126,7 @@ func packSectionInflate(pf *packFile, objectOfs uint64, r *bytes.Reader, sizeHin
 	if int64(consumed) < 0 || start > uint64(len(pf.data)) {
 		return bufpool.Buffer{}, ErrInvalidObject
 	}
-	body, err := zlib.Decompress(pf.data[start:])
+	body, err := zlibx.Decompress(pf.data[start:])
 	if err != nil {
 		return bufpool.Buffer{}, err
 	}
