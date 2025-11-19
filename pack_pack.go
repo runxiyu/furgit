@@ -96,17 +96,6 @@ func (repo *Repository) packTypeSizeAtLocation(loc packlocation, seen map[packKe
 	return repo.packTypeSizeWithin(pf, loc.Offset, seen)
 }
 
-func (repo *Repository) packTypeSizeByID(id Hash, seen map[packKey]struct{}) (ObjectType, int64, error) {
-	loc, err := repo.packIndexFind(id)
-	if err == nil {
-		return repo.packTypeSizeAtLocation(loc, seen)
-	}
-	if !errors.Is(err, ErrNotFound) {
-		return ObjectTypeInvalid, 0, err
-	}
-	return repo.looseTypeSize(id)
-}
-
 func packHeaderRead(r io.Reader) (ObjectType, int, error) {
 	var b [1]byte
 	_, err := io.ReadFull(r, b[:])
@@ -130,53 +119,23 @@ func packHeaderRead(r io.Reader) (ObjectType, int, error) {
 	return ty, size, nil
 }
 
-func packSectionInflate(pf *packFile, objectOfs uint64, r io.Reader, sizeHint int) (bufpool.Buffer, error) {
-	if pf != nil {
-		if br, ok := r.(*bytes.Reader); ok {
-			total := br.Size()
-			remaining := int64(br.Len())
-			consumed := total - remaining
-			start := objectOfs + uint64(consumed)
-			if int64(consumed) < 0 || start > uint64(len(pf.data)) {
-				return bufpool.Buffer{}, ErrInvalidObject
-			}
-			body, err := zlib.Decompress(pf.data[start:])
-			if err != nil {
-				return bufpool.Buffer{}, err
-			}
-			if sizeHint > 0 && len(body.Bytes()) != sizeHint {
-				body.Release()
-				return bufpool.Buffer{}, ErrInvalidObject
-			}
-			return body, nil
-		}
+func packSectionInflate(pf *packFile, objectOfs uint64, r *bytes.Reader, sizeHint int) (bufpool.Buffer, error) {
+	total := r.Size()
+	remaining := int64(r.Len())
+	consumed := total - remaining
+	start := objectOfs + uint64(consumed)
+	if int64(consumed) < 0 || start > uint64(len(pf.data)) {
+		return bufpool.Buffer{}, ErrInvalidObject
 	}
-
-	zr, err := zlib.NewReader(r)
+	body, err := zlib.Decompress(pf.data[start:])
 	if err != nil {
 		return bufpool.Buffer{}, err
 	}
-	defer func() { _ = zr.Close() }()
-
-	body := bufpool.Borrow(bufpool.DefaultBufferCap)
-	var scratch [32 * 1024]byte
-	for {
-		n, err := zr.Read(scratch[:])
-		if n > 0 {
-			body.Append(scratch[:n])
-		}
-		if err == io.EOF {
-			if sizeHint > 0 && len(body.Bytes()) != sizeHint {
-				body.Release()
-				return bufpool.Buffer{}, ErrInvalidObject
-			}
-			return body, nil
-		}
-		if err != nil {
-			body.Release()
-			return bufpool.Buffer{}, err
-		}
+	if sizeHint > 0 && len(body.Bytes()) != sizeHint {
+		body.Release()
+		return bufpool.Buffer{}, ErrInvalidObject
 	}
+	return body, nil
 }
 
 func packDeltaReadOfsDistance(r io.Reader) (uint64, error) {
@@ -617,7 +576,7 @@ func (pf *packFile) Close() error {
 	return closeErr
 }
 
-func (pf *packFile) cursor(ofs uint64) (io.Reader, error) {
+func (pf *packFile) cursor(ofs uint64) (*bytes.Reader, error) {
 	if pf == nil {
 		return nil, ErrInvalidObject
 	}

@@ -104,7 +104,7 @@ func (repo *Repository) looseTypeSize(id Hash) (ObjectType, int64, error) {
 	}
 	defer func() { _ = f.Close() }()
 
-	zr, err := zlib.NewReader(f)
+	zr, err := stdzlib.NewReader(f)
 	if err != nil {
 		return ObjectTypeInvalid, 0, err
 	}
