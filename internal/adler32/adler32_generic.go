@@ -1,96 +1,44 @@
-//go:build !amd64 || purego
-
 package adler32
 
-func update(d digest, p []byte) digest {
-	s1, s2 := uint32(d&0xffff), uint32(d>>16)
+const (
+	// mod is the largest prime that is less than 65536.
+	mod = 65521
+	// nmax is the largest n such that
+	// 255 * n * (n+1) / 2 + (n+1) * (mod-1) <= 2^32-1.
+	// It is mentioned in RFC 1950 (search for "5552").
+	nmax = 5552
 
+	// binary representation compatible with standard library.
+	magic         = "adl\x01"
+	marshaledSize = len(magic) + 4
+)
+
+// Add p to the running checksum d.
+func update(d uint32, p []byte) uint32 {
+	s1, s2 := d&0xffff, d>>16
 	for len(p) > 0 {
 		var q []byte
 		if len(p) > nmax {
 			p, q = p[:nmax], p[nmax:]
 		}
-
-		for len(p) >= 32 {
-			v := p[:32]
-			p = p[32:]
-
-			s1 += uint32(v[0])
+		for len(p) >= 4 {
+			s1 += uint32(p[0])
 			s2 += s1
-			s1 += uint32(v[1])
+			s1 += uint32(p[1])
 			s2 += s1
-			s1 += uint32(v[2])
+			s1 += uint32(p[2])
 			s2 += s1
-			s1 += uint32(v[3])
+			s1 += uint32(p[3])
 			s2 += s1
-			s1 += uint32(v[4])
-			s2 += s1
-			s1 += uint32(v[5])
-			s2 += s1
-			s1 += uint32(v[6])
-			s2 += s1
-			s1 += uint32(v[7])
-			s2 += s1
-			s1 += uint32(v[8])
-			s2 += s1
-			s1 += uint32(v[9])
-			s2 += s1
-			s1 += uint32(v[10])
-			s2 += s1
-			s1 += uint32(v[11])
-			s2 += s1
-			s1 += uint32(v[12])
-			s2 += s1
-			s1 += uint32(v[13])
-			s2 += s1
-			s1 += uint32(v[14])
-			s2 += s1
-			s1 += uint32(v[15])
-			s2 += s1
-			s1 += uint32(v[16])
-			s2 += s1
-			s1 += uint32(v[17])
-			s2 += s1
-			s1 += uint32(v[18])
-			s2 += s1
-			s1 += uint32(v[19])
-			s2 += s1
-			s1 += uint32(v[20])
-			s2 += s1
-			s1 += uint32(v[21])
-			s2 += s1
-			s1 += uint32(v[22])
-			s2 += s1
-			s1 += uint32(v[23])
-			s2 += s1
-			s1 += uint32(v[24])
-			s2 += s1
-			s1 += uint32(v[25])
-			s2 += s1
-			s1 += uint32(v[26])
-			s2 += s1
-			s1 += uint32(v[27])
-			s2 += s1
-			s1 += uint32(v[28])
-			s2 += s1
-			s1 += uint32(v[29])
-			s2 += s1
-			s1 += uint32(v[30])
-			s2 += s1
-			s1 += uint32(v[31])
-			s2 += s1
+			p = p[4:]
 		}
-
-		for i := 0; i < len(p); i++ {
-			x := p[i]
+		for _, x := range p {
 			s1 += uint32(x)
 			s2 += s1
 		}
-
 		s1 %= mod
 		s2 %= mod
 		p = q
 	}
-
-	return digest(s2<<16 | s1)
+	return s2<<16 | s1
 }
