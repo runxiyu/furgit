@@ -69,7 +69,7 @@ func TestHashWithoutClone(t *testing.T, mh MakeHash) {
 		emptyBuff := []byte("")
 		shortBuff := []byte("a")
 		longBuff := make([]byte, h.BlockSize()+1)
-		rng.Read(longBuff)
+		_, _ = rng.Read(longBuff)
 
 		// Set of example strings to append digest to
 		prefixes := [][]byte{nil, emptyBuff, shortBuff, longBuff}
@@ -105,7 +105,7 @@ func TestHashWithoutClone(t *testing.T, mh MakeHash) {
 		emptySlice := []byte("")
 		shortSlice := []byte("a")
 		longSlice := make([]byte, h.BlockSize()+1)
-		rng.Read(longSlice)
+		_, _ = rng.Read(longSlice)
 
 		// Set of example strings to append digest to
 		slices := [][]byte{emptySlice, shortSlice, longSlice}
@@ -123,7 +123,7 @@ func TestHashWithoutClone(t *testing.T, mh MakeHash) {
 
 		// Write to hash and then Reset it and see if Sum is same as emptySum
 		writeEx := make([]byte, h.BlockSize())
-		rng.Read(writeEx)
+		_, _ = rng.Read(writeEx)
 		writeToHash(t, h, writeEx)
 		h.Reset()
 		resetSum := getSum(t, h, nil)
@@ -140,7 +140,7 @@ func TestHashWithoutClone(t *testing.T, mh MakeHash) {
 		rng := newRandReader(t)
 
 		msg := make([]byte, blockSize)
-		rng.Read(msg)
+		_, _ = rng.Read(msg)
 		writeToHash(t, h, msg)
 		expectedDigest := getSum(t, h, nil) // Record control digest
 
@@ -151,8 +151,8 @@ func TestHashWithoutClone(t *testing.T, mh MakeHash) {
 		endOfPrefix, startOfSuffix := blockSize, blockSize*2
 
 		copy(buff[endOfPrefix:startOfSuffix], msg)
-		rng.Read(buff[:endOfPrefix])
-		rng.Read(buff[startOfSuffix:])
+		_, _ = rng.Read(buff[:endOfPrefix])
+		_, _ = rng.Read(buff[startOfSuffix:])
 
 		writeToHash(t, h, buff[endOfPrefix:startOfSuffix])
 		testDigest := getSum(t, h, nil)
@@ -168,8 +168,8 @@ func TestHashWithoutClone(t *testing.T, mh MakeHash) {
 		rng := newRandReader(t)
 
 		prefix, suffix := make([]byte, h.BlockSize()), make([]byte, h.BlockSize())
-		rng.Read(prefix)
-		rng.Read(suffix)
+		_, _ = rng.Read(prefix)
+		_, _ = rng.Read(suffix)
 
 		// Write prefix then suffix sequentially and record resulting hash
 		writeToHash(t, h, prefix)
