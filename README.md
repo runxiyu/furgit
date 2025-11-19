@@ -39,9 +39,8 @@ developing what forges like [Villosa](https://codeberg.org/lindenii/villosa) and
 interested) requires. Afterwards, we'll take a look at what other usages (such
 as writing Git clients, IDE integration, etc) would need.
 
-Furgit has no dependencies outside the standard library. In the future,
-packages from `golang.org/x` may be included. It is unlikely that other
-dependencies will be introduced.
+Furgit has no dependencies other than the standard library and some packages
+from `golang.org/x`. It is unlikely that other dependencies will be introduced.
 
 Currently, furgit is very basic; it supports reading and writing loose objects
 and reading from packfiles. There is some infrastructure for writing packfiles
