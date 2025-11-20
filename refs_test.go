@@ -3,6 +3,7 @@ package furgit
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -34,13 +35,16 @@ func TestResolveRef(t *testing.T) {
 		t.Fatalf("ResolveRef failed: %v", err)
 	}
 
-	if resolved != hashObj {
-		t.Errorf("resolved hash: got %s, want %s", resolved, hashObj)
+	if resolved.Kind != RefKindDetached {
+		t.Fatalf("expected detached ref, got %v", resolved.Kind)
+	}
+	if resolved.Hash != hashObj {
+		t.Errorf("resolved hash: got %s, want %s", resolved.Hash, hashObj)
 	}
 
 	gitRevParse := gitCmd(t, repoPath, "rev-parse", "refs/heads/main")
-	if resolved.String() != gitRevParse {
-		t.Errorf("furgit resolved %s, git resolved %s", resolved, gitRevParse)
+	if resolved.Hash.String() != gitRevParse {
+		t.Errorf("furgit resolved %s, git resolved %s", resolved.Hash, gitRevParse)
 	}
 
 	_, err = repo.ResolveRef("refs/heads/nonexistent")
@@ -72,22 +76,22 @@ func TestResolveHEAD(t *testing.T) {
 	}
 	defer func() { _ = repo.Close() }()
 
-	ref, err := repo.ResolveHead()
+	ref, err := repo.ResolveRef("HEAD")
 	if err != nil {
-		t.Fatalf("ResolveHEAD failed: %v", err)
+		t.Fatalf("ResolveRef(HEAD) failed: %v", err)
 	}
 
-	switch ref.Kind {
-	case HeadKindSymbolic:
-		if ref.Ref != "refs/heads/main" {
-			t.Errorf("HEAD ref: got %q, want %q", ref, "refs/heads/main")
-		}
-		gitSymRef := gitCmd(t, repoPath, "symbolic-ref", "HEAD")
-		if ref.Ref != gitSymRef {
-			t.Errorf("furgit resolved %v, git resolved %s", ref, gitSymRef)
-		}
-	default:
-		t.Errorf("HEAD kind: got %v, want %v", ref.Kind, HeadKindSymbolic)
+	if ref.Kind != RefKindSymbolic {
+		t.Fatalf("HEAD kind: got %v, want %v", ref.Kind, RefKindSymbolic)
+	}
+
+	if ref.Ref != "refs/heads/main" {
+		t.Errorf("HEAD symbolic ref: got %q, want %q", ref.Ref, "refs/heads/main")
+	}
+
+	gitSymRef := gitCmd(t, repoPath, "symbolic-ref", "HEAD")
+	if ref.Ref != gitSymRef {
+		t.Errorf("furgit resolved %v, git resolved %s", ref.Ref, gitSymRef)
 	}
 }
 
@@ -133,28 +137,93 @@ func TestPackedRefs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ResolveRef branch1 failed: %v", err)
 	}
-	if resolved1 != hash1 {
-		t.Errorf("branch1: got %s, want %s", resolved1, hash1)
+	if resolved1.Kind != RefKindDetached || resolved1.Hash != hash1 {
+		t.Errorf("branch1: got %s, want %s", resolved1.Hash, hash1)
 	}
 
 	gitResolved1 := gitCmd(t, repoPath, "rev-parse", "refs/heads/branch1")
-	if resolved1.String() != gitResolved1 {
-		t.Errorf("furgit resolved %s, git resolved %s", resolved1, gitResolved1)
+	if resolved1.Hash.String() != gitResolved1 {
+		t.Errorf("furgit resolved %s, git resolved %s", resolved1.Hash, gitResolved1)
 	}
 
 	resolved2, err := repo.ResolveRef("refs/heads/branch2")
 	if err != nil {
 		t.Fatalf("ResolveRef branch2 failed: %v", err)
 	}
-	if resolved2 != hash2 {
-		t.Errorf("branch2: got %s, want %s", resolved2, hash2)
+	if resolved2.Kind != RefKindDetached || resolved2.Hash != hash2 {
+		t.Errorf("branch2: got %s, want %s", resolved2.Hash, hash2)
 	}
 
 	resolvedTag, err := repo.ResolveRef("refs/tags/v1.0")
 	if err != nil {
 		t.Fatalf("ResolveRef tag failed: %v", err)
 	}
-	if resolvedTag != hash1 {
-		t.Errorf("tag: got %s, want %s", resolvedTag, hash1)
+	if resolvedTag.Kind != RefKindDetached || resolvedTag.Hash != hash1 {
+		t.Errorf("tag: got %s, want %s", resolvedTag.Hash, hash1)
+	}
+}
+
+func TestResolveRefFully(t *testing.T) {
+	repoPath, cleanup := setupTestRepo(t)
+	defer cleanup()
+
+	workDir, cleanupWork := setupWorkDir(t)
+	defer cleanupWork()
+
+	// Create an initial commit
+	err := os.WriteFile(filepath.Join(workDir, "file.txt"), []byte("content"), 0o644)
+	if err != nil {
+		t.Fatalf("failed to write file.txt: %v", err)
+	}
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "init")
+	commit := gitCmd(t, repoPath, "rev-parse", "HEAD")
+
+	// Create two layers of symbolic refs
+	gitCmd(t, repoPath, "symbolic-ref", "refs/heads/level1", "refs/heads/level2")
+	gitCmd(t, repoPath, "symbolic-ref", "refs/heads/level2", "refs/heads/main")
+	gitCmd(t, repoPath, "update-ref", "refs/heads/main", commit)
+
+	repo, err := OpenRepository(repoPath)
+	if err != nil {
+		t.Fatalf("OpenRepository failed: %v", err)
+	}
+	defer repo.Close()
+
+	commitHash, err := repo.ParseHash(commit)
+	if err != nil {
+		t.Fatalf("ParseHash failed: %v", err)
+	}
+
+	resolved, err := repo.ResolveRefFully("refs/heads/level1")
+	if err != nil {
+		t.Fatalf("ResolveRefFully failed: %v", err)
+	}
+
+	if resolved != commitHash {
+		t.Errorf("ResolveRefFully: got hash %s, want %s", resolved, commitHash)
+	}
+}
+
+func TestResolveRefFullySymbolicCycle(t *testing.T) {
+	repoPath, cleanup := setupTestRepo(t)
+	defer cleanup()
+
+	repo, err := OpenRepository(repoPath)
+	if err != nil {
+		t.Fatalf("OpenRepository failed: %v", err)
+	}
+	defer repo.Close()
+
+	gitCmd(t, repoPath, "symbolic-ref", "refs/heads/A", "refs/heads/B")
+	gitCmd(t, repoPath, "symbolic-ref", "refs/heads/B", "refs/heads/A")
+
+	_, err = repo.ResolveRefFully("refs/heads/A")
+	if err == nil {
+		t.Fatalf("ResolveRefFully should fail on a symbolic cycle")
+	}
+
+	if !strings.Contains(err.Error(), "cycle") {
+		t.Fatalf("unexpected error for symbolic cycle: %v", err)
 	}
 }

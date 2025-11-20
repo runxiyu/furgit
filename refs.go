@@ -3,117 +3,216 @@ package furgit
 import (
 	"bufio"
 	"bytes"
-	"errors"
+	"fmt"
 	"os"
+	"slices"
 	"strings"
 )
 
-// ResolveRef resolves a fully qualified ref name to its object ID.
-func (repo *Repository) ResolveRef(refname string) (Hash, error) {
-	id, err := repo.resolveLooseRef(refname)
-	if err == nil {
-		return id, nil
-	} else if !errors.Is(err, ErrNotFound) {
-		return Hash{}, err
-	}
-
-	return repo.resolvePackedRef(refname)
-}
-
-func (repo *Repository) resolveLooseRef(refname string) (Hash, error) {
+func (repo *Repository) resolveLooseRef(refname string) (Ref, error) {
 	data, err := os.ReadFile(repo.repoPath(refname))
 	if err != nil {
 		if os.IsNotExist(err) {
-			return Hash{}, ErrNotFound
+			return Ref{}, ErrNotFound
 		}
-		return Hash{}, err
+		return Ref{}, err
 	}
 	line := strings.TrimSpace(string(data))
+
+	if strings.HasPrefix(line, "ref: ") {
+		target := strings.TrimSpace(line[5:])
+		if target == "" {
+			return Ref{Kind: RefKindInvalid}, ErrInvalidRef
+		}
+		return Ref{
+			Kind: RefKindSymbolic,
+			Ref:  target,
+		}, nil
+	}
+
 	id, err := repo.ParseHash(line)
 	if err != nil {
-		return Hash{}, err
+		return Ref{Kind: RefKindInvalid}, err
 	}
-	return id, nil
+	return Ref{
+		Kind: RefKindDetached,
+		Hash: id,
+	}, nil
 }
 
-func (repo *Repository) resolvePackedRef(refname string) (Hash, error) {
+func (repo *Repository) resolvePackedRef(refname string) (Ref, error) {
+	// According to git-pack-refs(1), symbolic refs are never
+	// stored in packed-refs, so we only need to look for detached
+	// refs here.
+
 	path := repo.repoPath("packed-refs")
 	f, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return Hash{}, ErrNotFound
+			return Ref{}, ErrNotFound
 		}
-		return Hash{}, err
+		return Ref{}, err
 	}
 	defer func() { _ = f.Close() }()
 
 	want := []byte(refname)
 	scanner := bufio.NewScanner(f)
+
 	for scanner.Scan() {
 		line := scanner.Bytes()
+
 		if len(line) == 0 || line[0] == '#' || line[0] == '^' {
 			continue
 		}
+
 		sp := bytes.IndexByte(line, ' ')
 		if sp != repo.hashSize*2 {
 			continue
 		}
+
 		name := line[sp+1:]
-		if bytes.Equal(name, want) {
-			hex := string(line[:sp])
-			id, err := repo.ParseHash(hex)
-			if err != nil {
-				return Hash{}, err
-			}
-			return id, nil
+
+		if !bytes.Equal(name, want) {
+			continue
 		}
+
+		hex := string(line[:sp])
+		id, err := repo.ParseHash(hex)
+		if err != nil {
+			return Ref{Kind: RefKindInvalid}, err
+		}
+
+		ref := Ref{
+			Kind: RefKindDetached,
+			Hash: id,
+		}
+
+		if scanner.Scan() {
+			next := scanner.Bytes()
+			if len(next) > 0 && next[0] == '^' {
+				peeledHex := strings.TrimPrefix(string(next), "^")
+				peeledHex = strings.TrimSpace(peeledHex)
+
+				peeledID, err := repo.ParseHash(peeledHex)
+				if err != nil {
+					return Ref{Kind: RefKindInvalid}, err
+				}
+				ref.Peeled = peeledID
+			}
+		}
+
+		if scanErr := scanner.Err(); scanErr != nil {
+			return Ref{Kind: RefKindInvalid}, scanErr
+		}
+
+		return ref, nil
 	}
-	scanErr := scanner.Err()
-	if scanErr != nil {
-		return Hash{}, scanErr
+
+	if scanErr := scanner.Err(); scanErr != nil {
+		return Ref{Kind: RefKindInvalid}, scanErr
 	}
-	return Hash{}, ErrNotFound
+	return Ref{}, ErrNotFound
 }
 
-// HeadKind represents the kind of HEAD reference.
-type HeadKind int
+// RefKind represents the kind of HEAD reference.
+type RefKind int
 
 const (
 	// The HEAD reference is invalid.
-	HeadKindInvalid HeadKind = iota
+	RefKindInvalid RefKind = iota
 	// The HEAD reference points to a detached commit hash.
-	HeadKindDetached
+	RefKindDetached
 	// The HEAD reference points to a symbolic ref.
-	HeadKindSymbolic
+	RefKindSymbolic
 )
 
-// HeadRef represents a HEAD reference.
-type HeadRef struct {
-	// Kind is the kind of HEAD reference.
-	Kind HeadKind
-	// When Kind is HeadSymbolic, Ref is the fully qualified ref name.
+// Ref represents a reference.
+type Ref struct {
+	// Kind is the kind of the reference.
+	Kind RefKind
+	// When Kind is RefKindSymbolic, Ref is the fully qualified ref name.
+	// Otherwise the value is undefined.
 	Ref string
-	// When Kind is HeadDetached, Hash is the commit hash.
+	// When Kind is RefKindDetached, Hash is the commit hash.
+	// Otherwise the value is undefined.
 	Hash Hash
+	// When Kind is RefKindDetached, and the ref supposedly points to an
+	// annotated tag, Peeled is the peeled hash, i.e., the hash of the
+	// object that the tag points to.
+	Peeled Hash
 }
 
-// ResolveHead reads HEAD into a HEAD reference.
-func (repo *Repository) ResolveHead() (HeadRef, error) {
-	data, err := os.ReadFile(repo.repoPath("HEAD"))
-	if err != nil {
-		return HeadRef{Kind: HeadKindInvalid}, err
+// ResolveRef reads the given fully qualified ref (such as "HEAD" or "refs/heads/main")
+// and interprets its contents as either a symbolic ref ("ref: refs/..."), a detached
+// hash, or invalid.
+// If path is empty, it defaults to "HEAD".
+// (While typically only HEAD may be a symbolic reference, others may be as well.)
+func (repo *Repository) ResolveRef(path string) (Ref, error) {
+	if path == "" {
+		path = "HEAD"
 	}
-	line := strings.TrimSuffix(string(data), "\n")
-	if strings.HasPrefix(line, "ref: ") {
-		refname := strings.TrimSpace(line[5:])
-		if !strings.HasPrefix(refname, "refs/") {
-			return HeadRef{Kind: HeadKindSymbolic, Ref: refname}, ErrInvalidRef
+
+	if !strings.HasPrefix(path, "refs/") && !slices.Contains([]string{
+		"HEAD", "ORIG_HEAD", "FETCH_HEAD", "MERGE_HEAD",
+		"CHERRY_PICK_HEAD", "REVERT_HEAD", "REBASE_HEAD", "BISECT_HEAD",
+	}, path) {
+		// For now let's keep this to prevent e.g., random users from
+		// specifying something crazy like objects/... or ./config.
+		// There may be other legal pseudo-refs in the future,
+		// but it's probably the best to stay cautious for now.
+		return Ref{Kind: RefKindInvalid}, ErrInvalidRef
+	}
+
+	loose, err := repo.resolveLooseRef(path)
+	if err == nil {
+		return loose, nil
+	}
+	if err != ErrNotFound {
+		return Ref{Kind: RefKindInvalid}, err
+	}
+
+	packed, err := repo.resolvePackedRef(path)
+	if err == nil {
+		return packed, nil
+	}
+	if err != ErrNotFound {
+		return Ref{Kind: RefKindInvalid}, err
+	}
+
+	return Ref{Kind: RefKindInvalid}, ErrNotFound
+}
+
+// ResolveRefFully resolves a ref by recursively following
+// symbolic references until it reaches a detached ref.
+// Symbolic cycles are detected and reported.
+// Tags are not peeled automatically.
+func (repo *Repository) ResolveRefFully(path string) (Hash, error) {
+	seen := make(map[string]struct{})
+	return repo.resolveRefFully(path, seen)
+}
+
+func (repo *Repository) resolveRefFully(path string, seen map[string]struct{}) (Hash, error) {
+	if _, found := seen[path]; found {
+		return Hash{}, fmt.Errorf("symbolic ref cycle involving %q", path)
+	}
+	seen[path] = struct{}{}
+
+	ref, err := repo.ResolveRef(path)
+	if err != nil {
+		return Hash{}, err
+	}
+
+	switch ref.Kind {
+	case RefKindDetached:
+		return ref.Hash, nil
+
+	case RefKindSymbolic:
+		if ref.Ref == "" {
+			return Hash{}, ErrInvalidRef
 		}
-		return HeadRef{Kind: HeadKindSymbolic, Ref: refname}, nil
+		return repo.resolveRefFully(ref.Ref, seen)
+
+	default:
+		return Hash{}, ErrInvalidRef
 	}
-	id, err := repo.ParseHash(line)
-	if err != nil {
-		return HeadRef{Kind: HeadKindInvalid}, err
-	}
-	return HeadRef{Kind: HeadKindDetached, Hash: id}, nil
 }
