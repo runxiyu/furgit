@@ -156,6 +156,14 @@ func (repo *Repository) ResolveRef(path string) (Ref, error) {
 		"HEAD", "ORIG_HEAD", "FETCH_HEAD", "MERGE_HEAD",
 		"CHERRY_PICK_HEAD", "REVERT_HEAD", "REBASE_HEAD", "BISECT_HEAD",
 	}, path) {
+		id, err := repo.ParseHash(path)
+		if err == nil {
+			return Ref{
+				Kind: RefKindDetached,
+				Hash: id,
+			}, nil
+		}
+
 		// For now let's keep this to prevent e.g., random users from
 		// specifying something crazy like objects/... or ./config.
 		// There may be other legal pseudo-refs in the future,

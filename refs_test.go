@@ -227,3 +227,55 @@ func TestResolveRefFullySymbolicCycle(t *testing.T) {
 		t.Fatalf("unexpected error for symbolic cycle: %v", err)
 	}
 }
+
+func TestResolveRefHashInput(t *testing.T) {
+	repoPath, cleanup := setupTestRepo(t)
+	defer cleanup()
+
+	workDir, cleanupWork := setupWorkDir(t)
+	defer cleanupWork()
+
+	err := os.WriteFile(filepath.Join(workDir, "file.txt"), []byte("content"), 0o644)
+	if err != nil {
+		t.Fatalf("failed to write file.txt: %v", err)
+	}
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "init")
+
+	commitHash := gitCmd(t, repoPath, "rev-parse", "HEAD")
+
+	repo, err := OpenRepository(repoPath)
+	if err != nil {
+		t.Fatalf("OpenRepository failed: %v", err)
+	}
+	defer repo.Close()
+
+	hashObj, err := repo.ParseHash(commitHash)
+	if err != nil {
+		t.Fatalf("ParseHash failed: %v", err)
+	}
+
+	ref, err := repo.ResolveRef(commitHash)
+	if err != nil {
+		t.Fatalf("ResolveRef(hash) failed: %v", err)
+	}
+	if ref.Kind != RefKindDetached {
+		t.Fatalf("expected RefKindDetached, got %v", ref.Kind)
+	}
+	if ref.Hash != hashObj {
+		t.Fatalf("hash mismatch: got %s, want %s", ref.Hash, hashObj)
+	}
+
+	hash, err := repo.ResolveRefFully(commitHash)
+	if err != nil {
+		t.Fatalf("ResolveRefFully(hash) failed: %v", err)
+	}
+	if hash != hashObj {
+		t.Fatalf("hash mismatch: got %s, want %s", hash, hashObj)
+	}
+
+	_, err = repo.ResolveRef("this_is_not_a_hash")
+	if err == nil {
+		t.Fatalf("expected error for invalid hash input")
+	}
+}
