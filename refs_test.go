@@ -188,7 +188,7 @@ func TestResolveRefFully(t *testing.T) {
 	if err != nil {
 		t.Fatalf("OpenRepository failed: %v", err)
 	}
-	defer repo.Close()
+	defer func() { _ = repo.Close() }()
 
 	commitHash, err := repo.ParseHash(commit)
 	if err != nil {
@@ -213,7 +213,7 @@ func TestResolveRefFullySymbolicCycle(t *testing.T) {
 	if err != nil {
 		t.Fatalf("OpenRepository failed: %v", err)
 	}
-	defer repo.Close()
+	defer func() { _ = repo.Close() }()
 
 	gitCmd(t, repoPath, "symbolic-ref", "refs/heads/A", "refs/heads/B")
 	gitCmd(t, repoPath, "symbolic-ref", "refs/heads/B", "refs/heads/A")
@@ -248,7 +248,7 @@ func TestResolveRefHashInput(t *testing.T) {
 	if err != nil {
 		t.Fatalf("OpenRepository failed: %v", err)
 	}
-	defer repo.Close()
+	defer func() { _ = repo.Close() }()
 
 	hashObj, err := repo.ParseHash(commitHash)
 	if err != nil {

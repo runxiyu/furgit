@@ -16,7 +16,7 @@ func TestCurrentRepoDepthFirstEnumeration(t *testing.T) {
 	if err != nil {
 		t.Skipf("failed to open current .git directory: %v", err)
 	}
-	defer repo.Close()
+	defer func() { _ = repo.Close() }()
 
 	headHash, err := repo.ResolveRefFully("HEAD")
 	if err != nil {
