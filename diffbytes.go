@@ -81,10 +81,7 @@ func DiffBytes(oldB, newB []byte) ([]BytesDiffChunk, error) {
 	Vprev[offset+0] = x0
 	trace = append(trace, append([]int(nil), Vprev...))
 
-	found := false
-	if x0 >= n && y0 >= m {
-		found = true
-	}
+	found := x0 >= n && y0 >= m
 
 	for D := 1; D <= max && !found; D++ {
 		V := make([]int, 2*max+1)
