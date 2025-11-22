@@ -22,18 +22,45 @@ const (
 // A Buffer's underlying slice may grow as needed. When finished with a
 // pooled buffer, the caller should invoke Release() to return it to the pool.
 //
-// A zero-value Buffer is not valid for use.
+// Buffers must not be copied after first use; doing so can cause double-returns
+// to the pool and data races. A zero-value Buffer is not valid for use.
+//
+//go:nocopy
 type Buffer struct {
-	buf    []byte
-	pooled bool
+	_    noCopy
+	buf  []byte
+	pool poolIndex
 }
 
-var bufPool = sync.Pool{
-	New: func() any {
-		buf := make([]byte, 0, DefaultBufferCap)
-		return &buf
-	},
+type poolIndex int8
+
+const (
+	unpooled poolIndex = -1
+)
+
+var sizeClasses = [...]int{
+	DefaultBufferCap,
+	64 << 10,
+	128 << 10,
+	256 << 10,
+	512 << 10,
+	1 << 20,
+	2 << 20,
+	4 << 20,
+	maxPooledBuffer,
 }
+
+var bufferPools = func() []sync.Pool {
+	pools := make([]sync.Pool, len(sizeClasses))
+	for i, classCap := range sizeClasses {
+		capCopy := classCap
+		pools[i].New = func() any {
+			buf := make([]byte, 0, capCopy)
+			return &buf
+		}
+	}
+	return pools
+}()
 
 // Borrow retrieves a Buffer suitable for storing up to capHint bytes.
 // The returned Buffer may come from an internal sync.Pool.
@@ -47,21 +74,24 @@ func Borrow(capHint int) Buffer {
 	if capHint < DefaultBufferCap {
 		capHint = DefaultBufferCap
 	}
-	buf := bufPool.Get().(*[]byte)
-	if cap(*buf) < capHint {
-		bufPool.Put(buf)
+	classIdx, classCap, pooled := classFor(capHint)
+	if !pooled {
 		newBuf := make([]byte, 0, capHint)
-		return Buffer{buf: newBuf, pooled: false}
+		return Buffer{buf: newBuf, pool: unpooled}
+	}
+	buf := bufferPools[classIdx].Get().(*[]byte)
+	if cap(*buf) < classCap {
+		*buf = make([]byte, 0, classCap)
 	}
 	slice := (*buf)[:0]
-	return Buffer{buf: slice, pooled: true}
+	return Buffer{buf: slice, pool: poolIndex(classIdx)}
 }
 
 // FromOwned constructs a Buffer from a caller-owned byte slice. The resulting
 // Buffer does not participate in pooling and will never be returned to the
 // internal pool when released.
 func FromOwned(buf []byte) Buffer {
-	return Buffer{buf: buf, pooled: false}
+	return Buffer{buf: buf, pool: unpooled}
 }
 
 // Resize adjusts the length of the buffer to n bytes. If n exceeds the current
@@ -107,12 +137,9 @@ func (buf *Buffer) Release() {
 	if buf.buf == nil {
 		return
 	}
-	if buf.pooled && cap(buf.buf) <= maxPooledBuffer {
-		tmp := buf.buf[:0]
-		bufPool.Put(&tmp)
-	}
+	buf.returnToPool()
 	buf.buf = nil
-	buf.pooled = false
+	buf.pool = unpooled
 }
 
 // ensureCapacity grows the underlying buffer to accommodate the requested
@@ -123,18 +150,45 @@ func (buf *Buffer) ensureCapacity(needed int) {
 	if cap(buf.buf) >= needed {
 		return
 	}
-	old := buf.buf
-	wasPooled := buf.pooled
-	newCap := cap(buf.buf) * 2
-	if newCap < needed {
-		newCap = needed
+	classIdx, classCap, pooled := classFor(needed)
+	var newBuf []byte
+	if pooled {
+		raw := bufferPools[classIdx].Get().(*[]byte)
+		if cap(*raw) < classCap {
+			*raw = make([]byte, 0, classCap)
+		}
+		newBuf = (*raw)[:len(buf.buf)]
+	} else {
+		newBuf = make([]byte, len(buf.buf), classCap)
 	}
-	newBuf := make([]byte, len(buf.buf), newCap)
 	copy(newBuf, buf.buf)
+	buf.returnToPool()
 	buf.buf = newBuf
-	buf.pooled = false
-	if wasPooled && cap(old) <= maxPooledBuffer {
-		tmp := old[:0]
-		bufPool.Put(&tmp)
+	if pooled {
+		buf.pool = poolIndex(classIdx)
+	} else {
+		buf.pool = unpooled
 	}
 }
+
+func classFor(size int) (idx int, classCap int, ok bool) {
+	for i, class := range sizeClasses {
+		if size <= class {
+			return i, class, true
+		}
+	}
+	return -1, size, false
+}
+
+func (buf *Buffer) returnToPool() {
+	if buf.pool == unpooled {
+		return
+	}
+	tmp := buf.buf[:0]
+	bufferPools[int(buf.pool)].Put(&tmp)
+}
+
+type noCopy struct{}
+
+func (*noCopy) Lock()   {}
+func (*noCopy) Unlock() {}

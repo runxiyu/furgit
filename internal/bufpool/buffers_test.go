@@ -38,3 +38,40 @@ func TestBorrowBufferRelease(t *testing.T) {
 		t.Fatal("expected buffer cleared after release")
 	}
 }
+
+func TestBorrowUsesLargerPools(t *testing.T) {
+	const request = DefaultBufferCap * 4
+
+	classIdx, classCap, pooled := classFor(request)
+	if !pooled {
+		t.Fatalf("expected %d to map to a pooled class", request)
+	}
+
+	b := Borrow(request)
+	if b.pool != poolIndex(classIdx) {
+		t.Fatalf("expected pooled buffer in class %d, got %d", classIdx, b.pool)
+	}
+	if cap(b.buf) != classCap {
+		t.Fatalf("expected capacity %d, got %d", classCap, cap(b.buf))
+	}
+	b.Release()
+
+	b2 := Borrow(request)
+	defer b2.Release()
+	if b2.pool != poolIndex(classIdx) {
+		t.Fatalf("expected pooled buffer in class %d on reuse, got %d", classIdx, b2.pool)
+	}
+	if cap(b2.buf) != classCap {
+		t.Fatalf("expected capacity %d on reuse, got %d", classCap, cap(b2.buf))
+	}
+}
+
+func TestGrowingBufferStaysPooled(t *testing.T) {
+	b := Borrow(DefaultBufferCap)
+	defer b.Release()
+
+	b.Append(make([]byte, DefaultBufferCap*3))
+	if b.pool == unpooled {
+		t.Fatal("buffer should stay pooled after growth within limit")
+	}
+}

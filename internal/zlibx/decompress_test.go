@@ -82,3 +82,22 @@ func TestDecompressChecksumError(t *testing.T) {
 		t.Fatalf("expected ErrChecksum, got %v", err)
 	}
 }
+
+func TestDecompressSizedUsesHint(t *testing.T) {
+	payload := []byte("tiny payload")
+	compressed := compressZlib(t, payload, nil)
+
+	const hint = 1 << 20
+	out, err := DecompressSized(compressed, hint)
+	if err != nil {
+		t.Fatalf("DecompressSized: %v", err)
+	}
+	defer out.Release()
+
+	if !bytes.Equal(out.Bytes(), payload) {
+		t.Fatalf("unexpected payload %q", out.Bytes())
+	}
+	if cap(out.Bytes()) < hint {
+		t.Fatalf("expected capacity >= %d, got %d", hint, cap(out.Bytes()))
+	}
+}

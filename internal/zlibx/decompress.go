@@ -12,13 +12,25 @@ import (
 // Decompress inflates the provided zlib wrapped stream and returns the
 // uncompressed data inside a pooled bufpool.Buffer.
 func Decompress(src []byte) (bufpool.Buffer, error) {
-	return DecompressDict(src, nil)
+	return DecompressSized(src, 0)
+}
+
+// DecompressSized inflates the provided zlib stream, using sizeHint to
+// preallocate the output buffer when known (e.g. packfile entries).
+func DecompressSized(src []byte, sizeHint int) (bufpool.Buffer, error) {
+	return DecompressDictSized(src, nil, sizeHint)
 }
 
 // DecompressDict is like Decompress but accepts a preset dictionary. The
 // dictionary must match the checksum embedded in the stream if the dictionary
 // flag is present.
 func DecompressDict(src []byte, dict []byte) (bufpool.Buffer, error) {
+	return DecompressDictSized(src, dict, 0)
+}
+
+// DecompressDictSized is like DecompressDict but allows providing an expected
+// uncompressed size to avoid buffer growth copies.
+func DecompressDictSized(src []byte, dict []byte, sizeHint int) (bufpool.Buffer, error) {
 	if len(src) < 6 {
 		return bufpool.Buffer{}, io.ErrUnexpectedEOF
 	}
@@ -50,7 +62,7 @@ func DecompressDict(src []byte, dict []byte) (bufpool.Buffer, error) {
 	}
 
 	deflateData := src[offset:]
-	out, consumed, err := flatex.DecompressDict(deflateData, dict)
+	out, consumed, err := flatex.DecompressDictSized(deflateData, dict, sizeHint)
 	if err != nil {
 		return bufpool.Buffer{}, err
 	}

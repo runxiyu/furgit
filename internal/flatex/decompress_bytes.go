@@ -26,13 +26,20 @@ var bufferDecompressorPool = sync.Pool{
 // Decompress inflates the provided DEFLATE stream and returns the full output
 // in a pooled bufpool.Buffer along with the number of consumed bytes from src.
 func Decompress(src []byte) (bufpool.Buffer, int, error) {
-	return DecompressDict(src, nil)
+	return DecompressDictSized(src, nil, 0)
 }
 
 // DecompressDict inflates the provided DEFLATE stream using dict as the preset
 // dictionary and returns the full output in a pooled bufpool.Buffer. The second
 // returned value reports how many bytes of src were consumed.
 func DecompressDict(src []byte, dict []byte) (bufpool.Buffer, int, error) {
+	return DecompressDictSized(src, dict, 0)
+}
+
+// DecompressDictSized is like DecompressDict but allows providing an expected
+// output size to pre-size the destination buffer and avoid repeated growth.
+// A non-positive sizeHint falls back to the default buffer capacity.
+func DecompressDictSized(src []byte, dict []byte, sizeHint int) (bufpool.Buffer, int, error) {
 	d := bufferDecompressorPool.Get().(*bufferDecompressor)
 	defer bufferDecompressorPool.Put(d)
 
@@ -40,7 +47,7 @@ func DecompressDict(src []byte, dict []byte) (bufpool.Buffer, int, error) {
 		return bufpool.Buffer{}, 0, err
 	}
 
-	out := bufpool.Borrow(bufpool.DefaultBufferCap)
+	out := bufpool.Borrow(sizeHint)
 	out.Resize(0)
 
 	for {

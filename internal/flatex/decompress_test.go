@@ -74,3 +74,22 @@ func TestDecompressDictMissing(t *testing.T) {
 		t.Fatalf("expected error when dictionary missing")
 	}
 }
+
+func TestDecompressDictSizedUsesHint(t *testing.T) {
+	payload := []byte("short")
+	compressed := compressDeflate(t, payload, nil)
+
+	const hint = 1 << 19
+	out, _, err := DecompressDictSized(compressed, nil, hint)
+	if err != nil {
+		t.Fatalf("DecompressDictSized: %v", err)
+	}
+	defer out.Release()
+
+	if !bytes.Equal(out.Bytes(), payload) {
+		t.Fatalf("unexpected payload: got %q", out.Bytes())
+	}
+	if cap(out.Bytes()) < hint {
+		t.Fatalf("expected capacity >= %d, got %d", hint, cap(out.Bytes()))
+	}
+}
