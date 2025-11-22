@@ -28,9 +28,11 @@ const (
 	numCodes   = 19 // number of codes in Huffman meta-code
 )
 
-// Initialize the fixedHuffmanDecoder only once upon first use.
-var fixedOnce sync.Once
-var fixedHuffmanDecoder huffmanDecoder
+var (
+	// Initialize the fixedHuffmanDecoder only once upon first use.
+	fixedOnce           sync.Once
+	fixedHuffmanDecoder huffmanDecoder
+)
 
 // A CorruptInputError reports the presence of corrupt input at a given offset.
 type CorruptInputError int64
