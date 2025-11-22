@@ -22,10 +22,10 @@ type packlocation struct {
 	Offset   uint64
 }
 
-func (repo *Repository) packRead(id Hash) (StoredObject, error) {
+func (repo *Repository) packRead(id Hash) (ObjectType, *bufpool.Buffer, error) {
 	loc, err := repo.packIndexFind(id)
 	if err != nil {
-		return nil, err
+		return ObjectTypeInvalid, nil, err
 	}
 	return repo.packReadAt(loc, id)
 }
@@ -48,19 +48,16 @@ func (repo *Repository) packIndexFind(id Hash) (packlocation, error) {
 	return packlocation{}, ErrNotFound
 }
 
-func (repo *Repository) packReadAt(loc packlocation, want Hash) (StoredObject, error) {
+func (repo *Repository) packReadAt(loc packlocation, want Hash) (ObjectType, *bufpool.Buffer, error) {
 	ty, body, err := repo.packBodyResolveAtLocation(loc)
 	if err != nil {
-		return nil, err
+		return ObjectTypeInvalid, nil, err
 	}
-	data := body.Bytes()
-	// if !repo.verifyTypedObject(ty, data, want) {
+	// if !repo.verifyTypedObject(ty, body.Bytes(), want) {
 	// 	body.Release()
-	// 	return nil, ErrInvalidObject
+	// 	return ObjectTypeInvalid, nil, ErrInvalidObject
 	// }
-	obj, err := parseObjectBody(ty, want, data, repo)
-	body.Release()
-	return obj, err
+	return ty, body, nil
 }
 
 func (repo *Repository) packBodyResolveAtLocation(loc packlocation) (ObjectType, *bufpool.Buffer, error) {

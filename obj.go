@@ -95,18 +95,25 @@ func parseObjectBody(ty ObjectType, id Hash, body []byte, repo *Repository) (Sto
 
 // ReadObject resolves an ID.
 func (repo *Repository) ReadObject(id Hash) (StoredObject, error) {
-	obj, err := repo.looseRead(id)
+	ty, body, err := repo.looseRead(id)
 	if err == nil {
-		return obj, nil
+		obj, parseErr := parseObjectBody(ty, id, body.Bytes(), repo)
+		body.Release()
+		return obj, parseErr
 	}
 	if !errors.Is(err, ErrNotFound) {
 		return nil, err
 	}
-	obj, err = repo.packRead(id)
+	ty, body, err = repo.packRead(id)
 	if errors.Is(err, ErrNotFound) {
 		return nil, ErrInvalidObject
 	}
-	return obj, err
+	if err != nil {
+		return nil, err
+	}
+	obj, parseErr := parseObjectBody(ty, id, body.Bytes(), repo)
+	body.Release()
+	return obj, parseErr
 }
 
 // ReadObjectTypeSize reports the object type and size.

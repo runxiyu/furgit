@@ -24,14 +24,12 @@ func (repo *Repository) loosePath(id Hash) (string, error) {
 	return filepath.Join("objects", hex[:2], hex[2:]), nil
 }
 
-func (repo *Repository) looseRead(id Hash) (StoredObject, error) {
+func (repo *Repository) looseRead(id Hash) (ObjectType, *bufpool.Buffer, error) {
 	ty, body, err := repo.looseReadTyped(id)
 	if err != nil {
-		return nil, err
+		return ObjectTypeInvalid, nil, err
 	}
-	obj, err := parseObjectBody(ty, id, body.Bytes(), repo)
-	body.Release()
-	return obj, err
+	return ty, body, nil
 }
 
 func (repo *Repository) looseReadTyped(id Hash) (ObjectType, *bufpool.Buffer, error) {
