@@ -506,7 +506,8 @@ func openPackFile(absPath, rel string) (*packFile, error) {
 		return nil, ErrInvalidObject
 	}
 
-	header := make([]byte, 12)
+	var headerArr [12]byte
+	header := headerArr[:]
 	_, err = io.ReadFull(f, header)
 	if err != nil {
 		_ = f.Close()
