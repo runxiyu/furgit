@@ -116,6 +116,32 @@ func (repo *Repository) ReadObject(id Hash) (StoredObject, error) {
 	return obj, parseErr
 }
 
+// ReadObjectTypeRaw reads the object type and raw body.
+func (repo *Repository) ReadObjectTypeRaw(id Hash) (ObjectType, []byte, error) {
+	ty, body, err := repo.looseRead(id)
+	if err == nil {
+		return ty, body.Bytes(), nil
+	}
+	if !errors.Is(err, ErrNotFound) {
+		return ObjectTypeInvalid, nil, err
+	}
+	ty, body, err = repo.packRead(id)
+	if errors.Is(err, ErrNotFound) {
+		return ObjectTypeInvalid, nil, ErrNotFound
+	}
+	if err != nil {
+		return ObjectTypeInvalid, nil, err
+	}
+	return ty, body.Bytes(), nil
+	// note to self: It always feels wrong to not call .Release in places like
+	// this but this is actually correct; we're returning the underlying buffer
+	// to the user who should not be aware of our internal buffer pooling.
+	// Releasing this buffer back to the pool would lead to a use-after-free;
+	// not releasing it as we do here, means it gets GC'ed.
+	// Copying into a newly allocated buffer is even worse as it incurs
+	// unnecessary copy overhead.
+}
+
 // ReadObjectTypeSize reports the object type and size.
 //
 // Typicall, this is more efficient than reading the full object,
