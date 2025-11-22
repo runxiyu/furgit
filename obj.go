@@ -106,7 +106,7 @@ func (repo *Repository) ReadObject(id Hash) (StoredObject, error) {
 	}
 	ty, body, err = repo.packRead(id)
 	if errors.Is(err, ErrNotFound) {
-		return nil, ErrInvalidObject
+		return nil, ErrNotFound
 	}
 	if err != nil {
 		return nil, err
