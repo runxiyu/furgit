@@ -55,8 +55,6 @@ const (
 var (
 	// ErrChecksum is returned when reading ZLIB data that has an invalid checksum.
 	ErrChecksum = errors.New("zlib: invalid checksum")
-	// ErrDictionary is returned when reading ZLIB data that has an invalid dictionary.
-	ErrDictionary = errors.New("zlib: invalid dictionary")
 	// ErrHeader is returned when reading ZLIB data that has an invalid header.
 	ErrHeader = errors.New("zlib: invalid header")
 )
@@ -82,19 +80,12 @@ type reader struct {
 // data than necessary from r.
 // It is the caller's responsibility to call Close on the ReadCloser when done.
 func NewReader(r io.Reader) (io.ReadCloser, error) {
-	return NewReaderDict(r, nil)
-}
-
-// NewReaderDict is like [NewReader] but uses a preset dictionary.
-// NewReaderDict ignores the dictionary if the compressed data does not refer to it.
-// If the compressed data refers to a different dictionary, NewReaderDict returns [ErrDictionary].
-func NewReaderDict(r io.Reader, dict []byte) (io.ReadCloser, error) {
 	v := pool.Get()
 	z, ok := v.(*reader)
 	if !ok {
 		panic("zlib: pool returned unexpected type")
 	}
-	err := z.Reset(r, dict)
+	err := z.Reset(r)
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +138,7 @@ func (z *reader) Close() error {
 	return nil
 }
 
-func (z *reader) Reset(r io.Reader, dict []byte) error {
+func (z *reader) Reset(r io.Reader) error {
 	*z = reader{decompressor: z.decompressor}
 	if fr, ok := r.(flatex.Reader); ok {
 		z.r = fr
@@ -168,30 +159,15 @@ func (z *reader) Reset(r io.Reader, dict []byte) error {
 		z.err = ErrHeader
 		return z.err
 	}
-	haveDict := z.scratch[1]&0x20 != 0
-	if haveDict {
-		_, z.err = io.ReadFull(z.r, z.scratch[0:4])
-		if z.err != nil {
-			if z.err == io.EOF {
-				z.err = io.ErrUnexpectedEOF
-			}
-			return z.err
-		}
-		checksum := binary.BigEndian.Uint32(z.scratch[:4])
-		if checksum != adler32.Checksum(dict) {
-			z.err = ErrDictionary
-			return z.err
-		}
+	if z.scratch[1]&0x20 != 0 {
+		z.err = ErrHeader
+		return z.err
 	}
 
 	if z.decompressor == nil {
-		if haveDict {
-			z.decompressor = flatex.NewReaderDict(z.r, dict)
-		} else {
-			z.decompressor = flatex.NewReader(z.r)
-		}
+		z.decompressor = flatex.NewReader(z.r)
 	} else {
-		z.err = z.decompressor.(flatex.Resetter).Reset(z.r, dict)
+		z.err = z.decompressor.(flatex.Resetter).Reset(z.r)
 		if z.err != nil {
 			return z.err
 		}

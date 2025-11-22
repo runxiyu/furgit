@@ -21,7 +21,7 @@ type sliceInflater struct {
 	bits     *[maxNumLit + maxNumDist]int
 	codebits *[numCodes]int
 
-	dict dictDecoder
+	window windowDecoder
 
 	toRead    []byte
 	step      func(*sliceInflater)
@@ -33,18 +33,18 @@ type sliceInflater struct {
 	copyDist  int
 }
 
-func (f *sliceInflater) reset(src []byte, dict []byte) error {
+func (f *sliceInflater) reset(src []byte) error {
 	bits := f.bits
 	codebits := f.codebits
-	dictState := f.dict
+	windowState := f.window
 	*f = sliceInflater{
 		input:    src,
 		bits:     bits,
 		codebits: codebits,
-		dict:     dictState,
+		window:   windowState,
 		step:     (*sliceInflater).nextBlock,
 	}
-	f.dict.init(maxMatchOffset, dict)
+	f.window.init(maxMatchOffset)
 	return nil
 }
 
@@ -103,9 +103,9 @@ readLiteral:
 		var length int
 		switch {
 		case v < 256:
-			f.dict.writeByte(byte(v))
-			if f.dict.availWrite() == 0 {
-				f.toRead = f.dict.readFlush()
+			f.window.writeByte(byte(v))
+			if f.window.availWrite() == 0 {
+				f.toRead = f.window.readFlush()
 				f.step = (*sliceInflater).huffmanBlock
 				f.stepState = stateInit
 				return
@@ -190,7 +190,7 @@ readLiteral:
 			return
 		}
 
-		if dist > f.dict.histSize() {
+		if dist > f.window.histSize() {
 			f.err = CorruptInputError(f.roffset)
 			return
 		}
@@ -201,14 +201,14 @@ readLiteral:
 
 copyHistory:
 	{
-		cnt := f.dict.tryWriteCopy(f.copyDist, f.copyLen)
+		cnt := f.window.tryWriteCopy(f.copyDist, f.copyLen)
 		if cnt == 0 {
-			cnt = f.dict.writeCopy(f.copyDist, f.copyLen)
+			cnt = f.window.writeCopy(f.copyDist, f.copyLen)
 		}
 		f.copyLen -= cnt
 
-		if f.dict.availWrite() == 0 || f.copyLen > 0 {
-			f.toRead = f.dict.readFlush()
+		if f.window.availWrite() == 0 || f.copyLen > 0 {
+			f.toRead = f.window.readFlush()
 			f.step = (*sliceInflater).huffmanBlock
 			f.stepState = stateDict
 			return
@@ -237,7 +237,7 @@ func (f *sliceInflater) dataBlock() {
 	}
 
 	if n == 0 {
-		f.toRead = f.dict.readFlush()
+		f.toRead = f.window.readFlush()
 		f.finishBlock()
 		return
 	}
@@ -252,9 +252,9 @@ func (f *sliceInflater) copyData() {
 			f.finishBlock()
 			return
 		}
-		buf := f.dict.writeSlice()
+		buf := f.window.writeSlice()
 		if len(buf) == 0 {
-			f.toRead = f.dict.readFlush()
+			f.toRead = f.window.readFlush()
 			f.step = (*sliceInflater).copyData
 			return
 		}
@@ -270,9 +270,9 @@ func (f *sliceInflater) copyData() {
 		f.pos += n
 		f.roffset += int64(n)
 		f.copyLen -= n
-		f.dict.writeMark(n)
-		if f.dict.availWrite() == 0 {
-			f.toRead = f.dict.readFlush()
+		f.window.writeMark(n)
+		if f.window.availWrite() == 0 {
+			f.toRead = f.window.readFlush()
 			f.step = (*sliceInflater).copyData
 			return
 		}
@@ -281,8 +281,8 @@ func (f *sliceInflater) copyData() {
 
 func (f *sliceInflater) finishBlock() {
 	if f.final {
-		if f.dict.availRead() > 0 {
-			f.toRead = f.dict.readFlush()
+		if f.window.availRead() > 0 {
+			f.toRead = f.window.readFlush()
 		}
 		f.err = io.EOF
 	}

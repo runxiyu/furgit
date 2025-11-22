@@ -70,13 +70,13 @@ func (e *WriteError) Error() string {
 	return "flate: write error at offset " + strconv.FormatInt(e.Offset, 10) + ": " + e.Err.Error()
 }
 
-// Resetter resets a ReadCloser returned by [NewReader] or [NewReaderDict]
+// Resetter resets a ReadCloser returned by [NewReader]
 // to switch to a new underlying [Reader]. This permits reusing a ReadCloser
 // instead of allocating a new one.
 type Resetter interface {
 	// Reset discards any buffered data and resets the Resetter as if it was
 	// newly initialized with the given reader.
-	Reset(r io.Reader, dict []byte) error
+	Reset(r io.Reader) error
 }
 
 // The data structure for decoding Huffman tables is based on that of
@@ -287,7 +287,7 @@ type decompressor struct {
 	codebits *[numCodes]int
 
 	// Output history, buffer.
-	dict dictDecoder
+	window windowDecoder
 
 	// Temporary buffer (avoids repeated allocation).
 	buf [4]byte
@@ -352,7 +352,7 @@ func (f *decompressor) Read(b []byte) (int, error) {
 		}
 		f.step(f)
 		if f.err != nil && len(f.toRead) == 0 {
-			f.toRead = f.dict.readFlush() // Flush what's left in case of error
+			f.toRead = f.window.readFlush()
 		}
 	}
 }
@@ -506,9 +506,9 @@ readLiteral:
 		var length int
 		switch {
 		case v < 256:
-			f.dict.writeByte(byte(v))
-			if f.dict.availWrite() == 0 {
-				f.toRead = f.dict.readFlush()
+			f.window.writeByte(byte(v))
+			if f.window.availWrite() == 0 {
+				f.toRead = f.window.readFlush()
 				f.step = (*decompressor).huffmanBlock
 				f.stepState = stateInit
 				return
@@ -596,7 +596,7 @@ readLiteral:
 		}
 
 		// No check on length; encoding can be prescient.
-		if dist > f.dict.histSize() {
+		if dist > f.window.histSize() {
 			f.err = CorruptInputError(f.roffset)
 			return
 		}
@@ -608,14 +608,14 @@ readLiteral:
 copyHistory:
 	// Perform a backwards copy according to RFC section 3.2.3.
 	{
-		cnt := f.dict.tryWriteCopy(f.copyDist, f.copyLen)
+		cnt := f.window.tryWriteCopy(f.copyDist, f.copyLen)
 		if cnt == 0 {
-			cnt = f.dict.writeCopy(f.copyDist, f.copyLen)
+			cnt = f.window.writeCopy(f.copyDist, f.copyLen)
 		}
 		f.copyLen -= cnt
 
-		if f.dict.availWrite() == 0 || f.copyLen > 0 {
-			f.toRead = f.dict.readFlush()
+		if f.window.availWrite() == 0 || f.copyLen > 0 {
+			f.toRead = f.window.readFlush()
 			f.step = (*decompressor).huffmanBlock // We need to continue this work
 			f.stepState = stateDict
 			return
@@ -646,7 +646,7 @@ func (f *decompressor) dataBlock() {
 	}
 
 	if n == 0 {
-		f.toRead = f.dict.readFlush()
+		f.toRead = f.window.readFlush()
 		f.finishBlock()
 		return
 	}
@@ -658,7 +658,7 @@ func (f *decompressor) dataBlock() {
 // copyData copies f.copyLen bytes from the underlying reader into f.hist.
 // It pauses for reads when f.hist is full.
 func (f *decompressor) copyData() {
-	buf := f.dict.writeSlice()
+	buf := f.window.writeSlice()
 	if len(buf) > f.copyLen {
 		buf = buf[:f.copyLen]
 	}
@@ -666,14 +666,14 @@ func (f *decompressor) copyData() {
 	cnt, err := io.ReadFull(f.r, buf)
 	f.roffset += int64(cnt)
 	f.copyLen -= cnt
-	f.dict.writeMark(cnt)
+	f.window.writeMark(cnt)
 	if err != nil {
 		f.err = noEOF(err)
 		return
 	}
 
-	if f.dict.availWrite() == 0 || f.copyLen > 0 {
-		f.toRead = f.dict.readFlush()
+	if f.window.availWrite() == 0 || f.copyLen > 0 {
+		f.toRead = f.window.readFlush()
 		f.step = (*decompressor).copyData
 		return
 	}
@@ -682,8 +682,8 @@ func (f *decompressor) copyData() {
 
 func (f *decompressor) finishBlock() {
 	if f.final {
-		if f.dict.availRead() > 0 {
-			f.toRead = f.dict.readFlush()
+		if f.window.availRead() > 0 {
+			f.toRead = f.window.readFlush()
 		}
 		f.err = io.EOF
 	}
@@ -788,16 +788,16 @@ func fixedHuffmanDecoderInit() {
 	})
 }
 
-func (f *decompressor) Reset(r io.Reader, dict []byte) error {
+func (f *decompressor) Reset(r io.Reader) error {
 	*f = decompressor{
 		rBuf:     f.rBuf,
 		bits:     f.bits,
 		codebits: f.codebits,
-		dict:     f.dict,
+		window:   f.window,
 		step:     (*decompressor).nextBlock,
 	}
 	f.makeReader(r)
-	f.dict.init(maxMatchOffset, dict)
+	f.window.init(maxMatchOffset)
 	return nil
 }
 
@@ -817,25 +817,6 @@ func NewReader(r io.Reader) io.ReadCloser {
 	f.bits = new([maxNumLit + maxNumDist]int)
 	f.codebits = new([numCodes]int)
 	f.step = (*decompressor).nextBlock
-	f.dict.init(maxMatchOffset, nil)
-	return &f
-}
-
-// NewReaderDict is like [NewReader] but initializes the reader
-// with a preset dictionary. The returned reader behaves as if
-// the uncompressed data stream started with the given dictionary,
-// which has already been read. NewReaderDict is typically used
-// to read data compressed by [NewWriterDict].
-//
-// The ReadCloser returned by NewReaderDict also implements [Resetter].
-func NewReaderDict(r io.Reader, dict []byte) io.ReadCloser {
-	fixedHuffmanDecoderInit()
-
-	var f decompressor
-	f.makeReader(r)
-	f.bits = new([maxNumLit + maxNumDist]int)
-	f.codebits = new([numCodes]int)
-	f.step = (*decompressor).nextBlock
-	f.dict.init(maxMatchOffset, dict)
+	f.window.init(maxMatchOffset)
 	return &f
 }

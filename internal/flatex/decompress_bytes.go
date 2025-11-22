@@ -7,8 +7,6 @@ import (
 	"git.sr.ht/~runxiyu/furgit/internal/bufpool"
 )
 
-// bufferDecompressor wraps the custom slice inflater so byte-slice
-// decompressions avoid repeated allocations.
 type bufferDecompressor struct {
 	inflater sliceInflater
 }
@@ -23,27 +21,15 @@ var bufferDecompressorPool = sync.Pool{
 	},
 }
 
-// Decompress inflates the provided DEFLATE stream and returns the full output
-// in a pooled bufpool.Buffer along with the number of consumed bytes from src.
 func Decompress(src []byte) (*bufpool.Buffer, int, error) {
-	return DecompressDictSized(src, nil, 0)
+	return DecompressSized(src, 0)
 }
 
-// DecompressDict inflates the provided DEFLATE stream using dict as the preset
-// dictionary and returns the full output in a pooled bufpool.Buffer. The second
-// returned value reports how many bytes of src were consumed.
-func DecompressDict(src []byte, dict []byte) (*bufpool.Buffer, int, error) {
-	return DecompressDictSized(src, dict, 0)
-}
-
-// DecompressDictSized is like DecompressDict but allows providing an expected
-// output size to pre-size the destination buffer and avoid repeated growth.
-// A non-positive sizeHint falls back to the default buffer capacity.
-func DecompressDictSized(src []byte, dict []byte, sizeHint int) (*bufpool.Buffer, int, error) {
+func DecompressSized(src []byte, sizeHint int) (*bufpool.Buffer, int, error) {
 	d := bufferDecompressorPool.Get().(*bufferDecompressor)
 	defer bufferDecompressorPool.Put(d)
 
-	if err := d.inflater.reset(src, dict); err != nil {
+	if err := d.inflater.reset(src); err != nil {
 		return nil, 0, err
 	}
 
@@ -65,7 +51,7 @@ func DecompressDictSized(src []byte, dict []byte, sizeHint int) (*bufpool.Buffer
 		}
 		d.inflater.step(&d.inflater)
 		if d.inflater.err != nil && len(d.inflater.toRead) == 0 {
-			d.inflater.toRead = d.inflater.dict.readFlush()
+			d.inflater.toRead = d.inflater.window.readFlush()
 		}
 	}
 }
