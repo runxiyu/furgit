@@ -213,3 +213,5 @@ By making a contribution to this project, I certify that:
   they continue from that point (passing along some state such as
   the packLocation to avoid re-resolving the location from index
   files).
+* There may be some cases where integer overflows are handled
+  incorrectly.
