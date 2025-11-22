@@ -1,12 +1,9 @@
 package furgit
 
 import (
-	"bytes"
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"io"
-	"math"
 	"os"
 	"sync"
 	"syscall"
@@ -82,35 +79,29 @@ func (repo *Repository) packTypeSizeAtLocation(loc packlocation, seen map[packKe
 	return repo.packTypeSizeWithin(pf, loc.Offset, seen)
 }
 
-func packHeaderRead(r io.Reader) (ObjectType, int, error) {
-	var b [1]byte
-	_, err := io.ReadFull(r, b[:])
-	if err != nil {
-		return ObjectTypeInvalid, 0, err
+func packHeaderParse(data []byte) (ObjectType, int, int, error) {
+	if len(data) == 0 {
+		return ObjectTypeInvalid, 0, 0, io.ErrUnexpectedEOF
 	}
-	ty := ObjectType((b[0] >> 4) & 0x07)
-	size := int(b[0] & 0x0f)
+	b := data[0]
+	ty := ObjectType((b >> 4) & 0x07)
+	size := int(b & 0x0f)
 	shift := 4
-	for (b[0] & 0x80) != 0 {
-		_, err = io.ReadFull(r, b[:])
-		if err != nil {
-			return ObjectTypeInvalid, 0, err
+	consumed := 1
+	for (b & 0x80) != 0 {
+		if consumed >= len(data) {
+			return ObjectTypeInvalid, 0, 0, io.ErrUnexpectedEOF
 		}
-		size |= int(b[0]&0x7f) << shift
+		b = data[consumed]
+		size |= int(b&0x7f) << shift
 		shift += 7
-		if (b[0] & 0x80) == 0 {
-			break
-		}
+		consumed++
 	}
-	return ty, size, nil
+	return ty, size, consumed, nil
 }
 
-func packSectionInflate(pf *packFile, objectOfs uint64, r *bytes.Reader, sizeHint int) (bufpool.Buffer, error) {
-	total := r.Size()
-	remaining := int64(r.Len())
-	consumed := total - remaining
-	start := objectOfs + uint64(consumed)
-	if int64(consumed) < 0 || start > uint64(len(pf.data)) {
+func packSectionInflate(pf *packFile, start uint64, sizeHint int) (bufpool.Buffer, error) {
+	if start > uint64(len(pf.data)) {
 		return bufpool.Buffer{}, ErrInvalidObject
 	}
 	body, err := zlibx.Decompress(pf.data[start:])
@@ -124,21 +115,22 @@ func packSectionInflate(pf *packFile, objectOfs uint64, r *bytes.Reader, sizeHin
 	return body, nil
 }
 
-func packDeltaReadOfsDistance(r io.Reader) (uint64, error) {
-	var b [1]byte
-	_, err := io.ReadFull(r, b[:])
-	if err != nil {
-		return 0, err
+func packDeltaReadOfsDistance(data []byte) (uint64, int, error) {
+	if len(data) == 0 {
+		return 0, 0, io.ErrUnexpectedEOF
 	}
-	dist := uint64(b[0] & 0x7f)
-	for (b[0] & 0x80) != 0 {
-		_, err = io.ReadFull(r, b[:])
-		if err != nil {
-			return 0, err
+	b := data[0]
+	dist := uint64(b & 0x7f)
+	consumed := 1
+	for (b & 0x80) != 0 {
+		if consumed >= len(data) {
+			return 0, 0, io.ErrUnexpectedEOF
 		}
-		dist = ((dist + 1) << 7) + uint64(b[0]&0x7f)
+		b = data[consumed]
+		consumed++
+		dist = ((dist + 1) << 7) + uint64(b&0x7f)
 	}
-	return dist, nil
+	return dist, consumed, nil
 }
 
 type packKey struct {
@@ -171,11 +163,10 @@ func (repo *Repository) packTypeSizeWithin(pf *packFile, ofs uint64, seen map[pa
 		seen[key] = struct{}{}
 		visited = append(visited, key)
 
-		r, err := pf.cursor(ofs)
-		if err != nil {
-			return ObjectTypeInvalid, 0, err
+		if ofs >= uint64(len(pf.data)) {
+			return ObjectTypeInvalid, 0, ErrInvalidObject
 		}
-		ty, size, err := packHeaderRead(r)
+		ty, size, consumed, err := packHeaderParse(pf.data[ofs:])
 		if err != nil {
 			return ObjectTypeInvalid, 0, err
 		}
@@ -184,15 +175,20 @@ func (repo *Repository) packTypeSizeWithin(pf *packFile, ofs uint64, seen map[pa
 			firstHeader = false
 		}
 
+		if uint64(consumed) > uint64(len(pf.data))-ofs {
+			return ObjectTypeInvalid, 0, io.ErrUnexpectedEOF
+		}
+		dataStart := ofs + uint64(consumed)
 		switch ty {
 		case ObjectTypeCommit, ObjectTypeTree, ObjectTypeBlob, ObjectTypeTag:
 			return ty, declaredSize, nil
 		case ObjectTypeRefDelta:
-			var base Hash
-			_, err := io.ReadFull(r, base.data[:repo.hashSize])
-			if err != nil {
-				return ObjectTypeInvalid, 0, err
+			hashEnd := dataStart + uint64(repo.hashSize)
+			if hashEnd > uint64(len(pf.data)) {
+				return ObjectTypeInvalid, 0, io.ErrUnexpectedEOF
 			}
+			var base Hash
+			copy(base.data[:], pf.data[dataStart:hashEnd])
 			base.size = repo.hashSize
 			loc, err := repo.packIndexFind(base)
 			if err == nil {
@@ -212,11 +208,15 @@ func (repo *Repository) packTypeSizeWithin(pf *packFile, ofs uint64, seen map[pa
 			}
 			return baseTy, declaredSize, nil
 		case ObjectTypeOfsDelta:
-			dist, err := packDeltaReadOfsDistance(r)
+			dist, distConsumed, err := packDeltaReadOfsDistance(pf.data[dataStart:])
 			if err != nil {
 				return ObjectTypeInvalid, 0, err
 			}
 			if ofs <= dist {
+				return ObjectTypeInvalid, 0, ErrInvalidObject
+			}
+			dataStart += uint64(distConsumed)
+			if dataStart > uint64(len(pf.data)) {
 				return ObjectTypeInvalid, 0, ErrInvalidObject
 			}
 			ofs -= dist
@@ -258,18 +258,21 @@ func (repo *Repository) packBodyResolveWithin(pf *packFile, ofs uint64) (ObjectT
 
 	resolved := false
 	for !resolved {
-		r, err := pf.cursor(ofs)
+		if ofs >= uint64(len(pf.data)) {
+			return fail(ErrInvalidObject)
+		}
+		ty, size, consumed, err := packHeaderParse(pf.data[ofs:])
 		if err != nil {
 			return fail(err)
 		}
-		ty, size, err := packHeaderRead(r)
-		if err != nil {
-			return fail(err)
+		if uint64(consumed) > uint64(len(pf.data))-ofs {
+			return fail(io.ErrUnexpectedEOF)
 		}
+		dataStart := ofs + uint64(consumed)
 
 		switch ty {
 		case ObjectTypeCommit, ObjectTypeTree, ObjectTypeBlob, ObjectTypeTag:
-			body, err = packSectionInflate(pf, ofs, r, size)
+			body, err = packSectionInflate(pf, dataStart, size)
 			if err != nil {
 				return fail(err)
 			}
@@ -277,13 +280,14 @@ func (repo *Repository) packBodyResolveWithin(pf *packFile, ofs uint64) (ObjectT
 			resultTy = ty
 			resolved = true
 		case ObjectTypeRefDelta:
-			var base Hash
-			_, err := io.ReadFull(r, base.data[:repo.hashSize])
-			if err != nil {
-				return fail(err)
+			hashEnd := dataStart + uint64(repo.hashSize)
+			if hashEnd > uint64(len(pf.data)) {
+				return fail(io.ErrUnexpectedEOF)
 			}
+			var base Hash
+			copy(base.data[:], pf.data[dataStart:hashEnd])
 			base.size = repo.hashSize
-			delta, err := packSectionInflate(pf, ofs, r, 0)
+			delta, err := packSectionInflate(pf, hashEnd, 0)
 			if err != nil {
 				return fail(err)
 			}
@@ -308,14 +312,18 @@ func (repo *Repository) packBodyResolveWithin(pf *packFile, ofs uint64) (ObjectT
 			bodyReady = true
 			resolved = true
 		case ObjectTypeOfsDelta:
-			dist, err := packDeltaReadOfsDistance(r)
+			dist, distConsumed, err := packDeltaReadOfsDistance(pf.data[dataStart:])
 			if err != nil {
 				return fail(err)
 			}
 			if ofs <= dist {
 				return fail(ErrInvalidObject)
 			}
-			delta, err := packSectionInflate(pf, ofs, r, 0)
+			deltaStart := dataStart + uint64(distConsumed)
+			if deltaStart > uint64(len(pf.data)) {
+				return fail(ErrInvalidObject)
+			}
+			delta, err := packSectionInflate(pf, deltaStart, 0)
 			if err != nil {
 				return fail(err)
 			}
@@ -560,22 +568,6 @@ func (pf *packFile) Close() error {
 		}
 	})
 	return closeErr
-}
-
-func (pf *packFile) cursor(ofs uint64) (*bytes.Reader, error) {
-	if pf == nil {
-		return nil, ErrInvalidObject
-	}
-	if pf.size < 0 {
-		return nil, ErrInvalidObject
-	}
-	if ofs > uint64(pf.size) {
-		return nil, fmt.Errorf("furgit: pack: offset %d beyond %s", ofs, pf.relPath)
-	}
-	if ofs > uint64(math.MaxInt64) {
-		return nil, fmt.Errorf("furgit: pack: offset %d too large", ofs)
-	}
-	return bytes.NewReader(pf.data[ofs:]), nil
 }
 
 func (repo *Repository) packFile(rel string) (*packFile, error) {
