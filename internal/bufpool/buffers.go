@@ -23,11 +23,10 @@ const (
 // pooled buffer, the caller should invoke Release() to return it to the pool.
 //
 // Buffers must not be copied after first use; doing so can cause double-returns
-// to the pool and data races. A zero-value Buffer is not valid for use.
-//
-//go:nocopy
+// to the pool and data races. A zero-value Buffer is not valid for use. Use
+// the pointer type (*Buffer) returned by Borrow/FromOwned to avoid accidental
+// copies.
 type Buffer struct {
-	_    noCopy
 	buf  []byte
 	pool poolIndex
 }
@@ -70,28 +69,28 @@ var bufferPools = func() []sync.Pool {
 // unpooled buffer is allocated.
 //
 // The caller must call Release() when finished using the returned Buffer.
-func Borrow(capHint int) Buffer {
+func Borrow(capHint int) *Buffer {
 	if capHint < DefaultBufferCap {
 		capHint = DefaultBufferCap
 	}
 	classIdx, classCap, pooled := classFor(capHint)
 	if !pooled {
 		newBuf := make([]byte, 0, capHint)
-		return Buffer{buf: newBuf, pool: unpooled}
+		return &Buffer{buf: newBuf, pool: unpooled}
 	}
 	buf := bufferPools[classIdx].Get().(*[]byte)
 	if cap(*buf) < classCap {
 		*buf = make([]byte, 0, classCap)
 	}
 	slice := (*buf)[:0]
-	return Buffer{buf: slice, pool: poolIndex(classIdx)}
+	return &Buffer{buf: slice, pool: poolIndex(classIdx)}
 }
 
 // FromOwned constructs a Buffer from a caller-owned byte slice. The resulting
 // Buffer does not participate in pooling and will never be returned to the
 // internal pool when released.
-func FromOwned(buf []byte) Buffer {
-	return Buffer{buf: buf, pool: unpooled}
+func FromOwned(buf []byte) *Buffer {
+	return &Buffer{buf: buf, pool: unpooled}
 }
 
 // Resize adjusts the length of the buffer to n bytes. If n exceeds the current
@@ -187,8 +186,3 @@ func (buf *Buffer) returnToPool() {
 	tmp := buf.buf[:0]
 	bufferPools[int(buf.pool)].Put(&tmp)
 }
-
-type noCopy struct{}
-
-func (*noCopy) Lock()   {}
-func (*noCopy) Unlock() {}

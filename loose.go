@@ -34,36 +34,36 @@ func (repo *Repository) looseRead(id Hash) (StoredObject, error) {
 	return obj, err
 }
 
-func (repo *Repository) looseReadTyped(id Hash) (ObjectType, bufpool.Buffer, error) {
+func (repo *Repository) looseReadTyped(id Hash) (ObjectType, *bufpool.Buffer, error) {
 	path, err := repo.loosePath(id)
 	if err != nil {
-		return ObjectTypeInvalid, bufpool.Buffer{}, err
+		return ObjectTypeInvalid, nil, err
 	}
 	path = repo.repoPath(path)
 	f, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return ObjectTypeInvalid, bufpool.Buffer{}, ErrNotFound
+			return ObjectTypeInvalid, nil, ErrNotFound
 		}
-		return ObjectTypeInvalid, bufpool.Buffer{}, err
+		return ObjectTypeInvalid, nil, err
 	}
 	defer func() { _ = f.Close() }()
 
 	compressed, err := io.ReadAll(f)
 	if err != nil {
-		return ObjectTypeInvalid, bufpool.Buffer{}, err
+		return ObjectTypeInvalid, nil, err
 	}
 
 	raw, err := zlibx.Decompress(compressed)
 	if err != nil {
-		return ObjectTypeInvalid, bufpool.Buffer{}, err
+		return ObjectTypeInvalid, nil, err
 	}
 
 	rawBytes := raw.Bytes()
 	nul := bytes.IndexByte(rawBytes, 0)
 	if nul < 0 {
 		raw.Release()
-		return ObjectTypeInvalid, bufpool.Buffer{}, ErrInvalidObject
+		return ObjectTypeInvalid, nil, ErrInvalidObject
 	}
 
 	header := rawBytes[:nul]
@@ -72,11 +72,11 @@ func (repo *Repository) looseReadTyped(id Hash) (ObjectType, bufpool.Buffer, err
 	ty, declaredSize, err := parseLooseHeader(header)
 	if err != nil {
 		raw.Release()
-		return ObjectTypeInvalid, bufpool.Buffer{}, err
+		return ObjectTypeInvalid, nil, err
 	}
 	if declaredSize != int64(len(body)) {
 		raw.Release()
-		return ObjectTypeInvalid, bufpool.Buffer{}, ErrInvalidObject
+		return ObjectTypeInvalid, nil, ErrInvalidObject
 	}
 
 	copy(rawBytes, body)
