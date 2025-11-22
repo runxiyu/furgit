@@ -48,27 +48,6 @@ func (f *sliceInflater) reset(src []byte, dict []byte) error {
 	return nil
 }
 
-func (f *sliceInflater) readByte() (byte, error) {
-	if f.pos >= len(f.input) {
-		return 0, io.ErrUnexpectedEOF
-	}
-	b := f.input[f.pos]
-	f.pos++
-	f.roffset++
-	return b, nil
-}
-
-func (f *sliceInflater) readBytes(n int) ([]byte, error) {
-	if n < 0 || f.pos+n > len(f.input) {
-		f.pos = len(f.input)
-		return nil, io.ErrUnexpectedEOF
-	}
-	s := f.input[f.pos : f.pos+n]
-	f.pos += n
-	f.roffset += int64(n)
-	return s, nil
-}
-
 func (f *sliceInflater) nextBlock() {
 	for f.nb < 1+2 {
 		if err := f.moreBits(); err != nil {
@@ -242,11 +221,14 @@ func (f *sliceInflater) dataBlock() {
 	f.nb = 0
 	f.b = 0
 
-	hdr, err := f.readBytes(4)
-	if err != nil {
-		f.err = err
+	if f.pos+4 > len(f.input) {
+		f.pos = len(f.input)
+		f.err = io.ErrUnexpectedEOF
 		return
 	}
+	hdr := f.input[f.pos : f.pos+4]
+	f.pos += 4
+	f.roffset += 4
 	n := int(hdr[0]) | int(hdr[1])<<8
 	nn := int(hdr[2]) | int(hdr[3])<<8
 	if uint16(nn) != uint16(^n) {
@@ -309,10 +291,12 @@ func (f *sliceInflater) finishBlock() {
 }
 
 func (f *sliceInflater) moreBits() error {
-	c, err := f.readByte()
-	if err != nil {
-		return err
+	if f.pos >= len(f.input) {
+		return io.ErrUnexpectedEOF
 	}
+	c := f.input[f.pos]
+	f.pos++
+	f.roffset++
 	f.b |= uint32(c) << (f.nb & 31)
 	f.nb += 8
 	return nil
@@ -323,12 +307,14 @@ func (f *sliceInflater) huffSym(h *huffmanDecoder) (int, error) {
 	nb, b := f.nb, f.b
 	for {
 		for nb < n {
-			c, err := f.readByte()
-			if err != nil {
+			if f.pos >= len(f.input) {
 				f.b = b
 				f.nb = nb
-				return 0, err
+				return 0, io.ErrUnexpectedEOF
 			}
+			c := f.input[f.pos]
+			f.pos++
+			f.roffset++
 			b |= uint32(c) << (nb & 31)
 			nb += 8
 		}
@@ -373,12 +359,8 @@ func (f *sliceInflater) readHuffman() error {
 	f.nb -= 5 + 5 + 4
 	codebits := f.codebits[:]
 	bits := f.bits[:]
-	for i := range codebits {
-		codebits[i] = 0
-	}
-	for i := range bits {
-		bits[i] = 0
-	}
+	clear(codebits)
+	clear(bits)
 	for i := 0; i < nclen; i++ {
 		for f.nb < 3 {
 			if err := f.moreBits(); err != nil {
