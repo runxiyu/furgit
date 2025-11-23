@@ -24,3 +24,6 @@ tasks:
   - lint: |
       cd furgit
       golangci-lint run ./...
+  - vet: |
+      cd furgit
+      go vet ./...
