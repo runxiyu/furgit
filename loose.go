@@ -24,44 +24,44 @@ func (repo *Repository) loosePath(id Hash) (string, error) {
 	return filepath.Join("objects", hex[:2], hex[2:]), nil
 }
 
-func (repo *Repository) looseRead(id Hash) (ObjectType, *bufpool.Buffer, error) {
+func (repo *Repository) looseRead(id Hash) (ObjectType, bufpool.Buffer, error) {
 	ty, body, err := repo.looseReadTyped(id)
 	if err != nil {
-		return ObjectTypeInvalid, nil, err
+		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
 	return ty, body, nil
 }
 
-func (repo *Repository) looseReadTyped(id Hash) (ObjectType, *bufpool.Buffer, error) {
+func (repo *Repository) looseReadTyped(id Hash) (ObjectType, bufpool.Buffer, error) {
 	path, err := repo.loosePath(id)
 	if err != nil {
-		return ObjectTypeInvalid, nil, err
+		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
 	path = repo.repoPath(path)
 	f, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return ObjectTypeInvalid, nil, ErrNotFound
+			return ObjectTypeInvalid, bufpool.Buffer{}, ErrNotFound
 		}
-		return ObjectTypeInvalid, nil, err
+		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
 	defer func() { _ = f.Close() }()
 
 	compressed, err := io.ReadAll(f)
 	if err != nil {
-		return ObjectTypeInvalid, nil, err
+		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
 
 	raw, err := zlibx.Decompress(compressed)
 	if err != nil {
-		return ObjectTypeInvalid, nil, err
+		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
 
 	rawBytes := raw.Bytes()
 	nul := bytes.IndexByte(rawBytes, 0)
 	if nul < 0 {
 		raw.Release()
-		return ObjectTypeInvalid, nil, ErrInvalidObject
+		return ObjectTypeInvalid, bufpool.Buffer{}, ErrInvalidObject
 	}
 
 	header := rawBytes[:nul]
@@ -70,17 +70,17 @@ func (repo *Repository) looseReadTyped(id Hash) (ObjectType, *bufpool.Buffer, er
 	ty, declaredSize, err := parseLooseHeader(header)
 	if err != nil {
 		raw.Release()
-		return ObjectTypeInvalid, nil, err
+		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
 	if declaredSize != int64(len(body)) {
 		raw.Release()
-		return ObjectTypeInvalid, nil, ErrInvalidObject
+		return ObjectTypeInvalid, bufpool.Buffer{}, ErrInvalidObject
 	}
 
 	copy(rawBytes, body)
 	raw.Resize(len(body))
 	// if !repo.verifyRawObject(raw, id) {
-	// 	return ObjectTypeInvalid, nil, ErrInvalidObject
+	// 	return ObjectTypeInvalid, bufpool.Buffer{}, ErrInvalidObject
 	// }
 
 	return ty, raw, nil

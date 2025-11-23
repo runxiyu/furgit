@@ -21,16 +21,16 @@ var bufferDecompressorPool = sync.Pool{
 	},
 }
 
-func Decompress(src []byte) (*bufpool.Buffer, int, error) {
+func Decompress(src []byte) (bufpool.Buffer, int, error) {
 	return DecompressSized(src, 0)
 }
 
-func DecompressSized(src []byte, sizeHint int) (*bufpool.Buffer, int, error) {
+func DecompressSized(src []byte, sizeHint int) (bufpool.Buffer, int, error) {
 	d := bufferDecompressorPool.Get().(*bufferDecompressor)
 	defer bufferDecompressorPool.Put(d)
 
 	if err := d.inflater.reset(src); err != nil {
-		return nil, 0, err
+		return bufpool.Buffer{}, 0, err
 	}
 
 	out := bufpool.Borrow(sizeHint)
@@ -47,7 +47,7 @@ func DecompressSized(src []byte, sizeHint int) (*bufpool.Buffer, int, error) {
 				return out, d.inflater.pos, nil
 			}
 			out.Release()
-			return nil, 0, d.inflater.err
+			return bufpool.Buffer{}, 0, d.inflater.err
 		}
 		d.inflater.step(&d.inflater)
 		if d.inflater.err != nil && len(d.inflater.toRead) == 0 {

@@ -22,10 +22,10 @@ type packlocation struct {
 	Offset   uint64
 }
 
-func (repo *Repository) packRead(id Hash) (ObjectType, *bufpool.Buffer, error) {
+func (repo *Repository) packRead(id Hash) (ObjectType, bufpool.Buffer, error) {
 	loc, err := repo.packIndexFind(id)
 	if err != nil {
-		return ObjectTypeInvalid, nil, err
+		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
 	return repo.packReadAt(loc, id)
 }
@@ -48,22 +48,22 @@ func (repo *Repository) packIndexFind(id Hash) (packlocation, error) {
 	return packlocation{}, ErrNotFound
 }
 
-func (repo *Repository) packReadAt(loc packlocation, want Hash) (ObjectType, *bufpool.Buffer, error) {
+func (repo *Repository) packReadAt(loc packlocation, want Hash) (ObjectType, bufpool.Buffer, error) {
 	ty, body, err := repo.packBodyResolveAtLocation(loc)
 	if err != nil {
-		return ObjectTypeInvalid, nil, err
+		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
 	// if !repo.verifyTypedObject(ty, body.Bytes(), want) {
 	// 	body.Release()
-	// 	return ObjectTypeInvalid, nil, ErrInvalidObject
+	// 	return ObjectTypeInvalid, bufpool.Buffer{}, ErrInvalidObject
 	// }
 	return ty, body, nil
 }
 
-func (repo *Repository) packBodyResolveAtLocation(loc packlocation) (ObjectType, *bufpool.Buffer, error) {
+func (repo *Repository) packBodyResolveAtLocation(loc packlocation) (ObjectType, bufpool.Buffer, error) {
 	pf, err := repo.packFile(loc.PackPath)
 	if err != nil {
-		return ObjectTypeInvalid, nil, err
+		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
 	return repo.packBodyResolveWithin(pf, loc.Offset)
 }
@@ -97,17 +97,17 @@ func packHeaderParse(data []byte) (ObjectType, int, int, error) {
 	return ty, size, consumed, nil
 }
 
-func packSectionInflate(pf *packFile, start uint64, sizeHint int) (*bufpool.Buffer, error) {
+func packSectionInflate(pf *packFile, start uint64, sizeHint int) (bufpool.Buffer, error) {
 	if start > uint64(len(pf.data)) {
-		return nil, ErrInvalidObject
+		return bufpool.Buffer{}, ErrInvalidObject
 	}
 	body, err := zlibx.DecompressSized(pf.data[start:], sizeHint)
 	if err != nil {
-		return nil, err
+		return bufpool.Buffer{}, err
 	}
 	if sizeHint > 0 && len(body.Bytes()) != sizeHint {
 		body.Release()
-		return nil, ErrInvalidObject
+		return bufpool.Buffer{}, ErrInvalidObject
 	}
 	return body, nil
 }
@@ -225,13 +225,13 @@ func (repo *Repository) packTypeSizeWithin(pf *packFile, ofs uint64, seen map[pa
 	}
 }
 
-func (repo *Repository) packBodyResolveWithin(pf *packFile, ofs uint64) (ObjectType, *bufpool.Buffer, error) {
+func (repo *Repository) packBodyResolveWithin(pf *packFile, ofs uint64) (ObjectType, bufpool.Buffer, error) {
 	if pf == nil {
-		return ObjectTypeInvalid, nil, ErrInvalidObject
+		return ObjectTypeInvalid, bufpool.Buffer{}, ErrInvalidObject
 	}
 
 	type deltaFrame struct {
-		delta *bufpool.Buffer
+		delta bufpool.Buffer
 	}
 	var frames []deltaFrame
 	defer func() {
@@ -241,16 +241,16 @@ func (repo *Repository) packBodyResolveWithin(pf *packFile, ofs uint64) (ObjectT
 	}()
 
 	var (
-		body      *bufpool.Buffer
+		body      bufpool.Buffer
 		bodyReady bool
 		resultTy  ObjectType
 	)
-	fail := func(err error) (ObjectType, *bufpool.Buffer, error) {
+	fail := func(err error) (ObjectType, bufpool.Buffer, error) {
 		if bodyReady {
 			body.Release()
 			bodyReady = false
 		}
-		return ObjectTypeInvalid, nil, err
+		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
 
 	resolved := false
@@ -348,20 +348,20 @@ func (repo *Repository) packBodyResolveWithin(pf *packFile, ofs uint64) (ObjectT
 	return resultTy, body, nil
 }
 
-func packDeltaApply(base, delta *bufpool.Buffer) (*bufpool.Buffer, error) {
+func packDeltaApply(base, delta bufpool.Buffer) (bufpool.Buffer, error) {
 	pos := 0
 	baseBytes := base.Bytes()
 	deltaBytes := delta.Bytes()
 	srcSize, err := packVarintRead(deltaBytes, &pos)
 	if err != nil {
-		return nil, err
+		return bufpool.Buffer{}, err
 	}
 	dstSize, err := packVarintRead(deltaBytes, &pos)
 	if err != nil {
-		return nil, err
+		return bufpool.Buffer{}, err
 	}
 	if srcSize != len(baseBytes) {
-		return nil, ErrInvalidObject
+		return bufpool.Buffer{}, ErrInvalidObject
 	}
 	out := bufpool.Borrow(dstSize)
 	out.Resize(dstSize)
@@ -378,7 +378,7 @@ func packDeltaApply(base, delta *bufpool.Buffer) (*bufpool.Buffer, error) {
 			if op&0x01 != 0 {
 				if pos >= len(deltaBytes) {
 					out.Release()
-					return nil, ErrInvalidObject
+					return bufpool.Buffer{}, ErrInvalidObject
 				}
 				off |= int(deltaBytes[pos])
 				pos++
@@ -386,7 +386,7 @@ func packDeltaApply(base, delta *bufpool.Buffer) (*bufpool.Buffer, error) {
 			if op&0x02 != 0 {
 				if pos >= len(deltaBytes) {
 					out.Release()
-					return nil, ErrInvalidObject
+					return bufpool.Buffer{}, ErrInvalidObject
 				}
 				off |= int(deltaBytes[pos]) << 8
 				pos++
@@ -394,7 +394,7 @@ func packDeltaApply(base, delta *bufpool.Buffer) (*bufpool.Buffer, error) {
 			if op&0x04 != 0 {
 				if pos >= len(deltaBytes) {
 					out.Release()
-					return nil, ErrInvalidObject
+					return bufpool.Buffer{}, ErrInvalidObject
 				}
 				off |= int(deltaBytes[pos]) << 16
 				pos++
@@ -402,7 +402,7 @@ func packDeltaApply(base, delta *bufpool.Buffer) (*bufpool.Buffer, error) {
 			if op&0x08 != 0 {
 				if pos >= len(deltaBytes) {
 					out.Release()
-					return nil, ErrInvalidObject
+					return bufpool.Buffer{}, ErrInvalidObject
 				}
 				off |= int(deltaBytes[pos]) << 24
 				pos++
@@ -410,7 +410,7 @@ func packDeltaApply(base, delta *bufpool.Buffer) (*bufpool.Buffer, error) {
 			if op&0x10 != 0 {
 				if pos >= len(deltaBytes) {
 					out.Release()
-					return nil, ErrInvalidObject
+					return bufpool.Buffer{}, ErrInvalidObject
 				}
 				n |= int(deltaBytes[pos])
 				pos++
@@ -418,7 +418,7 @@ func packDeltaApply(base, delta *bufpool.Buffer) (*bufpool.Buffer, error) {
 			if op&0x20 != 0 {
 				if pos >= len(deltaBytes) {
 					out.Release()
-					return nil, ErrInvalidObject
+					return bufpool.Buffer{}, ErrInvalidObject
 				}
 				n |= int(deltaBytes[pos]) << 8
 				pos++
@@ -426,7 +426,7 @@ func packDeltaApply(base, delta *bufpool.Buffer) (*bufpool.Buffer, error) {
 			if op&0x40 != 0 {
 				if pos >= len(deltaBytes) {
 					out.Release()
-					return nil, ErrInvalidObject
+					return bufpool.Buffer{}, ErrInvalidObject
 				}
 				n |= int(deltaBytes[pos]) << 16
 				pos++
@@ -436,7 +436,7 @@ func packDeltaApply(base, delta *bufpool.Buffer) (*bufpool.Buffer, error) {
 			}
 			if off+n > len(baseBytes) || outPos+n > len(outBytes) {
 				out.Release()
-				return nil, ErrInvalidObject
+				return bufpool.Buffer{}, ErrInvalidObject
 			}
 			copy(outBytes[outPos:], baseBytes[off:off+n])
 			outPos += n
@@ -444,20 +444,20 @@ func packDeltaApply(base, delta *bufpool.Buffer) (*bufpool.Buffer, error) {
 			n := int(op)
 			if pos+n > len(deltaBytes) || outPos+n > len(outBytes) {
 				out.Release()
-				return nil, ErrInvalidObject
+				return bufpool.Buffer{}, ErrInvalidObject
 			}
 			copy(outBytes[outPos:], deltaBytes[pos:pos+n])
 			pos += n
 			outPos += n
 		default:
 			out.Release()
-			return nil, ErrInvalidObject
+			return bufpool.Buffer{}, ErrInvalidObject
 		}
 	}
 
 	if outPos != len(outBytes) {
 		out.Release()
-		return nil, ErrInvalidObject
+		return bufpool.Buffer{}, ErrInvalidObject
 	}
 	return out, nil
 }
