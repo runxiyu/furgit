@@ -15,8 +15,8 @@ DATA LCPI0_2<>+0x08(SB)/8, $0x0102030405060708
 GLOBL LCPI0_2<>(SB), (RODATA|NOPTR), $16
 
 TEXT ·adler32_sse3(SB), NOSPLIT, $0-36
-	MOVLQZX adler+0(FP), DI
-	MOVQ    buf+8(FP), SI
+	MOVLQZX in+0(FP), DI
+	MOVQ    buf_base+8(FP), SI
 	MOVQ    buf_len+16(FP), DX
 	MOVQ    buf_cap+24(FP), CX
 	NOP                         // (skipped)                            // push	rbp

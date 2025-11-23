@@ -18,10 +18,10 @@ DATA LCPI0_2<>+0x00(SB)/2, $0x0001
 GLOBL LCPI0_2<>(SB), (RODATA|NOPTR), $2
 
 TEXT ·adler32_avx2(SB), NOSPLIT, $0-36
-	MOVLQZX      adler+0(FP), DI
-	MOVQ         src+8(FP), SI
-	MOVQ         len+16(FP), DX
-	MOVQ         cap+24(FP), CX
+	MOVLQZX      in+0(FP), DI
+	MOVQ         buf_base+8(FP), SI
+	MOVQ         buf_len+16(FP), DX
+	MOVQ         buf_cap+24(FP), CX
 	WORD         $0x8548; BYTE $0xf6     // TESTQ SI, SI                         // test	rsi, rsi
 	JE           LBB0_1                  // <--                                  // je	.LBB0_1
 	WORD         $0xf889                 // MOVL DI, AX                          // mov	eax, edi

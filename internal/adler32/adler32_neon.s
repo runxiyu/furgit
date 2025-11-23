@@ -13,8 +13,8 @@ DATA mult_table<>+0x38(SB)/8, $0x0001000200030004
 GLOBL mult_table<>(SB), (RODATA|NOPTR), $64
 
 TEXT ·adler32_neon(SB), NOSPLIT, $0-36
-	MOVW adler+0(FP), R0
-	MOVD buf+8(FP), R1
+	MOVW in+0(FP), R0
+	MOVD buf_base+8(FP), R1
 	MOVD buf_len+16(FP), R2
 	MOVD buf_cap+24(FP), R3
 	NOP                     // (skipped)                            // stp	x29, x30, [sp, #-16]!
