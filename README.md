@@ -47,6 +47,28 @@ to some extent [tangled](https://tangled.org/@tangled.org/core).
 * Minor SIMD optimizations for Adler-32
 * Memory-mapping packfiles and their indexes
 
+## Performance
+
+See [gitbench](https://git.sr.ht/~runxiyu/gitbench) for details on methods.
+
+All tests below were run on `linux.git` with `HEAD` at `6da43bbeb6918164`
+on a `Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz`.
+
+### Traversing all trees
+
+* Git: 0.1 seconds
+* Furgit: 9 seconds
+* libgit2: 19 seconds
+* go-git: 122 seconds
+
+### Traversing the root tree only
+
+
+* Furgit: 1ms
+* Git: 4ms
+* libgit2: 11ms
+* go-git: 1800ms
+
 ## Dependencies
 
 * The standard library
