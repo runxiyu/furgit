@@ -534,17 +534,6 @@ func openPackFile(absPath, rel string) (*packFile, error) {
 		return nil, err
 	}
 
-	err = syscall.Madvise(region, syscall.MADV_RANDOM)
-	if err != nil {
-		_ = syscall.Munmap(region)
-		return nil, err
-	}
-	err = syscall.Madvise(region, syscall.MADV_WILLNEED)
-	if err != nil {
-		_ = syscall.Munmap(region)
-		return nil, err
-	}
-
 	return &packFile{
 		relPath: rel,
 		size:    stat.Size(),
