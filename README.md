@@ -8,48 +8,52 @@ Furgit is a fast Git library in pure Go
 
 ## Project status
 
-Furgit is in initial development, does not have tagged releases yet, and we can
-guarantee that the API will break every now and then. Do not use in
-production. When we do have tagged releases, we will likely follow
-[Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html).
+* Initial development
+* No tagged releases
+* API *will* break frequently
+* Do not use in production
+* Will likely follow [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) in the future
 
-## History
+## Current features
 
-Furgit's lineage is from [Villosa](https://codeberg.org/lindenii/villosa), a
-new, work-in-progress software development forge. It started as an internal
-package inside Villosa, and was later extracted into a standalone module.
+* SHA-256 and SHA-1
+* Reading loose objects
+* Writing loose objects
+* Reading packfiles
+* General support for blobs, trees, commits, and tags
 
-Villosa's old internal Git package, in turn, based on my work in
-[hare-git](https://forge.lindenii.org/hare/-/repos/hare-git/) for the Hare
-programming language. Features in here will likely be ported back to
-hare-git in the future.
+## Future features
 
-## Goals and current features
+* Multi pack indexes
+* Repack
+* [commit-graph](https://git-scm.com/docs/commit-graph)
+* Network protocols
+* And much more
 
-We do not focus on command-line utilities; in particular, Furgit does not
-intend to replace [upstream git](https://git-scm.com). It is intended to be
-used as a library.
+## General goals
 
-We intend for repository objects to be freely usable across goroutines, which
-may enable long-running applications such as forges to keep a pool of recently
-used repos (including their `.idx` and `.pack` cache) for rapid access.
+Furgit intends to be a general-purpose Git library.
 
-There is no specific plan for features yet, but we'll initially focus on
-developing what forges like [Villosa](https://codeberg.org/lindenii/villosa) and
-[tangled](https://tangled.org/@tangled.org/core) (and other forges if
-interested) requires. Afterwards, we'll take a look at what other usages (such
-as writing Git clients, IDE integration, etc) would need.
+For now, Furgit primarily prioritize APIs and optimizations that are
+likely to be used by software development forges and other
+server-side usages; in particular, Furgit follows the needs of
+[Villosa](https://villosa.lindenii.org/villosa//repos/villosa/) and
+to some extent [tangled](https://tangled.org/@tangled.org/core).
 
-Currently, furgit is very basic; it supports reading and writing loose objects
-and reading from packfiles. There is some infrastructure for writing packfiles
-in the tests but they need to be refactored.
+## Performance optimizations
+
+* Aggressive pooling of byte buffers
+* Aggressive pooling of custom zlib readers
+* Minor SIMD optimizations for Adler-32
+* Memory-mapping packfiles and their indexes
 
 ## Dependencies
 
-Furgit has no dependencies other than the standard library and some packages
-from `golang.org/x`. It is unlikely that other dependencies will be introduced.
+* The standard library
+* Some things from `golang.org/x`
 
-In some cases, external code is introduced but maintained in-tree.
+* It is unlikely that other dependencies will be introduced.
+* In some cases, external code is introduced but maintained in-tree.
 
 ## Environment requirements
 
@@ -58,61 +62,24 @@ We currently do not intend to support flexible storage backends such as
 a standard UNIX-like filesystem with
 [syscall.Mmap](https://pkg.go.dev/syscall#Mmap) is expected.
 
-## Performance
-
-Furgit is being aggressively optimized for performance.
-
-It is difficult to optimize Go code to be as performant as libgit2 (or
-for that matter, upstream git). However, we are making tiny steps
-towards it.
-
-The first step that has been arguably a success is the packfile parser.
-By using memory-mapped I/O, relatively optimized delta resolution, and
-zero-copy techniques, Furgit is able to perform the equivalent to
-`git ls-tree --long HEAD` on the Linux repository in about 2ms on
-a ThinkPad T14, which is comparable to Git, faster than libgit2,
-and significantly faster than go-git.
-
-However this is a microbenchmark and does not reflect all real-world
-performance. For example, when recursively listing tree entires and
-commits, Furgit's performance is only slightly faster than libgit2;
-both lack behind Git by multiple orders of magnitude.
-
-Things we might consider in the future include:
-
-* [commit-graph](https://git-scm.com/docs/commit-graph)
-* Improving the custom zlib implementation with more SIMD
-* More optimizations to delta resolution
-
-## Hash algorithm
-
-Furgit supports both SHA-256 and SHA-1.
-
-The default tests run with SHA-256. To run tests with SHA-1, use the `sha1`
-build tag.
-
-## Active services using Furgit
-
-There's an experimental instance of [Villosa](https://codeberg.org/lindenii/villosa)
-hosting [a copy of Linux](https://villosa.lindenii.org/test//repos/linux/)
-([tree](https://villosa.lindenii.org/test//repos/linux/HEAD/tree/)) using
-Furgit as the Git backend.
-
 ## Repos and community resources
 
-The [main repository](https://forge.lindenii.org/furgit/-/repos/furgit/) is
-hosted on [Lindenii Forge](https://forge.lindenii.org/forge/-/repos/server/)
-(the previous iteration of [Villosa](https://codeberg.org/lindenii/villosa)).
+* [Main repository](https://villosa.lindenii.org/furgit//repos/furgit/) on
+  [Villosa](https://villosa.lindenii.org/villosa//repos/villosa/)
+* [Lindenii Forge mirror](https://forge.lindenii.org/forge/-/repos/server/)
+* [SourceHut mirror](https://git.sr.ht/~runxiyu/furgit)
+* [Codeberg mirror](https://codeberg.org/runxiyu/furgit)
+* [tangled mirror](https://tangled.org/@runxiyu.tngl.sh/furgit)
+* [GitHub mirror](https://github.com/runxiyu/furgit)
 
-To contribute, clone the repository from the SSH remote
+To contribute, clone the repository from the Lindenii Forge mirror's SSH remote
 `ssh://forge.lindenii.org/forge/-/repos/server`, create a unique branch that
 begins with `contrib/`, and push. Your branch will be associated with your SSH
 key and a merge request will be created, and the maintainers will be notified
-on IRC.
-
-Anonymous SSH cloning is supported with or without a key. Pushing requires an
-SSH key: no key pre-registration is required, but you have to ensure that your
-key is consistent throughout pushes if you push multiple times.
+on IRC. Anonymous SSH cloning is supported with or without a key. Pushing
+requires an SSH key: no key pre-registration is required, but you have to
+ensure that your key is consistent throughout pushes if you push multiple
+times.
 
 ```
 git clone ssh://forge.lindenii.org/furgit/-/repos/furgit
@@ -122,13 +89,8 @@ git checkout -b contrib/name_of_your_contribution
 git push -u origin HEAD
 ```
 
-There are also a few mirrors. The maintainer may poll them for
-issues/patches/PRs/etc., but pushing to Lindenii Forge is recommended.
-
-* [SourceHut](https://git.sr.ht/~runxiyu/furgit)
-* [Codeberg](https://codeberg.org/runxiyu/furgit)
-* [tangled](https://tangled.org/@runxiyu.tngl.sh/furgit)
-* [GitHub](https://github.com/runxiyu/furgit)
+The contribution process will switch to Villosa once Villosa's patchset
+and code-review components work.
 
 We discuss in `#chat` on [irc.runxiyu.org](https://irc.runxiyu.org)
 ([web chat](https://webirc.runxiyu.org/kiwiirc/#chat))
@@ -136,10 +98,18 @@ We discuss in `#chat` on [irc.runxiyu.org](https://irc.runxiyu.org)
 The maintainer is working through college applications and IBDP coursework and
 may not necessarily respond in time.
 
-## Etymology
+## History and lineage
 
-I was thinking of names and I accidentally typed "git" as "fur" (i.e., left
-shifted one key on my QWERTY keyboard).
+* I wrote [Lindenii Forge](https://forge.lindenii.org/forge/-/repos/server/)
+* I wrote [hare-git](https://forge.lindenii.org/hare/-/repos/hare-git/)
+* I wanted a faster Git library for
+  [Lindenii Villosa](https://villosa.lindenii.org/villosa//repos/villosa/),
+  the next generation of Lindenii Forge
+* I translated hare-git and put it into `internal/common/git` in Villosa
+* I extracted it out into a general-purpose library, which is what we
+  have now
+* I was thinking of names and I accidentally typed "git" as "fur" (i.e., left
+  shifted one key on my QWERTY keyboard), so, "Furgit"
 
 ## License
 
@@ -205,7 +175,7 @@ By making a contribution to this project, I certify that:
     this project or the open source license(s) involved.
 ```
 
-## Random internal to-do list
+## Internal to-do list
 
 * Consider adding repository methods that attempt to resolve objects
   of a particular type. They would attempt to resolve the object's
