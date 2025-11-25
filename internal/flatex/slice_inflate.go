@@ -3,6 +3,7 @@ package flatex
 import (
 	"io"
 	"math/bits"
+	"sync"
 )
 
 // sliceInflater is a specialized DEFLATE decoder that reads directly from an
@@ -31,6 +32,16 @@ type sliceInflater struct {
 	hl, hd    *huffmanDecoder
 	copyLen   int
 	copyDist  int
+}
+
+var sliceInflaterPool = sync.Pool{
+	New: func() any {
+		fixedHuffmanDecoderInit()
+		return &sliceInflater{
+			bits:     new([maxNumLit + maxNumDist]int),
+			codebits: new([numCodes]int),
+		}
+	},
 }
 
 func (f *sliceInflater) reset(src []byte) error {

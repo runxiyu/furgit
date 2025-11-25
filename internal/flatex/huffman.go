@@ -26,12 +26,6 @@ const (
 	numCodes   = 19 // number of codes in Huffman meta-code
 )
 
-var (
-	// Initialize the fixedHuffmanDecoder only once upon first use.
-	fixedOnce           sync.Once
-	fixedHuffmanDecoder huffmanDecoder
-)
-
 // A CorruptInputError reports the presence of corrupt input at a given offset.
 type CorruptInputError int64
 
@@ -223,6 +217,12 @@ func (h *huffmanDecoder) init(lengths []int) bool {
 // RFC 1951 section 3.2.7.
 // Compression with dynamic Huffman codes
 var codeOrder = [...]int{16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15}
+
+var (
+	// Initialize the fixedHuffmanDecoder only once upon first use.
+	fixedOnce           sync.Once
+	fixedHuffmanDecoder huffmanDecoder
+)
 
 func fixedHuffmanDecoderInit() {
 	fixedOnce.Do(func() {
