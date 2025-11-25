@@ -144,8 +144,8 @@ type Ref struct {
 	Peeled Hash
 }
 
-// ListRef represents a reference entry as returned by ListRefs.
-type ListRef struct {
+// NamedRef represents a reference entry as returned by NamedRefs.
+type NamedRef struct {
 	// Name is the fully qualified ref name (e.g., refs/heads/main).
 	Name string
 	// Ref describes the reference target.
@@ -244,7 +244,7 @@ func (repo *Repository) resolveRefFully(path string, seen map[string]struct{}) (
 // repository root, then packed refs are read while skipping any names
 // that already appeared as loose refs. Packed refs are filtered
 // similarly.
-func (repo *Repository) ListRefs(pattern string) ([]ListRef, error) {
+func (repo *Repository) ListRefs(pattern string) ([]NamedRef, error) {
 	if pattern == "" {
 		pattern = "refs/*"
 	}
@@ -255,7 +255,7 @@ func (repo *Repository) ListRefs(pattern string) ([]ListRef, error) {
 		return nil, ErrInvalidRef
 	}
 
-	var out []ListRef
+	var out []NamedRef
 	seen := make(map[string]struct{})
 
 	globPattern := filepath.Join(repo.rootPath, filepath.FromSlash(pattern))
@@ -290,7 +290,7 @@ func (repo *Repository) ListRefs(pattern string) ([]ListRef, error) {
 		}
 
 		seen[name] = struct{}{}
-		out = append(out, ListRef{
+		out = append(out, NamedRef{
 			Name: name,
 			Ref:  ref,
 		})
@@ -357,7 +357,7 @@ func (repo *Repository) ListRefs(pattern string) ([]ListRef, error) {
 		if parseErr != nil {
 			return nil, parseErr
 		}
-		out = append(out, ListRef{
+		out = append(out, NamedRef{
 			Name: name,
 			Ref: Ref{
 				Kind: RefKindDetached,
