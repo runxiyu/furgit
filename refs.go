@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path"
+	"path/filepath"
 	"slices"
 	"strings"
 )
@@ -142,6 +144,14 @@ type Ref struct {
 	Peeled Hash
 }
 
+// ShowRef represents a reference entry as returned by ShowRefs.
+type ShowRef struct {
+	// Name is the fully qualified ref name (e.g., refs/heads/main).
+	Name string
+	// Ref describes the reference target.
+	Ref Ref
+}
+
 // ResolveRef reads the given fully qualified ref (such as "HEAD" or "refs/heads/main")
 // and interprets its contents as either a symbolic ref ("ref: refs/..."), a detached
 // hash, or invalid.
@@ -223,4 +233,142 @@ func (repo *Repository) resolveRefFully(path string, seen map[string]struct{}) (
 	default:
 		return Hash{}, ErrInvalidRef
 	}
+}
+
+// ShowRefs lists refs similarly to git-show-ref.
+//
+// The pattern must be empty or begin with "refs/". An empty pattern is
+// treated as "refs/*".
+
+// Loose refs are resolved using filesystem globbing relative to the
+// repository root, then packed refs are read while skipping any names
+// that already appeared as loose refs. Packed refs are filtered
+// similarly.
+func (repo *Repository) ShowRefs(pattern string) ([]ShowRef, error) {
+	if pattern == "" {
+		pattern = "refs/*"
+	}
+	if !strings.HasPrefix(pattern, "refs/") {
+		return nil, ErrInvalidRef
+	}
+	if filepath.IsAbs(pattern) {
+		return nil, ErrInvalidRef
+	}
+
+	var out []ShowRef
+	seen := make(map[string]struct{})
+
+	globPattern := filepath.Join(repo.rootPath, filepath.FromSlash(pattern))
+	matches, err := filepath.Glob(globPattern)
+	if err != nil {
+		return nil, err
+	}
+	for _, match := range matches {
+		info, statErr := os.Stat(match)
+		if statErr != nil {
+			return nil, statErr
+		}
+		if info.IsDir() {
+			continue
+		}
+
+		rel, relErr := filepath.Rel(repo.rootPath, match)
+		if relErr != nil {
+			return nil, relErr
+		}
+		name := filepath.ToSlash(rel)
+		if !strings.HasPrefix(name, "refs/") {
+			continue
+		}
+
+		ref, resolveErr := repo.resolveLooseRef(name)
+		if resolveErr != nil {
+			if resolveErr == ErrNotFound || os.IsNotExist(resolveErr) {
+				continue
+			}
+			return nil, resolveErr
+		}
+
+		seen[name] = struct{}{}
+		out = append(out, ShowRef{
+			Name: name,
+			Ref:  ref,
+		})
+	}
+
+	packedPath := repo.repoPath("packed-refs")
+	f, err := os.Open(packedPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return out, nil
+		}
+		return nil, err
+	}
+	defer func() { _ = f.Close() }()
+
+	scanner := bufio.NewScanner(f)
+	lastIdx := -1
+	for scanner.Scan() {
+		line := scanner.Bytes()
+		if len(line) == 0 || line[0] == '#' {
+			continue
+		}
+
+		if line[0] == '^' {
+			if lastIdx < 0 {
+				continue
+			}
+			peeledHex := strings.TrimPrefix(string(line), "^")
+			peeledHex = strings.TrimSpace(peeledHex)
+			peeled, parseErr := repo.ParseHash(peeledHex)
+			if parseErr != nil {
+				return nil, parseErr
+			}
+			out[lastIdx].Ref.Peeled = peeled
+			continue
+		}
+
+		sp := bytes.IndexByte(line, ' ')
+		if sp != repo.hashSize*2 {
+			lastIdx = -1
+			continue
+		}
+
+		name := string(line[sp+1:])
+		if !strings.HasPrefix(name, "refs/") {
+			lastIdx = -1
+			continue
+		}
+		if _, ok := seen[name]; ok {
+			lastIdx = -1
+			continue
+		}
+
+		match, matchErr := path.Match(pattern, name)
+		if matchErr != nil {
+			return nil, matchErr
+		}
+		if !match {
+			lastIdx = -1
+			continue
+		}
+
+		hash, parseErr := repo.ParseHash(string(line[:sp]))
+		if parseErr != nil {
+			return nil, parseErr
+		}
+		out = append(out, ShowRef{
+			Name: name,
+			Ref: Ref{
+				Kind: RefKindDetached,
+				Hash: hash,
+			},
+		})
+		lastIdx = len(out) - 1
+	}
+	if scanErr := scanner.Err(); scanErr != nil {
+		return nil, scanErr
+	}
+
+	return out, nil
 }

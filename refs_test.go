@@ -279,3 +279,208 @@ func TestResolveRefHashInput(t *testing.T) {
 		t.Fatalf("expected error for invalid hash input")
 	}
 }
+
+func TestShowRefsLooseOverridesPacked(t *testing.T) {
+	repoPath, cleanup := setupTestRepo(t)
+	defer cleanup()
+
+	workDir, cleanupWork := setupWorkDir(t)
+	defer cleanupWork()
+
+	gitCmd(t, repoPath, "symbolic-ref", "HEAD", "refs/heads/main")
+
+	err := os.WriteFile(filepath.Join(workDir, "file.txt"), []byte("one"), 0o644)
+	if err != nil {
+		t.Fatalf("failed to write file.txt: %v", err)
+	}
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "c1")
+	commit1 := gitCmd(t, repoPath, "rev-parse", "HEAD")
+
+	gitCmd(t, repoPath, "update-ref", "refs/heads/main", commit1)
+	gitCmd(t, repoPath, "update-ref", "refs/heads/feature", commit1)
+	gitCmd(t, repoPath, "pack-refs", "--all", "--prune")
+
+	err = os.WriteFile(filepath.Join(workDir, "file.txt"), []byte("two"), 0o644)
+	if err != nil {
+		t.Fatalf("failed to write file.txt: %v", err)
+	}
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "c2")
+	commit2 := gitCmd(t, repoPath, "rev-parse", "HEAD")
+	gitCmd(t, repoPath, "update-ref", "refs/heads/main", commit2)
+
+	repo, err := OpenRepository(repoPath)
+	if err != nil {
+		t.Fatalf("OpenRepository failed: %v", err)
+	}
+	defer func() { _ = repo.Close() }()
+
+	hash1, _ := repo.ParseHash(commit1)
+	hash2, _ := repo.ParseHash(commit2)
+
+	refs, err := repo.ShowRefs("refs/heads/*")
+	if err != nil {
+		t.Fatalf("ShowRefs failed: %v", err)
+	}
+
+	if len(refs) != 2 {
+		t.Fatalf("expected 2 refs, got %d", len(refs))
+	}
+
+	got := make(map[string]Ref, len(refs))
+	for _, r := range refs {
+		if _, exists := got[r.Name]; exists {
+			t.Fatalf("duplicate ref %q in results", r.Name)
+		}
+		got[r.Name] = r.Ref
+	}
+
+	mainRef, ok := got["refs/heads/main"]
+	if !ok {
+		t.Fatalf("missing refs/heads/main in results")
+	}
+	if mainRef.Kind != RefKindDetached || mainRef.Hash != hash2 {
+		t.Fatalf("refs/heads/main hash: got %s (kind %v), want %s", mainRef.Hash, mainRef.Kind, hash2)
+	}
+
+	featureRef, ok := got["refs/heads/feature"]
+	if !ok {
+		t.Fatalf("missing refs/heads/feature in results")
+	}
+	if featureRef.Kind != RefKindDetached || featureRef.Hash != hash1 {
+		t.Fatalf("refs/heads/feature hash: got %s (kind %v), want %s", featureRef.Hash, featureRef.Kind, hash1)
+	}
+}
+
+func TestShowRefsPatternFiltering(t *testing.T) {
+	repoPath, cleanup := setupTestRepo(t)
+	defer cleanup()
+
+	workDir, cleanupWork := setupWorkDir(t)
+	defer cleanupWork()
+
+	gitCmd(t, repoPath, "symbolic-ref", "HEAD", "refs/heads/main")
+
+	err := os.WriteFile(filepath.Join(workDir, "file.txt"), []byte("one"), 0o644)
+	if err != nil {
+		t.Fatalf("failed to write file.txt: %v", err)
+	}
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "c1")
+	commit1 := gitCmd(t, repoPath, "rev-parse", "HEAD")
+
+	gitCmd(t, repoPath, "update-ref", "refs/heads/main", commit1)
+	gitCmd(t, repoPath, "update-ref", "refs/heads/feature", commit1)
+	gitCmd(t, repoPath, "pack-refs", "--all", "--prune")
+
+	repo, err := OpenRepository(repoPath)
+	if err != nil {
+		t.Fatalf("OpenRepository failed: %v", err)
+	}
+	defer func() { _ = repo.Close() }()
+
+	hash1, _ := repo.ParseHash(commit1)
+
+	refs, err := repo.ShowRefs("refs/heads/fea*")
+	if err != nil {
+		t.Fatalf("ShowRefs failed: %v", err)
+	}
+	if len(refs) != 1 {
+		t.Fatalf("expected 1 ref, got %d", len(refs))
+	}
+	if refs[0].Name != "refs/heads/feature" {
+		t.Fatalf("unexpected ref name: got %q, want %q", refs[0].Name, "refs/heads/feature")
+	}
+	if refs[0].Ref.Kind != RefKindDetached || refs[0].Ref.Hash != hash1 {
+		t.Fatalf("refs/heads/feature hash: got %s (kind %v), want %s", refs[0].Ref.Hash, refs[0].Ref.Kind, hash1)
+	}
+}
+
+func TestShowRefsPackedPatterns(t *testing.T) {
+	repoPath, cleanup := setupTestRepo(t)
+	defer cleanup()
+
+	workDir, cleanupWork := setupWorkDir(t)
+	defer cleanupWork()
+
+	gitCmd(t, repoPath, "symbolic-ref", "HEAD", "refs/heads/main")
+
+	err := os.WriteFile(filepath.Join(workDir, "file.txt"), []byte("one"), 0o644)
+	if err != nil {
+		t.Fatalf("failed to write file.txt: %v", err)
+	}
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "c1")
+	commit := gitCmd(t, repoPath, "rev-parse", "HEAD")
+
+	gitCmd(t, repoPath, "update-ref", "refs/heads/main", commit)
+	gitCmd(t, repoPath, "update-ref", "refs/heads/feature/one", commit)
+	gitCmd(t, repoPath, "update-ref", "refs/notes/review", commit)
+	gitCmd(t, repoPath, "update-ref", "refs/tags/v1", commit)
+	gitCmd(t, repoPath, "pack-refs", "--all", "--prune")
+
+	repo, err := OpenRepository(repoPath)
+	if err != nil {
+		t.Fatalf("OpenRepository failed: %v", err)
+	}
+	defer func() { _ = repo.Close() }()
+
+	tests := []struct {
+		pattern string
+		want    []string
+	}{
+		{
+			pattern: "refs/heads/*",
+			want:    []string{"refs/heads/main"},
+		},
+		{
+			pattern: "refs/heads/*/*",
+			want:    []string{"refs/heads/feature/one"},
+		},
+		{
+			pattern: "refs/*/feature/one",
+			want:    []string{"refs/heads/feature/one"},
+		},
+		{
+			pattern: "refs/heads/feat?re/one",
+			want:    []string{"refs/heads/feature/one"},
+		},
+		{
+			pattern: "refs/tags/v[0-9]",
+			want:    []string{"refs/tags/v1"},
+		},
+		{
+			pattern: "refs/*/*",
+			want:    []string{"refs/heads/main", "refs/notes/review", "refs/tags/v1"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.pattern, func(t *testing.T) {
+			refs, err := repo.ShowRefs(tt.pattern)
+			if err != nil {
+				t.Fatalf("ShowRefs(%q) failed: %v", tt.pattern, err)
+			}
+
+			got := make(map[string]struct{}, len(refs))
+			for _, r := range refs {
+				got[r.Name] = struct{}{}
+			}
+
+			want := make(map[string]struct{}, len(tt.want))
+			for _, w := range tt.want {
+				want[w] = struct{}{}
+			}
+
+			if len(got) != len(want) {
+				t.Fatalf("ShowRefs(%q) returned %d refs, want %d", tt.pattern, len(got), len(want))
+			}
+			for name := range got {
+				if _, ok := want[name]; !ok {
+					t.Fatalf("ShowRefs(%q) unexpected ref %q", tt.pattern, name)
+				}
+			}
+		})
+	}
+}
