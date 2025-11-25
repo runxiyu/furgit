@@ -14,15 +14,14 @@ type bufferDecompressor struct {
 var bufferDecompressorPool = sync.Pool{
 	New: func() any {
 		fixedHuffmanDecoderInit()
-		d := &bufferDecompressor{}
-		d.inflater.bits = new([maxNumLit + maxNumDist]int)
-		d.inflater.codebits = new([numCodes]int)
+		d := &bufferDecompressor{
+			inflater: sliceInflater{
+				bits:     new([maxNumLit + maxNumDist]int),
+				codebits: new([numCodes]int),
+			},
+		}
 		return d
 	},
-}
-
-func Decompress(src []byte) (bufpool.Buffer, int, error) {
-	return DecompressSized(src, 0)
 }
 
 func DecompressSized(src []byte, sizeHint int) (bufpool.Buffer, int, error) {

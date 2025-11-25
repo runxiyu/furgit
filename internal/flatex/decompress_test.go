@@ -22,13 +22,13 @@ func compressDeflate(t *testing.T, payload []byte) []byte {
 	return buf.Bytes()
 }
 
-func TestDecompress(t *testing.T) {
+func TestDecompressSized(t *testing.T) {
 	payload := bytes.Repeat([]byte("golang"), 32)
 	compressed := compressDeflate(t, payload)
 
-	out, _, err := Decompress(compressed)
+	out, _, err := DecompressSized(compressed, 0)
 	if err != nil {
-		t.Fatalf("Decompress: %v", err)
+		t.Fatalf("DecompressSized: %v", err)
 	}
 	defer out.Release()
 
