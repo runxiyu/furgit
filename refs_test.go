@@ -280,7 +280,7 @@ func TestResolveRefHashInput(t *testing.T) {
 	}
 }
 
-func TestShowRefsLooseOverridesPacked(t *testing.T) {
+func TestListRefsLooseOverridesPacked(t *testing.T) {
 	repoPath, cleanup := setupTestRepo(t)
 	defer cleanup()
 
@@ -319,9 +319,9 @@ func TestShowRefsLooseOverridesPacked(t *testing.T) {
 	hash1, _ := repo.ParseHash(commit1)
 	hash2, _ := repo.ParseHash(commit2)
 
-	refs, err := repo.ShowRefs("refs/heads/*")
+	refs, err := repo.ListRefs("refs/heads/*")
 	if err != nil {
-		t.Fatalf("ShowRefs failed: %v", err)
+		t.Fatalf("ListRefs failed: %v", err)
 	}
 
 	if len(refs) != 2 {
@@ -353,7 +353,7 @@ func TestShowRefsLooseOverridesPacked(t *testing.T) {
 	}
 }
 
-func TestShowRefsPatternFiltering(t *testing.T) {
+func TestListRefsPatternFiltering(t *testing.T) {
 	repoPath, cleanup := setupTestRepo(t)
 	defer cleanup()
 
@@ -382,9 +382,9 @@ func TestShowRefsPatternFiltering(t *testing.T) {
 
 	hash1, _ := repo.ParseHash(commit1)
 
-	refs, err := repo.ShowRefs("refs/heads/fea*")
+	refs, err := repo.ListRefs("refs/heads/fea*")
 	if err != nil {
-		t.Fatalf("ShowRefs failed: %v", err)
+		t.Fatalf("ListRefs failed: %v", err)
 	}
 	if len(refs) != 1 {
 		t.Fatalf("expected 1 ref, got %d", len(refs))
@@ -397,7 +397,7 @@ func TestShowRefsPatternFiltering(t *testing.T) {
 	}
 }
 
-func TestShowRefsPackedPatterns(t *testing.T) {
+func TestListRefsPackedPatterns(t *testing.T) {
 	repoPath, cleanup := setupTestRepo(t)
 	defer cleanup()
 
@@ -458,9 +458,9 @@ func TestShowRefsPackedPatterns(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.pattern, func(t *testing.T) {
-			refs, err := repo.ShowRefs(tt.pattern)
+			refs, err := repo.ListRefs(tt.pattern)
 			if err != nil {
-				t.Fatalf("ShowRefs(%q) failed: %v", tt.pattern, err)
+				t.Fatalf("ListRefs(%q) failed: %v", tt.pattern, err)
 			}
 
 			got := make(map[string]struct{}, len(refs))
@@ -474,11 +474,11 @@ func TestShowRefsPackedPatterns(t *testing.T) {
 			}
 
 			if len(got) != len(want) {
-				t.Fatalf("ShowRefs(%q) returned %d refs, want %d", tt.pattern, len(got), len(want))
+				t.Fatalf("ListRefs(%q) returned %d refs, want %d", tt.pattern, len(got), len(want))
 			}
 			for name := range got {
 				if _, ok := want[name]; !ok {
-					t.Fatalf("ShowRefs(%q) unexpected ref %q", tt.pattern, name)
+					t.Fatalf("ListRefs(%q) unexpected ref %q", tt.pattern, name)
 				}
 			}
 		})

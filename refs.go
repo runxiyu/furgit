@@ -144,8 +144,8 @@ type Ref struct {
 	Peeled Hash
 }
 
-// ShowRef represents a reference entry as returned by ShowRefs.
-type ShowRef struct {
+// ListRef represents a reference entry as returned by ListRefs.
+type ListRef struct {
 	// Name is the fully qualified ref name (e.g., refs/heads/main).
 	Name string
 	// Ref describes the reference target.
@@ -235,7 +235,7 @@ func (repo *Repository) resolveRefFully(path string, seen map[string]struct{}) (
 	}
 }
 
-// ShowRefs lists refs similarly to git-show-ref.
+// ListRefs lists refs similarly to git-show-ref.
 //
 // The pattern must be empty or begin with "refs/". An empty pattern is
 // treated as "refs/*".
@@ -244,7 +244,7 @@ func (repo *Repository) resolveRefFully(path string, seen map[string]struct{}) (
 // repository root, then packed refs are read while skipping any names
 // that already appeared as loose refs. Packed refs are filtered
 // similarly.
-func (repo *Repository) ShowRefs(pattern string) ([]ShowRef, error) {
+func (repo *Repository) ListRefs(pattern string) ([]ListRef, error) {
 	if pattern == "" {
 		pattern = "refs/*"
 	}
@@ -255,7 +255,7 @@ func (repo *Repository) ShowRefs(pattern string) ([]ShowRef, error) {
 		return nil, ErrInvalidRef
 	}
 
-	var out []ShowRef
+	var out []ListRef
 	seen := make(map[string]struct{})
 
 	globPattern := filepath.Join(repo.rootPath, filepath.FromSlash(pattern))
@@ -290,7 +290,7 @@ func (repo *Repository) ShowRefs(pattern string) ([]ShowRef, error) {
 		}
 
 		seen[name] = struct{}{}
-		out = append(out, ShowRef{
+		out = append(out, ListRef{
 			Name: name,
 			Ref:  ref,
 		})
@@ -357,7 +357,7 @@ func (repo *Repository) ShowRefs(pattern string) ([]ShowRef, error) {
 		if parseErr != nil {
 			return nil, parseErr
 		}
-		out = append(out, ShowRef{
+		out = append(out, ListRef{
 			Name: name,
 			Ref: Ref{
 				Kind: RefKindDetached,
