@@ -24,9 +24,10 @@ func (repo *Repository) resolveLooseRef(refname string) (Ref, error) {
 	if strings.HasPrefix(line, "ref: ") {
 		target := strings.TrimSpace(line[5:])
 		if target == "" {
-			return Ref{Kind: RefKindInvalid}, ErrInvalidRef
+			return Ref{Name: refname, Kind: RefKindInvalid}, ErrInvalidRef
 		}
 		return Ref{
+			Name: refname,
 			Kind: RefKindSymbolic,
 			Ref:  target,
 		}, nil
@@ -34,9 +35,10 @@ func (repo *Repository) resolveLooseRef(refname string) (Ref, error) {
 
 	id, err := repo.ParseHash(line)
 	if err != nil {
-		return Ref{Kind: RefKindInvalid}, err
+		return Ref{Name: refname, Kind: RefKindInvalid}, err
 	}
 	return Ref{
+		Name: refname,
 		Kind: RefKindDetached,
 		Hash: id,
 	}, nil
@@ -81,10 +83,11 @@ func (repo *Repository) resolvePackedRef(refname string) (Ref, error) {
 		hex := string(line[:sp])
 		id, err := repo.ParseHash(hex)
 		if err != nil {
-			return Ref{Kind: RefKindInvalid}, err
+			return Ref{Name: refname, Kind: RefKindInvalid}, err
 		}
 
 		ref := Ref{
+			Name: refname,
 			Kind: RefKindDetached,
 			Hash: id,
 		}
@@ -97,21 +100,21 @@ func (repo *Repository) resolvePackedRef(refname string) (Ref, error) {
 
 				peeledID, err := repo.ParseHash(peeledHex)
 				if err != nil {
-					return Ref{Kind: RefKindInvalid}, err
+					return Ref{Name: refname, Kind: RefKindInvalid}, err
 				}
 				ref.Peeled = peeledID
 			}
 		}
 
 		if scanErr := scanner.Err(); scanErr != nil {
-			return Ref{Kind: RefKindInvalid}, scanErr
+			return Ref{Name: refname, Kind: RefKindInvalid}, scanErr
 		}
 
 		return ref, nil
 	}
 
 	if scanErr := scanner.Err(); scanErr != nil {
-		return Ref{Kind: RefKindInvalid}, scanErr
+		return Ref{Name: refname, Kind: RefKindInvalid}, scanErr
 	}
 	return Ref{}, ErrNotFound
 }
@@ -130,6 +133,10 @@ const (
 
 // Ref represents a reference.
 type Ref struct {
+	// Name is the fully qualified ref name (e.g., refs/heads/main).
+	// It may be empty for detached hashes that were not looked up
+	// by name (e.g., ResolveRef on a raw hash).
+	Name string
 	// Kind is the kind of the reference.
 	Kind RefKind
 	// When Kind is RefKindSymbolic, Ref is the fully qualified ref name.
@@ -144,12 +151,106 @@ type Ref struct {
 	Peeled Hash
 }
 
-// NamedRef represents a reference entry as returned by NamedRefs.
-type NamedRef struct {
-	// Name is the fully qualified ref name (e.g., refs/heads/main).
-	Name string
-	// Ref describes the reference target.
-	Ref Ref
+type refParseRule struct {
+	fmtStr string
+	prefix string
+	suffix string
+}
+
+func parseRule(rule string) refParseRule {
+	prefix, suffix, _ := strings.Cut(rule, "%s")
+	return refParseRule{
+		fmtStr: rule,
+		prefix: prefix,
+		suffix: suffix,
+	}
+}
+
+var refRevParseRules = []refParseRule{
+	parseRule("%s"),
+	parseRule("refs/%s"),
+	parseRule("refs/tags/%s"),
+	parseRule("refs/heads/%s"),
+	parseRule("refs/remotes/%s"),
+	parseRule("refs/remotes/%s/HEAD"),
+}
+
+func (rule refParseRule) match(name string) (string, bool) {
+	if rule.suffix != "" {
+		if !strings.HasSuffix(name, rule.suffix) {
+			return "", false
+		}
+		name = strings.TrimSuffix(name, rule.suffix)
+	}
+
+	var short string
+	n, err := fmt.Sscanf(name, rule.prefix+"%s", &short)
+	if err != nil || n != 1 {
+		return "", false
+	}
+	if fmt.Sprintf(rule.prefix+"%s", short) != name {
+		return "", false
+	}
+	return short, true
+}
+
+func (rule refParseRule) render(short string) string {
+	return rule.prefix + short + rule.suffix
+}
+
+// Short returns the shortest unambiguous shorthand for the ref name,
+// following the rev-parse rules used by Git. The provided list of refs
+// is used to test for ambiguity.
+//
+// When strict is true, all other rules must fail to resolve to an
+// existing ref; otherwise only rules prior to the matched rule must
+// fail.
+func (ref *Ref) Short(all []Ref, strict bool) string {
+	if ref == nil {
+		return ""
+	}
+	name := ref.Name
+	if name == "" {
+		return ""
+	}
+
+	names := make(map[string]struct{}, len(all))
+	for _, r := range all {
+		if r.Name == "" {
+			continue
+		}
+		names[r.Name] = struct{}{}
+	}
+
+	for i := len(refRevParseRules) - 1; i > 0; i-- {
+		short, ok := refRevParseRules[i].match(name)
+		if !ok {
+			continue
+		}
+
+		rulesToFail := i
+		if strict {
+			rulesToFail = len(refRevParseRules)
+		}
+
+		ambiguous := false
+		for j := 0; j < rulesToFail; j++ {
+			if j == i {
+				continue
+			}
+			full := refRevParseRules[j].render(short)
+			if _, found := names[full]; found {
+				ambiguous = true
+				break
+			}
+		}
+
+		if !ambiguous {
+			return short
+		}
+	}
+
+	return name
 }
 
 // ResolveRef reads the given fully qualified ref (such as "HEAD" or "refs/heads/main")
@@ -169,6 +270,7 @@ func (repo *Repository) ResolveRef(path string) (Ref, error) {
 		id, err := repo.ParseHash(path)
 		if err == nil {
 			return Ref{
+				Name: path,
 				Kind: RefKindDetached,
 				Hash: id,
 			}, nil
@@ -178,7 +280,7 @@ func (repo *Repository) ResolveRef(path string) (Ref, error) {
 		// specifying something crazy like objects/... or ./config.
 		// There may be other legal pseudo-refs in the future,
 		// but it's probably the best to stay cautious for now.
-		return Ref{Kind: RefKindInvalid}, ErrInvalidRef
+		return Ref{Name: path, Kind: RefKindInvalid}, ErrInvalidRef
 	}
 
 	loose, err := repo.resolveLooseRef(path)
@@ -186,7 +288,7 @@ func (repo *Repository) ResolveRef(path string) (Ref, error) {
 		return loose, nil
 	}
 	if err != ErrNotFound {
-		return Ref{Kind: RefKindInvalid}, err
+		return Ref{Name: path, Kind: RefKindInvalid}, err
 	}
 
 	packed, err := repo.resolvePackedRef(path)
@@ -194,10 +296,10 @@ func (repo *Repository) ResolveRef(path string) (Ref, error) {
 		return packed, nil
 	}
 	if err != ErrNotFound {
-		return Ref{Kind: RefKindInvalid}, err
+		return Ref{Name: path, Kind: RefKindInvalid}, err
 	}
 
-	return Ref{Kind: RefKindInvalid}, ErrNotFound
+	return Ref{Name: path, Kind: RefKindInvalid}, ErrNotFound
 }
 
 // ResolveRefFully resolves a ref by recursively following
@@ -244,7 +346,7 @@ func (repo *Repository) resolveRefFully(path string, seen map[string]struct{}) (
 // repository root, then packed refs are read while skipping any names
 // that already appeared as loose refs. Packed refs are filtered
 // similarly.
-func (repo *Repository) ListRefs(pattern string) ([]NamedRef, error) {
+func (repo *Repository) ListRefs(pattern string) ([]Ref, error) {
 	if pattern == "" {
 		pattern = "refs/*"
 	}
@@ -255,7 +357,7 @@ func (repo *Repository) ListRefs(pattern string) ([]NamedRef, error) {
 		return nil, ErrInvalidRef
 	}
 
-	var out []NamedRef
+	var out []Ref
 	seen := make(map[string]struct{})
 
 	globPattern := filepath.Join(repo.rootPath, filepath.FromSlash(pattern))
@@ -290,10 +392,7 @@ func (repo *Repository) ListRefs(pattern string) ([]NamedRef, error) {
 		}
 
 		seen[name] = struct{}{}
-		out = append(out, NamedRef{
-			Name: name,
-			Ref:  ref,
-		})
+		out = append(out, ref)
 	}
 
 	packedPath := repo.repoPath("packed-refs")
@@ -324,7 +423,7 @@ func (repo *Repository) ListRefs(pattern string) ([]NamedRef, error) {
 			if parseErr != nil {
 				return nil, parseErr
 			}
-			out[lastIdx].Ref.Peeled = peeled
+			out[lastIdx].Peeled = peeled
 			continue
 		}
 
@@ -357,12 +456,10 @@ func (repo *Repository) ListRefs(pattern string) ([]NamedRef, error) {
 		if parseErr != nil {
 			return nil, parseErr
 		}
-		out = append(out, NamedRef{
+		out = append(out, Ref{
 			Name: name,
-			Ref: Ref{
-				Kind: RefKindDetached,
-				Hash: hash,
-			},
+			Kind: RefKindDetached,
+			Hash: hash,
 		})
 		lastIdx = len(out) - 1
 	}

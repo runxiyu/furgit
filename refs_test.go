@@ -333,7 +333,7 @@ func TestListRefsLooseOverridesPacked(t *testing.T) {
 		if _, exists := got[r.Name]; exists {
 			t.Fatalf("duplicate ref %q in results", r.Name)
 		}
-		got[r.Name] = r.Ref
+		got[r.Name] = r
 	}
 
 	mainRef, ok := got["refs/heads/main"]
@@ -392,8 +392,8 @@ func TestListRefsPatternFiltering(t *testing.T) {
 	if refs[0].Name != "refs/heads/feature" {
 		t.Fatalf("unexpected ref name: got %q, want %q", refs[0].Name, "refs/heads/feature")
 	}
-	if refs[0].Ref.Kind != RefKindDetached || refs[0].Ref.Hash != hash1 {
-		t.Fatalf("refs/heads/feature hash: got %s (kind %v), want %s", refs[0].Ref.Hash, refs[0].Ref.Kind, hash1)
+	if refs[0].Kind != RefKindDetached || refs[0].Hash != hash1 {
+		t.Fatalf("refs/heads/feature hash: got %s (kind %v), want %s", refs[0].Hash, refs[0].Kind, hash1)
 	}
 }
 
@@ -483,4 +483,38 @@ func TestListRefsPackedPatterns(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestRefShort(t *testing.T) {
+	t.Run("unambiguous", func(t *testing.T) {
+		ref := Ref{Name: "refs/heads/main"}
+		short := ref.Short([]Ref{ref}, false)
+		if short != "main" {
+			t.Fatalf("expected short name %q, got %q", "main", short)
+		}
+	})
+
+	t.Run("ambiguous", func(t *testing.T) {
+		ref := Ref{Name: "refs/heads/main"}
+		tags := Ref{Name: "refs/tags/main"}
+		short := ref.Short([]Ref{ref, tags}, false)
+		if short != "heads/main" {
+			t.Fatalf("expected ambiguous ref to shorten to %q, got %q", "heads/main", short)
+		}
+	})
+
+	t.Run("strict", func(t *testing.T) {
+		ref := Ref{Name: "refs/heads/main"}
+		remoteHead := Ref{Name: "refs/remotes/main/HEAD"}
+
+		shortNonStrict := ref.Short([]Ref{ref, remoteHead}, false)
+		if shortNonStrict != "main" {
+			t.Fatalf("expected non-strict short name %q, got %q", "main", shortNonStrict)
+		}
+
+		shortStrict := ref.Short([]Ref{ref, remoteHead}, true)
+		if shortStrict != "heads/main" {
+			t.Fatalf("expected strict ambiguity to shorten to %q, got %q", "heads/main", shortStrict)
+		}
+	})
 }
