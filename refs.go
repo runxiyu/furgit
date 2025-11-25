@@ -239,7 +239,7 @@ func (repo *Repository) resolveRefFully(path string, seen map[string]struct{}) (
 //
 // The pattern must be empty or begin with "refs/". An empty pattern is
 // treated as "refs/*".
-
+//
 // Loose refs are resolved using filesystem globbing relative to the
 // repository root, then packed refs are read while skipping any names
 // that already appeared as loose refs. Packed refs are filtered
