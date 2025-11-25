@@ -305,7 +305,7 @@ func (repo *Repository) ResolveRef(path string) (Ref, error) {
 // ResolveRefFully resolves a ref by recursively following
 // symbolic references until it reaches a detached ref.
 // Symbolic cycles are detected and reported.
-// Tags are not peeled automatically.
+// Annotated tags are not peeled.
 func (repo *Repository) ResolveRefFully(path string) (Hash, error) {
 	seen := make(map[string]struct{})
 	return repo.resolveRefFully(path, seen)
