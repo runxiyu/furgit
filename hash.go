@@ -10,8 +10,8 @@ const maxHashSize = 32
 
 // Hash represents a Git object ID.
 type Hash struct {
-	data [maxHashSize]byte
 	size int
+	data [maxHashSize]byte
 }
 
 // hashFunc is a function that computes a hash from input data.
