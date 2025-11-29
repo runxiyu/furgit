@@ -151,19 +151,15 @@ func (tree *Tree) Serialize() ([]byte, error) {
 // Lookups are not recursive.
 // It returns nil if no such entry exists.
 func (tree *Tree) Entry(name []byte) *TreeEntry {
-	low, high := 0, len(tree.Entries)-1
-	for low <= high {
-		mid := (low + high) / 2
-		cmp := bytes.Compare(tree.Entries[mid].Name, name)
-		if cmp == 0 {
-			return &tree.Entries[mid]
-		} else if cmp < 0 {
-			low = mid + 1
-		} else {
-			high = mid - 1
-		}
+	if len(tree.Entries) == 0 {
+		return nil
 	}
-	return nil
+
+	if e := tree.entry(name, true); e != nil {
+		return e
+	}
+
+	return tree.entry(name, false)
 }
 
 // EntryRecursive looks up a tree entry by path.
@@ -197,4 +193,75 @@ func (sTree *StoredTree) EntryRecursive(repo *Repository, path [][]byte) (*TreeE
 	}
 
 	return nil, ErrNotFound
+}
+
+func (tree *Tree) entry(name []byte, searchIsTree bool) *TreeEntry {
+	low, high := 0, len(tree.Entries)-1
+	for low <= high {
+		mid := low + (high-low)/2
+		entry := &tree.Entries[mid]
+
+		cmp := gitTreeNameCompare(entry.Name, entry.Mode, name, searchIsTree)
+		if cmp == 0 {
+			if bytes.Equal(entry.Name, name) {
+				return entry
+			}
+			return nil
+		}
+		if cmp < 0 {
+			low = mid + 1
+		} else {
+			high = mid - 1
+		}
+	}
+	return nil
+}
+
+func gitTreeNameCompare(entryName []byte, entryMode FileMode, searchName []byte, searchIsTree bool) int {
+	isEntryTree := entryMode == FileModeDir
+
+	entryLen := len(entryName)
+	if isEntryTree {
+		entryLen++
+	}
+	searchLen := len(searchName)
+	if searchIsTree {
+		searchLen++
+	}
+
+	n := entryLen
+	if searchLen < n {
+		n = searchLen
+	}
+
+	for i := 0; i < n; i++ {
+		var ec, sc byte
+
+		if i < len(entryName) {
+			ec = entryName[i]
+		} else {
+			ec = '/'
+		}
+
+		if i < len(searchName) {
+			sc = searchName[i]
+		} else {
+			sc = '/'
+		}
+
+		if ec < sc {
+			return -1
+		}
+		if ec > sc {
+			return 1
+		}
+	}
+
+	if entryLen < searchLen {
+		return -1
+	}
+	if entryLen > searchLen {
+		return 1
+	}
+	return 0
 }
