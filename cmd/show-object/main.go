@@ -21,7 +21,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("open repo: %v", err)
 	}
-	defer repo.Close()
+	defer func() {
+		_ = repo.Close()
+	}()
 
 	h, err := repo.ResolveRefFully(*ref)
 	if err != nil {
