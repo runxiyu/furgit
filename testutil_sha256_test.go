@@ -10,7 +10,7 @@ import (
 
 func setupTestRepo(t *testing.T) (string, func()) {
 	t.Helper()
-	tempDir, err := os.MkdirTemp("", "furgit-test-*")
+	tempDir, err := os.MkdirTemp("", "furgit-test-*.git")
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
