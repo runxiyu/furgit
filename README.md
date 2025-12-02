@@ -86,33 +86,10 @@ a standard UNIX-like filesystem with
 
 ## Repos and community resources
 
-* [Main repository](https://villosa.lindenii.org/furgit//repos/furgit/) on
-  [Villosa](https://villosa.lindenii.org/villosa//repos/villosa/)
-* [Lindenii Forge mirror](https://forge.lindenii.org/forge/-/repos/server/)
+* [Codeberg](https://codeberg.org/lindenii/furgit)
 * [SourceHut mirror](https://git.sr.ht/~runxiyu/furgit)
-* [Codeberg mirror](https://codeberg.org/runxiyu/furgit)
 * [tangled mirror](https://tangled.org/@runxiyu.tngl.sh/furgit)
 * [GitHub mirror](https://github.com/runxiyu/furgit)
-
-To contribute, clone the repository from the Lindenii Forge mirror's SSH remote
-`ssh://forge.lindenii.org/forge/-/repos/server`, create a unique branch that
-begins with `contrib/`, and push. Your branch will be associated with your SSH
-key and a merge request will be created, and the maintainers will be notified
-on IRC. Anonymous SSH cloning is supported with or without a key. Pushing
-requires an SSH key: no key pre-registration is required, but you have to
-ensure that your key is consistent throughout pushes if you push multiple
-times.
-
-```
-git clone ssh://forge.lindenii.org/furgit/-/repos/furgit
-cd furgit
-git checkout -b contrib/name_of_your_contribution
-# edit and commit stuff
-git push -u origin HEAD
-```
-
-The contribution process will switch to Villosa once Villosa's patchset
-and code-review components work.
 
 We discuss in `#chat` on [irc.runxiyu.org](https://irc.runxiyu.org)
 ([web chat](https://webirc.runxiyu.org/kiwiirc/#chat))
