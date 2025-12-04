@@ -54,6 +54,9 @@ See [gitbench](https://git.sr.ht/~runxiyu/gitbench) for details on methods.
 All tests below were run on `linux.git` with `HEAD` at `6da43bbeb6918164`
 on a `Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz`.
 
+**Note:** go-git is expected to perform much better after
+[storage: filesystem/mmap, Add PackScanner to handle large repos](https://github.com/go-git/go-git/pull/1776).
+
 ### Traversing all trees
 
 * Git: 0.1 seconds
