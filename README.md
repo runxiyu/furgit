@@ -89,7 +89,7 @@ a standard UNIX-like filesystem with
 
 ## Repos and community resources
 
-* [Codeberg](https://codeberg.org/lindenii/furgit)
+* [Codeberg](https://codeberg.org/lindenii/furgit) (with the canonical issue tracker)
 * [SourceHut mirror](https://git.sr.ht/~runxiyu/furgit)
 * [tangled mirror](https://tangled.org/@runxiyu.tngl.sh/furgit)
 * [GitHub mirror](https://github.com/runxiyu/furgit)
@@ -102,10 +102,10 @@ may not necessarily respond in time.
 
 ## History and lineage
 
-* I wrote [Lindenii Forge](https://forge.lindenii.org/forge/-/repos/server/)
-* I wrote [hare-git](https://forge.lindenii.org/hare/-/repos/hare-git/)
+* I wrote Lindenii Forge
+* I wrote [hare-git](https://codeberg.org/lindenii/hare-git)
 * I wanted a faster Git library for
-  [Lindenii Villosa](https://villosa.lindenii.org/villosa//repos/villosa/),
+  [Lindenii Villosa](https://codeberg.org/lindenii/villosa)
   the next generation of Lindenii Forge
 * I translated hare-git and put it into `internal/common/git` in Villosa
 * I extracted it out into a general-purpose library, which is what we
