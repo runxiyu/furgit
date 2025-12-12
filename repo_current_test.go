@@ -43,7 +43,7 @@ func TestCurrentRepoDepthFirstEnumeration(t *testing.T) {
 		if err != nil {
 			t.Logf("failed to read object %s: %v", hash, err)
 			errors++
-			if errors > 10 {
+			if errors > 0 {
 				t.Fatalf("too many errors (%d) reading objects", errors)
 			}
 			continue
