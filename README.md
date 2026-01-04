@@ -94,11 +94,9 @@ a standard UNIX-like filesystem with
 * [tangled mirror](https://tangled.org/@runxiyu.tngl.sh/furgit)
 * [GitHub mirror](https://github.com/runxiyu/furgit)
 
-We discuss in `#chat` on [irc.runxiyu.org](https://irc.runxiyu.org)
-([web chat](https://webirc.runxiyu.org/kiwiirc/#chat))
-
-The maintainer is working through college applications and IBDP coursework and
-may not necessarily respond in time.
+We discuss in `#lindenii` on
+[irc.runxiyu.org](https://irc.runxiyu.org)
+([web chat](https://webirc.runxiyu.org/kiwiirc/#lindenii))
 
 ## History and lineage
 
