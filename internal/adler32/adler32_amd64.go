@@ -15,6 +15,7 @@ import (
 const Size = 4
 
 var (
+	hasSSE3 = cpu.X86.HasSSE3
 	hasAVX2 = cpu.X86.HasAVX2
 )
 
@@ -26,7 +27,7 @@ func (d *digest) Reset() { *d = 1 }
 
 // New returns a new hash.Hash32 computing the Adler-32 checksum.
 func New() hash.Hash32 {
-	if !hasAVX2 {
+	if !hasSSE3 {
 		return adler32.New()
 	}
 	d := new(digest)
@@ -59,7 +60,11 @@ func (d *digest) BlockSize() int { return 4 }
 func (d *digest) Write(data []byte) (nn int, err error) {
 	if len(data) >= 64 {
 		var h uint32
-		h = adler32_avx2(uint32(*d), data)
+		if hasAVX2 {
+			h = adler32_avx2(uint32(*d), data)
+		} else {
+			h = adler32_sse3(uint32(*d), data)
+		}
 		*d = digest(h)
 	} else {
 		h := update(uint32(*d), data)
@@ -77,9 +82,12 @@ func (d *digest) Sum(in []byte) []byte {
 
 // Checksum returns the Adler-32 checksum of data.
 func Checksum(data []byte) uint32 {
-	if !hasAVX2 || len(data) < 64 {
+	if !hasSSE3 || len(data) < 64 {
 		return update(1, data)
 	}
 
-	return adler32_avx2(1, data)
+	if hasAVX2 {
+		return adler32_avx2(1, data)
+	}
+	return adler32_sse3(1, data)
 }
