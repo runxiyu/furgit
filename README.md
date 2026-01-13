@@ -54,31 +54,21 @@ See [gitbench](https://git.sr.ht/~runxiyu/gitbench) for details on methods.
 All tests below were run on `linux.git` with `HEAD` at `6da43bbeb6918164`
 on a `Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz`.
 
+| Task                     | [git](https://git-scm.com) | Furgit | [libgit2](https://libgit2.org) | [go-git](https://github.com/go-git/go-git) |
+| -                        | -                          | -      | -                              | -                                          |
+| Traversing all trees     | 0.1s                       | 9s     | 19s                            | 122s                                       |
+| Traversing the root tree | 4ms                        | 1ms    | 11ms                           | 1800ms                                     |
+
 **Note:** go-git is expected to perform much better after
 [storage: filesystem/mmap, Add PackScanner to handle large repos](https://github.com/go-git/go-git/pull/1776).
-
-### Traversing all trees
-
-* Git: 0.1 seconds
-* Furgit: 9 seconds
-* libgit2: 19 seconds
-* go-git: 122 seconds
-
-### Traversing the root tree only
-
-
-* Furgit: 1ms
-* Git: 4ms
-* libgit2: 11ms
-* go-git: 1800ms
 
 ## Dependencies
 
 * The standard library
 * Some things from `golang.org/x`
 
-* It is unlikely that other dependencies will be introduced.
-* In some cases, external code is introduced but maintained in-tree.
+It is unlikely that other dependencies will be introduced.
+Occasionally, external code is introduced but maintained in-tree.
 
 ## Environment requirements
 
@@ -87,16 +77,19 @@ We currently do not intend to support flexible storage backends such as
 a standard UNIX-like filesystem with
 [syscall.Mmap](https://pkg.go.dev/syscall#Mmap) is expected.
 
-## Repos and community resources
+## Repos and mirrors
 
 * [Codeberg](https://codeberg.org/lindenii/furgit) (with the canonical issue tracker)
 * [SourceHut mirror](https://git.sr.ht/~runxiyu/furgit)
 * [tangled mirror](https://tangled.org/@runxiyu.tngl.sh/furgit)
 * [GitHub mirror](https://github.com/runxiyu/furgit)
 
-We discuss in `#lindenii` on
-[irc.runxiyu.org](https://irc.runxiyu.org)
-([web chat](https://webirc.runxiyu.org/kiwiirc/#lindenii))
+## Community
+
+* [#lindenii](https://webirc.runxiyu.org/kiwiirc/#lindenii)
+  on [irc.runxiyu.org](https://irc.runxiyu.org)
+* [#lindenii](https://web.libera.chat/#lindenii)
+  on [Libera.Chat](https://libera.chat)
 
 ## History and lineage
 
