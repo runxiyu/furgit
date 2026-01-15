@@ -79,9 +79,6 @@ func (repo *Repository) looseReadTyped(id Hash) (ObjectType, bufpool.Buffer, err
 
 	copy(rawBytes, body)
 	raw.Resize(len(body))
-	// if !repo.verifyRawObject(raw, id) {
-	// 	return ObjectTypeInvalid, bufpool.Buffer{}, ErrInvalidObject
-	// }
 
 	return ty, raw, nil
 }

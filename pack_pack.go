@@ -53,10 +53,6 @@ func (repo *Repository) packReadAt(loc packlocation, want Hash) (ObjectType, buf
 	if err != nil {
 		return ObjectTypeInvalid, bufpool.Buffer{}, err
 	}
-	// if !repo.verifyTypedObject(ty, body.Bytes(), want) {
-	// 	body.Release()
-	// 	return ObjectTypeInvalid, bufpool.Buffer{}, ErrInvalidObject
-	// }
 	return ty, body, nil
 }
 
