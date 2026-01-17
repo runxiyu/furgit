@@ -18,7 +18,7 @@ func TestHashParse(t *testing.T) {
 
 	var validHash string
 	var expectedSize int
-	if repo.hashSize == 32 {
+	if repo.hashAlgo.size() == 32 {
 		validHash = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 		expectedSize = 32
 	} else {

@@ -70,7 +70,7 @@ func (repo *Repository) resolvePackedRef(refname string) (Ref, error) {
 		}
 
 		sp := bytes.IndexByte(line, ' ')
-		if sp != repo.hashSize*2 {
+		if sp != repo.hashAlgo.size()*2 {
 			continue
 		}
 
@@ -428,7 +428,7 @@ func (repo *Repository) ListRefs(pattern string) ([]Ref, error) {
 		}
 
 		sp := bytes.IndexByte(line, ' ')
-		if sp != repo.hashSize*2 {
+		if sp != repo.hashAlgo.size()*2 {
 			lastIdx = -1
 			continue
 		}

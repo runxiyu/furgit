@@ -20,7 +20,6 @@ import (
 type Repository struct {
 	rootPath string
 	hashAlgo hashAlgorithm
-	hashSize int
 
 	packIdxOnce sync.Once
 	packIdx     []*packIndex
@@ -74,8 +73,7 @@ func OpenRepository(path string) (*Repository, error) {
 		return nil, fmt.Errorf("furgit: unsupported hash algorithm %q", algo)
 	}
 
-	hashSize := hashAlgo.size()
-	if hashSize == 0 {
+	if hashAlgo.size() == 0 {
 		return nil, fmt.Errorf("furgit: unsupported hash algorithm %q", algo)
 	}
 	if _, ok := hashFuncs[hashAlgo]; !ok {
@@ -85,7 +83,6 @@ func OpenRepository(path string) (*Repository, error) {
 	return &Repository{
 		rootPath:  path,
 		hashAlgo:  hashAlgo,
-		hashSize:  hashSize,
 		packFiles: make(map[string]*packFile),
 	}, nil
 }
@@ -133,9 +130,9 @@ func (repo *Repository) ParseHash(s string) (Hash, error) {
 	if len(s)%2 != 0 {
 		return id, fmt.Errorf("furgit: invalid hash length %d, it has to be even at the very least", len(s))
 	}
-	expectedLen := repo.hashSize * 2
+	expectedLen := repo.hashAlgo.size() * 2
 	if len(s) != expectedLen {
-		return id, fmt.Errorf("furgit: hash length mismatch: got %d chars, expected %d for hash size %d", len(s), expectedLen, repo.hashSize)
+		return id, fmt.Errorf("furgit: hash length mismatch: got %d chars, expected %d for hash size %d", len(s), expectedLen, repo.hashAlgo.size())
 	}
 	data, err := hex.DecodeString(s)
 	if err != nil {

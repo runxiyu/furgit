@@ -163,7 +163,7 @@ func (pi *packIndex) parse(buf []byte) error {
 	nobj := int(readBE32(pi.fanout[len(pi.fanout)-4:]))
 
 	namesStart := fanoutEnd
-	namesEnd := namesStart + nobj*pi.repo.hashSize
+	namesEnd := namesStart + nobj*pi.repo.hashAlgo.size()
 	if namesEnd > len(buf) {
 		return ErrInvalidObject
 	}
@@ -183,7 +183,7 @@ func (pi *packIndex) parse(buf []byte) error {
 	pi.offset32 = buf[off32Start:off32End]
 
 	off64Start := off32End
-	trailerStart := len(buf) - 2*pi.repo.hashSize
+	trailerStart := len(buf) - 2*pi.repo.hashAlgo.size()
 	if trailerStart < off64Start {
 		return ErrInvalidObject
 	}
@@ -253,7 +253,7 @@ func (pi *packIndex) lookup(id Hash) (packlocation, error) {
 		lo = int(pi.fanoutEntry(first - 1))
 	}
 	hi := int(pi.fanoutEntry(first))
-	idx, found := bsearchHash(pi.names, pi.repo.hashSize, lo, hi, id)
+	idx, found := bsearchHash(pi.names, pi.repo.hashAlgo.size(), lo, hi, id)
 	if !found {
 		return packlocation{}, ErrNotFound
 	}

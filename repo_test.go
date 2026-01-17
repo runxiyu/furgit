@@ -17,8 +17,9 @@ func TestRepositoryOpen(t *testing.T) {
 	if repo.rootPath != repoPath {
 		t.Errorf("rootPath: got %q, want %q", repo.rootPath, repoPath)
 	}
-	if repo.hashSize != 32 && repo.hashSize != 20 {
-		t.Errorf("hashSize: got %d, want 32 (SHA-256) or 20 (SHA-1)", repo.hashSize)
+	hashSize := repo.hashAlgo.size()
+	if hashSize != 32 && hashSize != 20 {
+		t.Errorf("hashSize: got %d, want 32 (SHA-256) or 20 (SHA-1)", hashSize)
 	}
 }
 
