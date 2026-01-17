@@ -16,7 +16,9 @@ Furgit is a fast Git library in pure Go
 
 ## Current features
 
-* SHA-256 and SHA-1
+* SHA-256 and SHA-1\
+  (runtime supports both; tests are SHA-256 by default,
+  but `sha1` build tag makes it test SHA-1)
 * Reading loose objects
 * Writing loose objects
 * Reading packfiles
