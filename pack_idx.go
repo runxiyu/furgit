@@ -244,8 +244,8 @@ func (pi *packIndex) lookup(id Hash) (packlocation, error) {
 	if err != nil {
 		return packlocation{}, err
 	}
-	if id.size != pi.repo.hashSize {
-		return packlocation{}, fmt.Errorf("furgit: hash size mismatch: got %d, expected %d", id.size, pi.repo.hashSize)
+	if id.algo != pi.repo.hashAlgo {
+		return packlocation{}, fmt.Errorf("furgit: hash algorithm mismatch: got %s, expected %s", id.algo.String(), pi.repo.hashAlgo.String())
 	}
 	first := int(id.data[0])
 	var lo int

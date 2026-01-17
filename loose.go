@@ -17,8 +17,8 @@ const looseHeaderLimit = 4096
 
 // loosePath returns the path for a loose object, validating hash size.
 func (repo *Repository) loosePath(id Hash) (string, error) {
-	if id.size != repo.hashSize {
-		return "", fmt.Errorf("furgit: hash size mismatch: got %d, expected %d", id.size, repo.hashSize)
+	if id.algo != repo.hashAlgo {
+		return "", fmt.Errorf("furgit: hash algorithm mismatch: got %s, expected %s", id.algo.String(), repo.hashAlgo.String())
 	}
 	hex := id.String()
 	return filepath.Join("objects", hex[:2], hex[2:]), nil

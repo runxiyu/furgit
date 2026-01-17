@@ -83,7 +83,7 @@ func parseTree(id Hash, body []byte, repo *Repository) (*StoredTree, error) {
 		}
 		var child Hash
 		copy(child.data[:], body[i:i+repo.hashSize])
-		child.size = repo.hashSize
+		child.algo = repo.hashAlgo
 		i += repo.hashSize
 
 		mode, err := strconv.ParseUint(string(modeBytes), 8, 32)
@@ -112,7 +112,7 @@ func (tree *Tree) serialize() []byte {
 	var bodyLen int
 	for _, e := range tree.Entries {
 		mode := strconv.FormatUint(uint64(e.Mode), 8)
-		bodyLen += len(mode) + 1 + len(e.Name) + 1 + e.ID.size
+		bodyLen += len(mode) + 1 + len(e.Name) + 1 + e.ID.Size()
 	}
 
 	body := make([]byte, bodyLen)
@@ -125,7 +125,8 @@ func (tree *Tree) serialize() []byte {
 		pos += copy(body[pos:], e.Name)
 		body[pos] = 0
 		pos++
-		pos += copy(body[pos:], e.ID.data[:e.ID.size])
+		size := e.ID.Size()
+		pos += copy(body[pos:], e.ID.data[:size])
 	}
 
 	return body

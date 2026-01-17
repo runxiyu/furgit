@@ -1,8 +1,6 @@
 package furgit
 
 import (
-	"crypto/sha1"
-	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"os"
@@ -21,6 +19,7 @@ import (
 // has been closed.
 type Repository struct {
 	rootPath string
+	hashAlgo hashAlgorithm
 	hashSize int
 
 	packIdxOnce sync.Once
@@ -65,22 +64,27 @@ func OpenRepository(path string) (*Repository, error) {
 		algo = "sha1"
 	}
 
-	var hashSize int
+	var hashAlgo hashAlgorithm
 	switch algo {
 	case "sha1":
-		hashSize = sha1.Size
+		hashAlgo = hashAlgoSHA1
 	case "sha256":
-		hashSize = sha256.Size
+		hashAlgo = hashAlgoSHA256
 	default:
 		return nil, fmt.Errorf("furgit: unsupported hash algorithm %q", algo)
 	}
 
-	if _, ok := hashFuncs[hashSize]; !ok {
+	hashSize := hashAlgo.size()
+	if hashSize == 0 {
+		return nil, fmt.Errorf("furgit: unsupported hash algorithm %q", algo)
+	}
+	if _, ok := hashFuncs[hashAlgo]; !ok {
 		return nil, fmt.Errorf("furgit: hash algorithm %q is not supported by the hash functions provided by this build", algo)
 	}
 
 	return &Repository{
 		rootPath:  path,
+		hashAlgo:  hashAlgo,
 		hashSize:  hashSize,
 		packFiles: make(map[string]*packFile),
 	}, nil
@@ -138,19 +142,19 @@ func (repo *Repository) ParseHash(s string) (Hash, error) {
 		return id, fmt.Errorf("furgit: decode hash: %w", err)
 	}
 	copy(id.data[:], data)
-	id.size = len(s) / 2
+	id.algo = repo.hashAlgo
 	return id, nil
 }
 
 // computeRawHash computes a hash from raw data using the repository's hash algorithm.
 func (repo *Repository) computeRawHash(data []byte) Hash {
-	hashFunc := hashFuncs[repo.hashSize]
+	hashFunc := hashFuncs[repo.hashAlgo]
 	return hashFunc(data)
 }
 
 // verifyRawObject verifies a raw object against its expected hash.
 func (repo *Repository) verifyRawObject(buf []byte, want Hash) bool { //nolint:unused
-	if want.size != repo.hashSize {
+	if want.algo != repo.hashAlgo {
 		return false
 	}
 	return repo.computeRawHash(buf) == want
@@ -158,7 +162,7 @@ func (repo *Repository) verifyRawObject(buf []byte, want Hash) bool { //nolint:u
 
 // verifyTypedObject verifies a typed object against its expected hash.
 func (repo *Repository) verifyTypedObject(ty ObjectType, body []byte, want Hash) bool { //nolint:unused
-	if want.size != repo.hashSize {
+	if want.algo != repo.hashAlgo {
 		return false
 	}
 	header, err := headerForType(ty, body)

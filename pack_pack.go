@@ -182,7 +182,7 @@ func (repo *Repository) packTypeSizeWithin(pf *packFile, ofs uint64, seen map[pa
 			}
 			var base Hash
 			copy(base.data[:], pf.data[dataStart:hashEnd])
-			base.size = repo.hashSize
+			base.algo = repo.hashAlgo
 			loc, err := repo.packIndexFind(base)
 			if err == nil {
 				pf, err = repo.packFile(loc.PackPath)
@@ -279,7 +279,7 @@ func (repo *Repository) packBodyResolveWithin(pf *packFile, ofs uint64) (ObjectT
 			}
 			var base Hash
 			copy(base.data[:], pf.data[dataStart:hashEnd])
-			base.size = repo.hashSize
+			base.algo = repo.hashAlgo
 			delta, err := packSectionInflate(pf, hashEnd, 0)
 			if err != nil {
 				return fail(err)
