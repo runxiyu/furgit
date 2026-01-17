@@ -28,7 +28,6 @@ func TestCurrentRepoDepthFirstEnumeration(t *testing.T) {
 	queue = append(queue, headHash)
 
 	objectsRead := 0
-	errors := 0
 
 	for len(queue) > 0 {
 		hash := queue[0]
@@ -41,12 +40,7 @@ func TestCurrentRepoDepthFirstEnumeration(t *testing.T) {
 
 		obj, err := repo.ReadObject(hash)
 		if err != nil {
-			t.Logf("failed to read object %s: %v", hash, err)
-			errors++
-			if errors > 0 {
-				t.Fatalf("too many errors (%d) reading objects", errors)
-			}
-			continue
+			t.Fatalf("failed to read object %s: %v", hash, err)
 		}
 		objectsRead++
 
@@ -72,11 +66,5 @@ func TestCurrentRepoDepthFirstEnumeration(t *testing.T) {
 
 	if objectsRead == 0 {
 		t.Fatal("no objects were read from the repository")
-	}
-
-	t.Logf("Read %d objects from current repository HEAD (%d errors)", objectsRead, errors)
-
-	if errors > 0 {
-		t.Fatalf("encountered %d errors during enumeration", errors)
 	}
 }
