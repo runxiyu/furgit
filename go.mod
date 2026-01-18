@@ -1,4 +1,4 @@
-module git.sr.ht/~runxiyu/furgit
+module codeberg.org/lindenii/furgit
 
 go 1.25.3
 
