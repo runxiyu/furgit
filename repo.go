@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"git.sr.ht/~runxiyu/furgit/config"
+	"codeberg.org/lindenii/furgit/config"
 )
 
 // Repository represents a Git repository.

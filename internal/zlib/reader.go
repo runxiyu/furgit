@@ -41,7 +41,7 @@ import (
 	"io"
 	"sync"
 
-	"git.sr.ht/~runxiyu/furgit/internal/adler32"
+	"codeberg.org/lindenii/furgit/internal/adler32"
 )
 
 const (

@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"git.sr.ht/~runxiyu/furgit/internal/bufpool"
-	"git.sr.ht/~runxiyu/furgit/internal/zlib"
-	"git.sr.ht/~runxiyu/furgit/internal/zlibx"
+	"codeberg.org/lindenii/furgit/internal/bufpool"
+	"codeberg.org/lindenii/furgit/internal/zlib"
+	"codeberg.org/lindenii/furgit/internal/zlibx"
 )
 
 const looseHeaderLimit = 4096

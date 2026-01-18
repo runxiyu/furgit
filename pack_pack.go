@@ -8,8 +8,8 @@ import (
 	"sync"
 	"syscall"
 
-	"git.sr.ht/~runxiyu/furgit/internal/bufpool"
-	"git.sr.ht/~runxiyu/furgit/internal/zlibx"
+	"codeberg.org/lindenii/furgit/internal/bufpool"
+	"codeberg.org/lindenii/furgit/internal/zlibx"
 )
 
 const (

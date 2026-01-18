@@ -3,7 +3,7 @@ package flatex
 import (
 	"io"
 
-	"git.sr.ht/~runxiyu/furgit/internal/bufpool"
+	"codeberg.org/lindenii/furgit/internal/bufpool"
 )
 
 func DecompressSized(src []byte, sizeHint int) (bufpool.Buffer, int, error) {

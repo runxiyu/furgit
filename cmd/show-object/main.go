@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"git.sr.ht/~runxiyu/furgit"
+	"codeberg.org/lindenii/furgit"
 )
 
 func main() {

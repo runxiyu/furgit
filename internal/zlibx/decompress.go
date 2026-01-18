@@ -4,9 +4,9 @@ import (
 	"encoding/binary"
 	"io"
 
-	"git.sr.ht/~runxiyu/furgit/internal/adler32"
-	"git.sr.ht/~runxiyu/furgit/internal/bufpool"
-	"git.sr.ht/~runxiyu/furgit/internal/flatex"
+	"codeberg.org/lindenii/furgit/internal/adler32"
+	"codeberg.org/lindenii/furgit/internal/bufpool"
+	"codeberg.org/lindenii/furgit/internal/flatex"
 )
 
 func Decompress(src []byte) (bufpool.Buffer, error) {

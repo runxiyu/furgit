@@ -11,7 +11,7 @@ import (
 	"hash"
 	"io"
 
-	"git.sr.ht/~runxiyu/furgit/internal/adler32"
+	"codeberg.org/lindenii/furgit/internal/adler32"
 )
 
 // These constants are copied from the [flate] package, so that code that imports
