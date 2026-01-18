@@ -6,10 +6,30 @@ import (
 	"encoding/hex"
 )
 
-const maxHashSize = 32
+// maxHashSize MUST be equal to (or larger than) the size of the
+// largest hash supported in hashFuncs.
+const maxHashSize = sha256.Size
 
 // hashAlgorithm identifies the hash algorithm used for Git object IDs.
 type hashAlgorithm uint8
+
+// hashFuncs maps hash algorithm to hash function.
+var hashFuncs = map[hashAlgorithm]hashFunc{
+	hashAlgoSHA1: func(data []byte) Hash {
+		sum := sha1.Sum(data)
+		var h Hash
+		copy(h.data[:], sum[:])
+		h.algo = hashAlgoSHA1
+		return h
+	},
+	hashAlgoSHA256: func(data []byte) Hash {
+		sum := sha256.Sum256(data)
+		var h Hash
+		copy(h.data[:], sum[:])
+		h.algo = hashAlgoSHA256
+		return h
+	},
+}
 
 const (
 	hashAlgoUnknown hashAlgorithm = iota
@@ -49,24 +69,6 @@ type Hash struct {
 
 // hashFunc is a function that computes a hash from input data.
 type hashFunc func([]byte) Hash
-
-// hashFuncs maps hash algorithm to hash function.
-var hashFuncs = map[hashAlgorithm]hashFunc{
-	hashAlgoSHA1: func(data []byte) Hash {
-		sum := sha1.Sum(data)
-		var h Hash
-		copy(h.data[:], sum[:])
-		h.algo = hashAlgoSHA1
-		return h
-	},
-	hashAlgoSHA256: func(data []byte) Hash {
-		sum := sha256.Sum256(data)
-		var h Hash
-		copy(h.data[:], sum[:])
-		h.algo = hashAlgoSHA256
-		return h
-	},
-}
 
 // String returns a hexadecimal string representation of the hash.
 func (hash Hash) String() string {
