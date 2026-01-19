@@ -2,7 +2,6 @@ image: freebsd/latest
 packages:
   - golangci-lint
   - go
-  - go-dev
 tasks:
   - build: |
       cd furgit
