@@ -64,6 +64,17 @@ on a `Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz`.
 **Note:** go-git is expected to perform much better after
 [storage: filesystem/mmap, Add PackScanner to handle large repos](https://github.com/go-git/go-git/pull/1776).
 
+## Architectural considerations
+
+It is important to realize that Furgit, and performant Git implementations in
+general, heavily rely on using memory mappings of packfiles, and assume
+relatively predictable fault handling behavior. Therefore, in distributed
+systems, we strongly advise *not* using Furgit on top of distributed network
+filesystems such as CephFS or NFS; instead, consider solutions where redundancy
+and distributions belong *above* the Git layer, such as using a set of Git
+nodes each running Furgit/etc. on local repositories, then using an RPC
+protocol over it.
+
 ## Dependencies
 
 * The standard library
