@@ -1,0 +1,1 @@
+consider making Ref an interface satisfied by concrete RefDetached, RefSymbolic
