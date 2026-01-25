@@ -306,34 +306,34 @@ func (repo *Repository) ResolveRef(path string) (Ref, error) {
 // symbolic references until it reaches a detached ref.
 // Symbolic cycles are detected and reported.
 // Annotated tags are not peeled.
-func (repo *Repository) ResolveRefFully(path string) (Hash, error) {
+func (repo *Repository) ResolveRefFully(path string) (Ref, error) {
 	seen := make(map[string]struct{})
 	return repo.resolveRefFully(path, seen)
 }
 
-func (repo *Repository) resolveRefFully(path string, seen map[string]struct{}) (Hash, error) {
+func (repo *Repository) resolveRefFully(path string, seen map[string]struct{}) (Ref, error) {
 	if _, found := seen[path]; found {
-		return Hash{}, fmt.Errorf("symbolic ref cycle involving %q", path)
+		return Ref{}, fmt.Errorf("symbolic ref cycle involving %q", path)
 	}
 	seen[path] = struct{}{}
 
 	ref, err := repo.ResolveRef(path)
 	if err != nil {
-		return Hash{}, err
+		return Ref{}, err
 	}
 
 	switch ref.Kind {
 	case RefKindDetached:
-		return ref.Hash, nil
+		return ref, nil
 
 	case RefKindSymbolic:
 		if ref.Ref == "" {
-			return Hash{}, ErrInvalidRef
+			return Ref{}, ErrInvalidRef
 		}
 		return repo.resolveRefFully(ref.Ref, seen)
 
 	default:
-		return Hash{}, ErrInvalidRef
+		return Ref{}, ErrInvalidRef
 	}
 }
 
