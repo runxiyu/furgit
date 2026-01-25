@@ -202,7 +202,7 @@ func (tree *Tree) entry(name []byte, searchIsTree bool) *TreeEntry {
 		mid := low + (high-low)/2
 		entry := &tree.Entries[mid]
 
-		cmp := gitTreeNameCompare(entry.Name, entry.Mode, name, searchIsTree)
+		cmp := TreeEntryNameCompare(entry.Name, entry.Mode, name, searchIsTree)
 		if cmp == 0 {
 			if bytes.Equal(entry.Name, name) {
 				return entry
@@ -218,7 +218,7 @@ func (tree *Tree) entry(name []byte, searchIsTree bool) *TreeEntry {
 	return nil
 }
 
-func gitTreeNameCompare(entryName []byte, entryMode FileMode, searchName []byte, searchIsTree bool) int {
+func TreeEntryNameCompare(entryName []byte, entryMode FileMode, searchName []byte, searchIsTree bool) int {
 	isEntryTree := entryMode == FileModeDir
 
 	entryLen := len(entryName)
