@@ -30,7 +30,7 @@ func main() {
 		log.Fatalf("resolve ref: %v", err)
 	}
 
-	obj, err := repo.ReadObject(h)
+	obj, err := repo.ReadObject(h.Hash)
 	if err != nil {
 		log.Fatalf("read object: %v", err)
 	}
