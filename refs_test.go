@@ -200,8 +200,8 @@ func TestResolveRefFully(t *testing.T) {
 		t.Fatalf("ResolveRefFully failed: %v", err)
 	}
 
-	if resolved != commitHash {
-		t.Errorf("ResolveRefFully: got hash %s, want %s", resolved, commitHash)
+	if resolved.Hash != commitHash {
+		t.Errorf("ResolveRefFully: got hash %s, want %s", resolved.Hash, commitHash)
 	}
 }
 
@@ -266,12 +266,12 @@ func TestResolveRefHashInput(t *testing.T) {
 		t.Fatalf("hash mismatch: got %s, want %s", ref.Hash, hashObj)
 	}
 
-	hash, err := repo.ResolveRefFully(commitHash)
+	hashRef, err := repo.ResolveRefFully(commitHash)
 	if err != nil {
 		t.Fatalf("ResolveRefFully(hash) failed: %v", err)
 	}
-	if hash != hashObj {
-		t.Fatalf("hash mismatch: got %s, want %s", hash, hashObj)
+	if hashRef.Hash != hashObj {
+		t.Fatalf("hash mismatch: got %s, want %s", hashRef.Hash, hashObj)
 	}
 
 	_, err = repo.ResolveRef("this_is_not_a_hash")

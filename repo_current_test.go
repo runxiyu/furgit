@@ -25,7 +25,7 @@ func TestCurrentRepoDepthFirstEnumeration(t *testing.T) {
 
 	visited := make(map[Hash]bool)
 	var queue []Hash
-	queue = append(queue, headHash)
+	queue = append(queue, headHash.Hash)
 
 	objectsRead := 0
 
