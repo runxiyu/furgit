@@ -6,6 +6,8 @@
   they continue from that point (passing along some state such as
   the packLocation to avoid re-resolving the location from index
   files).
+* consider making Ref an interface satisfied by concrete RefDetached,
+  RefSymbolic
 * There may be some cases where integer overflows are handled
   incorrectly.
 * Use https://pkg.go.dev/simd/archsimd@go1.26rc1 for SIMD instead of assembly
