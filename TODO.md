@@ -8,6 +8,8 @@
   files).
 * consider making Ref an interface satisfied by concrete RefDetached,
   RefSymbolic
+* consider making HashAlgorithm an interface
+* consider adding compression agility
 * There may be some cases where integer overflows are handled
   incorrectly.
 * Use https://pkg.go.dev/simd/archsimd@go1.26rc1 for SIMD instead of assembly
