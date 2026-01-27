@@ -63,21 +63,9 @@ func OpenRepository(path string) (*Repository, error) {
 		algo = "sha1"
 	}
 
-	var hashAlgo hashAlgorithm
-	switch algo {
-	case "sha1":
-		hashAlgo = hashAlgoSHA1
-	case "sha256":
-		hashAlgo = hashAlgoSHA256
-	default:
+	hashAlgo, ok := parseHashAlgorithm(algo)
+	if !ok {
 		return nil, fmt.Errorf("furgit: unsupported hash algorithm %q", algo)
-	}
-
-	if hashAlgo.size() == 0 {
-		return nil, fmt.Errorf("furgit: unsupported hash algorithm %q", algo)
-	}
-	if _, ok := hashFuncs[hashAlgo]; !ok {
-		return nil, fmt.Errorf("furgit: hash algorithm %q is not supported by the hash functions provided by this build", algo)
 	}
 
 	return &Repository{
@@ -130,9 +118,9 @@ func (repo *Repository) ParseHash(s string) (Hash, error) {
 	if len(s)%2 != 0 {
 		return id, fmt.Errorf("furgit: invalid hash length %d, it has to be even at the very least", len(s))
 	}
-	expectedLen := repo.hashAlgo.size() * 2
+	expectedLen := repo.hashAlgo.Size() * 2
 	if len(s) != expectedLen {
-		return id, fmt.Errorf("furgit: hash length mismatch: got %d chars, expected %d for hash size %d", len(s), expectedLen, repo.hashAlgo.size())
+		return id, fmt.Errorf("furgit: hash length mismatch: got %d chars, expected %d for hash size %d", len(s), expectedLen, repo.hashAlgo.Size())
 	}
 	data, err := hex.DecodeString(s)
 	if err != nil {
@@ -145,8 +133,7 @@ func (repo *Repository) ParseHash(s string) (Hash, error) {
 
 // computeRawHash computes a hash from raw data using the repository's hash algorithm.
 func (repo *Repository) computeRawHash(data []byte) Hash {
-	hashFunc := hashFuncs[repo.hashAlgo]
-	return hashFunc(data)
+	return repo.hashAlgo.Sum(data)
 }
 
 // verifyRawObject verifies a raw object against its expected hash.

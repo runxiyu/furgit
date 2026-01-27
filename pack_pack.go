@@ -176,7 +176,7 @@ func (repo *Repository) packTypeSizeWithin(pf *packFile, ofs uint64, seen map[pa
 		case ObjectTypeCommit, ObjectTypeTree, ObjectTypeBlob, ObjectTypeTag:
 			return ty, declaredSize, nil
 		case ObjectTypeRefDelta:
-			hashEnd := dataStart + uint64(repo.hashAlgo.size())
+			hashEnd := dataStart + uint64(repo.hashAlgo.Size())
 			if hashEnd > uint64(len(pf.data)) {
 				return ObjectTypeInvalid, 0, io.ErrUnexpectedEOF
 			}
@@ -273,7 +273,7 @@ func (repo *Repository) packBodyResolveWithin(pf *packFile, ofs uint64) (ObjectT
 			resultTy = ty
 			resolved = true
 		case ObjectTypeRefDelta:
-			hashEnd := dataStart + uint64(repo.hashAlgo.size())
+			hashEnd := dataStart + uint64(repo.hashAlgo.Size())
 			if hashEnd > uint64(len(pf.data)) {
 				return fail(io.ErrUnexpectedEOF)
 			}
