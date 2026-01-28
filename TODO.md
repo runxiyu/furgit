@@ -6,11 +6,11 @@
   they continue from that point (passing along some state such as
   the packLocation to avoid re-resolving the location from index
   files).
-* consider making Ref an interface satisfied by concrete RefDetached,
-  RefSymbolic
-* consider making HashAlgorithm an interface
-* consider adding compression agility
+* Consider making Ref an interface satisfied by concrete RefDetached,
+  RefSymbolic.
+* Consider adding compression agility.
 * There may be some cases where integer overflows are handled
   incorrectly.
-* Use https://pkg.go.dev/simd/archsimd@go1.26rc1 for SIMD instead of assembly
-* Add a function to insert an entry into a tree
+* Use https://pkg.go.dev/simd/archsimd@go1.26rc1 for SIMD instead of
+  assembly.
+* Add a function to insert an entry into a tree.
