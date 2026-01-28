@@ -13,3 +13,4 @@
 * There may be some cases where integer overflows are handled
   incorrectly.
 * Use https://pkg.go.dev/simd/archsimd@go1.26rc1 for SIMD instead of assembly
+* Add a function to insert an entry into a tree
