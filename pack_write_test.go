@@ -2,7 +2,9 @@ package furgit
 
 import (
 	"bytes"
+	"crypto/rand"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -88,11 +90,19 @@ func TestPackWriteNoDeltas(t *testing.T) {
 	workDir, cleanupWork := setupWorkDir(t)
 	defer cleanupWork()
 
-	if err := os.WriteFile(filepath.Join(workDir, "file1.txt"), []byte("content1"), 0o644); err != nil {
-		t.Fatalf("failed to write file1.txt: %v", err)
-	}
-	if err := os.WriteFile(filepath.Join(workDir, "file2.txt"), []byte("content2"), 0o644); err != nil {
-		t.Fatalf("failed to write file2.txt: %v", err)
+	const (
+		fileCount = 1000
+		fileSize  = 1024
+	)
+	buf := make([]byte, fileSize)
+	for i := 0; i < fileCount; i++ {
+		if _, err := rand.Read(buf); err != nil {
+			t.Fatalf("rand.Read failed: %v", err)
+		}
+		name := filepath.Join(workDir, fmt.Sprintf("file%04d.bin", i))
+		if err := os.WriteFile(name, buf, 0o644); err != nil {
+			t.Fatalf("failed to write %s: %v", name, err)
+		}
 	}
 
 	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
