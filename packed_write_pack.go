@@ -1,6 +1,7 @@
 package furgit
 
 import (
+	"crypto/rand"
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/binary"
@@ -318,10 +319,15 @@ func (repo *Repository) packWrite(w io.Writer, objects []Hash, opts packWriteOpt
 	}
 
 	var dctx deltaContext
+	var deltaSeed uint32
 	if opts.EnableDeltas {
 		dctx.window = defaultDeltaWindow
+		var seedBytes [4]byte
+		if _, err := rand.Read(seedBytes[:]); err != nil {
+			return Hash{}, err
+		}
+		deltaSeed = binary.LittleEndian.Uint32(seedBytes[:])
 	}
-	deltaSeed := uint32(0)
 
 	for _, id := range objects {
 		ty, body, err := repo.ReadObjectTypeRaw(id)
