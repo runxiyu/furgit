@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"sort"
 	"strconv"
 )
 
@@ -216,6 +217,46 @@ func (tree *Tree) entry(name []byte, searchIsTree bool) *TreeEntry {
 		}
 	}
 	return nil
+}
+
+// InsertEntry inserts a tree entry while preserving Git's name ordering.
+// It returns an error if an entry with the same name already exists.
+func (tree *Tree) InsertEntry(newEntry TreeEntry) error {
+	if tree == nil {
+		return ErrInvalidObject
+	}
+	for _, entry := range tree.Entries {
+		if bytes.Equal(entry.Name, newEntry.Name) {
+			return fmt.Errorf("furgit: tree: entry %q already exists", newEntry.Name)
+		}
+	}
+	newIsTree := newEntry.Mode == FileModeDir
+	insertAt := sort.Search(len(tree.Entries), func(i int) bool {
+		return TreeEntryNameCompare(tree.Entries[i].Name, tree.Entries[i].Mode, newEntry.Name, newIsTree) >= 0
+	})
+	tree.Entries = append(tree.Entries, TreeEntry{})
+	copy(tree.Entries[insertAt+1:], tree.Entries[insertAt:])
+	tree.Entries[insertAt] = newEntry
+	return nil
+}
+
+// RemoveEntry removes a tree entry by name.
+// It returns ErrNotFound if no matching entry exists.
+func (tree *Tree) RemoveEntry(name []byte) error {
+	if tree == nil {
+		return ErrInvalidObject
+	}
+	if len(tree.Entries) == 0 {
+		return ErrNotFound
+	}
+	for i := range tree.Entries {
+		if bytes.Equal(tree.Entries[i].Name, name) {
+			copy(tree.Entries[i:], tree.Entries[i+1:])
+			tree.Entries = tree.Entries[:len(tree.Entries)-1]
+			return nil
+		}
+	}
+	return ErrNotFound
 }
 
 func TreeEntryNameCompare(entryName []byte, entryMode FileMode, searchName []byte, searchIsTree bool) int {
