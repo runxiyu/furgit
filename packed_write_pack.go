@@ -39,6 +39,16 @@ func newPackWriter(w io.Writer, algo hashAlgorithm, objCount uint32) (*packWrite
 	}, nil
 }
 
+func (pw *packWriter) Write(p []byte) (int, error) {
+	if pw == nil || !pw.wroteHeader {
+		return 0, ErrInvalidObject
+	}
+	if err := pw.writePacked(p); err != nil {
+		return 0, err
+	}
+	return len(p), nil
+}
+
 func (pw *packWriter) writePacked(p []byte) error {
 	if len(p) == 0 {
 		return nil
@@ -94,7 +104,7 @@ func (pw *packWriter) WriteObject(ty ObjectType, body []byte) error {
 		return err
 	}
 
-	zw := zlib.NewWriter(&packHashWriter{pw: pw})
+	zw := zlib.NewWriter(pw)
 	if _, err := zw.Write(body); err != nil {
 		_ = zw.Close()
 		return err
@@ -137,7 +147,7 @@ func (pw *packWriter) WriteOfsDelta(baseOffset uint64, baseSize, resultSize int,
 		return err
 	}
 
-	zw := zlib.NewWriter(&packHashWriter{pw: pw})
+	zw := zlib.NewWriter(pw)
 	if _, err := zw.Write(delta); err != nil {
 		_ = zw.Close()
 		return err
@@ -175,7 +185,7 @@ func (pw *packWriter) WriteRefDelta(base Hash, baseSize, resultSize int, delta [
 		return err
 	}
 
-	zw := zlib.NewWriter(&packHashWriter{pw: pw})
+	zw := zlib.NewWriter(pw)
 	if _, err := zw.Write(delta); err != nil {
 		_ = zw.Close()
 		return err
@@ -195,20 +205,6 @@ func (pw *packWriter) Close() (Hash, error) {
 	copy(out.data[:], sum)
 	out.algo = pw.algo
 	return out, nil
-}
-
-type packHashWriter struct {
-	pw *packWriter
-}
-
-func (w *packHashWriter) Write(p []byte) (int, error) {
-	if w == nil || w.pw == nil {
-		return 0, ErrInvalidObject
-	}
-	if err := w.pw.writePacked(p); err != nil {
-		return 0, err
-	}
-	return len(p), nil
 }
 
 // packHeaderEncode encodes a pack object header (type + size).
