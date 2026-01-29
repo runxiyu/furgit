@@ -2,8 +2,6 @@ package furgit
 
 import (
 	"crypto/rand"
-	"crypto/sha1"
-	"crypto/sha256"
 	"encoding/binary"
 	"errors"
 	"hash"
@@ -29,7 +27,7 @@ func newPackWriter(w io.Writer, algo hashAlgorithm, objCount uint32) (*packWrite
 	if w == nil {
 		return nil, ErrInvalidObject
 	}
-	h, err := newHashWriter(algo)
+	h, err := algo.New()
 	if err != nil {
 		return nil, err
 	}
@@ -39,17 +37,6 @@ func newPackWriter(w io.Writer, algo hashAlgorithm, objCount uint32) (*packWrite
 		algo:     algo,
 		objCount: objCount,
 	}, nil
-}
-
-func newHashWriter(algo hashAlgorithm) (hash.Hash, error) {
-	switch algo {
-	case hashAlgoSHA1:
-		return sha1.New(), nil
-	case hashAlgoSHA256:
-		return sha256.New(), nil
-	default:
-		return nil, ErrInvalidObject
-	}
 }
 
 func (pw *packWriter) writePacked(p []byte) error {

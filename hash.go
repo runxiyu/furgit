@@ -4,6 +4,7 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/hex"
+	"hash"
 )
 
 // maxHashSize MUST be >= the largest supported algorithm size.
@@ -22,6 +23,7 @@ type hashAlgorithmDetails struct {
 	name string
 	size int
 	sum  func([]byte) Hash
+	new  func() hash.Hash
 }
 
 var hashAlgorithmTable = [...]hashAlgorithmDetails{
@@ -36,6 +38,9 @@ var hashAlgorithmTable = [...]hashAlgorithmDetails{
 			h.algo = hashAlgoSHA1
 			return h
 		},
+		new: func() hash.Hash {
+			return sha1.New()
+		},
 	},
 	hashAlgoSHA256: {
 		name: "sha256",
@@ -46,6 +51,9 @@ var hashAlgorithmTable = [...]hashAlgorithmDetails{
 			copy(h.data[:], sum[:])
 			h.algo = hashAlgoSHA256
 			return h
+		},
+		new: func() hash.Hash {
+			return sha256.New()
 		},
 	},
 }
@@ -74,6 +82,14 @@ func (algo hashAlgorithm) HexLen() int {
 
 func (algo hashAlgorithm) Sum(data []byte) Hash {
 	return algo.info().sum(data)
+}
+
+func (algo hashAlgorithm) New() (hash.Hash, error) {
+	newFn := algo.info().new
+	if newFn == nil {
+		return nil, ErrInvalidObject
+	}
+	return newFn(), nil
 }
 
 // Hash represents a Git object ID.
