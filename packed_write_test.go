@@ -3,6 +3,7 @@ package furgit
 import (
 	"bytes"
 	"crypto/rand"
+	"encoding/binary"
 	"fmt"
 	"os"
 	"os/exec"
@@ -365,7 +366,7 @@ func checkPackStream(path string, algo hashAlgorithm, objectCount int) error {
 	if len(data) < 12 {
 		return ErrInvalidObject
 	}
-	if readBE32(data[0:4]) != packMagic || readBE32(data[4:8]) != packVersion2 {
+	if binary.BigEndian.Uint32(data[0:4]) != packMagic || binary.BigEndian.Uint32(data[4:8]) != packVersion2 {
 		return ErrInvalidObject
 	}
 	pos := 12
@@ -433,9 +434,14 @@ func checkPackStream(path string, algo hashAlgorithm, objectCount int) error {
 			if baseBody == nil {
 				return fmt.Errorf("obj %d missing base body", i)
 			}
-			baseSize, resultSize, err := readDeltaSizes(payload)
+			pos := 0
+			baseSize, err := packVarintRead(payload, &pos)
 			if err != nil {
-				return fmt.Errorf("obj %d delta sizes: %v", i, err)
+				return fmt.Errorf("obj %d delta base size: %v", i, err)
+			}
+			resultSize, err := packVarintRead(payload, &pos)
+			if err != nil {
+				return fmt.Errorf("obj %d delta result size: %v", i, err)
 			}
 			if baseSize != len(baseBody) {
 				return fmt.Errorf("obj %d delta base size mismatch: got %d want %d", i, baseSize, len(baseBody))
@@ -454,9 +460,14 @@ func checkPackStream(path string, algo hashAlgorithm, objectCount int) error {
 			if baseBody == nil {
 				return fmt.Errorf("obj %d missing ref base body", i)
 			}
-			baseSize, resultSize, err := readDeltaSizes(payload)
+			pos := 0
+			baseSize, err := packVarintRead(payload, &pos)
 			if err != nil {
-				return fmt.Errorf("obj %d ref delta sizes: %v", i, err)
+				return fmt.Errorf("obj %d ref delta base size: %v", i, err)
+			}
+			resultSize, err := packVarintRead(payload, &pos)
+			if err != nil {
+				return fmt.Errorf("obj %d ref delta result size: %v", i, err)
 			}
 			if baseSize != len(baseBody) {
 				return fmt.Errorf("obj %d ref delta base size mismatch: got %d want %d", i, baseSize, len(baseBody))
@@ -491,19 +502,6 @@ func checkPackStream(path string, algo hashAlgorithm, objectCount int) error {
 		}
 	}
 	return nil
-}
-
-func readDeltaSizes(delta []byte) (int, int, error) {
-	pos := 0
-	baseSize, err := packVarintRead(delta, &pos)
-	if err != nil {
-		return 0, 0, err
-	}
-	resultSize, err := packVarintRead(delta, &pos)
-	if err != nil {
-		return 0, 0, err
-	}
-	return baseSize, resultSize, nil
 }
 
 func removeLooseObject(repoPath, oid string) error {

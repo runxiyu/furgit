@@ -2,6 +2,7 @@ package furgit
 
 import (
 	"bytes"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"os"
@@ -146,10 +147,10 @@ func (pi *packIndex) parse(buf []byte) error {
 	if len(buf) < 8+256*4 {
 		return ErrInvalidObject
 	}
-	if readBE32(buf[0:4]) != idxMagic {
+	if binary.BigEndian.Uint32(buf[0:4]) != idxMagic {
 		return ErrInvalidObject
 	}
-	if readBE32(buf[4:8]) != idxVersion2 {
+	if binary.BigEndian.Uint32(buf[4:8]) != idxVersion2 {
 		return ErrInvalidObject
 	}
 
@@ -160,7 +161,7 @@ func (pi *packIndex) parse(buf []byte) error {
 		return ErrInvalidObject
 	}
 	pi.fanout = buf[fanoutStart:fanoutEnd]
-	nobj := int(readBE32(pi.fanout[len(pi.fanout)-4:]))
+	nobj := int(binary.BigEndian.Uint32(pi.fanout[len(pi.fanout)-4:]))
 
 	namesStart := fanoutEnd
 	namesEnd := namesStart + nobj*pi.repo.hashAlgo.Size()
@@ -199,19 +200,6 @@ func (pi *packIndex) parse(buf []byte) error {
 	return nil
 }
 
-func readBE32(b []byte) uint32 {
-	_ = b[3]
-	return uint32(b[0])<<24 | uint32(b[1])<<16 | uint32(b[2])<<8 | uint32(b[3])
-}
-
-func readBE64(b []byte) uint64 {
-	_ = b[7]
-	return (uint64(b[0]) << 56) | (uint64(b[1]) << 48) |
-		(uint64(b[2]) << 40) | (uint64(b[3]) << 32) |
-		(uint64(b[4]) << 24) | (uint64(b[5]) << 16) |
-		(uint64(b[6]) << 8) | uint64(b[7])
-}
-
 func (pi *packIndex) fanoutEntry(i int) uint32 {
 	if len(pi.fanout) == 0 {
 		return 0
@@ -221,12 +209,12 @@ func (pi *packIndex) fanoutEntry(i int) uint32 {
 		return 0
 	}
 	start := i * 4
-	return readBE32(pi.fanout[start : start+4])
+	return binary.BigEndian.Uint32(pi.fanout[start : start+4])
 }
 
 func (pi *packIndex) offset(idx int) (uint64, error) {
 	start := idx * 4
-	word := readBE32(pi.offset32[start : start+4])
+	word := binary.BigEndian.Uint32(pi.offset32[start : start+4])
 	if word&0x80000000 == 0 {
 		return uint64(word), nil
 	}
@@ -236,7 +224,7 @@ func (pi *packIndex) offset(idx int) (uint64, error) {
 		return 0, errors.New("furgit: pack: corrupt 64-bit offset table")
 	}
 	base := pos * 8
-	return readBE64(pi.offset64[base : base+8]), nil
+	return binary.BigEndian.Uint64(pi.offset64[base : base+8]), nil
 }
 
 func (pi *packIndex) lookup(id Hash) (packlocation, error) {
