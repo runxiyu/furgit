@@ -80,9 +80,9 @@ protocol over it.
 
 * The standard library
 * Some things from `golang.org/x`
+* `github.com/cespare/xxhash/v2` (may move in-tree at some point)
 
-It is unlikely that other dependencies will be introduced.
-Occasionally, external code is introduced but maintained in-tree.
+Some external code is also introduced and maintained in-tree.
 
 ## Environment requirements
 
