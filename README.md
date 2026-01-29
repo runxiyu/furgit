@@ -9,16 +9,15 @@ Furgit is a fast Git library in pure Go
 ## Project status
 
 * Initial development
-* No tagged releases
-* API *will* break frequently
+* Frequent breaking changes
 * Do not use in production
-* Will likely follow [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) in the future
+* Will likely use [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) later
 
 ## Current features
 
 * SHA-256 and SHA-1\
   (runtime supports both; tests are SHA-256 by default,
-  but `sha1` build tag makes it test SHA-1)
+  but the `sha1` build tag makes it test SHA-1)
 * Reading loose objects
 * Writing loose objects
 * Reading packfiles
@@ -27,6 +26,7 @@ Furgit is a fast Git library in pure Go
 
 ## Future features
 
+* Compression algorithm agility
 * Multi pack indexes
 * Repack
 * [commit-graph](https://git-scm.com/docs/commit-graph)
