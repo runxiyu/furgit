@@ -351,3 +351,124 @@ func TestTreeRemoveEntry(t *testing.T) {
 		t.Fatal("expected error for nil tree")
 	}
 }
+
+func TestTreeEntryNameCompare(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name         string
+		entryName    []byte
+		entryMode    FileMode
+		searchName   []byte
+		searchIsTree bool
+		want         int
+	}{
+		{
+			name:       "equal file names",
+			entryName:  []byte("alpha"),
+			entryMode:  FileModeRegular,
+			searchName: []byte("alpha"),
+			want:       0,
+		},
+		{
+			name:         "equal tree names",
+			entryName:    []byte("dir"),
+			entryMode:    FileModeDir,
+			searchName:   []byte("dir"),
+			searchIsTree: true,
+			want:         0,
+		},
+		{
+			name:       "lexicographic less",
+			entryName:  []byte("alpha"),
+			entryMode:  FileModeRegular,
+			searchName: []byte("beta"),
+			want:       -1,
+		},
+		{
+			name:       "lexicographic greater",
+			entryName:  []byte("gamma"),
+			entryMode:  FileModeRegular,
+			searchName: []byte("beta"),
+			want:       1,
+		},
+		{
+			name:         "file sorts before same-name dir",
+			entryName:    []byte("same"),
+			entryMode:    FileModeRegular,
+			searchName:   []byte("same"),
+			searchIsTree: true,
+			want:         -1,
+		},
+		{
+			name:         "dir sorts after same-name file",
+			entryName:    []byte("same"),
+			entryMode:    FileModeDir,
+			searchName:   []byte("same"),
+			searchIsTree: false,
+			want:         1,
+		},
+		{
+			name:         "dir sorts before longer file",
+			entryName:    []byte("a"),
+			entryMode:    FileModeDir,
+			searchName:   []byte("ab"),
+			searchIsTree: false,
+			want:         -1,
+		},
+		{
+			name:       "file sorts before longer file",
+			entryName:  []byte("a"),
+			entryMode:  FileModeRegular,
+			searchName: []byte("ab"),
+			want:       -1,
+		},
+		{
+			name:         "search tree compares after exact file name",
+			entryName:    []byte("a"),
+			entryMode:    FileModeRegular,
+			searchName:   []byte("a"),
+			searchIsTree: true,
+			want:         -1,
+		},
+		{
+			name:         "entry tree compares after exact search file",
+			entryName:    []byte("a"),
+			entryMode:    FileModeDir,
+			searchName:   []byte("a"),
+			searchIsTree: false,
+			want:         1,
+		},
+		{
+			name:         "slash impact mid-compare",
+			entryName:    []byte("a"),
+			entryMode:    FileModeDir,
+			searchName:   []byte("a0"),
+			searchIsTree: false,
+			want:         -1,
+		},
+		{
+			name:         "file sorts after same prefix dir",
+			entryName:    []byte("a0"),
+			entryMode:    FileModeRegular,
+			searchName:   []byte("a"),
+			searchIsTree: true,
+			want:         1,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			got := TreeEntryNameCompare(tt.entryName, tt.entryMode, tt.searchName, tt.searchIsTree)
+			if got < 0 {
+				got = -1
+			} else if got > 0 {
+				got = 1
+			}
+			if got != tt.want {
+				t.Fatalf("compare(%q,%v,%q,%v) = %d, want %d", tt.entryName, tt.entryMode, tt.searchName, tt.searchIsTree, got, tt.want)
+			}
+		})
+	}
+}
