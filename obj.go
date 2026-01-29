@@ -40,6 +40,9 @@ const (
 type Object interface {
 	// ObjectType returns the object's type.
 	ObjectType() ObjectType
+	// Serialize renders the object into its raw byte representation,
+	// including the header (i.e., "type size\0").
+	Serialize() ([]byte, error)
 }
 
 // StoredObject describes a Git object with a known hash, such as

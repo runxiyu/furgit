@@ -173,23 +173,10 @@ func objTypeFromName(name string) (ObjectType, error) {
 
 // WriteLooseObject writes an object to the repository as a loose object.
 func (repo *Repository) WriteLooseObject(obj Object) (Hash, error) {
-	var raw []byte
-	var err error
-
-	switch o := obj.(type) {
-	case *Blob:
-		raw, err = o.Serialize()
-	case *Tree:
-		raw, err = o.Serialize()
-	case *Commit:
-		raw, err = o.Serialize()
-	case *Tag:
-		raw, err = o.Serialize()
-	default:
-		return Hash{}, fmt.Errorf("furgit: unsupported object type for writing: %T", obj)
+	if obj == nil {
+		return Hash{}, ErrInvalidObject
 	}
-	// TODO: Consider adding serialize to the interface?
-
+	raw, err := obj.Serialize()
 	if err != nil {
 		return Hash{}, err
 	}
