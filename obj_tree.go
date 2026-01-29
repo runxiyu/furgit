@@ -259,6 +259,10 @@ func (tree *Tree) RemoveEntry(name []byte) error {
 	return ErrNotFound
 }
 
+// TreeEntryNameCompare compares names using Git's tree ordering rules.
+//
+// If an entry or search name is a tree, it is compared as if it has a trailing
+// '/'.
 func TreeEntryNameCompare(entryName []byte, entryMode FileMode, searchName []byte, searchIsTree bool) int {
 	isEntryTree := entryMode == FileModeDir
 
