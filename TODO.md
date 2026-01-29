@@ -1,5 +1,6 @@
 ## Internal to-do list
 
+* Revamp error handling completely.
 * Consider adding repository methods that attempt to resolve objects
   of a particular type. They would attempt to resolve the object's
   header and return an error if the type mismatches; if it matches,
