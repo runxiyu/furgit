@@ -97,7 +97,7 @@ func packSectionInflate(pf *packFile, start uint64, sizeHint int) (bufpool.Buffe
 	if start > uint64(len(pf.data)) {
 		return bufpool.Buffer{}, ErrInvalidObject
 	}
-	body, err := zlibx.DecompressSized(pf.data[start:], sizeHint)
+	body, _, err := zlibx.DecompressSized(pf.data[start:], sizeHint)
 	if err != nil {
 		return bufpool.Buffer{}, err
 	}

@@ -155,7 +155,7 @@ func TestDecompressSizedUsesHint(t *testing.T) {
 	compressed := compressZlib(t, payload)
 
 	const hint = 1 << 20
-	out, err := DecompressSized(compressed, hint)
+	out, _, err := DecompressSized(compressed, hint)
 	if err != nil {
 		t.Fatalf("DecompressSized: %v", err)
 	}

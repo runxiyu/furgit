@@ -10,9 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/adler32"
 	"codeberg.org/lindenii/furgit/internal/bufpool"
-	"codeberg.org/lindenii/furgit/internal/flatex"
+	"codeberg.org/lindenii/furgit/internal/zlibx"
 )
 
 func TestPackHeaderEncodeParseRoundtrip(t *testing.T) {
@@ -422,10 +421,12 @@ func checkPackStream(path string, algo hashAlgorithm, objectCount int) error {
 		default:
 		}
 
-		payload, zconsumed, err := consumeZlibStream(data[pos:], size)
+		payloadBuf, zconsumed, err := zlibx.DecompressSized(data[pos:], size)
 		if err != nil {
 			return fmt.Errorf("obj %d zlib at %d: %v", i, pos, err)
 		}
+		payload := append([]byte(nil), payloadBuf.Bytes()...)
+		payloadBuf.Release()
 		pos += zconsumed
 		switch ty {
 		case ObjectTypeOfsDelta:
@@ -490,36 +491,6 @@ func checkPackStream(path string, algo hashAlgorithm, objectCount int) error {
 		}
 	}
 	return nil
-}
-
-func consumeZlibStream(src []byte, sizeHint int) ([]byte, int, error) {
-	if len(src) < 6 {
-		return nil, 0, fmt.Errorf("zlib too short")
-	}
-	cmf := src[0]
-	flg := src[1]
-	if (cmf&0x0f != 8) || (cmf>>4 > 7) || (uint16(cmf)<<8|uint16(flg))%31 != 0 {
-		return nil, 0, fmt.Errorf("zlib header invalid")
-	}
-	if flg&0x20 != 0 {
-		return nil, 0, fmt.Errorf("zlib dict not supported")
-	}
-	deflateData := src[2:]
-	out, consumed, err := flatex.DecompressSized(deflateData, sizeHint)
-	if err != nil {
-		return nil, 0, err
-	}
-	payload := append([]byte(nil), out.Bytes()...)
-	out.Release()
-	total := 2 + consumed + 4
-	if total > len(src) {
-		return nil, 0, fmt.Errorf("zlib truncated")
-	}
-	expected := readBE32(src[2+consumed : 2+consumed+4])
-	if expected != adler32.Checksum(payload) {
-		return nil, 0, fmt.Errorf("zlib checksum mismatch")
-	}
-	return payload, total, nil
 }
 
 func readDeltaSizes(delta []byte) (int, int, error) {
