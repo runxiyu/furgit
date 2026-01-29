@@ -294,3 +294,60 @@ func TestTreeLarge(t *testing.T) {
 		}
 	}
 }
+
+func TestTreeInsertEntry(t *testing.T) {
+	tree := &Tree{
+		Entries: []TreeEntry{
+			{Mode: FileModeRegular, Name: []byte("alpha"), ID: Hash{}},
+			{Mode: FileModeRegular, Name: []byte("gamma"), ID: Hash{}},
+		},
+	}
+
+	if err := tree.InsertEntry(TreeEntry{Mode: FileModeRegular, Name: []byte("beta"), ID: Hash{}}); err != nil {
+		t.Fatalf("InsertEntry failed: %v", err)
+	}
+	if len(tree.Entries) != 3 {
+		t.Fatalf("entries count: got %d, want 3", len(tree.Entries))
+	}
+	if string(tree.Entries[1].Name) != "beta" {
+		t.Fatalf("inserted order mismatch: got %q, want %q", tree.Entries[1].Name, "beta")
+	}
+
+	if err := tree.InsertEntry(TreeEntry{Mode: FileModeRegular, Name: []byte("beta"), ID: Hash{}}); err == nil {
+		t.Fatal("expected duplicate insert error")
+	}
+
+	var nilTree *Tree
+	if err := nilTree.InsertEntry(TreeEntry{Mode: FileModeRegular, Name: []byte("x"), ID: Hash{}}); err == nil {
+		t.Fatal("expected error for nil tree")
+	}
+}
+
+func TestTreeRemoveEntry(t *testing.T) {
+	tree := &Tree{
+		Entries: []TreeEntry{
+			{Mode: FileModeRegular, Name: []byte("alpha"), ID: Hash{}},
+			{Mode: FileModeRegular, Name: []byte("beta"), ID: Hash{}},
+			{Mode: FileModeRegular, Name: []byte("gamma"), ID: Hash{}},
+		},
+	}
+
+	if err := tree.RemoveEntry([]byte("beta")); err != nil {
+		t.Fatalf("RemoveEntry failed: %v", err)
+	}
+	if len(tree.Entries) != 2 {
+		t.Fatalf("entries count: got %d, want 2", len(tree.Entries))
+	}
+	if string(tree.Entries[0].Name) != "alpha" || string(tree.Entries[1].Name) != "gamma" {
+		t.Fatalf("remove order mismatch: got %q, %q", tree.Entries[0].Name, tree.Entries[1].Name)
+	}
+
+	if err := tree.RemoveEntry([]byte("beta")); err == nil {
+		t.Fatal("expected ErrNotFound for missing entry")
+	}
+
+	var nilTree *Tree
+	if err := nilTree.RemoveEntry([]byte("alpha")); err == nil {
+		t.Fatal("expected error for nil tree")
+	}
+}
