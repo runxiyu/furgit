@@ -3,12 +3,16 @@ package furgit
 import (
 	"bytes"
 	"crypto/rand"
-	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"codeberg.org/lindenii/furgit/internal/adler32"
+	"codeberg.org/lindenii/furgit/internal/bufpool"
+	"codeberg.org/lindenii/furgit/internal/flatex"
 )
 
 func TestPackHeaderEncodeParseRoundtrip(t *testing.T) {
@@ -169,7 +173,20 @@ func TestPackWriteNoDeltas(t *testing.T) {
 		_ = os.Remove(idxPath)
 	}()
 
-	_ = gitCmd(t, repoPath, "index-pack", "-o", idxPath, packPath)
+	if err := checkPackStream(packPath, repo.hashAlgo, len(objects)); err != nil {
+		t.Fatalf("pack stream invalid: %v", err)
+	}
+
+	cmd := exec.Command("git", "index-pack", "-o", idxPath, packPath)
+	cmd.Dir = repoPath
+	cmd.Env = append(os.Environ(),
+		"GIT_CONFIG_GLOBAL=/dev/null",
+		"GIT_CONFIG_SYSTEM=/dev/null",
+	)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("git index-pack failed: %v\n%s", err, output)
+	}
 
 	verifyOut := gitCmd(t, repoPath, "verify-pack", "-v", idxPath)
 	seen := make(map[string]struct{})
@@ -204,9 +221,51 @@ func TestPackWriteNoDeltas(t *testing.T) {
 	_ = gitCmd(t, repoPath, "fsck", "--full", "--strict")
 }
 
-func TestPackWriteDeltasUnimplemented(t *testing.T) {
+func TestPackWriteDeltas(t *testing.T) {
 	repoPath, cleanup := setupTestRepo(t)
 	defer cleanup()
+
+	workDir, cleanupWork := setupWorkDir(t)
+	defer cleanupWork()
+
+	const (
+		fileCount = 200
+		fileSize  = 2048
+	)
+	base := bytes.Repeat([]byte("delta-base-"), fileSize/10)
+	for i := 0; i < fileCount; i++ {
+		buf := make([]byte, len(base))
+		copy(buf, base)
+		buf[i%len(buf)] ^= byte(i)
+		name := filepath.Join(workDir, fmt.Sprintf("delta%04d.txt", i))
+		if err := os.WriteFile(name, buf, 0o644); err != nil {
+			t.Fatalf("failed to write %s: %v", name, err)
+		}
+	}
+
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "Delta commit")
+	commitHash := gitCmd(t, repoPath, "rev-parse", "HEAD")
+
+	commitBody := gitCatFile(t, repoPath, "commit", commitHash)
+	lines := bytes.Split(commitBody, []byte{'\n'})
+	if len(lines) == 0 || !bytes.HasPrefix(lines[0], []byte("tree ")) {
+		t.Fatalf("commit missing tree header")
+	}
+	treeHash := strings.TrimSpace(string(bytes.TrimPrefix(lines[0], []byte("tree "))))
+
+	lsTree := gitCmd(t, repoPath, "ls-tree", "-r", treeHash)
+	var blobHashes []string
+	for _, line := range strings.Split(lsTree, "\n") {
+		if line == "" {
+			continue
+		}
+		fields := strings.Fields(line)
+		if len(fields) < 3 {
+			t.Fatalf("unexpected ls-tree line: %q", line)
+		}
+		blobHashes = append(blobHashes, fields[2])
+	}
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -214,11 +273,266 @@ func TestPackWriteDeltasUnimplemented(t *testing.T) {
 	}
 	defer func() { _ = repo.Close() }()
 
-	buf := new(bytes.Buffer)
-	_, err = repo.packWrite(buf, nil, packWriteOptions{EnableDeltas: true})
-	if !errors.Is(err, errPackDeltaUnimplemented) {
-		t.Fatalf("expected errPackDeltaUnimplemented, got %v", err)
+	var objects []Hash
+	commitID, _ := repo.ParseHash(commitHash)
+	objects = append(objects, commitID)
+	treeID, _ := repo.ParseHash(treeHash)
+	objects = append(objects, treeID)
+	for _, bh := range blobHashes {
+		id, _ := repo.ParseHash(bh)
+		objects = append(objects, id)
 	}
+	expectedOids := append([]string{commitHash, treeHash}, blobHashes...)
+
+	packDir := filepath.Join(repoPath, "objects", "pack")
+	if err := os.MkdirAll(packDir, 0o755); err != nil {
+		t.Fatalf("failed to create pack dir: %v", err)
+	}
+	pf, err := os.CreateTemp(packDir, "furgit-delta-test-*.pack")
+	if err != nil {
+		t.Fatalf("failed to create pack file: %v", err)
+	}
+	packPath := pf.Name()
+	idxPath := strings.TrimSuffix(packPath, ".pack") + ".idx"
+	if _, err := repo.packWrite(pf, objects, packWriteOptions{
+		EnableDeltas:    true,
+		MinDeltaSavings: 1,
+	}); err != nil {
+		_ = pf.Close()
+		t.Fatalf("packWrite failed: %v", err)
+	}
+	if err := pf.Close(); err != nil {
+		t.Fatalf("failed to close pack file: %v", err)
+	}
+
+	defer func() {
+		_ = os.Remove(packPath)
+		_ = os.Remove(idxPath)
+	}()
+
+	if err := checkPackStream(packPath, repo.hashAlgo, len(objects)); err != nil {
+		t.Fatalf("pack stream invalid: %v", err)
+	}
+
+	cmd := exec.Command("git", "index-pack", "-o", idxPath, packPath)
+	cmd.Dir = repoPath
+	cmd.Env = append(os.Environ(),
+		"GIT_CONFIG_GLOBAL=/dev/null",
+		"GIT_CONFIG_SYSTEM=/dev/null",
+	)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("git index-pack failed: %v\n%s", err, output)
+	}
+
+	verifyOut := gitCmd(t, repoPath, "verify-pack", "-v", idxPath)
+	seen := make(map[string]struct{})
+	for _, line := range strings.Split(verifyOut, "\n") {
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		if strings.HasPrefix(line, "chain length") || strings.HasPrefix(line, "non delta") {
+			continue
+		}
+		parts := strings.Fields(line)
+		if len(parts) == 0 {
+			continue
+		}
+		seen[parts[0]] = struct{}{}
+	}
+	for _, oid := range expectedOids {
+		if _, ok := seen[oid]; !ok {
+			t.Fatalf("verify-pack missing object %s", oid)
+		}
+	}
+
+	for _, oid := range expectedOids {
+		if err := removeLooseObject(repoPath, oid); err != nil {
+			t.Fatalf("remove loose object %s: %v", oid, err)
+		}
+	}
+	for _, oid := range expectedOids {
+		_ = gitCmd(t, repoPath, "cat-file", "-p", oid)
+	}
+
+	_ = gitCmd(t, repoPath, "fsck", "--full", "--strict")
+}
+
+func checkPackStream(path string, algo hashAlgorithm, objectCount int) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	if len(data) < 12 {
+		return ErrInvalidObject
+	}
+	if readBE32(data[0:4]) != packMagic || readBE32(data[4:8]) != packVersion2 {
+		return ErrInvalidObject
+	}
+	pos := 12
+	hashSize := algo.Size()
+	type objEntry struct {
+		offset uint64
+		ty     ObjectType
+		body   []byte
+	}
+	byOffset := make(map[uint64]objEntry, objectCount)
+	byHash := make(map[string]objEntry, objectCount)
+	for i := 0; i < objectCount; i++ {
+		objOffset := uint64(pos)
+		ty, size, consumed, err := packHeaderParse(data[pos:])
+		if err != nil {
+			return fmt.Errorf("obj %d header at %d: %v", i, pos, err)
+		}
+		pos += consumed
+		baseOffset := uint64(0)
+		baseTy := ObjectTypeInvalid
+		var baseBody []byte
+		var baseHash Hash
+		switch ty {
+		case ObjectTypeOfsDelta:
+			dist, distConsumed, err := packDeltaReadOfsDistance(data[pos:])
+			if err != nil {
+				return fmt.Errorf("obj %d ofs at %d: %v", i, pos, err)
+			}
+			pos += distConsumed
+			if dist == 0 || dist > objOffset {
+				return fmt.Errorf("obj %d ofs at %d: invalid dist", i, pos)
+			}
+			baseOffset = objOffset - dist
+			base, ok := byOffset[baseOffset]
+			if !ok {
+				return fmt.Errorf("obj %d ofs at %d: missing base", i, pos)
+			}
+			baseTy = base.ty
+			baseBody = base.body
+		case ObjectTypeRefDelta:
+			if pos+hashSize > len(data) {
+				return ErrInvalidObject
+			}
+			copy(baseHash.data[:], data[pos:pos+hashSize])
+			baseHash.algo = algo
+			baseEntry, ok := byHash[baseHash.String()]
+			if !ok {
+				return fmt.Errorf("obj %d ref base not found", i)
+			}
+			baseTy = baseEntry.ty
+			baseBody = baseEntry.body
+			pos += hashSize
+		default:
+		}
+
+		payload, zconsumed, err := consumeZlibStream(data[pos:], size)
+		if err != nil {
+			return fmt.Errorf("obj %d zlib at %d: %v", i, pos, err)
+		}
+		pos += zconsumed
+		switch ty {
+		case ObjectTypeOfsDelta:
+			if baseBody == nil {
+				return fmt.Errorf("obj %d missing base body", i)
+			}
+			baseSize, resultSize, err := readDeltaSizes(payload)
+			if err != nil {
+				return fmt.Errorf("obj %d delta sizes: %v", i, err)
+			}
+			if baseSize != len(baseBody) {
+				return fmt.Errorf("obj %d delta base size mismatch: got %d want %d", i, baseSize, len(baseBody))
+			}
+			out, err := packDeltaApply(bufpool.FromOwned(baseBody), bufpool.FromOwned(payload))
+			if err != nil {
+				return fmt.Errorf("obj %d delta apply: %v", i, err)
+			}
+			body := append([]byte(nil), out.Bytes()...)
+			out.Release()
+			if resultSize != len(body) {
+				return fmt.Errorf("obj %d delta result size mismatch: got %d want %d", i, len(body), resultSize)
+			}
+			byOffset[objOffset] = objEntry{offset: objOffset, ty: baseTy, body: body}
+		case ObjectTypeRefDelta:
+			if baseBody == nil {
+				return fmt.Errorf("obj %d missing ref base body", i)
+			}
+			baseSize, resultSize, err := readDeltaSizes(payload)
+			if err != nil {
+				return fmt.Errorf("obj %d ref delta sizes: %v", i, err)
+			}
+			if baseSize != len(baseBody) {
+				return fmt.Errorf("obj %d ref delta base size mismatch: got %d want %d", i, baseSize, len(baseBody))
+			}
+			out, err := packDeltaApply(bufpool.FromOwned(baseBody), bufpool.FromOwned(payload))
+			if err != nil {
+				return fmt.Errorf("obj %d ref delta apply: %v", i, err)
+			}
+			body := append([]byte(nil), out.Bytes()...)
+			out.Release()
+			if resultSize != len(body) {
+				return fmt.Errorf("obj %d ref delta result size mismatch: got %d want %d", i, len(body), resultSize)
+			}
+			byOffset[objOffset] = objEntry{offset: objOffset, ty: baseTy, body: body}
+		default:
+			if size >= 0 && len(payload) != size {
+				return fmt.Errorf("obj %d size mismatch: got %d want %d", i, len(payload), size)
+			}
+			body := append([]byte(nil), payload...)
+			byOffset[objOffset] = objEntry{offset: objOffset, ty: ty, body: body}
+		}
+
+		entry := byOffset[objOffset]
+		if entry.body != nil && entry.ty != ObjectTypeInvalid {
+			hdr, err := headerForType(entry.ty, entry.body)
+			if err != nil {
+				return err
+			}
+			raw := append(hdr, entry.body...)
+			hash := algo.Sum(raw)
+			byHash[hash.String()] = entry
+		}
+	}
+	return nil
+}
+
+func consumeZlibStream(src []byte, sizeHint int) ([]byte, int, error) {
+	if len(src) < 6 {
+		return nil, 0, fmt.Errorf("zlib too short")
+	}
+	cmf := src[0]
+	flg := src[1]
+	if (cmf&0x0f != 8) || (cmf>>4 > 7) || (uint16(cmf)<<8|uint16(flg))%31 != 0 {
+		return nil, 0, fmt.Errorf("zlib header invalid")
+	}
+	if flg&0x20 != 0 {
+		return nil, 0, fmt.Errorf("zlib dict not supported")
+	}
+	deflateData := src[2:]
+	out, consumed, err := flatex.DecompressSized(deflateData, sizeHint)
+	if err != nil {
+		return nil, 0, err
+	}
+	payload := append([]byte(nil), out.Bytes()...)
+	out.Release()
+	total := 2 + consumed + 4
+	if total > len(src) {
+		return nil, 0, fmt.Errorf("zlib truncated")
+	}
+	expected := readBE32(src[2+consumed : 2+consumed+4])
+	if expected != adler32.Checksum(payload) {
+		return nil, 0, fmt.Errorf("zlib checksum mismatch")
+	}
+	return payload, total, nil
+}
+
+func readDeltaSizes(delta []byte) (int, int, error) {
+	pos := 0
+	baseSize, err := packVarintRead(delta, &pos)
+	if err != nil {
+		return 0, 0, err
+	}
+	resultSize, err := packVarintRead(delta, &pos)
+	if err != nil {
+		return 0, 0, err
+	}
+	return baseSize, resultSize, nil
 }
 
 func removeLooseObject(repoPath, oid string) error {
