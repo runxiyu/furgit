@@ -13,7 +13,7 @@ import (
 )
 
 // TODO
-var errPackDeltaUnimplemented = errors.New("furgit: pack: delta writing not implemented")
+var errThinPackUnimplemented = errors.New("furgit: pack: thin packs not implemented")
 
 // packWriter writes a PACKv2 stream.
 type packWriter struct {
@@ -304,7 +304,7 @@ func (repo *Repository) packWrite(w io.Writer, objects []Hash, opts packWriteOpt
 		return Hash{}, ErrInvalidObject
 	}
 	if opts.EnableThinPack {
-		return Hash{}, errPackDeltaUnimplemented
+		return Hash{}, errThinPackUnimplemented
 	}
 	if len(objects) > int(^uint32(0)) {
 		return Hash{}, ErrInvalidObject
