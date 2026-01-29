@@ -89,7 +89,7 @@ func deltaEncode(baseSize, resultSize int, instr []deltaInstruction) ([]byte, er
 	return out, nil
 }
 
-func deltaTry(base, target []byte, seed uint32, minSavings int) ([]byte, bool) {
+func deltaTry(base, target []byte, seed uint64, minSavings int) ([]byte, bool) {
 	if minSavings < 0 {
 		minSavings = 0
 	}

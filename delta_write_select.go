@@ -26,7 +26,7 @@ func (ctx *deltaContext) addCandidate(obj *objectToPack) {
 	}
 }
 
-func pickDeltaBase(ctx *deltaContext, obj *objectToPack, seed uint32, minSavings, maxDepth int) (*objectToPack, []byte) {
+func pickDeltaBase(ctx *deltaContext, obj *objectToPack, seed uint64, minSavings, maxDepth int) (*objectToPack, []byte) {
 	if ctx == nil || len(ctx.candidates) == 0 {
 		return nil, nil
 	}

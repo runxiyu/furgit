@@ -3,7 +3,7 @@ package furgit
 import (
 	"bytes"
 
-	"codeberg.org/lindenii/furgit/internal/murmurhash2"
+	"github.com/cespare/xxhash/v2"
 )
 
 const (
@@ -62,7 +62,7 @@ var deltaGearTab = [...]uint32{
 type deltaBlock struct {
 	length int
 	offset int
-	hash   uint32
+	hash   uint64
 }
 
 type deltaTable struct {
@@ -82,7 +82,7 @@ type deltaInstruction struct {
 	data   []byte
 }
 
-func deltify(base, target []byte, seed uint32) ([]deltaInstruction, error) {
+func deltify(base, target []byte, seed uint64) ([]deltaInstruction, error) {
 	if base == nil {
 		base = []byte{}
 	}
@@ -96,7 +96,7 @@ func deltify(base, target []byte, seed uint32) ([]deltaInstruction, error) {
 	return deltifyMemMem(target, 0, len(target), seed, dt, base, 0, len(base))
 }
 
-func deltifyMemMem(target []byte, fileoffset, filesize int, seed uint32, dt *deltaTable, base []byte, baseOffset0, baseSize int) ([]deltaInstruction, error) {
+func deltifyMemMem(target []byte, fileoffset, filesize int, seed uint64, dt *deltaTable, base []byte, baseOffset0, baseSize int) ([]deltaInstruction, error) {
 	const allocChunkSize = 64
 	instr := make([]deltaInstruction, 0, allocChunkSize)
 	offset0 := fileoffset
@@ -141,7 +141,7 @@ func deltifyMemMem(target []byte, fileoffset, filesize int, seed uint32, dt *del
 	return instr, nil
 }
 
-func deltaTableInitMem(data []byte, fileoffset, filesize int, seed uint32) (*deltaTable, error) {
+func deltaTableInitMem(data []byte, fileoffset, filesize int, seed uint64) (*deltaTable, error) {
 	dt := &deltaTable{
 		nalloc: 128,
 		size:   128,
@@ -164,8 +164,13 @@ func deltaTableInitMem(data []byte, fileoffset, filesize int, seed uint32) (*del
 	return dt, nil
 }
 
-func deltaHashBlock(p []byte, seed uint32) uint32 {
-	return murmurhash2.Sum32(p, seed)
+func deltaHashBlock(p []byte, seed uint64) uint64 {
+	if seed == 0 {
+		return xxhash.Sum64(p)
+	}
+	d := xxhash.NewWithSeed(seed)
+	_, _ = d.Write(p)
+	return d.Sum64()
 }
 
 func deltaNextBlockLen(data []byte, fileoffset, filesize int) int {
@@ -188,7 +193,7 @@ func deltaNextBlockLen(data []byte, fileoffset, filesize int) int {
 	return p - fileoffset
 }
 
-func (dt *deltaTable) addBlock(data []byte, offset0, length, offset int, h uint32) error {
+func (dt *deltaTable) addBlock(data []byte, offset0, length, offset int, h uint64) error {
 	if length == 0 {
 		return nil
 	}
@@ -200,22 +205,22 @@ func (dt *deltaTable) addBlock(data []byte, offset0, length, offset int, h uint3
 		return nil
 	}
 	dt.offs[idx] = uint32(dt.nblocks + 1)
-	dt.blocks[dt.nblocks] = deltaBlock{
-		length: length,
-		offset: offset,
-		hash:   h,
-	}
+		dt.blocks[dt.nblocks] = deltaBlock{
+			length: length,
+			offset: offset,
+			hash:   h,
+		}
 	dt.nblocks++
 	dt.len++
 	return nil
 }
 
-func (dt *deltaTable) lookupBlock(chunk []byte, length int, seed uint32, base []byte, baseOffset0 int) *deltaBlock {
+func (dt *deltaTable) lookupBlock(chunk []byte, length int, seed uint64, base []byte, baseOffset0 int) *deltaBlock {
 	if dt == nil || dt.size == 0 {
 		return nil
 	}
 	h := deltaHashBlock(chunk, seed)
-	for i := int(h % uint32(dt.size)); dt.offs[i] != 0; i = (i + 1) % dt.size {
+	for i := int(h % uint64(dt.size)); dt.offs[i] != 0; i = (i + 1) % dt.size {
 		block := &dt.blocks[dt.offs[i]-1]
 		if block.hash != h || block.length != length {
 			continue
@@ -231,11 +236,11 @@ func (dt *deltaTable) lookupBlock(chunk []byte, length int, seed uint32, base []
 	return nil
 }
 
-func (dt *deltaTable) lookupSlot(data []byte, offset0, offset, length int, h uint32) (int, bool) {
+func (dt *deltaTable) lookupSlot(data []byte, offset0, offset, length int, h uint64) (int, bool) {
 	if dt == nil || dt.size == 0 {
 		return 0, false
 	}
-	for i := int(h % uint32(dt.size)); ; i = (i + 1) % dt.size {
+	for i := int(h % uint64(dt.size)); ; i = (i + 1) % dt.size {
 		if dt.offs[i] == 0 {
 			return i, false
 		}
@@ -273,7 +278,7 @@ func (dt *deltaTable) resize() error {
 		dt.offs = make([]uint32, dt.size)
 		for i := 0; i < dt.nblocks; i++ {
 			block := &dt.blocks[i]
-			idx := int(block.hash % uint32(dt.size))
+			idx := int(block.hash % uint64(dt.size))
 			for dt.offs[idx] != 0 {
 				idx = (idx + 1) % dt.size
 			}

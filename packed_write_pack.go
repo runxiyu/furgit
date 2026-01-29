@@ -319,14 +319,14 @@ func (repo *Repository) packWrite(w io.Writer, objects []Hash, opts packWriteOpt
 	}
 
 	var dctx deltaContext
-	var deltaSeed uint32
+	var deltaSeed uint64
 	if opts.EnableDeltas {
 		dctx.window = defaultDeltaWindow
-		var seedBytes [4]byte
+		var seedBytes [8]byte
 		if _, err := rand.Read(seedBytes[:]); err != nil {
 			return Hash{}, err
 		}
-		deltaSeed = binary.LittleEndian.Uint32(seedBytes[:])
+		deltaSeed = binary.LittleEndian.Uint64(seedBytes[:])
 	}
 
 	for _, id := range objects {
