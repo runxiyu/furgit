@@ -2,6 +2,7 @@ package furgit
 
 // Blob represents a Git blob object.
 type Blob struct {
+	// Data represents the payload content of the blob.
 	Data []byte
 }
 
