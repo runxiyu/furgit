@@ -1,3 +1,4 @@
+// Package adler32 implements the Adler-32 checksum.
 package adler32
 
 const (
