@@ -1,4 +1,4 @@
-// pktline provides support for the pkt-line format described in gitprotocol-common(5).
+// Package pktline provides support for the pkt-line format described in gitprotocol-common(5).
 package pktline
 
 import (
