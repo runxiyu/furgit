@@ -14,7 +14,7 @@ func Decompress(src []byte) (bufpool.Buffer, error) {
 	return out, err
 }
 
-func DecompressSized(src []byte, sizeHint int) (bufpool.Buffer, int, error) {
+func DecompressSized(src []byte, sizeHint int) (buf bufpool.Buffer, consumed int, err error) {
 	if len(src) < 6 {
 		return bufpool.Buffer{}, 0, io.ErrUnexpectedEOF
 	}
