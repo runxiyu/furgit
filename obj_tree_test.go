@@ -39,7 +39,7 @@ func TestTreeWrite(t *testing.T) {
 		t.Errorf("git type: got %q, want %q", gitType, "tree")
 	}
 
-	gitLsTree := gitCmd(t, repoPath, "ls-tree", treeHash.String())
+	gitLsTree := gitCmd(t, repoPath, nil, "ls-tree", treeHash.String())
 	if !strings.Contains(gitLsTree, "file.txt") {
 		t.Errorf("git ls-tree doesn't contain file.txt: %s", gitLsTree)
 	}
@@ -68,8 +68,8 @@ func TestTreeRead(t *testing.T) {
 		t.Fatalf("failed to write c.txt: %v", err)
 	}
 
-	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
-	treeHash := gitCmd(t, repoPath, "--work-tree="+workDir, "write-tree")
+	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
+	treeHash := gitCmd(t, repoPath, nil, "--work-tree="+workDir, "write-tree")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -124,8 +124,8 @@ func TestTreeEntry(t *testing.T) {
 		t.Fatalf("failed to write c.txt: %v", err)
 	}
 
-	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
-	treeHash := gitCmd(t, repoPath, "--work-tree="+workDir, "write-tree")
+	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
+	treeHash := gitCmd(t, repoPath, nil, "--work-tree="+workDir, "write-tree")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -175,8 +175,8 @@ func TestTreeEntryRecursive(t *testing.T) {
 		t.Fatalf("failed to write dir/nested.txt: %v", err)
 	}
 
-	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
-	treeHash := gitCmd(t, repoPath, "--work-tree="+workDir, "write-tree")
+	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
+	treeHash := gitCmd(t, repoPath, nil, "--work-tree="+workDir, "write-tree")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -233,7 +233,7 @@ func TestTreeLarge(t *testing.T) {
 	repoPath, cleanup := setupTestRepo(t)
 	defer cleanup()
 
-	gitCmd(t, repoPath, "config", "gc.auto", "0")
+	gitCmd(t, repoPath, nil, "config", "gc.auto", "0")
 
 	workDir, cleanupWork := setupWorkDir(t)
 	defer cleanupWork()
@@ -248,8 +248,8 @@ func TestTreeLarge(t *testing.T) {
 		}
 	}
 
-	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
-	treeHash := gitCmd(t, repoPath, "--work-tree="+workDir, "write-tree")
+	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
+	treeHash := gitCmd(t, repoPath, nil, "--work-tree="+workDir, "write-tree")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -265,7 +265,7 @@ func TestTreeLarge(t *testing.T) {
 		t.Errorf("tree entries: got %d, want %d", len(tree.Entries), numFiles)
 	}
 
-	gitCount := gitCmd(t, repoPath, "ls-tree", treeHash)
+	gitCount := gitCmd(t, repoPath, nil, "ls-tree", treeHash)
 	gitLines := strings.Count(gitCount, "\n") + 1
 	if len(tree.Entries) != gitLines {
 		t.Errorf("furgit found %d entries, git found %d", len(tree.Entries), gitLines)

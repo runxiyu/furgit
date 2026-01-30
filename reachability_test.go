@@ -20,9 +20,9 @@ func TestReachabilityCommitsWantHave(t *testing.T) {
 		if err := os.WriteFile(path, []byte{byte('a' + i), '\n'}, 0o644); err != nil {
 			t.Fatalf("write file: %v", err)
 		}
-		gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
-		gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "commit")
-		commits = append(commits, gitCmd(t, repoPath, "rev-parse", "HEAD"))
+		gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
+		gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", "commit")
+		commits = append(commits, gitCmd(t, repoPath, nil, "rev-parse", "HEAD"))
 	}
 
 	repo, err := OpenRepository(repoPath)
@@ -97,8 +97,8 @@ func TestReachabilityAllObjects(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(workDir, "dir", "file2.txt"), []byte("two\n"), 0o644); err != nil {
 		t.Fatalf("write file2: %v", err)
 	}
-	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
-	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "commit")
+	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", "commit")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -106,7 +106,7 @@ func TestReachabilityAllObjects(t *testing.T) {
 	}
 	defer func() { _ = repo.Close() }()
 
-	head := gitCmd(t, repoPath, "rev-parse", "HEAD")
+	head := gitCmd(t, repoPath, nil, "rev-parse", "HEAD")
 	wantID, _ := repo.ParseHash(head)
 	walk, err := repo.ReachableObjects(ReachabilityQuery{
 		Wants: []Hash{wantID},
@@ -124,9 +124,9 @@ func TestReachabilityAllObjects(t *testing.T) {
 		t.Fatalf("Reachability walk error: %v", err)
 	}
 
-	treeStr := gitCmd(t, repoPath, "show", "-s", "--format=%T", head)
+	treeStr := gitCmd(t, repoPath, nil, "show", "-s", "--format=%T", head)
 	treeID, _ := repo.ParseHash(treeStr)
-	lsTree := gitCmd(t, repoPath, "ls-tree", "-r", treeStr)
+	lsTree := gitCmd(t, repoPath, nil, "ls-tree", "-r", treeStr)
 	fields := strings.Fields(lsTree)
 	if len(fields) < 3 {
 		t.Fatalf("unexpected ls-tree output: %q", lsTree)
@@ -157,9 +157,9 @@ func TestReachabilityStopAtHaves(t *testing.T) {
 		if err := os.WriteFile(path, []byte{byte('a' + i), '\n'}, 0o644); err != nil {
 			t.Fatalf("write file: %v", err)
 		}
-		gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
-		gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "commit")
-		commits = append(commits, gitCmd(t, repoPath, "rev-parse", "HEAD"))
+		gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
+		gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", "commit")
+		commits = append(commits, gitCmd(t, repoPath, nil, "rev-parse", "HEAD"))
 	}
 
 	repo, err := OpenRepository(repoPath)

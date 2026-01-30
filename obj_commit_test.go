@@ -87,9 +87,9 @@ func TestCommitRead(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to write file.txt: %v", err)
 	}
-	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
-	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "Test commit")
-	commitHash := gitCmd(t, repoPath, "rev-parse", "HEAD")
+	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", "Test commit")
+	commitHash := gitCmd(t, repoPath, nil, "rev-parse", "HEAD")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -135,24 +135,24 @@ func TestCommitWithParents(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to write file1.txt: %v", err)
 	}
-	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
-	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "First commit")
-	parent1Hash := gitCmd(t, repoPath, "rev-parse", "HEAD")
+	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", "First commit")
+	parent1Hash := gitCmd(t, repoPath, nil, "rev-parse", "HEAD")
 
 	err = os.WriteFile(filepath.Join(workDir, "file2.txt"), []byte("content2"), 0o644)
 	if err != nil {
 		t.Fatalf("failed to write file2.txt: %v", err)
 	}
-	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
-	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "Second commit")
-	parent2Hash := gitCmd(t, repoPath, "rev-parse", "HEAD")
+	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", "Second commit")
+	parent2Hash := gitCmd(t, repoPath, nil, "rev-parse", "HEAD")
 
 	err = os.WriteFile(filepath.Join(workDir, "file3.txt"), []byte("content3"), 0o644)
 	if err != nil {
 		t.Fatalf("failed to write file3.txt: %v", err)
 	}
-	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
-	treeHash := gitCmd(t, repoPath, "--work-tree="+workDir, "write-tree")
+	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
+	treeHash := gitCmd(t, repoPath, nil, "--work-tree="+workDir, "write-tree")
 
 	mergeCommitData := fmt.Sprintf("tree %s\nparent %s\nparent %s\nauthor Test Author <test@example.org> 1234567890 +0000\ncommitter Test Committer <committer@example.org> 1234567890 +0000\n\nMerge commit\n",
 		treeHash, parent1Hash, parent2Hash)

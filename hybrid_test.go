@@ -29,8 +29,8 @@ func TestTreeNestedDeep(t *testing.T) {
 		t.Fatalf("failed to create deep.txt: %v", err)
 	}
 
-	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
-	treeHash := gitCmd(t, repoPath, "--work-tree="+workDir, "write-tree")
+	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
+	treeHash := gitCmd(t, repoPath, nil, "--work-tree="+workDir, "write-tree")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -83,8 +83,8 @@ func TestTreeMixedModes(t *testing.T) {
 		t.Fatalf("failed to create symlink: %v", err)
 	}
 
-	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
-	treeHash := gitCmd(t, repoPath, "--work-tree="+workDir, "write-tree")
+	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
+	treeHash := gitCmd(t, repoPath, nil, "--work-tree="+workDir, "write-tree")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -130,9 +130,9 @@ func TestCommitChain(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to create %s: %v", filename, err)
 		}
-		gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
-		gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", fmt.Sprintf("Commit %d", i))
-		commitHash := gitCmd(t, repoPath, "rev-parse", "HEAD")
+		gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
+		gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", fmt.Sprintf("Commit %d", i))
+		commitHash := gitCmd(t, repoPath, nil, "rev-parse", "HEAD")
 		commits = append(commits, commitHash)
 	}
 
@@ -185,13 +185,13 @@ func TestMultipleTags(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create file.txt: %v", err)
 	}
-	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
-	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "Tagged commit")
-	commitHash := gitCmd(t, repoPath, "rev-parse", "HEAD")
+	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", "Tagged commit")
+	commitHash := gitCmd(t, repoPath, nil, "rev-parse", "HEAD")
 
 	tags := []string{"v1.0.0", "v1.0.1", "v1.1.0", "v2.0.0"}
 	for _, tagName := range tags {
-		gitCmd(t, repoPath, "tag", "-a", "-m", fmt.Sprintf("Release %s", tagName), tagName, commitHash)
+		gitCmd(t, repoPath, nil, "tag", "-a", "-m", fmt.Sprintf("Release %s", tagName), tagName, commitHash)
 	}
 
 	repo, err := OpenRepository(repoPath)
@@ -203,7 +203,7 @@ func TestMultipleTags(t *testing.T) {
 	}()
 
 	for _, tagName := range tags {
-		tagHash := gitCmd(t, repoPath, "rev-parse", tagName)
+		tagHash := gitCmd(t, repoPath, nil, "rev-parse", tagName)
 		hash, _ := repo.ParseHash(tagHash)
 		obj, err := repo.ReadObject(hash)
 		if err != nil {
@@ -231,7 +231,7 @@ func TestPackfileAfterMultipleRepacks(t *testing.T) {
 	repoPath, cleanup := setupTestRepo(t)
 	defer cleanup()
 
-	gitCmd(t, repoPath, "config", "gc.auto", "0")
+	gitCmd(t, repoPath, nil, "config", "gc.auto", "0")
 
 	workDir, cleanupWork := setupWorkDir(t)
 	defer cleanupWork()
@@ -241,12 +241,12 @@ func TestPackfileAfterMultipleRepacks(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to create file%d.txt: %v", i, err)
 		}
-		gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
-		gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", fmt.Sprintf("Commit %d", i))
-		gitCmd(t, repoPath, "repack", "-d")
+		gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
+		gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", fmt.Sprintf("Commit %d", i))
+		gitCmd(t, repoPath, nil, "repack", "-d")
 	}
 
-	gitCmd(t, repoPath, "repack", "-a", "-d")
+	gitCmd(t, repoPath, nil, "repack", "-a", "-d")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -256,7 +256,7 @@ func TestPackfileAfterMultipleRepacks(t *testing.T) {
 		_ = repo.Close()
 	}()
 
-	headHash := gitCmd(t, repoPath, "rev-parse", "HEAD")
+	headHash := gitCmd(t, repoPath, nil, "rev-parse", "HEAD")
 	hash, _ := repo.ParseHash(headHash)
 
 	obj, err := repo.ReadObject(hash)
