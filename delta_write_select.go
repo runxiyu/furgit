@@ -8,6 +8,7 @@ type objectToPack struct {
 	body       []byte
 	offset     uint64
 	deltaDepth int
+	inPack     bool
 }
 
 type deltaContext struct {
