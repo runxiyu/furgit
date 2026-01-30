@@ -1,3 +1,4 @@
+// Package diffbytes provides routines to perform line-based diffs.
 package diffbytes
 
 import "bytes"
