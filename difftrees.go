@@ -19,13 +19,10 @@ type TreeDiffEntry struct {
 	// Path is the full slash-separated path relative to the root
 	// of the repository.
 	Path []byte
-
 	// Kind indicates the type of difference.
 	Kind TreeDiffEntryKind
-
 	// Old is the old tree entry (nil iff added).
 	Old *TreeEntry
-
 	// New is the new tree entry (nil iff deleted).
 	New *TreeEntry
 }
