@@ -14,7 +14,7 @@ func TestCurrentRepoDepthFirstEnumeration(t *testing.T) {
 
 	repo, err := OpenRepository(gitDir)
 	if err != nil {
-		t.Skipf("failed to open current .git directory: %v", err)
+		t.Fatal("failed to open current .git directory: %v", err)
 	}
 	defer func() { _ = repo.Close() }()
 
