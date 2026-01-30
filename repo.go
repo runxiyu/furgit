@@ -27,7 +27,12 @@ type Repository struct {
 
 	packFiles   map[string]*packFile
 	packFilesMu sync.RWMutex
-	closeOnce   sync.Once
+
+	commitGraphOnce sync.Once
+	commitGraph     *commitGraph
+	commitGraphErr  error
+
+	closeOnce sync.Once
 }
 
 // OpenRepository opens the repository at the provided path.
@@ -100,6 +105,12 @@ func (repo *Repository) Close() error {
 				if err != nil && closeErr == nil {
 					closeErr = err
 				}
+			}
+		}
+		if repo.commitGraph != nil {
+			err := repo.commitGraph.Close()
+			if err != nil && closeErr == nil {
+				closeErr = err
 			}
 		}
 	})
