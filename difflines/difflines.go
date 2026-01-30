@@ -1,11 +1,11 @@
-// Package diffbytes provides routines to perform line-based diffs.
-package diffbytes
+// Package difflines provides routines to perform line-based diffs.
+package difflines
 
 import "bytes"
 
-// DiffBytes performs a line-based diff.
+// DiffLines performs a line-based diff.
 // Lines are bytes up to and including '\n' (final line may lack '\n').
-func DiffBytes(oldB, newB []byte) ([]BytesDiffChunk, error) {
+func DiffLines(oldB, newB []byte) ([]LinesDiffChunk, error) {
 	type lineRef struct {
 		base  []byte
 		start int
@@ -119,7 +119,7 @@ func DiffBytes(oldB, newB []byte) ([]BytesDiffChunk, error) {
 	}
 
 	type edit struct {
-		kind    BytesDiffChunkKind
+		kind    LinesDiffChunkKind
 		lineref lineRef
 	}
 	revEdits := make([]edit, 0, n+m)
@@ -148,7 +148,7 @@ func DiffBytes(oldB, newB []byte) ([]BytesDiffChunk, error) {
 		for x > prevX && y > prevY {
 			x--
 			y--
-			revEdits = append(revEdits, edit{kind: BytesDiffChunkKindUnchanged, lineref: oldLines[x]})
+			revEdits = append(revEdits, edit{kind: LinesDiffChunkKindUnchanged, lineref: oldLines[x]})
 		}
 
 		if D == 0 {
@@ -157,10 +157,10 @@ func DiffBytes(oldB, newB []byte) ([]BytesDiffChunk, error) {
 
 		if x == prevX {
 			y--
-			revEdits = append(revEdits, edit{kind: BytesDiffChunkKindAdded, lineref: newLines[y]})
+			revEdits = append(revEdits, edit{kind: LinesDiffChunkKindAdded, lineref: newLines[y]})
 		} else {
 			x--
-			revEdits = append(revEdits, edit{kind: BytesDiffChunkKindDeleted, lineref: oldLines[x]})
+			revEdits = append(revEdits, edit{kind: LinesDiffChunkKindDeleted, lineref: oldLines[x]})
 		}
 	}
 
@@ -168,7 +168,7 @@ func DiffBytes(oldB, newB []byte) ([]BytesDiffChunk, error) {
 		revEdits[i], revEdits[j] = revEdits[j], revEdits[i]
 	}
 
-	var out []BytesDiffChunk
+	var out []LinesDiffChunk
 	type meta struct {
 		base  []byte
 		start int
@@ -182,7 +182,7 @@ func DiffBytes(oldB, newB []byte) ([]BytesDiffChunk, error) {
 		curEnd := e.lineref.end
 
 		if len(out) == 0 || out[len(out)-1].Kind != e.kind {
-			out = append(out, BytesDiffChunk{Kind: e.kind, Data: curBase[curStart:curEnd]})
+			out = append(out, LinesDiffChunk{Kind: e.kind, Data: curBase[curStart:curEnd]})
 			metas = append(metas, meta{base: curBase, start: curStart, end: curEnd})
 			continue
 		}
@@ -203,21 +203,21 @@ func DiffBytes(oldB, newB []byte) ([]BytesDiffChunk, error) {
 	return out, nil
 }
 
-// BytesDiffChunk represents a contiguous region of bytes categorized
+// LinesDiffChunk represents a contiguous region of lines categorized
 // as unchanged, deleted, or added.
-type BytesDiffChunk struct {
-	Kind BytesDiffChunkKind
+type LinesDiffChunk struct {
+	Kind LinesDiffChunkKind
 	Data []byte
 }
 
-// BytesDiffChunkKind enumerates the type of diff chunk.
-type BytesDiffChunkKind int
+// LinesDiffChunkKind enumerates the type of diff chunk.
+type LinesDiffChunkKind int
 
 const (
-	// BytesDiffChunkKindUnchanged represents an unchanged diff chunk.
-	BytesDiffChunkKindUnchanged BytesDiffChunkKind = iota
-	// BytesDiffChunkKindDeleted represents a deleted diff chunk.
-	BytesDiffChunkKindDeleted
-	// BytesDiffChunkKindAdded represents an added diff chunk.
-	BytesDiffChunkKindAdded
+	// LinesDiffChunkKindUnchanged represents an unchanged diff chunk.
+	LinesDiffChunkKindUnchanged LinesDiffChunkKind = iota
+	// LinesDiffChunkKindDeleted represents a deleted diff chunk.
+	LinesDiffChunkKindDeleted
+	// LinesDiffChunkKindAdded represents an added diff chunk.
+	LinesDiffChunkKindAdded
 )

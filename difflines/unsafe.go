@@ -1,4 +1,4 @@
-package diffbytes
+package difflines
 
 import "unsafe"
 
