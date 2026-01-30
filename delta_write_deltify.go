@@ -205,11 +205,11 @@ func (dt *deltaTable) addBlock(data []byte, offset0, length, offset int, h uint6
 		return nil
 	}
 	dt.offs[idx] = uint32(dt.nblocks + 1)
-		dt.blocks[dt.nblocks] = deltaBlock{
-			length: length,
-			offset: offset,
-			hash:   h,
-		}
+	dt.blocks[dt.nblocks] = deltaBlock{
+		length: length,
+		offset: offset,
+		hash:   h,
+	}
 	dt.nblocks++
 	dt.len++
 	return nil
