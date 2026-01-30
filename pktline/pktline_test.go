@@ -10,12 +10,14 @@ import (
 func TestWriteReadLineRoundtrip(t *testing.T) {
 	var buf bytes.Buffer
 	payload := []byte("hello\n")
-	if err := WriteLine(&buf, payload); err != nil {
+	pw := NewWriter(&buf)
+	if err := pw.WriteLine(payload); err != nil {
 		t.Fatalf("WriteLine: %v", err)
 	}
 
 	dst := make([]byte, 64)
-	line, n, status, err := ReadLine(&buf, dst)
+	pr := NewReader(&buf)
+	line, n, status, err := pr.ReadLine(dst)
 	if err != nil {
 		t.Fatalf("ReadLine: %v", err)
 	}
@@ -43,8 +45,9 @@ func TestReadLineSpecialPackets(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := bytes.NewBufferString(tt.input)
+			pr := NewReader(r)
 			dst := make([]byte, 16)
-			line, n, status, err := ReadLine(r, dst)
+			line, n, status, err := pr.ReadLine(dst)
 			if err != nil {
 				t.Fatalf("ReadLine: %v", err)
 			}
@@ -60,8 +63,9 @@ func TestReadLineSpecialPackets(t *testing.T) {
 
 func TestReadLineInvalidHeader(t *testing.T) {
 	r := bytes.NewBufferString("zzzz")
+	pr := NewReader(r)
 	dst := make([]byte, 16)
-	_, _, _, err := ReadLine(r, dst)
+	_, _, _, err := pr.ReadLine(dst)
 	if !errors.Is(err, ErrInvalidHeader) {
 		t.Fatalf("expected ErrInvalidHeader, got %v", err)
 	}
@@ -70,11 +74,13 @@ func TestReadLineInvalidHeader(t *testing.T) {
 func TestReadLineBufferTooSmall(t *testing.T) {
 	var buf bytes.Buffer
 	payload := []byte("abcd")
-	if err := WriteLine(&buf, payload); err != nil {
+	pw := NewWriter(&buf)
+	if err := pw.WriteLine(payload); err != nil {
 		t.Fatalf("WriteLine: %v", err)
 	}
 	dst := make([]byte, 2)
-	_, _, _, err := ReadLine(&buf, dst)
+	pr := NewReader(&buf)
+	_, _, _, err := pr.ReadLine(dst)
 	if !errors.Is(err, ErrBufferTooSmall) {
 		t.Fatalf("expected ErrBufferTooSmall, got %v", err)
 	}
@@ -82,7 +88,8 @@ func TestReadLineBufferTooSmall(t *testing.T) {
 
 func TestWriteLineTooLarge(t *testing.T) {
 	payload := make([]byte, maxPacketDataLen+1)
-	if err := WriteLine(io.Discard, payload); !errors.Is(err, ErrPacketTooLarge) {
+	pw := NewWriter(io.Discard)
+	if err := pw.WriteLine(payload); !errors.Is(err, ErrPacketTooLarge) {
 		t.Fatalf("expected ErrPacketTooLarge, got %v", err)
 	}
 }
