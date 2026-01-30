@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"hash"
 	"io"
+	"sort"
 
 	"codeberg.org/lindenii/furgit/internal/zlib"
 )
@@ -310,7 +311,12 @@ func (repo *Repository) packWrite(w io.Writer, objects []Hash, opts packWriteOpt
 		return Hash{}, ErrInvalidObject
 	}
 
-	pw, err := newPackWriter(w, repo.hashAlgo, uint32(len(objects)))
+	objInfos, err := repo.packBuildObjectList(objects, opts.EnableDeltas)
+	if err != nil {
+		return Hash{}, err
+	}
+
+	pw, err := newPackWriter(w, repo.hashAlgo, uint32(len(objInfos)))
 	if err != nil {
 		return Hash{}, err
 	}
@@ -335,15 +341,16 @@ func (repo *Repository) packWrite(w io.Writer, objects []Hash, opts packWriteOpt
 		}
 	}
 
-	for _, id := range objects {
-		ty, body, err := repo.ReadObjectTypeRaw(id)
+	for _, info := range objInfos {
+		ty, body, err := repo.ReadObjectTypeRaw(info.id)
 		if err != nil {
 			return Hash{}, err
 		}
 		obj := &objectToPack{
-			id:     id,
+			id:     info.id,
 			ty:     ty,
 			body:   body,
+			size:   info.size,
 			inPack: true,
 		}
 		startOffset := pw.bytesWritten
@@ -414,14 +421,57 @@ func (repo *Repository) seedDeltaCandidatesFromHaves(ctx *deltaContext, haves []
 			return err
 		}
 		candidate := &objectToPack{
-			id:     obj.ID,
-			ty:     ty,
-			body:   body,
-			inPack: false,
+			id:        obj.ID,
+			ty:        ty,
+			body:      body,
+			size:      len(body),
+			inPack:    false,
+			preferred: true,
 		}
 		ctx.addCandidate(candidate)
 	}
 	return walk.Err()
+}
+
+type packObjectInfo struct {
+	id    Hash
+	ty    ObjectType
+	size  int
+	index int
+}
+
+func (repo *Repository) packBuildObjectList(objects []Hash, enableDeltas bool) ([]packObjectInfo, error) {
+	if repo == nil {
+		return nil, ErrInvalidObject
+	}
+	infos := make([]packObjectInfo, 0, len(objects))
+	for i, id := range objects {
+		ty, size, err := repo.ReadObjectTypeSize(id)
+		if err != nil {
+			return nil, err
+		}
+		infos = append(infos, packObjectInfo{
+			id:    id,
+			ty:    ty,
+			size:  int(size),
+			index: i,
+		})
+	}
+	if !enableDeltas {
+		return infos, nil
+	}
+	sort.SliceStable(infos, func(i, j int) bool {
+		ai := infos[i]
+		aj := infos[j]
+		if ai.ty != aj.ty {
+			return ai.ty < aj.ty
+		}
+		if ai.size != aj.size {
+			return ai.size > aj.size
+		}
+		return ai.index < aj.index
+	})
+	return infos, nil
 }
 
 type packWriteOptions struct {

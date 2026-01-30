@@ -30,6 +30,7 @@ Furgit is a fast Git library in pure Go
 * Multi pack indexes
 * Repack
 * Better delta base selection strategy
+* Delta reuse; delta islands
 * Reading reachability bitmaps
 * Writing reachability bitmaps when writing packfiles
 * [commit-graph](https://git-scm.com/docs/commit-graph) (in progress)
