@@ -213,7 +213,10 @@ type BytesDiffChunk struct {
 type BytesDiffChunkKind int
 
 const (
+	// BytesDiffChunkKindUnchanged represents an unchanged diff chunk.
 	BytesDiffChunkKindUnchanged BytesDiffChunkKind = iota
+	// BytesDiffChunkKindDeleted represents a deleted diff chunk.
 	BytesDiffChunkKindDeleted
+	// BytesDiffChunkKindAdded represents an added diff chunk.
 	BytesDiffChunkKindAdded
 )
