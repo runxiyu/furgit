@@ -3,15 +3,11 @@ package furgit
 import (
 	"crypto/rand"
 	"encoding/binary"
-	"errors"
 	"hash"
 	"io"
 
 	"codeberg.org/lindenii/furgit/internal/zlib"
 )
-
-// TODO
-var errThinPackUnimplemented = errors.New("furgit: pack: thin packs not implemented")
 
 // packWriter writes a PACKv2 stream.
 type packWriter struct {
@@ -281,14 +277,6 @@ func packOfsEncode(dist uint64) ([]byte, error) {
 	return out[:pos], nil
 }
 
-// packWrite writes a pack stream for the provided object ids.
-func (repo *Repository) packWrite(w io.Writer, objects []Hash, opts packWriteOptions) (Hash, error) {
-	if opts.EnableThinPack {
-		return Hash{}, errThinPackUnimplemented
-	}
-	return repo.packWriteObjects(w, objects, opts, nil)
-}
-
 // packWriteReachable writes a pack stream for objects reachable from the
 // provided reachability query.
 func (repo *Repository) packWriteReachable(w io.Writer, query ReachabilityQuery, opts packWriteOptions) (Hash, error) {
@@ -307,10 +295,11 @@ func (repo *Repository) packWriteReachable(w io.Writer, query ReachabilityQuery,
 	if err := walk.Err(); err != nil {
 		return Hash{}, err
 	}
-	return repo.packWriteObjects(w, objects, opts, walk)
+	return repo.packWrite(w, objects, opts, walk)
 }
 
-func (repo *Repository) packWriteObjects(w io.Writer, objects []Hash, opts packWriteOptions, have *ReachabilityWalk) (Hash, error) {
+// packWrite writes a pack stream for the provided object ids.
+func (repo *Repository) packWrite(w io.Writer, objects []Hash, opts packWriteOptions, have *ReachabilityWalk) (Hash, error) {
 	if repo == nil {
 		return Hash{}, ErrInvalidObject
 	}
