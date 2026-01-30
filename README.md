@@ -67,14 +67,12 @@ on a `Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz`.
 
 ## Architectural considerations
 
-It is important to realize that Furgit, and performant Git implementations in
-general, heavily rely on using memory mappings of packfiles, and assume
-relatively predictable fault handling behavior. Therefore, in distributed
-systems, we strongly advise *not* using Furgit on top of distributed network
-filesystems such as CephFS or NFS; instead, consider solutions where redundancy
-and distributions belong *above* the Git layer, such as using a set of Git
-nodes each running Furgit/etc. on local repositories, then using an RPC
-protocol over it.
+Furgit heavily relies on memory mappings of packfiles, and assume relatively
+predictable fault handling behavior. In distributed systems, we advise *not*
+using Furgit on top of distributed network filesystems such as CephFS or NFS;
+consider solutions where redundancy and distributions belong *above* the Git
+layer, e.g., using an RPC protocol over a set of Git nodes each running Furgit
+on local repositories.
 
 ## Dependencies
 
