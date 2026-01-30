@@ -1,3 +1,4 @@
+// Package config provides routines to parse Git configuration files.
 package config
 
 import (
