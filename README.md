@@ -95,9 +95,7 @@ Some external code is also introduced and maintained in-tree.
 
 ## Environment requirements
 
-We currently do not intend to support flexible storage backends such as
-[storers in go-git](https://pkg.go.dev/github.com/go-git/go-git/v5/plumbing/storer);
-a standard UNIX-like filesystem with
+A standard UNIX-like filesystem with
 [syscall.Mmap](https://pkg.go.dev/syscall#Mmap) is expected.
 
 ## Repos and mirrors
