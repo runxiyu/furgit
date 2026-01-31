@@ -41,6 +41,7 @@ Furgit is a fast Git library in pure Go
 * Network protocols
 * Reftables
 * Large object promisors?
+* Large binary database format or something
 * And much more
 
 ## General goals
