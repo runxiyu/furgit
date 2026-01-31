@@ -40,6 +40,7 @@ Furgit is a fast Git library in pure Go
 * [commit-graph](https://git-scm.com/docs/commit-graph) (in progress)
 * Network protocols
 * Reftables
+* Large object promisors?
 * And much more
 
 ## General goals
