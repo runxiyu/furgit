@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"hash"
 	"io"
+	"sync"
 
 	"codeberg.org/lindenii/furgit/internal/adler32"
 )
@@ -35,6 +36,12 @@ type Writer struct {
 	err         error
 	scratch     [4]byte
 	wroteHeader bool
+}
+
+var writerPool = sync.Pool{
+	New: func() any {
+		return new(Writer)
+	},
 }
 
 // NewWriter creates a new [Writer].
@@ -66,11 +73,33 @@ func NewWriterLevelDict(w io.Writer, level int, dict []byte) (*Writer, error) {
 	if level < HuffmanOnly || level > BestCompression {
 		return nil, fmt.Errorf("zlib: invalid compression level: %d", level)
 	}
-	return &Writer{
-		w:     w,
-		level: level,
-		dict:  dict,
-	}, nil
+	v := writerPool.Get()
+	z, ok := v.(*Writer)
+	if !ok {
+		panic("zlib: pool returned unexpected type")
+	}
+
+	// flate.Writer can only be Reset with the same level/dictionary mode.
+	// Reuse it only when the configuration is unchanged and dictionary-free.
+	reuseCompressor := z.compressor != nil && z.level == level && z.dict == nil && dict == nil
+	if !reuseCompressor {
+		z.compressor = nil
+	}
+	if z.digest != nil {
+		z.digest.Reset()
+	}
+
+	*z = Writer{
+		w:          w,
+		level:      level,
+		dict:       dict,
+		compressor: z.compressor,
+		digest:     z.digest,
+	}
+	if z.compressor != nil {
+		z.compressor.Reset(w)
+	}
+	return z, nil
 }
 
 // Reset clears the state of the [Writer] z such that it is equivalent to its
@@ -190,5 +219,10 @@ func (z *Writer) Close() error {
 	// ZLIB (RFC 1950) is big-endian, unlike GZIP (RFC 1952).
 	binary.BigEndian.PutUint32(z.scratch[:], checksum)
 	_, z.err = z.w.Write(z.scratch[0:4])
-	return z.err
+	if z.err != nil {
+		return z.err
+	}
+
+	writerPool.Put(z)
+	return nil
 }

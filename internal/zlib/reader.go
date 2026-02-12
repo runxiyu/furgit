@@ -7,13 +7,14 @@ Package zlib implements reading and writing of zlib format compressed data,
 as specified in RFC 1950.
 
 This package differs from the standard library's compress/zlib package
-in that it pools readers to reduce allocations. Writers are unchanged.
+in that it pools readers and writers to reduce allocations.
 
-Note that closing the reader causes it to be returned to a pool for
-reuse. Therefore, the caller must not retain references to the
-reader after closing it; in the standard library's compress/zlib package,
-it is legal to Reset a closed reader and continue using it; that is
-not allowed here, so there is simply no Resetter interface.
+Note that closing a reader or writer causes it to be returned to a pool
+for reuse. Therefore, the caller must not retain references to a
+reader or writer after closing it; in the standard library's
+compress/zlib package, it is legal to Reset a closed reader or writer
+and continue using it; that is not allowed here, so there is simply no
+Resetter interface.
 
 The implementation provides filters that uncompress during reading
 and compress during writing.  For example, to write compressed data
@@ -58,7 +59,7 @@ var (
 	ErrHeader = errors.New("zlib: invalid header")
 )
 
-var pool = sync.Pool{
+var readerPool = sync.Pool{
 	New: func() any {
 		r := new(reader)
 		return r
@@ -86,7 +87,7 @@ func NewReader(r io.Reader) (io.ReadCloser, error) {
 // NewReaderDict ignores the dictionary if the compressed data does not refer to it.
 // If the compressed data refers to a different dictionary, NewReaderDict returns [ErrDictionary].
 func NewReaderDict(r io.Reader, dict []byte) (io.ReadCloser, error) {
-	v := pool.Get()
+	v := readerPool.Get()
 	z, ok := v.(*reader)
 	if !ok {
 		panic("zlib: pool returned unexpected type")
@@ -140,7 +141,7 @@ func (z *reader) Close() error {
 		return z.err
 	}
 
-	pool.Put(z)
+	readerPool.Put(z)
 	return nil
 }
 
