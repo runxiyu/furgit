@@ -126,6 +126,22 @@ A standard UNIX-like filesystem with
 * I was thinking of names and I accidentally typed "git" as "fur" (i.e., left
   shifted one key on my QWERTY keyboard), so, "Furgit"
 
+## Reporting bugs
+
+All problem/bug reports should include a reproduction recipe in form
+of a Go program which starts out with an empty repository and runs a
+series of Furgit functions/methods and/or Git commands to trigger the
+problem, be it a crash or some other undesirable behavior.
+
+Please take this request very seriously; Ask for help with writing your
+regression test before asking for your problem to be fixed. Time invested in
+writing a regression test saves time wasted on back-and-forth discussion about
+how the problem can be reproduced. A regression test will need to be written in
+any case to verify a fix and prevent the problem from resurfacing.
+
+If writing an automated test really turns out to be impossible, please
+explain in very clear terms how the problem can be reproduced.
+
 ## License
 
 This project is licensed under the GNU Affero General Public License,
