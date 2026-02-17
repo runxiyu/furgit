@@ -15,3 +15,4 @@
 * Use https://pkg.go.dev/simd/archsimd@go1.26rc1 for SIMD instead of
   assembly.
 * Add a function to insert an entry into a tree.
+* Study https://gitlab.com/groups/gitlab-org/-/epics/20716 
