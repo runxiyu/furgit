@@ -104,84 +104,19 @@ func (pw *packWriter) WriteObject(ty ObjectType, body []byte) error {
 }
 
 func (pw *packWriter) WriteOfsDelta(baseOffset uint64, baseSize, resultSize int, delta []byte) error {
-	if pw == nil || !pw.wroteHeader {
-		return ErrInvalidObject
-	}
-	if baseSize < 0 || resultSize < 0 {
-		return ErrInvalidObject
-	}
-	if delta == nil {
-		delta = []byte{}
-	}
-	deltaSize := len(delta)
-	if deltaSize <= 0 {
-		return ErrInvalidObject
-	}
-	currentOffset := pw.bytesWritten
-	if baseOffset >= currentOffset {
-		return ErrInvalidObject
-	}
-	dist := currentOffset - baseOffset
-
-	hdr, err := packHeaderEncode(ObjectTypeOfsDelta, deltaSize)
-	if err != nil {
-		return err
-	}
-	if err := pw.writePacked(hdr); err != nil {
-		return err
-	}
-	ofs, err := packOfsEncode(dist)
-	if err != nil {
-		return err
-	}
-	if err := pw.writePacked(ofs); err != nil {
-		return err
-	}
-
-	zw := zlib.NewWriter(&packHashWriter{pw: pw})
-	if _, err := zw.Write(delta); err != nil {
-		_ = zw.Close()
-		return err
-	}
-	return zw.Close()
+	_ = baseOffset
+	_ = baseSize
+	_ = resultSize
+	_ = delta
+	return errPackDeltaUnimplemented
 }
 
 func (pw *packWriter) WriteRefDelta(base Hash, baseSize, resultSize int, delta []byte) error {
-	if pw == nil || !pw.wroteHeader {
-		return ErrInvalidObject
-	}
-	if baseSize < 0 || resultSize < 0 {
-		return ErrInvalidObject
-	}
-	if delta == nil {
-		delta = []byte{}
-	}
-	deltaSize := len(delta)
-	if deltaSize <= 0 {
-		return ErrInvalidObject
-	}
-	baseBytes := base.Bytes()
-	if len(baseBytes) == 0 {
-		return ErrInvalidObject
-	}
-
-	hdr, err := packHeaderEncode(ObjectTypeRefDelta, deltaSize)
-	if err != nil {
-		return err
-	}
-	if err := pw.writePacked(hdr); err != nil {
-		return err
-	}
-	if err := pw.writePacked(baseBytes); err != nil {
-		return err
-	}
-
-	zw := zlib.NewWriter(&packHashWriter{pw: pw})
-	if _, err := zw.Write(delta); err != nil {
-		_ = zw.Close()
-		return err
-	}
-	return zw.Close()
+	_ = base
+	_ = baseSize
+	_ = resultSize
+	_ = delta
+	return errPackDeltaUnimplemented
 }
 
 func (pw *packWriter) Close() (Hash, error) {
@@ -291,7 +226,7 @@ func (repo *Repository) packWrite(w io.Writer, objects []Hash, opts packWriteOpt
 	if repo == nil {
 		return Hash{}, ErrInvalidObject
 	}
-	if opts.EnableThinPack {
+	if opts.EnableDeltas || opts.EnableThinPack {
 		return Hash{}, errPackDeltaUnimplemented
 	}
 	if len(objects) > int(^uint32(0)) {
@@ -306,45 +241,13 @@ func (repo *Repository) packWrite(w io.Writer, objects []Hash, opts packWriteOpt
 		return Hash{}, err
 	}
 
-	var dctx deltaContext
-	if opts.EnableDeltas {
-		dctx.window = defaultDeltaWindow
-	}
-	deltaSeed := uint32(0)
-
 	for _, id := range objects {
 		ty, body, err := repo.ReadObjectTypeRaw(id)
 		if err != nil {
 			return Hash{}, err
 		}
-		obj := &objectToPack{
-			id:   id,
-			ty:   ty,
-			body: body,
-		}
-		startOffset := pw.bytesWritten
-		wroteDelta := false
-
-		if opts.EnableDeltas && ty == ObjectTypeBlob {
-			base, delta := pickDeltaBase(&dctx, obj, deltaSeed, opts.MinDeltaSavings, opts.MaxDeltaDepth)
-			if base != nil && delta != nil {
-				if err := pw.WriteOfsDelta(base.offset, len(base.body), len(body), delta); err != nil {
-					return Hash{}, err
-				}
-				wroteDelta = true
-				obj.deltaDepth = base.deltaDepth + 1
-			}
-		}
-		if !wroteDelta {
-			if err := pw.WriteObject(ty, body); err != nil {
-				return Hash{}, err
-			}
-			obj.deltaDepth = 0
-		}
-		obj.offset = startOffset
-
-		if opts.EnableDeltas && ty == ObjectTypeBlob {
-			dctx.addCandidate(obj)
+		if err := pw.WriteObject(ty, body); err != nil {
+			return Hash{}, err
 		}
 	}
 
