@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sort"
 
-	"codeberg.org/lindenii/furgit/objecttype"
 	"codeberg.org/lindenii/furgit/objectid"
+	"codeberg.org/lindenii/furgit/objecttype"
 )
 
 // FileMode represents the mode of a file in a Git tree.

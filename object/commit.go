@@ -1,8 +1,8 @@
 package object
 
 import (
-	"codeberg.org/lindenii/furgit/objecttype"
 	"codeberg.org/lindenii/furgit/objectid"
+	"codeberg.org/lindenii/furgit/objecttype"
 )
 
 // Commit represents a Git commit object.
