@@ -10,9 +10,9 @@ import (
 
 func TestBlobSerialize(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		repo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewBareRepo(t, algo)
 		body := []byte("hello\nblob\n")
-		wantID := repo.HashObject(t, "blob", body)
+		wantID := testRepo.HashObject(t, "blob", body)
 
 		blob := &object.Blob{Data: body}
 		rawObj, err := blob.SerializeWithHeader()

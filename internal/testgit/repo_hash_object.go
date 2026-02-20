@@ -7,10 +7,10 @@ import (
 )
 
 // HashObject hashes and writes an object and returns its object ID.
-func (repo *TestRepo) HashObject(tb testing.TB, objType string, body []byte) objectid.ObjectID {
+func (testRepo *TestRepo) HashObject(tb testing.TB, objType string, body []byte) objectid.ObjectID {
 	tb.Helper()
-	hex := repo.RunInput(tb, body, "hash-object", "-t", objType, "-w", "--stdin")
-	id, err := objectid.ParseHex(repo.algo, hex)
+	hex := testRepo.RunInput(tb, body, "hash-object", "-t", objType, "-w", "--stdin")
+	id, err := objectid.ParseHex(testRepo.algo, hex)
 	if err != nil {
 		tb.Fatalf("parse git hash-object output %q: %v", hex, err)
 	}

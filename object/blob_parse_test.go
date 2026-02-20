@@ -11,11 +11,11 @@ import (
 
 func TestBlobParseFromGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		repo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewBareRepo(t, algo)
 		body := []byte("hello\nblob\n")
-		blobID := repo.HashObject(t, "blob", body)
+		blobID := testRepo.HashObject(t, "blob", body)
 
-		rawBody := repo.CatFile(t, "blob", blobID)
+		rawBody := testRepo.CatFile(t, "blob", blobID)
 		blob, err := object.ParseBlob(rawBody)
 		if err != nil {
 			t.Fatalf("ParseBlob: %v", err)

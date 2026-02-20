@@ -11,29 +11,29 @@ import (
 	"codeberg.org/lindenii/furgit/objectid"
 )
 
-func openConfig(t *testing.T, repo *testgit.TestRepo) *os.File {
+func openConfig(t *testing.T, testRepo *testgit.TestRepo) *os.File {
 	t.Helper()
-	cfgFile, err := os.Open(filepath.Join(repo.Dir(), "config"))
+	cfgFile, err := os.Open(filepath.Join(testRepo.Dir(), "config"))
 	if err != nil {
 		t.Fatalf("failed to open config: %v", err)
 	}
 	return cfgFile
 }
 
-func gitConfigGet(t *testing.T, repo *testgit.TestRepo, key string) string {
+func gitConfigGet(t *testing.T, testRepo *testgit.TestRepo, key string) string {
 	t.Helper()
-	return repo.Run(t, "config", "--get", key)
+	return testRepo.Run(t, "config", "--get", key)
 }
 
 func TestConfigAgainstGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		repo := testgit.NewBareRepo(t, algo)
-		repo.Run(t, "config", "core.bare", "true")
-		repo.Run(t, "config", "core.filemode", "false")
-		repo.Run(t, "config", "user.name", "Jane Doe")
-		repo.Run(t, "config", "user.email", "jane@example.org")
+		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo.Run(t, "config", "core.bare", "true")
+		testRepo.Run(t, "config", "core.filemode", "false")
+		testRepo.Run(t, "config", "user.name", "Jane Doe")
+		testRepo.Run(t, "config", "user.email", "jane@example.org")
 
-		cfgFile := openConfig(t, repo)
+		cfgFile := openConfig(t, testRepo)
 		defer func() { _ = cfgFile.Close() }()
 
 		cfg, err := config.ParseConfig(cfgFile)
@@ -58,11 +58,11 @@ func TestConfigAgainstGit(t *testing.T) {
 
 func TestConfigSubsectionAgainstGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		repo := testgit.NewBareRepo(t, algo)
-		repo.Run(t, "config", "remote.origin.url", "https://example.org/repo.git")
-		repo.Run(t, "config", "remote.origin.fetch", "+refs/heads/*:refs/remotes/origin/*")
+		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo.Run(t, "config", "remote.origin.url", "https://example.org/repo.git")
+		testRepo.Run(t, "config", "remote.origin.fetch", "+refs/heads/*:refs/remotes/origin/*")
 
-		cfgFile := openConfig(t, repo)
+		cfgFile := openConfig(t, testRepo)
 		defer func() { _ = cfgFile.Close() }()
 
 		cfg, err := config.ParseConfig(cfgFile)
@@ -81,12 +81,12 @@ func TestConfigSubsectionAgainstGit(t *testing.T) {
 
 func TestConfigMultiValueAgainstGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		repo := testgit.NewBareRepo(t, algo)
-		repo.Run(t, "config", "--add", "remote.origin.fetch", "+refs/heads/main:refs/remotes/origin/main")
-		repo.Run(t, "config", "--add", "remote.origin.fetch", "+refs/heads/dev:refs/remotes/origin/dev")
-		repo.Run(t, "config", "--add", "remote.origin.fetch", "+refs/tags/*:refs/tags/*")
+		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo.Run(t, "config", "--add", "remote.origin.fetch", "+refs/heads/main:refs/remotes/origin/main")
+		testRepo.Run(t, "config", "--add", "remote.origin.fetch", "+refs/heads/dev:refs/remotes/origin/dev")
+		testRepo.Run(t, "config", "--add", "remote.origin.fetch", "+refs/tags/*:refs/tags/*")
 
-		cfgFile := openConfig(t, repo)
+		cfgFile := openConfig(t, testRepo)
 		defer func() { _ = cfgFile.Close() }()
 
 		cfg, err := config.ParseConfig(cfgFile)
@@ -114,14 +114,14 @@ func TestConfigMultiValueAgainstGit(t *testing.T) {
 
 func TestConfigCaseInsensitiveAgainstGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		repo := testgit.NewBareRepo(t, algo)
-		repo.Run(t, "config", "Core.Bare", "true")
-		repo.Run(t, "config", "CORE.FileMode", "false")
+		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo.Run(t, "config", "Core.Bare", "true")
+		testRepo.Run(t, "config", "CORE.FileMode", "false")
 
-		gitVerifyBare := gitConfigGet(t, repo, "core.bare")
-		gitVerifyFilemode := gitConfigGet(t, repo, "core.filemode")
+		gitVerifyBare := gitConfigGet(t, testRepo, "core.bare")
+		gitVerifyFilemode := gitConfigGet(t, testRepo, "core.filemode")
 
-		cfgFile := openConfig(t, repo)
+		cfgFile := openConfig(t, testRepo)
 		defer func() { _ = cfgFile.Close() }()
 
 		cfg, err := config.ParseConfig(cfgFile)
@@ -143,13 +143,13 @@ func TestConfigCaseInsensitiveAgainstGit(t *testing.T) {
 
 func TestConfigBooleanAgainstGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		repo := testgit.NewBareRepo(t, algo)
-		repo.Run(t, "config", "test.flag1", "true")
-		repo.Run(t, "config", "test.flag2", "false")
-		repo.Run(t, "config", "test.flag3", "yes")
-		repo.Run(t, "config", "test.flag4", "no")
+		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo.Run(t, "config", "test.flag1", "true")
+		testRepo.Run(t, "config", "test.flag2", "false")
+		testRepo.Run(t, "config", "test.flag3", "yes")
+		testRepo.Run(t, "config", "test.flag4", "no")
 
-		cfgFile := openConfig(t, repo)
+		cfgFile := openConfig(t, testRepo)
 		defer func() { _ = cfgFile.Close() }()
 
 		cfg, err := config.ParseConfig(cfgFile)
@@ -161,10 +161,10 @@ func TestConfigBooleanAgainstGit(t *testing.T) {
 			key  string
 			want string
 		}{
-			{"flag1", gitConfigGet(t, repo, "test.flag1")},
-			{"flag2", gitConfigGet(t, repo, "test.flag2")},
-			{"flag3", gitConfigGet(t, repo, "test.flag3")},
-			{"flag4", gitConfigGet(t, repo, "test.flag4")},
+			{"flag1", gitConfigGet(t, testRepo, "test.flag1")},
+			{"flag2", gitConfigGet(t, testRepo, "test.flag2")},
+			{"flag3", gitConfigGet(t, testRepo, "test.flag3")},
+			{"flag4", gitConfigGet(t, testRepo, "test.flag4")},
 		}
 
 		for _, tt := range tests {
@@ -177,13 +177,13 @@ func TestConfigBooleanAgainstGit(t *testing.T) {
 
 func TestConfigComplexValuesAgainstGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		repo := testgit.NewBareRepo(t, algo)
-		repo.Run(t, "config", "test.spaced", "value with spaces")
-		repo.Run(t, "config", "test.special", "value=with=equals")
-		repo.Run(t, "config", "test.path", "/path/to/something")
-		repo.Run(t, "config", "test.number", "12345")
+		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo.Run(t, "config", "test.spaced", "value with spaces")
+		testRepo.Run(t, "config", "test.special", "value=with=equals")
+		testRepo.Run(t, "config", "test.path", "/path/to/something")
+		testRepo.Run(t, "config", "test.number", "12345")
 
-		cfgFile := openConfig(t, repo)
+		cfgFile := openConfig(t, testRepo)
 		defer func() { _ = cfgFile.Close() }()
 
 		cfg, err := config.ParseConfig(cfgFile)
@@ -193,7 +193,7 @@ func TestConfigComplexValuesAgainstGit(t *testing.T) {
 
 		tests := []string{"spaced", "special", "path", "number"}
 		for _, key := range tests {
-			want := gitConfigGet(t, repo, "test."+key)
+			want := gitConfigGet(t, testRepo, "test."+key)
 			if got := cfg.Get("test", "", key); got != want {
 				t.Errorf("test.%s: got %q, want %q (from git)", key, got, want)
 			}
@@ -203,12 +203,12 @@ func TestConfigComplexValuesAgainstGit(t *testing.T) {
 
 func TestConfigEntriesAgainstGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		repo := testgit.NewBareRepo(t, algo)
-		repo.Run(t, "config", "core.bare", "true")
-		repo.Run(t, "config", "core.filemode", "false")
-		repo.Run(t, "config", "user.name", "Test User")
+		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo.Run(t, "config", "core.bare", "true")
+		testRepo.Run(t, "config", "core.filemode", "false")
+		testRepo.Run(t, "config", "user.name", "Test User")
 
-		cfgFile := openConfig(t, repo)
+		cfgFile := openConfig(t, testRepo)
 		defer func() { _ = cfgFile.Close() }()
 
 		cfg, err := config.ParseConfig(cfgFile)
@@ -229,7 +229,7 @@ func TestConfigEntriesAgainstGit(t *testing.T) {
 			}
 			found[key] = true
 
-			gitValue := gitConfigGet(t, repo, key)
+			gitValue := gitConfigGet(t, testRepo, key)
 			if entry.Value != gitValue {
 				t.Errorf("entry %s: got value %q, git has %q", key, entry.Value, gitValue)
 			}

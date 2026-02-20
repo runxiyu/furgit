@@ -61,20 +61,20 @@ func gitLsTreeNames(out []byte) [][]byte {
 	return names
 }
 
-func adversarialRootEntries(t *testing.T, repo *testgit.TestRepo) []object.TreeEntry {
+func adversarialRootEntries(t *testing.T, testRepo *testgit.TestRepo) []object.TreeEntry {
 	t.Helper()
 
-	blobA := repo.HashObject(t, "blob", []byte("blob-A\n"))
-	blobB := repo.HashObject(t, "blob", []byte("blob-B\n"))
-	blobC := repo.HashObject(t, "blob", []byte("blob-C\n"))
+	blobA := testRepo.HashObject(t, "blob", []byte("blob-A\n"))
+	blobB := testRepo.HashObject(t, "blob", []byte("blob-B\n"))
+	blobC := testRepo.HashObject(t, "blob", []byte("blob-C\n"))
 
-	subDirA := repo.Mktree(t,
+	subDirA := testRepo.Mktree(t,
 		fmt.Sprintf("100644 blob %s\tnested-a.txt\n100755 blob %s\trun-a.sh\n", blobA.String(), blobB.String()))
-	subDirB := repo.Mktree(t,
+	subDirB := testRepo.Mktree(t,
 		fmt.Sprintf("100644 blob %s\tnested-b.txt\n100644 blob %s\tz-last\n", blobB.String(), blobC.String()))
-	subDirC := repo.Mktree(t,
+	subDirC := testRepo.Mktree(t,
 		fmt.Sprintf("120000 blob %s\tlink-c\n100644 blob %s\tchild\n", blobC.String(), blobA.String()))
-	subDirD := repo.Mktree(t,
+	subDirD := testRepo.Mktree(t,
 		fmt.Sprintf("100644 blob %s\tleaf\n", blobA.String()))
 
 	return []object.TreeEntry{

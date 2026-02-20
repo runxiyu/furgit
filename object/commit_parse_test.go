@@ -11,10 +11,10 @@ import (
 
 func TestCommitParseFromGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		repo := testgit.NewBareRepo(t, algo)
-		_, treeID, commitID := repo.MakeCommit(t, "subject\n\nbody")
+		testRepo := testgit.NewBareRepo(t, algo)
+		_, treeID, commitID := testRepo.MakeCommit(t, "subject\n\nbody")
 
-		rawBody := repo.CatFile(t, "commit", commitID)
+		rawBody := testRepo.CatFile(t, "commit", commitID)
 		commit, err := object.ParseCommit(rawBody, algo)
 		if err != nil {
 			t.Fatalf("ParseCommit: %v", err)

@@ -10,8 +10,8 @@ import (
 
 func TestTreeSerialize(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		repo := testgit.NewBareRepo(t, algo)
-		entries := adversarialRootEntries(t, repo)
+		testRepo := testgit.NewBareRepo(t, algo)
+		entries := adversarialRootEntries(t, testRepo)
 		tree := &object.Tree{}
 
 		for i := len(entries) - 1; i >= 0; i-- {
@@ -45,7 +45,7 @@ func TestTreeSerialize(t *testing.T) {
 			t.Fatalf("Entry(%q) should exist after reinsert", removed.Name)
 		}
 
-		wantTreeID := repo.Mktree(t, buildGitMktreeInput(tree.Entries))
+		wantTreeID := testRepo.Mktree(t, buildGitMktreeInput(tree.Entries))
 
 		rawObj, err := tree.SerializeWithHeader()
 		if err != nil {

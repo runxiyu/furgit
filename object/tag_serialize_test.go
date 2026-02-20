@@ -10,11 +10,11 @@ import (
 
 func TestTagSerialize(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		repo := testgit.NewBareRepo(t, algo)
-		_, _, commitID := repo.MakeCommit(t, "subject\n\nbody")
-		tagID := repo.TagAnnotated(t, "v1", commitID, "tag message")
+		testRepo := testgit.NewBareRepo(t, algo)
+		_, _, commitID := testRepo.MakeCommit(t, "subject\n\nbody")
+		tagID := testRepo.TagAnnotated(t, "v1", commitID, "tag message")
 
-		rawBody := repo.CatFile(t, "tag", tagID)
+		rawBody := testRepo.CatFile(t, "tag", tagID)
 		tag, err := object.ParseTag(rawBody, algo)
 		if err != nil {
 			t.Fatalf("ParseTag: %v", err)

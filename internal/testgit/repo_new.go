@@ -31,7 +31,7 @@ func newRepo(tb testing.TB, algo objectid.Algorithm, bare bool) *TestRepo {
 	}
 	tb.Cleanup(func() { _ = os.RemoveAll(dir) })
 
-	repo := &TestRepo{
+	testRepo := &TestRepo{
 		dir:  dir,
 		algo: algo,
 		env: append(os.Environ(),
@@ -51,6 +51,6 @@ func newRepo(tb testing.TB, algo objectid.Algorithm, bare bool) *TestRepo {
 		args = append(args, "--bare")
 	}
 	args = append(args, dir)
-	repo.runBytes(tb, nil, "", args...)
-	return repo
+	testRepo.runBytes(tb, nil, "", args...)
+	return testRepo
 }

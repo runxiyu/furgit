@@ -8,36 +8,36 @@ import (
 )
 
 // Run executes git and returns trimmed textual output.
-func (repo *TestRepo) Run(tb testing.TB, args ...string) string {
+func (testRepo *TestRepo) Run(tb testing.TB, args ...string) string {
 	tb.Helper()
-	out := repo.runBytes(tb, nil, repo.dir, args...)
+	out := testRepo.runBytes(tb, nil, testRepo.dir, args...)
 	return strings.TrimSpace(string(out))
 }
 
 // RunBytes executes git and returns raw output bytes.
-func (repo *TestRepo) RunBytes(tb testing.TB, args ...string) []byte {
+func (testRepo *TestRepo) RunBytes(tb testing.TB, args ...string) []byte {
 	tb.Helper()
-	return repo.runBytes(tb, nil, repo.dir, args...)
+	return testRepo.runBytes(tb, nil, testRepo.dir, args...)
 }
 
 // RunInput executes git with stdin and returns trimmed textual output.
-func (repo *TestRepo) RunInput(tb testing.TB, stdin []byte, args ...string) string {
+func (testRepo *TestRepo) RunInput(tb testing.TB, stdin []byte, args ...string) string {
 	tb.Helper()
-	out := repo.runBytes(tb, stdin, repo.dir, args...)
+	out := testRepo.runBytes(tb, stdin, testRepo.dir, args...)
 	return strings.TrimSpace(string(out))
 }
 
 // RunInputBytes executes git with stdin and returns raw output bytes.
-func (repo *TestRepo) RunInputBytes(tb testing.TB, stdin []byte, args ...string) []byte {
+func (testRepo *TestRepo) RunInputBytes(tb testing.TB, stdin []byte, args ...string) []byte {
 	tb.Helper()
-	return repo.runBytes(tb, stdin, repo.dir, args...)
+	return testRepo.runBytes(tb, stdin, testRepo.dir, args...)
 }
 
-func (repo *TestRepo) runBytes(tb testing.TB, stdin []byte, dir string, args ...string) []byte {
+func (testRepo *TestRepo) runBytes(tb testing.TB, stdin []byte, dir string, args ...string) []byte {
 	tb.Helper()
 	cmd := exec.Command("git", args...)
 	cmd.Dir = dir
-	cmd.Env = repo.env
+	cmd.Env = testRepo.env
 	if stdin != nil {
 		cmd.Stdin = bytes.NewReader(stdin)
 	}

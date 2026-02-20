@@ -11,8 +11,8 @@ import (
 
 func TestTreeParseFromGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		repo := testgit.NewBareRepo(t, algo)
-		entries := adversarialRootEntries(t, repo)
+		testRepo := testgit.NewBareRepo(t, algo)
+		entries := adversarialRootEntries(t, testRepo)
 		inserted := &object.Tree{}
 		for _, entry := range entries {
 			if err := inserted.InsertEntry(entry); err != nil {
@@ -20,9 +20,9 @@ func TestTreeParseFromGit(t *testing.T) {
 			}
 		}
 
-		treeID := repo.Mktree(t, buildGitMktreeInput(inserted.Entries))
+		treeID := testRepo.Mktree(t, buildGitMktreeInput(inserted.Entries))
 
-		rawBody := repo.CatFile(t, "tree", treeID)
+		rawBody := testRepo.CatFile(t, "tree", treeID)
 		tree, err := object.ParseTree(rawBody, algo)
 		if err != nil {
 			t.Fatalf("ParseTree: %v", err)
@@ -40,7 +40,7 @@ func TestTreeParseFromGit(t *testing.T) {
 			}
 		}
 
-		lsNames := gitLsTreeNames(repo.RunBytes(t, "ls-tree", "--name-only", "-z", treeID.String()))
+		lsNames := gitLsTreeNames(testRepo.RunBytes(t, "ls-tree", "--name-only", "-z", treeID.String()))
 		if len(lsNames) != len(tree.Entries) {
 			t.Fatalf("ls-tree names = %d, want %d", len(lsNames), len(tree.Entries))
 		}
