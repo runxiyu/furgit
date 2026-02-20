@@ -1,24 +1,26 @@
-package objectid
+package objectid_test
 
 import (
 	"bytes"
 	"testing"
+
+	"codeberg.org/lindenii/furgit/objectid"
 )
 
 func TestParseAlgorithm(t *testing.T) {
 	t.Parallel()
 
-	algo, ok := ParseAlgorithm("sha1")
-	if !ok || algo != AlgorithmSHA1 {
+	algo, ok := objectid.ParseAlgorithm("sha1")
+	if !ok || algo != objectid.AlgorithmSHA1 {
 		t.Fatalf("ParseAlgorithm(sha1) = (%v,%v)", algo, ok)
 	}
 
-	algo, ok = ParseAlgorithm("sha256")
-	if !ok || algo != AlgorithmSHA256 {
+	algo, ok = objectid.ParseAlgorithm("sha256")
+	if !ok || algo != objectid.AlgorithmSHA256 {
 		t.Fatalf("ParseAlgorithm(sha256) = (%v,%v)", algo, ok)
 	}
 
-	if _, ok := ParseAlgorithm("md5"); ok {
+	if _, ok := objectid.ParseAlgorithm("md5"); ok {
 		t.Fatalf("ParseAlgorithm(md5) should fail")
 	}
 }
@@ -28,24 +30,24 @@ func TestParseHexRoundtrip(t *testing.T) {
 
 	tests := []struct {
 		name string
-		algo Algorithm
+		algo objectid.Algorithm
 		hex  string
 	}{
 		{
 			name: "sha1",
-			algo: AlgorithmSHA1,
+			algo: objectid.AlgorithmSHA1,
 			hex:  "0123456789abcdef0123456789abcdef01234567",
 		},
 		{
 			name: "sha256",
-			algo: AlgorithmSHA256,
+			algo: objectid.AlgorithmSHA256,
 			hex:  "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			id, err := ParseHex(tt.algo, tt.hex)
+			id, err := objectid.ParseHex(tt.algo, tt.hex)
 			if err != nil {
 				t.Fatalf("ParseHex failed: %v", err)
 			}
@@ -61,7 +63,7 @@ func TestParseHexRoundtrip(t *testing.T) {
 				t.Fatalf("Bytes len = %d, want %d", len(raw), tt.algo.Size())
 			}
 
-			id2, err := FromBytes(tt.algo, raw)
+			id2, err := objectid.FromBytes(tt.algo, raw)
 			if err != nil {
 				t.Fatalf("FromBytes failed: %v", err)
 			}
@@ -77,18 +79,18 @@ func TestParseHexErrors(t *testing.T) {
 
 	tests := []struct {
 		name string
-		algo Algorithm
+		algo objectid.Algorithm
 		hex  string
 	}{
-		{"unknown algo", AlgorithmUnknown, "00"},
-		{"odd len", AlgorithmSHA1, "0"},
-		{"wrong len", AlgorithmSHA1, "0123"},
-		{"invalid hex", AlgorithmSHA1, "zz23456789abcdef0123456789abcdef01234567"},
+		{"unknown algo", objectid.AlgorithmUnknown, "00"},
+		{"odd len", objectid.AlgorithmSHA1, "0"},
+		{"wrong len", objectid.AlgorithmSHA1, "0123"},
+		{"invalid hex", objectid.AlgorithmSHA1, "zz23456789abcdef0123456789abcdef01234567"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if _, err := ParseHex(tt.algo, tt.hex); err == nil {
+			if _, err := objectid.ParseHex(tt.algo, tt.hex); err == nil {
 				t.Fatalf("expected ParseHex error")
 			}
 		})
@@ -98,10 +100,10 @@ func TestParseHexErrors(t *testing.T) {
 func TestFromBytesErrors(t *testing.T) {
 	t.Parallel()
 
-	if _, err := FromBytes(AlgorithmUnknown, []byte{1, 2}); err == nil {
+	if _, err := objectid.FromBytes(objectid.AlgorithmUnknown, []byte{1, 2}); err == nil {
 		t.Fatalf("expected FromBytes unknown algo error")
 	}
-	if _, err := FromBytes(AlgorithmSHA1, []byte{1, 2}); err == nil {
+	if _, err := objectid.FromBytes(objectid.AlgorithmSHA1, []byte{1, 2}); err == nil {
 		t.Fatalf("expected FromBytes wrong size error")
 	}
 }
@@ -109,7 +111,7 @@ func TestFromBytesErrors(t *testing.T) {
 func TestBytesReturnsCopy(t *testing.T) {
 	t.Parallel()
 
-	id, err := ParseHex(AlgorithmSHA1, "0123456789abcdef0123456789abcdef01234567")
+	id, err := objectid.ParseHex(objectid.AlgorithmSHA1, "0123456789abcdef0123456789abcdef01234567")
 	if err != nil {
 		t.Fatalf("ParseHex failed: %v", err)
 	}
@@ -128,13 +130,13 @@ func TestBytesReturnsCopy(t *testing.T) {
 func TestAlgorithmSum(t *testing.T) {
 	t.Parallel()
 
-	id1 := AlgorithmSHA1.Sum([]byte("hello"))
-	if id1.Algorithm() != AlgorithmSHA1 || id1.Size() != AlgorithmSHA1.Size() {
+	id1 := objectid.AlgorithmSHA1.Sum([]byte("hello"))
+	if id1.Algorithm() != objectid.AlgorithmSHA1 || id1.Size() != objectid.AlgorithmSHA1.Size() {
 		t.Fatalf("sha1 sum produced invalid object id")
 	}
 
-	id2 := AlgorithmSHA256.Sum([]byte("hello"))
-	if id2.Algorithm() != AlgorithmSHA256 || id2.Size() != AlgorithmSHA256.Size() {
+	id2 := objectid.AlgorithmSHA256.Sum([]byte("hello"))
+	if id2.Algorithm() != objectid.AlgorithmSHA256 || id2.Size() != objectid.AlgorithmSHA256.Size() {
 		t.Fatalf("sha256 sum produced invalid object id")
 	}
 
