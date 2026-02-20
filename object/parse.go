@@ -5,11 +5,11 @@ import (
 
 	"codeberg.org/lindenii/furgit/internal/objectheader"
 	"codeberg.org/lindenii/furgit/objecttype"
-	"codeberg.org/lindenii/furgit/oid"
+	"codeberg.org/lindenii/furgit/objectid"
 )
 
 // ParseObjectWithoutHeader parses a typed object body.
-func ParseObjectWithoutHeader(ty objecttype.Type, body []byte, algo oid.Algorithm) (Object, error) {
+func ParseObjectWithoutHeader(ty objecttype.Type, body []byte, algo objectid.Algorithm) (Object, error) {
 	switch ty {
 	case objecttype.TypeBlob:
 		return ParseBlob(body)
@@ -25,7 +25,7 @@ func ParseObjectWithoutHeader(ty objecttype.Type, body []byte, algo oid.Algorith
 }
 
 // ParseObjectWithHeader parses a loose object in "type size\\x00body" format.
-func ParseObjectWithHeader(raw []byte, algo oid.Algorithm) (Object, error) {
+func ParseObjectWithHeader(raw []byte, algo objectid.Algorithm) (Object, error) {
 	ty, size, headerLen, ok := objectheader.Parse(raw)
 	if !ok {
 		return nil, fmt.Errorf("object: malformed object header")

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"strconv"
 
-	"codeberg.org/lindenii/furgit/oid"
+	"codeberg.org/lindenii/furgit/objectid"
 )
 
 // ParseTree decodes a tree object body.
-func ParseTree(body []byte, algo oid.Algorithm) (*Tree, error) {
+func ParseTree(body []byte, algo objectid.Algorithm) (*Tree, error) {
 	var entries []TreeEntry
 	i := 0
 	for i < len(body) {
@@ -31,7 +31,7 @@ func ParseTree(body []byte, algo oid.Algorithm) (*Tree, error) {
 		if idEnd > len(body) {
 			return nil, fmt.Errorf("object: tree: truncated child object id")
 		}
-		id, err := oid.FromBytes(algo, body[i:idEnd])
+		id, err := objectid.FromBytes(algo, body[i:idEnd])
 		if err != nil {
 			return nil, err
 		}

@@ -4,22 +4,22 @@ import (
 	"os"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/oid"
+	"codeberg.org/lindenii/furgit/objectid"
 )
 
 // NewBareRepo creates a temporary bare repository initialized with the requested algorithm.
-func NewBareRepo(tb testing.TB, algo oid.Algorithm) *TestRepo {
+func NewBareRepo(tb testing.TB, algo objectid.Algorithm) *TestRepo {
 	tb.Helper()
 	return newRepo(tb, algo, true)
 }
 
 // NewWorkRepo creates a temporary non-bare repository initialized with the requested algorithm.
-func NewWorkRepo(tb testing.TB, algo oid.Algorithm) *TestRepo {
+func NewWorkRepo(tb testing.TB, algo objectid.Algorithm) *TestRepo {
 	tb.Helper()
 	return newRepo(tb, algo, false)
 }
 
-func newRepo(tb testing.TB, algo oid.Algorithm, bare bool) *TestRepo {
+func newRepo(tb testing.TB, algo objectid.Algorithm, bare bool) *TestRepo {
 	tb.Helper()
 	if algo.Size() == 0 {
 		tb.Fatalf("invalid algorithm: %v", algo)

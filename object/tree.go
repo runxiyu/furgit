@@ -6,7 +6,7 @@ import (
 	"sort"
 
 	"codeberg.org/lindenii/furgit/objecttype"
-	"codeberg.org/lindenii/furgit/oid"
+	"codeberg.org/lindenii/furgit/objectid"
 )
 
 // FileMode represents the mode of a file in a Git tree.
@@ -24,7 +24,7 @@ const (
 type TreeEntry struct {
 	Mode FileMode
 	Name []byte
-	ID   oid.ObjectID
+	ID   objectid.ObjectID
 }
 
 // Tree represents a Git tree object.

@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/oid"
+	"codeberg.org/lindenii/furgit/objectid"
 )
 
 // ParseCommit decodes a commit object body.
-func ParseCommit(body []byte, algo oid.Algorithm) (*Commit, error) {
+func ParseCommit(body []byte, algo objectid.Algorithm) (*Commit, error) {
 	c := new(Commit)
 	i := 0
 	for i < len(body) {
@@ -30,13 +30,13 @@ func ParseCommit(body []byte, algo oid.Algorithm) (*Commit, error) {
 
 		switch string(key) {
 		case "tree":
-			id, err := oid.ParseHex(algo, string(value))
+			id, err := objectid.ParseHex(algo, string(value))
 			if err != nil {
 				return nil, fmt.Errorf("object: commit: tree: %w", err)
 			}
 			c.Tree = id
 		case "parent":
-			id, err := oid.ParseHex(algo, string(value))
+			id, err := objectid.ParseHex(algo, string(value))
 			if err != nil {
 				return nil, fmt.Errorf("object: commit: parent: %w", err)
 			}

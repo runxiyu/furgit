@@ -3,11 +3,11 @@ package testgit
 import (
 	"testing"
 
-	"codeberg.org/lindenii/furgit/oid"
+	"codeberg.org/lindenii/furgit/objectid"
 )
 
 // CommitTree creates a commit from a tree and message, optionally with parents.
-func (repo *TestRepo) CommitTree(tb testing.TB, tree oid.ObjectID, message string, parents ...oid.ObjectID) oid.ObjectID {
+func (repo *TestRepo) CommitTree(tb testing.TB, tree objectid.ObjectID, message string, parents ...objectid.ObjectID) objectid.ObjectID {
 	tb.Helper()
 	args := []string{"commit-tree", tree.String()}
 	for _, p := range parents {
@@ -15,7 +15,7 @@ func (repo *TestRepo) CommitTree(tb testing.TB, tree oid.ObjectID, message strin
 	}
 	args = append(args, "-m", message)
 	hex := repo.Run(tb, args...)
-	id, err := oid.ParseHex(repo.algo, hex)
+	id, err := objectid.ParseHex(repo.algo, hex)
 	if err != nil {
 		tb.Fatalf("parse commit-tree output %q: %v", hex, err)
 	}

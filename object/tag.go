@@ -2,12 +2,12 @@ package object
 
 import (
 	"codeberg.org/lindenii/furgit/objecttype"
-	"codeberg.org/lindenii/furgit/oid"
+	"codeberg.org/lindenii/furgit/objectid"
 )
 
 // Tag represents a Git annotated tag object.
 type Tag struct {
-	Target     oid.ObjectID
+	Target     objectid.ObjectID
 	TargetType objecttype.Type
 	Name       []byte
 	Tagger     *Ident

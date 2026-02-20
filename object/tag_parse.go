@@ -6,11 +6,11 @@ import (
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/objecttype"
-	"codeberg.org/lindenii/furgit/oid"
+	"codeberg.org/lindenii/furgit/objectid"
 )
 
 // ParseTag decodes a tag object body.
-func ParseTag(body []byte, algo oid.Algorithm) (*Tag, error) {
+func ParseTag(body []byte, algo objectid.Algorithm) (*Tag, error) {
 	t := new(Tag)
 	i := 0
 	var haveTarget, haveType bool
@@ -33,7 +33,7 @@ func ParseTag(body []byte, algo oid.Algorithm) (*Tag, error) {
 
 		switch string(key) {
 		case "object":
-			id, err := oid.ParseHex(algo, string(value))
+			id, err := objectid.ParseHex(algo, string(value))
 			if err != nil {
 				return nil, fmt.Errorf("object: tag: object: %w", err)
 			}

@@ -2,13 +2,13 @@ package object
 
 import (
 	"codeberg.org/lindenii/furgit/objecttype"
-	"codeberg.org/lindenii/furgit/oid"
+	"codeberg.org/lindenii/furgit/objectid"
 )
 
 // Commit represents a Git commit object.
 type Commit struct {
-	Tree         oid.ObjectID
-	Parents      []oid.ObjectID
+	Tree         objectid.ObjectID
+	Parents      []objectid.ObjectID
 	Author       Ident
 	Committer    Ident
 	Message      []byte

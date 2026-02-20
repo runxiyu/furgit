@@ -7,11 +7,11 @@ import (
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/object"
 	"codeberg.org/lindenii/furgit/objecttype"
-	"codeberg.org/lindenii/furgit/oid"
+	"codeberg.org/lindenii/furgit/objectid"
 )
 
 func TestTagParseFromGit(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo oid.Algorithm) {
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
 		repo := testgit.NewBareRepo(t, algo)
 		_, _, commitID := repo.MakeCommit(t, "subject\n\nbody")
 		tagID := repo.TagAnnotated(t, "v1", commitID, "tag message")

@@ -1,5 +1,5 @@
-// Package oid provides object ID and algorithm primitives for Git objects.
-package oid
+// Package objectid provides object ID and algorithm primitives for Git objects.
+package objectid
 
 import (
 	"crypto/sha1"
@@ -12,9 +12,9 @@ import (
 
 var (
 	// ErrInvalidAlgorithm indicates an unsupported object ID algorithm.
-	ErrInvalidAlgorithm = errors.New("oid: invalid algorithm")
+	ErrInvalidAlgorithm = errors.New("objectid: invalid algorithm")
 	// ErrInvalidObjectID indicates malformed object ID data.
-	ErrInvalidObjectID = errors.New("oid: invalid object id")
+	ErrInvalidObjectID = errors.New("objectid: invalid object id")
 )
 
 // maxObjectIDSize MUST be >= the largest supported algorithm size.

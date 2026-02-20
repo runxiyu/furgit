@@ -1,4 +1,4 @@
-package oid
+package objectid
 
 import (
 	"bytes"

@@ -3,14 +3,14 @@ package testgit
 import (
 	"testing"
 
-	"codeberg.org/lindenii/furgit/oid"
+	"codeberg.org/lindenii/furgit/objectid"
 )
 
 // HashObject hashes and writes an object and returns its object ID.
-func (repo *TestRepo) HashObject(tb testing.TB, objType string, body []byte) oid.ObjectID {
+func (repo *TestRepo) HashObject(tb testing.TB, objType string, body []byte) objectid.ObjectID {
 	tb.Helper()
 	hex := repo.RunInput(tb, body, "hash-object", "-t", objType, "-w", "--stdin")
-	id, err := oid.ParseHex(repo.algo, hex)
+	id, err := objectid.ParseHex(repo.algo, hex)
 	if err != nil {
 		tb.Fatalf("parse git hash-object output %q: %v", hex, err)
 	}
