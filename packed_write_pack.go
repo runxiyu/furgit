@@ -283,39 +283,11 @@ func packOfsEncode(dist uint64) ([]byte, error) {
 
 // packWrite writes a pack stream for the provided object ids.
 func (repo *Repository) packWrite(w io.Writer, objects []Hash, opts packWriteOptions) (Hash, error) {
+	if repo == nil {
+		return Hash{}, ErrInvalidObject
+	}
 	if opts.EnableThinPack {
 		return Hash{}, errThinPackUnimplemented
-	}
-	return repo.packWriteObjects(w, objects, opts, nil)
-}
-
-// packWriteReachable writes a pack stream for objects reachable from the
-// provided reachability query.
-func (repo *Repository) packWriteReachable(w io.Writer, query ReachabilityQuery, opts packWriteOptions) (Hash, error) {
-	if repo == nil {
-		return Hash{}, ErrInvalidObject
-	}
-	query.Mode = ReachabilityAllObjects
-	walk, err := repo.ReachableObjects(query)
-	if err != nil {
-		return Hash{}, err
-	}
-	var objects []Hash
-	for obj := range walk.Seq() {
-		objects = append(objects, obj.ID)
-	}
-	if err := walk.Err(); err != nil {
-		return Hash{}, err
-	}
-	return repo.packWriteObjects(w, objects, opts, walk)
-}
-
-func (repo *Repository) packWriteObjects(w io.Writer, objects []Hash, opts packWriteOptions, have *ReachabilityWalk) (Hash, error) {
-	if repo == nil {
-		return Hash{}, ErrInvalidObject
-	}
-	if opts.EnableThinPack && have == nil {
-		return Hash{}, ErrInvalidObject
 	}
 	if len(objects) > int(^uint32(0)) {
 		return Hash{}, ErrInvalidObject
@@ -340,22 +312,15 @@ func (repo *Repository) packWriteObjects(w io.Writer, objects []Hash, opts packW
 		deltaSeed = binary.LittleEndian.Uint64(seedBytes[:])
 	}
 
-	if opts.EnableDeltas && opts.EnableThinPack {
-		if err := repo.seedDeltaCandidatesFromHaves(&dctx, have.query.Haves); err != nil {
-			return Hash{}, err
-		}
-	}
-
 	for _, id := range objects {
 		ty, body, err := repo.ReadObjectTypeRaw(id)
 		if err != nil {
 			return Hash{}, err
 		}
 		obj := &objectToPack{
-			id:     id,
-			ty:     ty,
-			body:   body,
-			inPack: true,
+			id:   id,
+			ty:   ty,
+			body: body,
 		}
 		startOffset := pw.bytesWritten
 		wroteDelta := false
@@ -363,27 +328,11 @@ func (repo *Repository) packWriteObjects(w io.Writer, objects []Hash, opts packW
 		if opts.EnableDeltas && ty == ObjectTypeBlob {
 			base, delta := pickDeltaBase(&dctx, obj, deltaSeed, opts.MinDeltaSavings, opts.MaxDeltaDepth)
 			if base != nil && delta != nil {
-				switch {
-				case base.inPack:
-					if err := pw.WriteOfsDelta(base.offset, len(base.body), len(body), delta); err != nil {
-						return Hash{}, err
-					}
-					wroteDelta = true
-					obj.deltaDepth = base.deltaDepth + 1
-				case opts.EnableThinPack:
-					inHave, err := have.HaveContains(base.id)
-					if err != nil {
-						return Hash{}, err
-					}
-					if inHave {
-						if err := pw.WriteRefDelta(base.id, len(base.body), len(body), delta); err != nil {
-							return Hash{}, err
-						}
-						wroteDelta = true
-						obj.deltaDepth = base.deltaDepth + 1
-					}
-				default:
+				if err := pw.WriteOfsDelta(base.offset, len(base.body), len(body), delta); err != nil {
+					return Hash{}, err
 				}
+				wroteDelta = true
+				obj.deltaDepth = base.deltaDepth + 1
 			}
 		}
 		if !wroteDelta {
@@ -400,39 +349,6 @@ func (repo *Repository) packWriteObjects(w io.Writer, objects []Hash, opts packW
 	}
 
 	return pw.Close()
-}
-
-func (repo *Repository) seedDeltaCandidatesFromHaves(ctx *deltaContext, haves []Hash) error {
-	if repo == nil {
-		return ErrInvalidObject
-	}
-	if ctx == nil || ctx.window <= 0 || len(haves) == 0 {
-		return nil
-	}
-	walk, err := repo.ReachableObjects(ReachabilityQuery{
-		Wants: haves,
-		Mode:  ReachabilityAllObjects,
-	})
-	if err != nil {
-		return err
-	}
-	for obj := range walk.Seq() {
-		if obj.Type != ObjectTypeBlob {
-			continue
-		}
-		ty, body, err := repo.ReadObjectTypeRaw(obj.ID)
-		if err != nil {
-			return err
-		}
-		candidate := &objectToPack{
-			id:     obj.ID,
-			ty:     ty,
-			body:   body,
-			inPack: false,
-		}
-		ctx.addCandidate(candidate)
-	}
-	return walk.Err()
 }
 
 type packWriteOptions struct {
