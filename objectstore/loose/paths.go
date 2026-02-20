@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"path"
+	"path/filepath"
 
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
@@ -17,7 +17,7 @@ func (store *Store) objectPath(id objectid.ObjectID) (string, error) {
 		return "", fmt.Errorf("objectstore/loose: object id algorithm mismatch: got %s want %s", id.Algorithm(), store.algo)
 	}
 	hex := id.String()
-	return path.Join(hex[:2], hex[2:]), nil
+	return filepath.Join(hex[:2], hex[2:]), nil
 }
 
 // openObject opens the loose object file for id.
