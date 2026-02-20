@@ -3,6 +3,7 @@ package objectdb
 import (
 	"errors"
 	"fmt"
+	"io"
 
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
@@ -52,6 +53,42 @@ func (chain *Chain) ReadBytesContent(id objectid.ObjectID) (objecttype.Type, []b
 			continue
 		}
 		return objecttype.TypeInvalid, nil, fmt.Errorf("objectdb: backend %d read bytes content: %w", i, err)
+	}
+	return objecttype.TypeInvalid, nil, ErrObjectNotFound
+}
+
+// ReadReaderFull reads a full serialized object stream from the first backend that has it.
+func (chain *Chain) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) {
+	for i, backend := range chain.backends {
+		if backend == nil {
+			continue
+		}
+		reader, err := backend.ReadReaderFull(id)
+		if err == nil {
+			return reader, nil
+		}
+		if errors.Is(err, ErrObjectNotFound) {
+			continue
+		}
+		return nil, fmt.Errorf("objectdb: backend %d read reader full: %w", i, err)
+	}
+	return nil, ErrObjectNotFound
+}
+
+// ReadReaderContent reads an object's type and content stream from the first backend that has it.
+func (chain *Chain) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, io.ReadCloser, error) {
+	for i, backend := range chain.backends {
+		if backend == nil {
+			continue
+		}
+		ty, reader, err := backend.ReadReaderContent(id)
+		if err == nil {
+			return ty, reader, nil
+		}
+		if errors.Is(err, ErrObjectNotFound) {
+			continue
+		}
+		return objecttype.TypeInvalid, nil, fmt.Errorf("objectdb: backend %d read reader content: %w", i, err)
 	}
 	return objecttype.TypeInvalid, nil, ErrObjectNotFound
 }
