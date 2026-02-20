@@ -2,7 +2,6 @@
 package loose
 
 import (
-	"errors"
 	"os"
 
 	"codeberg.org/lindenii/furgit/objectid"
@@ -21,9 +20,6 @@ type Store struct {
 
 // New creates a loose-object store rooted at root for algo.
 func New(root *os.Root, algo objectid.Algorithm) (*Store, error) {
-	if root == nil {
-		return nil, errors.New("objectstore/loose: nil root")
-	}
 	if algo.Size() == 0 {
 		return nil, objectid.ErrInvalidAlgorithm
 	}
