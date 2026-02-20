@@ -77,22 +77,22 @@ func (chain *Chain) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) 
 	return nil, objectstore.ErrObjectNotFound
 }
 
-// ReadReaderContent reads an object's type and content stream from the first backend that has it.
-func (chain *Chain) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, io.ReadCloser, error) {
+// ReadReaderContent reads an object's type, declared content length, and content stream from the first backend that has it.
+func (chain *Chain) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, int64, io.ReadCloser, error) {
 	for i, backend := range chain.backends {
 		if backend == nil {
 			continue
 		}
-		ty, reader, err := backend.ReadReaderContent(id)
+		ty, size, reader, err := backend.ReadReaderContent(id)
 		if err == nil {
-			return ty, reader, nil
+			return ty, size, reader, nil
 		}
 		if errors.Is(err, objectstore.ErrObjectNotFound) {
 			continue
 		}
-		return objecttype.TypeInvalid, nil, fmt.Errorf("objectstore: backend %d read reader content: %w", i, err)
+		return objecttype.TypeInvalid, 0, nil, fmt.Errorf("objectstore: backend %d read reader content: %w", i, err)
 	}
-	return objecttype.TypeInvalid, nil, objectstore.ErrObjectNotFound
+	return objecttype.TypeInvalid, 0, nil, objectstore.ErrObjectNotFound
 }
 
 // ReadHeader reads object header data from the first backend that has it.
