@@ -1,5 +1,5 @@
-// Package objectdb provides storage interfaces for Git objects.
-package objectdb
+// Package objectstore provides storage interfaces for Git objects.
+package objectstore
 
 import (
 	"errors"
@@ -11,10 +11,10 @@ import (
 
 // ErrObjectNotFound indicates that an object does not exist in a backend.
 // TODO: This might need to be an interface or otherwise be able to encapsulate multiple concrete backends'
-var ErrObjectNotFound = errors.New("objectdb: object not found")
+var ErrObjectNotFound = errors.New("objectstore: object not found")
 
-// ObjectDB reads Git objects by object ID.
-type ObjectDB interface {
+// ObjectStore reads Git objects by object ID.
+type ObjectStore interface {
 	// ReadBytesFull reads a full serialized object as "type size\\x00content".
 	// If hashed with the same algorithm it MUST match the object ID.
 	ReadBytesFull(id objectid.ObjectID) ([]byte, error)
