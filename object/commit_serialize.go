@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"fmt"
 
+	"codeberg.org/lindenii/furgit/internal/objectheader"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
-func (commit *Commit) serialize() ([]byte, error) {
+// SerializeWithoutHeader renders the raw commit body bytes.
+func (commit *Commit) SerializeWithoutHeader() ([]byte, error) {
 	var buf bytes.Buffer
 
 	if commit.Tree.Size() == 0 {
@@ -54,15 +56,15 @@ func (commit *Commit) serialize() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// Serialize renders the raw object (header + body).
-func (commit *Commit) Serialize() ([]byte, error) {
-	body, err := commit.serialize()
+// SerializeWithHeader renders the raw object (header + body).
+func (commit *Commit) SerializeWithHeader() ([]byte, error) {
+	body, err := commit.SerializeWithoutHeader()
 	if err != nil {
 		return nil, err
 	}
-	header, err := headerForType(objecttype.TypeCommit, body)
-	if err != nil {
-		return nil, err
+	header, ok := objectheader.Encode(objecttype.TypeCommit, int64(len(body)))
+	if !ok {
+		return nil, ErrInvalidObject
 	}
 	raw := make([]byte, len(header)+len(body))
 	copy(raw, header)

@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"fmt"
 
+	"codeberg.org/lindenii/furgit/internal/objectheader"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
-func (tag *Tag) serialize() ([]byte, error) {
+// SerializeWithoutHeader renders the raw tag body bytes.
+func (tag *Tag) SerializeWithoutHeader() ([]byte, error) {
 	if tag.Target.Size() == 0 {
 		return nil, ErrInvalidObject
 	}
@@ -42,15 +44,15 @@ func (tag *Tag) serialize() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// Serialize renders the raw object (header + body).
-func (tag *Tag) Serialize() ([]byte, error) {
-	body, err := tag.serialize()
+// SerializeWithHeader renders the raw object (header + body).
+func (tag *Tag) SerializeWithHeader() ([]byte, error) {
+	body, err := tag.SerializeWithoutHeader()
 	if err != nil {
 		return nil, err
 	}
-	header, err := headerForType(objecttype.TypeTag, body)
-	if err != nil {
-		return nil, err
+	header, ok := objectheader.Encode(objecttype.TypeTag, int64(len(body)))
+	if !ok {
+		return nil, ErrInvalidObject
 	}
 	raw := make([]byte, len(header)+len(body))
 	copy(raw, header)

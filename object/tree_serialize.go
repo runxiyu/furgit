@@ -3,10 +3,12 @@ package object
 import (
 	"strconv"
 
+	"codeberg.org/lindenii/furgit/internal/objectheader"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
-func (tree *Tree) serialize() []byte {
+// SerializeWithoutHeader renders the raw tree body bytes.
+func (tree *Tree) SerializeWithoutHeader() ([]byte, error) {
 	var bodyLen int
 	for _, entry := range tree.Entries {
 		mode := strconv.FormatUint(uint64(entry.Mode), 8)
@@ -27,15 +29,18 @@ func (tree *Tree) serialize() []byte {
 		pos += copy(body[pos:], id)
 	}
 
-	return body
+	return body, nil
 }
 
-// Serialize renders the raw object (header + body).
-func (tree *Tree) Serialize() ([]byte, error) {
-	body := tree.serialize()
-	header, err := headerForType(objecttype.TypeTree, body)
+// SerializeWithHeader renders the raw object (header + body).
+func (tree *Tree) SerializeWithHeader() ([]byte, error) {
+	body, err := tree.SerializeWithoutHeader()
 	if err != nil {
 		return nil, err
+	}
+	header, ok := objectheader.Encode(objecttype.TypeTree, int64(len(body)))
+	if !ok {
+		return nil, ErrInvalidObject
 	}
 	raw := make([]byte, len(header)+len(body))
 	copy(raw, header)

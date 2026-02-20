@@ -15,9 +15,9 @@ func TestBlobSerialize(t *testing.T) {
 		wantID := repo.HashObject(t, "blob", body)
 
 		blob := &object.Blob{Data: body}
-		rawObj, err := blob.Serialize()
+		rawObj, err := blob.SerializeWithHeader()
 		if err != nil {
-			t.Fatalf("Serialize: %v", err)
+			t.Fatalf("SerializeWithHeader: %v", err)
 		}
 		gotID := algo.Sum(rawObj)
 		if gotID != wantID {

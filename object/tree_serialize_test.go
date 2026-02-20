@@ -48,9 +48,9 @@ func TestTreeSerialize(t *testing.T) {
 
 		wantTreeID := repo.Mktree(t, buildGitMktreeInput(tree.Entries))
 
-		rawObj, err := tree.Serialize()
+		rawObj, err := tree.SerializeWithHeader()
 		if err != nil {
-			t.Fatalf("Serialize: %v", err)
+			t.Fatalf("SerializeWithHeader: %v", err)
 		}
 		gotTreeID := algo.Sum(rawObj)
 		if gotTreeID != wantTreeID {

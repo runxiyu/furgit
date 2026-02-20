@@ -20,9 +20,9 @@ func TestTagSerialize(t *testing.T) {
 			t.Fatalf("ParseTag: %v", err)
 		}
 
-		rawObj, err := tag.Serialize()
+		rawObj, err := tag.SerializeWithHeader()
 		if err != nil {
-			t.Fatalf("Serialize: %v", err)
+			t.Fatalf("SerializeWithHeader: %v", err)
 		}
 		gotID := algo.Sum(rawObj)
 		if gotID != tagID {

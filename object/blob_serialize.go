@@ -1,15 +1,27 @@
 package object
 
-import "codeberg.org/lindenii/furgit/objecttype"
+import (
+	"codeberg.org/lindenii/furgit/internal/objectheader"
+	"codeberg.org/lindenii/furgit/objecttype"
+)
 
-// Serialize renders the raw object (header + body).
-func (blob *Blob) Serialize() ([]byte, error) {
-	header, err := headerForType(objecttype.TypeBlob, blob.Data)
+// SerializeWithoutHeader renders the raw blob body bytes.
+func (blob *Blob) SerializeWithoutHeader() ([]byte, error) {
+	return append([]byte(nil), blob.Data...), nil
+}
+
+// SerializeWithHeader renders the raw object (header + body).
+func (blob *Blob) SerializeWithHeader() ([]byte, error) {
+	body, err := blob.SerializeWithoutHeader()
 	if err != nil {
 		return nil, err
 	}
-	raw := make([]byte, len(header)+len(blob.Data))
+	header, ok := objectheader.Encode(objecttype.TypeBlob, int64(len(body)))
+	if !ok {
+		return nil, ErrInvalidObject
+	}
+	raw := make([]byte, len(header)+len(body))
 	copy(raw, header)
-	copy(raw[len(header):], blob.Data)
+	copy(raw[len(header):], body)
 	return raw, nil
 }

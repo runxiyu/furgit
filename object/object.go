@@ -2,9 +2,7 @@
 package object
 
 import (
-	"bytes"
 	"errors"
-	"strconv"
 
 	"codeberg.org/lindenii/furgit/objecttype"
 )
@@ -19,20 +17,6 @@ var (
 // Object is a Git object that can serialize itself.
 type Object interface {
 	ObjectType() objecttype.Type
-	Serialize() ([]byte, error)
-}
-
-func headerForType(ty objecttype.Type, body []byte) ([]byte, error) {
-	tyStr, ok := objecttype.Name(ty)
-	if !ok {
-		return nil, ErrInvalidObject
-	}
-	size := strconv.Itoa(len(body))
-	var buf bytes.Buffer
-	buf.Grow(len(tyStr) + len(size) + 2)
-	buf.WriteString(tyStr)
-	buf.WriteByte(' ')
-	buf.WriteString(size)
-	buf.WriteByte(0)
-	return buf.Bytes(), nil
+	SerializeWithoutHeader() ([]byte, error)
+	SerializeWithHeader() ([]byte, error)
 }
