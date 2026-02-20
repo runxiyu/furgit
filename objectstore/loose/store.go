@@ -1,4 +1,4 @@
-// Package loose provides loose-object reads from a repository root.
+// Package loose provides loose-object reads from a Git objects directory.
 package loose
 
 import (
@@ -7,18 +7,19 @@ import (
 	"codeberg.org/lindenii/furgit/objectid"
 )
 
-// Store reads loose Git objects from a repository root.
+// Store reads loose Git objects from an objects directory root.
 //
 // Store does not own root. Callers are responsible for closing root.
 type Store struct {
-	// root is the repository root capability used for all object file access.
+	// root is the objects directory capability used for all object file access.
+	// Object files are opened by relative paths like "<first2>/<rest>".
 	// Store does not own this root.
 	root *os.Root
 	// algo is the expected object ID algorithm for lookups.
 	algo objectid.Algorithm
 }
 
-// New creates a loose-object store rooted at root for algo.
+// New creates a loose-object store rooted at an objects directory for algo.
 func New(root *os.Root, algo objectid.Algorithm) (*Store, error) {
 	if algo.Size() == 0 {
 		return nil, objectid.ErrInvalidAlgorithm

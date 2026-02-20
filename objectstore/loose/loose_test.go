@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -18,9 +19,10 @@ import (
 
 func openLooseStore(t *testing.T, repoPath string, algo objectid.Algorithm) *loose.Store {
 	t.Helper()
-	root, err := os.OpenRoot(repoPath)
+	objectsPath := filepath.Join(repoPath, "objects")
+	root, err := os.OpenRoot(objectsPath)
 	if err != nil {
-		t.Fatalf("OpenRoot(%q): %v", repoPath, err)
+		t.Fatalf("OpenRoot(%q): %v", objectsPath, err)
 	}
 	t.Cleanup(func() { _ = root.Close() })
 

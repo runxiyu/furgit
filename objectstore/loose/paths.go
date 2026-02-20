@@ -11,13 +11,13 @@ import (
 	"codeberg.org/lindenii/furgit/objectstore"
 )
 
-// objectPath returns the loose object path for id.
+// objectPath returns the loose object path for id relative to the objects root.
 func (store *Store) objectPath(id objectid.ObjectID) (string, error) {
 	if id.Algorithm() != store.algo {
 		return "", fmt.Errorf("objectstore/loose: object id algorithm mismatch: got %s want %s", id.Algorithm(), store.algo)
 	}
 	hex := id.String()
-	return path.Join("objects", hex[:2], hex[2:]), nil
+	return path.Join(hex[:2], hex[2:]), nil
 }
 
 // openObject opens the loose object file for id.
