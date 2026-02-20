@@ -11,10 +11,6 @@ import (
 
 // ParseTag decodes a tag object body.
 func ParseTag(body []byte, algo oid.Algorithm) (*Tag, error) {
-	if algo.Size() == 0 {
-		return nil, fmt.Errorf("object: tag: invalid hash algorithm %q", algo)
-	}
-
 	t := new(Tag)
 	i := 0
 	var haveTarget, haveType bool

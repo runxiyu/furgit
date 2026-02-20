@@ -2,7 +2,6 @@ package object
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"sort"
 
@@ -73,9 +72,6 @@ func (tree *Tree) entry(name []byte, searchIsTree bool) *TreeEntry {
 
 // InsertEntry inserts a tree entry while preserving Git ordering.
 func (tree *Tree) InsertEntry(newEntry TreeEntry) error {
-	if tree == nil {
-		return errors.New("object: tree: insert on nil tree")
-	}
 	if tree.entry(newEntry.Name, true) != nil || tree.entry(newEntry.Name, false) != nil {
 		return fmt.Errorf("object: tree: entry %q already exists", newEntry.Name)
 	}
@@ -91,9 +87,6 @@ func (tree *Tree) InsertEntry(newEntry TreeEntry) error {
 
 // RemoveEntry removes a tree entry by name.
 func (tree *Tree) RemoveEntry(name []byte) error {
-	if tree == nil {
-		return errors.New("object: tree: remove on nil tree")
-	}
 	if len(tree.Entries) == 0 {
 		return fmt.Errorf("object: tree: entry %q not found", name)
 	}

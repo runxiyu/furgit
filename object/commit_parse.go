@@ -10,10 +10,6 @@ import (
 
 // ParseCommit decodes a commit object body.
 func ParseCommit(body []byte, algo oid.Algorithm) (*Commit, error) {
-	if algo.Size() == 0 {
-		return nil, fmt.Errorf("object: commit: invalid hash algorithm %q", algo)
-	}
-
 	c := new(Commit)
 	i := 0
 	for i < len(body) {
