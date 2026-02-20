@@ -159,7 +159,7 @@ func TestPackWriteNoDeltas(t *testing.T) {
 	}
 	packPath := pf.Name()
 	idxPath := strings.TrimSuffix(packPath, ".pack") + ".idx"
-	if _, err := repo.packWrite(pf, objects, packWriteOptions{}, nil); err != nil {
+	if _, err := repo.packWrite(pf, objects, packWriteOptions{}); err != nil {
 		_ = pf.Close()
 		t.Fatalf("packWrite failed: %v", err)
 	}
@@ -287,7 +287,7 @@ func TestPackWriteDeltas(t *testing.T) {
 	if _, err := repo.packWrite(pf, objects, packWriteOptions{
 		EnableDeltas:    true,
 		MinDeltaSavings: 1,
-	}, nil); err != nil {
+	}); err != nil {
 		_ = pf.Close()
 		t.Fatalf("packWrite failed: %v", err)
 	}
