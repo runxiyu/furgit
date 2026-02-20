@@ -3,6 +3,8 @@ package object
 import (
 	"bytes"
 	"fmt"
+
+	"codeberg.org/lindenii/furgit/objecttype"
 )
 
 func (commit *Commit) serialize() ([]byte, error) {
@@ -58,7 +60,7 @@ func (commit *Commit) Serialize() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	header, err := headerForType(TypeCommit, body)
+	header, err := headerForType(objecttype.TypeCommit, body)
 	if err != nil {
 		return nil, err
 	}

@@ -1,8 +1,10 @@
 package object
 
+import "codeberg.org/lindenii/furgit/objecttype"
+
 // Serialize renders the raw object (header + body).
 func (blob *Blob) Serialize() ([]byte, error) {
-	header, err := headerForType(TypeBlob, blob.Data)
+	header, err := headerForType(objecttype.TypeBlob, blob.Data)
 	if err != nil {
 		return nil, err
 	}

@@ -4,8 +4,9 @@ package object
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"strconv"
+
+	"codeberg.org/lindenii/furgit/objecttype"
 )
 
 var (
@@ -15,68 +16,16 @@ var (
 	ErrNotFound = errors.New("object: not found")
 )
 
-// Type mirrors Git object type tags.
-type Type uint8
-
-const (
-	TypeInvalid  Type = 0
-	TypeCommit   Type = 1
-	TypeTree     Type = 2
-	TypeBlob     Type = 3
-	TypeTag      Type = 4
-	TypeFuture   Type = 5
-	TypeOfsDelta Type = 6
-	TypeRefDelta Type = 7
-)
-
-const (
-	typeNameBlob   = "blob"
-	typeNameTree   = "tree"
-	typeNameCommit = "commit"
-	typeNameTag    = "tag"
-)
-
 // Object is a Git object that can serialize itself.
 type Object interface {
-	ObjectType() Type
+	ObjectType() objecttype.Type
 	Serialize() ([]byte, error)
 }
 
-// ParseTypeName parses a canonical Git object type name.
-func ParseTypeName(name string) (Type, error) {
-	switch name {
-	case typeNameBlob:
-		return TypeBlob, nil
-	case typeNameTree:
-		return TypeTree, nil
-	case typeNameCommit:
-		return TypeCommit, nil
-	case typeNameTag:
-		return TypeTag, nil
-	default:
-		return TypeInvalid, ErrInvalidObject
-	}
-}
-
-func typeName(ty Type) (string, error) {
-	switch ty {
-	case TypeBlob:
-		return typeNameBlob, nil
-	case TypeTree:
-		return typeNameTree, nil
-	case TypeCommit:
-		return typeNameCommit, nil
-	case TypeTag:
-		return typeNameTag, nil
-	default:
-		return "", fmt.Errorf("object: unsupported type %d", ty)
-	}
-}
-
-func headerForType(ty Type, body []byte) ([]byte, error) {
-	tyStr, err := typeName(ty)
-	if err != nil {
-		return nil, err
+func headerForType(ty objecttype.Type, body []byte) ([]byte, error) {
+	tyStr, ok := objecttype.Name(ty)
+	if !ok {
+		return nil, ErrInvalidObject
 	}
 	size := strconv.Itoa(len(body))
 	var buf bytes.Buffer

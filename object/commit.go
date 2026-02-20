@@ -1,6 +1,9 @@
 package object
 
-import "codeberg.org/lindenii/furgit/oid"
+import (
+	"codeberg.org/lindenii/furgit/objecttype"
+	"codeberg.org/lindenii/furgit/oid"
+)
 
 // Commit represents a Git commit object.
 type Commit struct {
@@ -14,7 +17,7 @@ type Commit struct {
 }
 
 // ObjectType returns TypeCommit.
-func (commit *Commit) ObjectType() Type {
+func (commit *Commit) ObjectType() objecttype.Type {
 	_ = commit
-	return TypeCommit
+	return objecttype.TypeCommit
 }

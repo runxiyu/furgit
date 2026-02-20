@@ -6,6 +6,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/object"
+	"codeberg.org/lindenii/furgit/objecttype"
 	"codeberg.org/lindenii/furgit/oid"
 )
 
@@ -23,8 +24,8 @@ func TestTagParseFromGit(t *testing.T) {
 		if tag.Target != commitID {
 			t.Fatalf("tag target mismatch: got %s want %s", tag.Target, commitID)
 		}
-		if tag.TargetType != object.TypeCommit {
-			t.Fatalf("tag target type = %v, want %v", tag.TargetType, object.TypeCommit)
+		if tag.TargetType != objecttype.TypeCommit {
+			t.Fatalf("tag target type = %v, want %v", tag.TargetType, objecttype.TypeCommit)
 		}
 		if !bytes.Equal(tag.Name, []byte("v1")) {
 			t.Fatalf("tag name = %q, want %q", tag.Name, "v1")

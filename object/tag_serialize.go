@@ -3,6 +3,8 @@ package object
 import (
 	"bytes"
 	"fmt"
+
+	"codeberg.org/lindenii/furgit/objecttype"
 )
 
 func (tag *Tag) serialize() ([]byte, error) {
@@ -13,8 +15,8 @@ func (tag *Tag) serialize() ([]byte, error) {
 	var buf bytes.Buffer
 	fmt.Fprintf(&buf, "object %s\n", tag.Target.String())
 
-	tyName, err := typeName(tag.TargetType)
-	if err != nil {
+	tyName, ok := objecttype.Name(tag.TargetType)
+	if !ok {
 		return nil, fmt.Errorf("object: tag: invalid target type %d", tag.TargetType)
 	}
 	buf.WriteString("type ")
@@ -46,7 +48,7 @@ func (tag *Tag) Serialize() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	header, err := headerForType(TypeTag, body)
+	header, err := headerForType(objecttype.TypeTag, body)
 	if err != nil {
 		return nil, err
 	}

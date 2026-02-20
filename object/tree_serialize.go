@@ -1,6 +1,10 @@
 package object
 
-import "strconv"
+import (
+	"strconv"
+
+	"codeberg.org/lindenii/furgit/objecttype"
+)
 
 func (tree *Tree) serialize() []byte {
 	var bodyLen int
@@ -29,7 +33,7 @@ func (tree *Tree) serialize() []byte {
 // Serialize renders the raw object (header + body).
 func (tree *Tree) Serialize() ([]byte, error) {
 	body := tree.serialize()
-	header, err := headerForType(TypeTree, body)
+	header, err := headerForType(objecttype.TypeTree, body)
 	if err != nil {
 		return nil, err
 	}

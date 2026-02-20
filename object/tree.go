@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 
+	"codeberg.org/lindenii/furgit/objecttype"
 	"codeberg.org/lindenii/furgit/oid"
 )
 
@@ -32,9 +33,9 @@ type Tree struct {
 }
 
 // ObjectType returns TypeTree.
-func (tree *Tree) ObjectType() Type {
+func (tree *Tree) ObjectType() objecttype.Type {
 	_ = tree
-	return TypeTree
+	return objecttype.TypeTree
 }
 
 // Entry looks up a tree entry by name.

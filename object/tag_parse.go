@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"codeberg.org/lindenii/furgit/objecttype"
 	"codeberg.org/lindenii/furgit/oid"
 )
 
@@ -43,8 +44,8 @@ func ParseTag(body []byte, algo oid.Algorithm) (*Tag, error) {
 			t.Target = id
 			haveTarget = true
 		case "type":
-			ty, err := ParseTypeName(string(value))
-			if err != nil {
+			ty, ok := objecttype.ParseName(string(value))
+			if !ok {
 				return nil, errors.New("object: tag: unknown target type")
 			}
 			t.TargetType = ty
