@@ -17,9 +17,6 @@ func (store *Store) objectPath(id objectid.ObjectID) (string, error) {
 		return "", fmt.Errorf("objectstore/loose: object id algorithm mismatch: got %s want %s", id.Algorithm(), store.algo)
 	}
 	hex := id.String()
-	if len(hex) != store.algo.HexLen() {
-		return "", fmt.Errorf("objectstore/loose: malformed object id %q", hex)
-	}
 	return path.Join("objects", hex[:2], hex[2:]), nil
 }
 
