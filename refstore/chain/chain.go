@@ -60,20 +60,7 @@ func (chain *Chain) ResolveFully(name string) (ref.Detached, error) {
 		switch resolved := resolved.(type) {
 		case ref.Detached:
 			return resolved, nil
-		case *ref.Detached:
-			if resolved == nil {
-				return ref.Detached{}, fmt.Errorf("refstore: backend returned nil detached reference")
-			}
-			return *resolved, nil
 		case ref.Symbolic:
-			if resolved.Target == "" {
-				return ref.Detached{}, fmt.Errorf("refstore: symbolic reference %q has empty target", resolved.Name())
-			}
-			cur = resolved.Target
-		case *ref.Symbolic:
-			if resolved == nil {
-				return ref.Detached{}, fmt.Errorf("refstore: backend returned nil symbolic reference")
-			}
 			if resolved.Target == "" {
 				return ref.Detached{}, fmt.Errorf("refstore: symbolic reference %q has empty target", resolved.Name())
 			}
