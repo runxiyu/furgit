@@ -1,4 +1,4 @@
-package config
+package config_test
 
 import (
 	"os"
@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"codeberg.org/lindenii/furgit/config"
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/objectid"
 )
@@ -35,7 +36,7 @@ func TestConfigAgainstGit(t *testing.T) {
 		cfgFile := openConfig(t, repo)
 		defer func() { _ = cfgFile.Close() }()
 
-		cfg, err := ParseConfig(cfgFile)
+		cfg, err := config.ParseConfig(cfgFile)
 		if err != nil {
 			t.Fatalf("ParseConfig failed: %v", err)
 		}
@@ -64,7 +65,7 @@ func TestConfigSubsectionAgainstGit(t *testing.T) {
 		cfgFile := openConfig(t, repo)
 		defer func() { _ = cfgFile.Close() }()
 
-		cfg, err := ParseConfig(cfgFile)
+		cfg, err := config.ParseConfig(cfgFile)
 		if err != nil {
 			t.Fatalf("ParseConfig failed: %v", err)
 		}
@@ -88,7 +89,7 @@ func TestConfigMultiValueAgainstGit(t *testing.T) {
 		cfgFile := openConfig(t, repo)
 		defer func() { _ = cfgFile.Close() }()
 
-		cfg, err := ParseConfig(cfgFile)
+		cfg, err := config.ParseConfig(cfgFile)
 		if err != nil {
 			t.Fatalf("ParseConfig failed: %v", err)
 		}
@@ -123,7 +124,7 @@ func TestConfigCaseInsensitiveAgainstGit(t *testing.T) {
 		cfgFile := openConfig(t, repo)
 		defer func() { _ = cfgFile.Close() }()
 
-		cfg, err := ParseConfig(cfgFile)
+		cfg, err := config.ParseConfig(cfgFile)
 		if err != nil {
 			t.Fatalf("ParseConfig failed: %v", err)
 		}
@@ -151,7 +152,7 @@ func TestConfigBooleanAgainstGit(t *testing.T) {
 		cfgFile := openConfig(t, repo)
 		defer func() { _ = cfgFile.Close() }()
 
-		cfg, err := ParseConfig(cfgFile)
+		cfg, err := config.ParseConfig(cfgFile)
 		if err != nil {
 			t.Fatalf("ParseConfig failed: %v", err)
 		}
@@ -185,7 +186,7 @@ func TestConfigComplexValuesAgainstGit(t *testing.T) {
 		cfgFile := openConfig(t, repo)
 		defer func() { _ = cfgFile.Close() }()
 
-		cfg, err := ParseConfig(cfgFile)
+		cfg, err := config.ParseConfig(cfgFile)
 		if err != nil {
 			t.Fatalf("ParseConfig failed: %v", err)
 		}
@@ -210,7 +211,7 @@ func TestConfigEntriesAgainstGit(t *testing.T) {
 		cfgFile := openConfig(t, repo)
 		defer func() { _ = cfgFile.Close() }()
 
-		cfg, err := ParseConfig(cfgFile)
+		cfg, err := config.ParseConfig(cfgFile)
 		if err != nil {
 			t.Fatalf("ParseConfig failed: %v", err)
 		}
@@ -266,7 +267,7 @@ func TestConfigErrorCases(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := strings.NewReader(tt.config)
-			_, err := ParseConfig(r)
+			_, err := config.ParseConfig(r)
 			if err == nil {
 				t.Errorf("expected error for %s", tt.name)
 			}
