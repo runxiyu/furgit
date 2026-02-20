@@ -69,18 +69,27 @@ var algorithmTable = [...]algorithmDetails{
 }
 
 var algorithmByName = map[string]Algorithm{}
+var supportedAlgorithms []Algorithm
 
 func init() {
 	for algo, info := range algorithmTable {
 		if info.name == "" {
 			continue
 		}
-		algorithmByName[info.name] = Algorithm(algo)
+		parsed := Algorithm(algo)
+		algorithmByName[info.name] = parsed
+		supportedAlgorithms = append(supportedAlgorithms, parsed)
 	}
 }
 
 func (algo Algorithm) info() algorithmDetails {
 	return algorithmTable[algo]
+}
+
+// SupportedAlgorithms returns all object ID algorithms supported by furgit.
+// Do not mutate.
+func SupportedAlgorithms() []Algorithm {
+	return supportedAlgorithms
 }
 
 // ParseAlgorithm parses a canonical algorithm name (e.g. "sha1", "sha256").
