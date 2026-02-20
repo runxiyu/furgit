@@ -27,21 +27,14 @@ const (
 	StatusResponseEnd
 )
 
-// Reader reads pkt-line data from an io.Reader.
-type Reader struct {
-	r io.Reader
-}
-
-// NewReader returns a Reader that reads from r.
-func NewReader(r io.Reader) *Reader {
-	return &Reader{r: r}
-}
-
-// ReadLine reads a single pkt-line from the underlying reader into buf.
+// ReadLine reads a single pkt-line from r into buf.
 // It returns the payload slice, number of payload bytes, and a status.
-func (pr *Reader) ReadLine(buf []byte) ([]byte, int, Status, error) {
+func ReadLine(r io.Reader, buf []byte) ([]byte, int, Status, error) {
+	if r == nil {
+		return nil, 0, StatusEOF, ErrInvalidHeader
+	}
 	var header [4]byte
-	if _, err := io.ReadFull(pr.r, header[:]); err != nil {
+	if _, err := io.ReadFull(r, header[:]); err != nil {
 		if errors.Is(err, io.EOF) {
 			return nil, 0, StatusEOF, io.EOF
 		}
@@ -73,7 +66,7 @@ func (pr *Reader) ReadLine(buf []byte) ([]byte, int, Status, error) {
 	if n > len(buf) {
 		return nil, 0, StatusEOF, ErrBufferTooSmall
 	}
-	if _, err := io.ReadFull(pr.r, buf[:n]); err != nil {
+	if _, err := io.ReadFull(r, buf[:n]); err != nil {
 		if errors.Is(err, io.ErrUnexpectedEOF) {
 			return nil, 0, StatusEOF, io.ErrUnexpectedEOF
 		}
@@ -82,48 +75,46 @@ func (pr *Reader) ReadLine(buf []byte) ([]byte, int, Status, error) {
 	return buf[:n], n, StatusData, nil
 }
 
-// Writer writes pkt-line data to an io.Writer.
-type Writer struct {
-	w io.Writer
-}
-
-// NewWriter returns a Writer that writes to w.
-func NewWriter(w io.Writer) *Writer {
-	return &Writer{w: w}
-}
-
 // WriteLine writes a single pkt-line with data as its payload.
-func (pw *Writer) WriteLine(data []byte) error {
+func WriteLine(w io.Writer, data []byte) error {
+	if w == nil {
+		return ErrInvalidHeader
+	}
 	if len(data) > maxPacketDataLen {
 		return ErrPacketTooLarge
 	}
 	var header [4]byte
 	setHeader(header[:], len(data)+4)
-	if _, err := pw.w.Write(header[:]); err != nil {
+	if _, err := w.Write(header[:]); err != nil {
 		return err
 	}
 	if len(data) == 0 {
 		return nil
 	}
-	_, err := pw.w.Write(data)
+	_, err := w.Write(data)
 	return err
 }
 
 // Flush writes a flush-pkt ("0000").
-func (pw *Writer) Flush() error {
-	_, err := io.WriteString(pw.w, "0000")
-	return err
+func Flush(w io.Writer) error {
+	return writeLiteral(w, "0000")
 }
 
 // Delim writes a delim-pkt ("0001").
-func (pw *Writer) Delim() error {
-	_, err := io.WriteString(pw.w, "0001")
-	return err
+func Delim(w io.Writer) error {
+	return writeLiteral(w, "0001")
 }
 
 // ResponseEnd writes a response-end pkt ("0002").
-func (pw *Writer) ResponseEnd() error {
-	_, err := io.WriteString(pw.w, "0002")
+func ResponseEnd(w io.Writer) error {
+	return writeLiteral(w, "0002")
+}
+
+func writeLiteral(w io.Writer, s string) error {
+	if w == nil {
+		return ErrInvalidHeader
+	}
+	_, err := io.WriteString(w, s)
 	return err
 }
 
