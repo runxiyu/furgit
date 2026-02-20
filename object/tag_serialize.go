@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/internal/objectheader"
+	"codeberg.org/lindenii/furgit/objectheader"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 

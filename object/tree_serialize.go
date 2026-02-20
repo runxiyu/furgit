@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strconv"
 
-	"codeberg.org/lindenii/furgit/internal/objectheader"
+	"codeberg.org/lindenii/furgit/objectheader"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 

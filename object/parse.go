@@ -3,9 +3,9 @@ package object
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/internal/objectheader"
-	"codeberg.org/lindenii/furgit/objecttype"
+	"codeberg.org/lindenii/furgit/objectheader"
 	"codeberg.org/lindenii/furgit/objectid"
+	"codeberg.org/lindenii/furgit/objecttype"
 )
 
 // ParseObjectWithoutHeader parses a typed object body.
