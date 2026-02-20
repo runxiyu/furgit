@@ -141,18 +141,12 @@ func (id ObjectID) Size() int {
 // String returns the canonical hex representation.
 func (id ObjectID) String() string {
 	size := id.Size()
-	if size == 0 {
-		return ""
-	}
 	return hex.EncodeToString(id.data[:size])
 }
 
 // Bytes returns a copy of the object ID bytes.
 func (id ObjectID) Bytes() []byte {
 	size := id.Size()
-	if size == 0 {
-		return nil
-	}
 	return append([]byte(nil), id.data[:size]...)
 }
 
