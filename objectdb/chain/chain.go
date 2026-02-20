@@ -1,23 +1,25 @@
-package objectdb
+// Package chain provides an ordered object database chain implementation.
+package chain
 
 import (
 	"errors"
 	"fmt"
 	"io"
 
+	"codeberg.org/lindenii/furgit/objectdb"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
 // Chain queries multiple object databases in order.
 type Chain struct {
-	backends []ObjectDB
+	backends []objectdb.ObjectDB
 }
 
-// NewChain creates an ordered object database chain.
-func NewChain(backends ...ObjectDB) *Chain {
+// New creates an ordered object database chain.
+func New(backends ...objectdb.ObjectDB) *Chain {
 	return &Chain{
-		backends: append([]ObjectDB(nil), backends...),
+		backends: append([]objectdb.ObjectDB(nil), backends...),
 	}
 }
 
@@ -31,12 +33,12 @@ func (chain *Chain) ReadBytesFull(id objectid.ObjectID) ([]byte, error) {
 		if err == nil {
 			return full, nil
 		}
-		if errors.Is(err, ErrObjectNotFound) {
+		if errors.Is(err, objectdb.ErrObjectNotFound) {
 			continue
 		}
 		return nil, fmt.Errorf("objectdb: backend %d read bytes full: %w", i, err)
 	}
-	return nil, ErrObjectNotFound
+	return nil, objectdb.ErrObjectNotFound
 }
 
 // ReadBytesContent reads an object's type and content bytes from the first backend that has it.
@@ -49,12 +51,12 @@ func (chain *Chain) ReadBytesContent(id objectid.ObjectID) (objecttype.Type, []b
 		if err == nil {
 			return ty, content, nil
 		}
-		if errors.Is(err, ErrObjectNotFound) {
+		if errors.Is(err, objectdb.ErrObjectNotFound) {
 			continue
 		}
 		return objecttype.TypeInvalid, nil, fmt.Errorf("objectdb: backend %d read bytes content: %w", i, err)
 	}
-	return objecttype.TypeInvalid, nil, ErrObjectNotFound
+	return objecttype.TypeInvalid, nil, objectdb.ErrObjectNotFound
 }
 
 // ReadReaderFull reads a full serialized object stream from the first backend that has it.
@@ -67,12 +69,12 @@ func (chain *Chain) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) 
 		if err == nil {
 			return reader, nil
 		}
-		if errors.Is(err, ErrObjectNotFound) {
+		if errors.Is(err, objectdb.ErrObjectNotFound) {
 			continue
 		}
 		return nil, fmt.Errorf("objectdb: backend %d read reader full: %w", i, err)
 	}
-	return nil, ErrObjectNotFound
+	return nil, objectdb.ErrObjectNotFound
 }
 
 // ReadReaderContent reads an object's type and content stream from the first backend that has it.
@@ -85,12 +87,12 @@ func (chain *Chain) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, io
 		if err == nil {
 			return ty, reader, nil
 		}
-		if errors.Is(err, ErrObjectNotFound) {
+		if errors.Is(err, objectdb.ErrObjectNotFound) {
 			continue
 		}
 		return objecttype.TypeInvalid, nil, fmt.Errorf("objectdb: backend %d read reader content: %w", i, err)
 	}
-	return objecttype.TypeInvalid, nil, ErrObjectNotFound
+	return objecttype.TypeInvalid, nil, objectdb.ErrObjectNotFound
 }
 
 // ReadHeader reads object header data from the first backend that has it.
@@ -103,12 +105,12 @@ func (chain *Chain) ReadHeader(id objectid.ObjectID) (objecttype.Type, int64, er
 		if err == nil {
 			return ty, size, nil
 		}
-		if errors.Is(err, ErrObjectNotFound) {
+		if errors.Is(err, objectdb.ErrObjectNotFound) {
 			continue
 		}
 		return objecttype.TypeInvalid, 0, fmt.Errorf("objectdb: backend %d read header: %w", i, err)
 	}
-	return objecttype.TypeInvalid, 0, ErrObjectNotFound
+	return objecttype.TypeInvalid, 0, objectdb.ErrObjectNotFound
 }
 
 // Close closes all backends and joins close errors.
