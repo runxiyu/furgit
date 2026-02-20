@@ -13,8 +13,8 @@ import (
 // TODO: This might need to be an interface or otherwise be able to encapsulate multiple concrete backends'
 var ErrObjectNotFound = errors.New("objectstore: object not found")
 
-// ObjectStore reads Git objects by object ID.
-type ObjectStore interface {
+// Store reads Git objects by object ID.
+type Store interface {
 	// ReadBytesFull reads a full serialized object as "type size\\x00content".
 	// If hashed with the same algorithm it MUST match the object ID.
 	ReadBytesFull(id objectid.ObjectID) ([]byte, error)

@@ -13,13 +13,13 @@ import (
 
 // Chain queries multiple object databases in order.
 type Chain struct {
-	backends []objectstore.ObjectStore
+	backends []objectstore.Store
 }
 
 // New creates an ordered object database chain.
-func New(backends ...objectstore.ObjectStore) *Chain {
+func New(backends ...objectstore.Store) *Chain {
 	return &Chain{
-		backends: append([]objectstore.ObjectStore(nil), backends...),
+		backends: append([]objectstore.Store(nil), backends...),
 	}
 }
 
