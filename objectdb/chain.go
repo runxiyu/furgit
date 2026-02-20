@@ -1,0 +1,89 @@
+package objectdb
+
+import (
+	"errors"
+	"fmt"
+
+	"codeberg.org/lindenii/furgit/objectid"
+	"codeberg.org/lindenii/furgit/objecttype"
+)
+
+// Chain queries multiple object databases in order.
+type Chain struct {
+	backends []ObjectDB
+}
+
+// NewChain creates an ordered object database chain.
+func NewChain(backends ...ObjectDB) *Chain {
+	return &Chain{
+		backends: append([]ObjectDB(nil), backends...),
+	}
+}
+
+// ReadBytesFull reads a full serialized object from the first backend that has it.
+func (chain *Chain) ReadBytesFull(id objectid.ObjectID) ([]byte, error) {
+	for i, backend := range chain.backends {
+		if backend == nil {
+			continue
+		}
+		full, err := backend.ReadBytesFull(id)
+		if err == nil {
+			return full, nil
+		}
+		if errors.Is(err, ErrObjectNotFound) {
+			continue
+		}
+		return nil, fmt.Errorf("objectdb: backend %d read bytes full: %w", i, err)
+	}
+	return nil, ErrObjectNotFound
+}
+
+// ReadBytesContent reads an object's type and content bytes from the first backend that has it.
+func (chain *Chain) ReadBytesContent(id objectid.ObjectID) (objecttype.Type, []byte, error) {
+	for i, backend := range chain.backends {
+		if backend == nil {
+			continue
+		}
+		ty, content, err := backend.ReadBytesContent(id)
+		if err == nil {
+			return ty, content, nil
+		}
+		if errors.Is(err, ErrObjectNotFound) {
+			continue
+		}
+		return objecttype.TypeInvalid, nil, fmt.Errorf("objectdb: backend %d read bytes content: %w", i, err)
+	}
+	return objecttype.TypeInvalid, nil, ErrObjectNotFound
+}
+
+// ReadHeader reads object header data from the first backend that has it.
+func (chain *Chain) ReadHeader(id objectid.ObjectID) (objecttype.Type, int64, error) {
+	for i, backend := range chain.backends {
+		if backend == nil {
+			continue
+		}
+		ty, size, err := backend.ReadHeader(id)
+		if err == nil {
+			return ty, size, nil
+		}
+		if errors.Is(err, ErrObjectNotFound) {
+			continue
+		}
+		return objecttype.TypeInvalid, 0, fmt.Errorf("objectdb: backend %d read header: %w", i, err)
+	}
+	return objecttype.TypeInvalid, 0, ErrObjectNotFound
+}
+
+// Close closes all backends and joins close errors.
+func (chain *Chain) Close() error {
+	var errs []error
+	for _, backend := range chain.backends {
+		if backend == nil {
+			continue
+		}
+		if err := backend.Close(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errors.Join(errs...)
+}
