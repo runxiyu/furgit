@@ -22,7 +22,7 @@ Furgit is a fast Git library in pure Go
 * Reading loose objects
 * Writing loose objects
 * Reading packfiles
-* Writing packfiles (no thin packs yet)
+* Writing packfiles (basic; no deltas yet)
 * General support for blobs, trees, commits, and tags
 
 ## Future features
