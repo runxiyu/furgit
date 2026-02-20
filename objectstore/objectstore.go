@@ -16,7 +16,10 @@ var ErrObjectNotFound = errors.New("objectstore: object not found")
 // Store reads Git objects by object ID.
 type Store interface {
 	// ReadBytesFull reads a full serialized object as "type size\\x00content".
-	// If hashed with the same algorithm it MUST match the object ID.
+	//
+	// In a valid repository, hashing this payload with the same algorithm yields
+	// the requested object ID. Readers should treat this as a repository
+	// invariant and should not re-verify it on every read.
 	ReadBytesFull(id objectid.ObjectID) ([]byte, error)
 	// ReadBytesContent reads an object's type and content bytes.
 	ReadBytesContent(id objectid.ObjectID) (objecttype.Type, []byte, error)
