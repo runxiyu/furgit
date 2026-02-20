@@ -31,8 +31,6 @@ Furgit is a fast Git library in pure Go
 * Multi pack indexes
 * Repack
 * Writing thin packs
-* Reading reachability bitmaps
-* Writing reachability bitmaps when writing packfiles
 * [commit-graph](https://git-scm.com/docs/commit-graph) (in progress)
 * Network protocols
 * Reftables
