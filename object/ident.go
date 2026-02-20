@@ -39,16 +39,16 @@ func ParseIdent(line []byte) (*Ident, error) {
 		return nil, errors.New("object: ident: missing timestamp separator")
 	}
 	rest = rest[1:]
-	sp := bytes.IndexByte(rest, ' ')
-	if sp < 0 {
+	before, after, ok := bytes.Cut(rest, []byte{' '})
+	if !ok {
 		return nil, errors.New("object: ident: missing timezone separator")
 	}
-	when, err := strconv.ParseInt(string(rest[:sp]), 10, 64)
+	when, err := strconv.ParseInt(string(before), 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("object: ident: invalid timestamp: %w", err)
 	}
 
-	tz := rest[sp+1:]
+	tz := after
 	if len(tz) < 5 {
 		return nil, errors.New("object: ident: invalid timezone encoding")
 	}

@@ -113,10 +113,7 @@ func TreeEntryNameCompare(entryName []byte, entryMode FileMode, searchName []byt
 		searchLen++
 	}
 
-	n := entryLen
-	if searchLen < n {
-		n = searchLen
-	}
+	n := min(searchLen, entryLen)
 
 	for i := 0; i < n; i++ {
 		var ec, sc byte
