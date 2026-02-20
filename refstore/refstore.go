@@ -13,6 +13,9 @@ var ErrReferenceNotFound = errors.New("refstore: reference not found")
 // Store reads Git references.
 type Store interface {
 	// Resolve resolves a reference name to either a symbolic or detached ref.
+	//
+	// Implementations should return value forms (ref.Detached or ref.Symbolic),
+	// not pointer forms.
 	// If the reference does not exist, implementations should return
 	// ErrReferenceNotFound.
 	Resolve(name string) (ref.Ref, error)
