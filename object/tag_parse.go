@@ -1,0 +1,81 @@
+package object
+
+import (
+	"bytes"
+	"errors"
+	"fmt"
+
+	"codeberg.org/lindenii/furgit/oid"
+)
+
+// ParseTag decodes a tag object body.
+func ParseTag(body []byte, algo oid.Algorithm) (*Tag, error) {
+	if algo.Size() == 0 {
+		return nil, ErrInvalidObject
+	}
+
+	t := new(Tag)
+	i := 0
+	var haveTarget, haveType bool
+
+	for i < len(body) {
+		rel := bytes.IndexByte(body[i:], '\n')
+		if rel < 0 {
+			return nil, errors.New("object: tag: missing newline")
+		}
+		line := body[i : i+rel]
+		i += rel + 1
+		if len(line) == 0 {
+			break
+		}
+
+		key, value, found := bytes.Cut(line, []byte{' '})
+		if !found {
+			return nil, errors.New("object: tag: malformed header")
+		}
+
+		switch string(key) {
+		case "object":
+			id, err := oid.ParseHex(algo, string(value))
+			if err != nil {
+				return nil, fmt.Errorf("object: tag: object: %w", err)
+			}
+			t.Target = id
+			haveTarget = true
+		case "type":
+			ty, err := ParseTypeName(string(value))
+			if err != nil {
+				return nil, errors.New("object: tag: unknown target type")
+			}
+			t.TargetType = ty
+			haveType = true
+		case "tag":
+			t.Name = append([]byte(nil), value...)
+		case "tagger":
+			idt, err := ParseIdent(value)
+			if err != nil {
+				return nil, fmt.Errorf("object: tag: tagger: %w", err)
+			}
+			t.Tagger = idt
+		case "gpgsig", "gpgsig-sha256":
+			for i < len(body) {
+				nextRel := bytes.IndexByte(body[i:], '\n')
+				if nextRel < 0 {
+					return nil, errors.New("object: tag: unterminated gpgsig")
+				}
+				if body[i] != ' ' {
+					break
+				}
+				i += nextRel + 1
+			}
+		default:
+			// Ignore unknown headers for now.
+		}
+	}
+
+	if !haveTarget || !haveType {
+		return nil, errors.New("object: tag: missing required headers")
+	}
+	t.Message = append([]byte(nil), body[i:]...)
+	return t, nil
+}
