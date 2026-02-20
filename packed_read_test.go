@@ -13,7 +13,7 @@ func TestPackfileRead(t *testing.T) {
 	repoPath, cleanup := setupTestRepo(t)
 	defer cleanup()
 
-	gitCmd(t, repoPath, nil, "config", "gc.auto", "0")
+	gitCmd(t, repoPath, "config", "gc.auto", "0")
 
 	workDir, cleanupWork := setupWorkDir(t)
 	defer cleanupWork()
@@ -27,11 +27,11 @@ func TestPackfileRead(t *testing.T) {
 		t.Fatalf("failed to write file2.txt: %v", err)
 	}
 
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", "Test commit")
-	commitHash := gitCmd(t, repoPath, nil, "rev-parse", "HEAD")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "Test commit")
+	commitHash := gitCmd(t, repoPath, "rev-parse", "HEAD")
 
-	gitCmd(t, repoPath, nil, "repack", "-a", "-d")
+	gitCmd(t, repoPath, "repack", "-a", "-d")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -64,7 +64,7 @@ func TestPackfileRead(t *testing.T) {
 		t.Errorf("tree entries: got %d, want 2", len(tree.Entries))
 	}
 
-	gitLsTree := gitCmd(t, repoPath, nil, "ls-tree", commit.Tree.String())
+	gitLsTree := gitCmd(t, repoPath, "ls-tree", commit.Tree.String())
 	for _, entry := range tree.Entries {
 		if !strings.Contains(gitLsTree, string(entry.Name)) {
 			t.Errorf("git ls-tree doesn't contain %s", entry.Name)
@@ -80,7 +80,7 @@ func TestPackfileLarge(t *testing.T) {
 	repoPath, cleanup := setupTestRepo(t)
 	defer cleanup()
 
-	gitCmd(t, repoPath, nil, "config", "gc.auto", "0")
+	gitCmd(t, repoPath, "config", "gc.auto", "0")
 
 	workDir, cleanupWork := setupWorkDir(t)
 	defer cleanupWork()
@@ -95,11 +95,11 @@ func TestPackfileLarge(t *testing.T) {
 		}
 	}
 
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", "Large commit")
-	commitHash := gitCmd(t, repoPath, nil, "rev-parse", "HEAD")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "Large commit")
+	commitHash := gitCmd(t, repoPath, "rev-parse", "HEAD")
 
-	gitCmd(t, repoPath, nil, "repack", "-a", "-d")
+	gitCmd(t, repoPath, "repack", "-a", "-d")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -118,7 +118,7 @@ func TestPackfileLarge(t *testing.T) {
 		t.Errorf("tree entries: got %d, want %d", len(tree.Entries), numFiles)
 	}
 
-	gitCount := gitCmd(t, repoPath, nil, "ls-tree", commit.Tree.String())
+	gitCount := gitCmd(t, repoPath, "ls-tree", commit.Tree.String())
 	gitLines := strings.Count(gitCount, "\n") + 1
 	if len(tree.Entries) != gitLines {
 		t.Errorf("furgit found %d entries, git found %d", len(tree.Entries), gitLines)

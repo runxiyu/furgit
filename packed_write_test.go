@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -108,9 +109,9 @@ func TestPackWriteNoDeltas(t *testing.T) {
 		}
 	}
 
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", "Test commit")
-	commitHash := gitCmd(t, repoPath, nil, "rev-parse", "HEAD")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "Test commit")
+	commitHash := gitCmd(t, repoPath, "rev-parse", "HEAD")
 
 	commitBody := gitCatFile(t, repoPath, "commit", commitHash)
 	lines := bytes.Split(commitBody, []byte{'\n'})
@@ -119,7 +120,7 @@ func TestPackWriteNoDeltas(t *testing.T) {
 	}
 	treeHash := strings.TrimSpace(string(bytes.TrimPrefix(lines[0], []byte("tree "))))
 
-	lsTree := gitCmd(t, repoPath, nil, "ls-tree", "-r", treeHash)
+	lsTree := gitCmd(t, repoPath, "ls-tree", "-r", treeHash)
 	var blobHashes []string
 	for _, line := range strings.Split(lsTree, "\n") {
 		if line == "" {
@@ -176,9 +177,18 @@ func TestPackWriteNoDeltas(t *testing.T) {
 		t.Fatalf("pack stream invalid: %v", err)
 	}
 
-	_ = gitCmd(t, repoPath, nil, "index-pack", "-o", idxPath, packPath)
+	cmd := exec.Command("git", "index-pack", "-o", idxPath, packPath)
+	cmd.Dir = repoPath
+	cmd.Env = append(os.Environ(),
+		"GIT_CONFIG_GLOBAL=/dev/null",
+		"GIT_CONFIG_SYSTEM=/dev/null",
+	)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("git index-pack failed: %v\n%s", err, output)
+	}
 
-	verifyOut := gitCmd(t, repoPath, nil, "verify-pack", "-v", idxPath)
+	verifyOut := gitCmd(t, repoPath, "verify-pack", "-v", idxPath)
 	seen := make(map[string]struct{})
 	for _, line := range strings.Split(verifyOut, "\n") {
 		if strings.TrimSpace(line) == "" {
@@ -205,10 +215,10 @@ func TestPackWriteNoDeltas(t *testing.T) {
 		}
 	}
 	for _, oid := range expectedOids {
-		_ = gitCmd(t, repoPath, nil, "cat-file", "-p", oid)
+		_ = gitCmd(t, repoPath, "cat-file", "-p", oid)
 	}
 
-	_ = gitCmd(t, repoPath, nil, "fsck", "--full", "--strict")
+	_ = gitCmd(t, repoPath, "fsck", "--full", "--strict")
 }
 
 func TestPackWriteDeltas(t *testing.T) {
@@ -233,9 +243,9 @@ func TestPackWriteDeltas(t *testing.T) {
 		}
 	}
 
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", "Delta commit")
-	commitHash := gitCmd(t, repoPath, nil, "rev-parse", "HEAD")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "Delta commit")
+	commitHash := gitCmd(t, repoPath, "rev-parse", "HEAD")
 
 	commitBody := gitCatFile(t, repoPath, "commit", commitHash)
 	lines := bytes.Split(commitBody, []byte{'\n'})
@@ -244,7 +254,7 @@ func TestPackWriteDeltas(t *testing.T) {
 	}
 	treeHash := strings.TrimSpace(string(bytes.TrimPrefix(lines[0], []byte("tree "))))
 
-	lsTree := gitCmd(t, repoPath, nil, "ls-tree", "-r", treeHash)
+	lsTree := gitCmd(t, repoPath, "ls-tree", "-r", treeHash)
 	var blobHashes []string
 	for _, line := range strings.Split(lsTree, "\n") {
 		if line == "" {
@@ -304,9 +314,18 @@ func TestPackWriteDeltas(t *testing.T) {
 		t.Fatalf("pack stream invalid: %v", err)
 	}
 
-	_ = gitCmd(t, repoPath, nil, "index-pack", "-o", idxPath, packPath)
+	cmd := exec.Command("git", "index-pack", "-o", idxPath, packPath)
+	cmd.Dir = repoPath
+	cmd.Env = append(os.Environ(),
+		"GIT_CONFIG_GLOBAL=/dev/null",
+		"GIT_CONFIG_SYSTEM=/dev/null",
+	)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("git index-pack failed: %v\n%s", err, output)
+	}
 
-	verifyOut := gitCmd(t, repoPath, nil, "verify-pack", "-v", idxPath)
+	verifyOut := gitCmd(t, repoPath, "verify-pack", "-v", idxPath)
 	seen := make(map[string]struct{})
 	for _, line := range strings.Split(verifyOut, "\n") {
 		if strings.TrimSpace(line) == "" {
@@ -333,10 +352,10 @@ func TestPackWriteDeltas(t *testing.T) {
 		}
 	}
 	for _, oid := range expectedOids {
-		_ = gitCmd(t, repoPath, nil, "cat-file", "-p", oid)
+		_ = gitCmd(t, repoPath, "cat-file", "-p", oid)
 	}
 
-	_ = gitCmd(t, repoPath, nil, "fsck", "--full", "--strict")
+	_ = gitCmd(t, repoPath, "fsck", "--full", "--strict")
 }
 
 func TestPackWriteThinPackReachable(t *testing.T) {
@@ -350,18 +369,18 @@ func TestPackWriteThinPackReachable(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(workDir, "file.txt"), base, 0o644); err != nil {
 		t.Fatalf("write base file: %v", err)
 	}
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", "base")
-	haveHash := gitCmd(t, repoPath, nil, "rev-parse", "HEAD")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "base")
+	haveHash := gitCmd(t, repoPath, "rev-parse", "HEAD")
 
 	mod := append([]byte(nil), base...)
 	mod[1024] = 'B'
 	if err := os.WriteFile(filepath.Join(workDir, "file.txt"), mod, 0o644); err != nil {
 		t.Fatalf("write mod file: %v", err)
 	}
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", "target")
-	wantHash := gitCmd(t, repoPath, nil, "rev-parse", "HEAD")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "target")
+	wantHash := gitCmd(t, repoPath, "rev-parse", "HEAD")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -404,10 +423,20 @@ func TestPackWriteThinPackReachable(t *testing.T) {
 	_ = os.Remove(packPath)
 	_ = os.Remove(idxPath)
 
-	_ = gitCmd(t, repoPath, buf.Bytes(), "index-pack", "--stdin", "--fix-thin", "-o", idxPath, packPath)
+	cmd := exec.Command("git", "index-pack", "--stdin", "--fix-thin", "-o", idxPath, packPath)
+	cmd.Dir = repoPath
+	cmd.Env = append(os.Environ(),
+		"GIT_CONFIG_GLOBAL=/dev/null",
+		"GIT_CONFIG_SYSTEM=/dev/null",
+	)
+	cmd.Stdin = bytes.NewReader(buf.Bytes())
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("git index-pack --fix-thin failed: %v\n%s", err, output)
+	}
 
-	_ = gitCmd(t, repoPath, nil, "cat-file", "-p", wantHash)
-	_ = gitCmd(t, repoPath, nil, "fsck", "--full", "--strict")
+	_ = gitCmd(t, repoPath, "cat-file", "-p", wantHash)
+	_ = gitCmd(t, repoPath, "fsck", "--full", "--strict")
 
 	_ = os.Remove(packPath)
 	_ = os.Remove(idxPath)

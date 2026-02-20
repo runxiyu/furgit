@@ -28,12 +28,12 @@ func TestCommitGraphReadBasic(t *testing.T) {
 		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 			t.Fatalf("write %s: %v", name, err)
 		}
-		gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
-		gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", fmt.Sprintf("commit %d", i))
+		gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+		gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", fmt.Sprintf("commit %d", i))
 	}
 
-	gitCmd(t, repoPath, nil, "repack", "-a", "-d")
-	gitCmd(t, repoPath, nil, "commit-graph", "write", "--reachable", "--changed-paths")
+	gitCmd(t, repoPath, "repack", "-a", "-d")
+	gitCmd(t, repoPath, "commit-graph", "write", "--reachable", "--changed-paths")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -46,7 +46,7 @@ func TestCommitGraphReadBasic(t *testing.T) {
 		t.Fatalf("CommitGraph failed: %v", err)
 	}
 
-	revList := gitCmd(t, repoPath, nil, "rev-list", "--all")
+	revList := gitCmd(t, repoPath, "rev-list", "--all")
 	commits := strings.Fields(revList)
 	if len(commits) == 0 {
 		t.Fatal("no commits found")
@@ -67,7 +67,7 @@ func TestCommitGraphReadBasic(t *testing.T) {
 			t.Fatalf("CommitAt failed: %v", err)
 		}
 
-		treeStr := string(gitCmd(t, repoPath, nil, "show", "-s", "--format=%T", oidStr))
+		treeStr := string(gitCmd(t, repoPath, "show", "-s", "--format=%T", oidStr))
 		tree, err := repo.ParseHash(treeStr)
 		if err != nil {
 			t.Fatalf("ParseHash tree failed: %v", err)
@@ -76,7 +76,7 @@ func TestCommitGraphReadBasic(t *testing.T) {
 			t.Fatalf("tree mismatch for %s: got %s want %s", oidStr, cc.Tree.String(), tree.String())
 		}
 
-		parentStr := string(gitCmd(t, repoPath, nil, "show", "-s", "--format=%P", oidStr))
+		parentStr := string(gitCmd(t, repoPath, "show", "-s", "--format=%P", oidStr))
 		parents := strings.Fields(parentStr)
 		if len(parents) != len(cc.Parents) {
 			t.Fatalf("parent count mismatch for %s: got %d want %d", oidStr, len(cc.Parents), len(parents))
@@ -95,7 +95,7 @@ func TestCommitGraphReadBasic(t *testing.T) {
 			}
 		}
 
-		ctStr := gitCmd(t, repoPath, nil, "show", "-s", "--format=%ct", oidStr)
+		ctStr := gitCmd(t, repoPath, "show", "-s", "--format=%ct", oidStr)
 		ct, err := strconv.ParseInt(ctStr, 10, 64)
 		if err != nil {
 			t.Fatalf("parse commit time: %v", err)
@@ -104,7 +104,7 @@ func TestCommitGraphReadBasic(t *testing.T) {
 			t.Fatalf("commit time mismatch for %s: got %d want %d", oidStr, cc.CommitTime, ct)
 		}
 
-		changed := gitCmd(t, repoPath, nil, "diff-tree", "--no-commit-id", "--name-only", "-r", "--root", oidStr)
+		changed := gitCmd(t, repoPath, "diff-tree", "--no-commit-id", "--name-only", "-r", "--root", oidStr)
 		for _, path := range strings.Fields(changed) {
 			if path == "" {
 				continue
@@ -126,42 +126,42 @@ func TestCommitGraphReadExtraEdges(t *testing.T) {
 	workDir, cleanupWork := setupWorkDir(t)
 	defer cleanupWork()
 
-	gitCmd(t, workDir, nil, "init")
+	gitCmd(t, workDir, "init")
 
 	if err := os.WriteFile(filepath.Join(workDir, "base.txt"), []byte("base\n"), 0o644); err != nil {
 		t.Fatalf("write base: %v", err)
 	}
-	gitCmd(t, workDir, nil, "add", ".")
-	gitCmd(t, workDir, nil, "commit", "-m", "base")
+	gitCmd(t, workDir, "add", ".")
+	gitCmd(t, workDir, "commit", "-m", "base")
 
-	gitCmd(t, workDir, nil, "checkout", "-b", "branch1")
+	gitCmd(t, workDir, "checkout", "-b", "branch1")
 	if err := os.WriteFile(filepath.Join(workDir, "b1.txt"), []byte("b1\n"), 0o644); err != nil {
 		t.Fatalf("write b1: %v", err)
 	}
-	gitCmd(t, workDir, nil, "add", ".")
-	gitCmd(t, workDir, nil, "commit", "-m", "b1")
+	gitCmd(t, workDir, "add", ".")
+	gitCmd(t, workDir, "commit", "-m", "b1")
 
-	gitCmd(t, workDir, nil, "checkout", "master")
-	gitCmd(t, workDir, nil, "checkout", "-b", "branch2")
+	gitCmd(t, workDir, "checkout", "master")
+	gitCmd(t, workDir, "checkout", "-b", "branch2")
 	if err := os.WriteFile(filepath.Join(workDir, "b2.txt"), []byte("b2\n"), 0o644); err != nil {
 		t.Fatalf("write b2: %v", err)
 	}
-	gitCmd(t, workDir, nil, "add", ".")
-	gitCmd(t, workDir, nil, "commit", "-m", "b2")
+	gitCmd(t, workDir, "add", ".")
+	gitCmd(t, workDir, "commit", "-m", "b2")
 
-	gitCmd(t, workDir, nil, "checkout", "master")
-	gitCmd(t, workDir, nil, "checkout", "-b", "branch3")
+	gitCmd(t, workDir, "checkout", "master")
+	gitCmd(t, workDir, "checkout", "-b", "branch3")
 	if err := os.WriteFile(filepath.Join(workDir, "b3.txt"), []byte("b3\n"), 0o644); err != nil {
 		t.Fatalf("write b3: %v", err)
 	}
-	gitCmd(t, workDir, nil, "add", ".")
-	gitCmd(t, workDir, nil, "commit", "-m", "b3")
+	gitCmd(t, workDir, "add", ".")
+	gitCmd(t, workDir, "commit", "-m", "b3")
 
-	gitCmd(t, workDir, nil, "checkout", "master")
-	gitCmd(t, workDir, nil, "merge", "--no-ff", "-m", "octopus", "branch1", "branch2", "branch3")
+	gitCmd(t, workDir, "checkout", "master")
+	gitCmd(t, workDir, "merge", "--no-ff", "-m", "octopus", "branch1", "branch2", "branch3")
 
-	gitCmd(t, workDir, nil, "repack", "-a", "-d")
-	gitCmd(t, workDir, nil, "commit-graph", "write", "--reachable")
+	gitCmd(t, workDir, "repack", "-a", "-d")
+	gitCmd(t, workDir, "commit-graph", "write", "--reachable")
 
 	repo, err := OpenRepository(filepath.Join(workDir, ".git"))
 	if err != nil {
@@ -174,7 +174,7 @@ func TestCommitGraphReadExtraEdges(t *testing.T) {
 		t.Fatalf("CommitGraph failed: %v", err)
 	}
 
-	mergeHash := gitCmd(t, workDir, nil, "rev-parse", "HEAD")
+	mergeHash := gitCmd(t, workDir, "rev-parse", "HEAD")
 	id, _ := repo.ParseHash(mergeHash)
 	pos, ok := cg.CommitPosition(id)
 	if !ok {
@@ -184,7 +184,7 @@ func TestCommitGraphReadExtraEdges(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CommitAt failed: %v", err)
 	}
-	parentStr := gitCmd(t, workDir, nil, "show", "-s", "--format=%P", mergeHash)
+	parentStr := gitCmd(t, workDir, "show", "-s", "--format=%P", mergeHash)
 	parents := strings.Fields(parentStr)
 	if len(cc.Parents) != len(parents) {
 		t.Fatalf("octopus parent mismatch: got %d want %d", len(cc.Parents), len(parents))
@@ -203,12 +203,12 @@ func TestCommitGraphReadSplitChain(t *testing.T) {
 		if err := os.WriteFile(path, []byte(fmt.Sprintf("v%d\n", i)), 0o644); err != nil {
 			t.Fatalf("write %s: %v", path, err)
 		}
-		gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
-		gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", fmt.Sprintf("commit %d", i))
+		gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+		gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", fmt.Sprintf("commit %d", i))
 	}
 
-	gitCmd(t, repoPath, nil, "repack", "-a", "-d")
-	gitCmd(t, repoPath, nil, "commit-graph", "write", "--reachable", "--changed-paths", "--split=no-merge")
+	gitCmd(t, repoPath, "repack", "-a", "-d")
+	gitCmd(t, repoPath, "commit-graph", "write", "--reachable", "--changed-paths", "--split=no-merge")
 
 	// more commits needed to get a split chain with base layer
 	for i := 5; i < 8; i++ {
@@ -216,11 +216,11 @@ func TestCommitGraphReadSplitChain(t *testing.T) {
 		if err := os.WriteFile(path, []byte(fmt.Sprintf("v%d\n", i)), 0o644); err != nil {
 			t.Fatalf("write %s: %v", path, err)
 		}
-		gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
-		gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", fmt.Sprintf("commit %d", i))
+		gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+		gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", fmt.Sprintf("commit %d", i))
 	}
-	gitCmd(t, repoPath, nil, "repack", "-a", "-d")
-	gitCmd(t, repoPath, nil, "commit-graph", "write", "--reachable", "--changed-paths", "--split=no-merge", "--append")
+	gitCmd(t, repoPath, "repack", "-a", "-d")
+	gitCmd(t, repoPath, "commit-graph", "write", "--reachable", "--changed-paths", "--split=no-merge", "--append")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -242,7 +242,7 @@ func TestCommitGraphReadSplitChain(t *testing.T) {
 	if cg.numCommitsInBase == 0 {
 		t.Fatalf("expected non-zero base commit count")
 	}
-	revList := gitCmd(t, repoPath, nil, "rev-list", "--max-parents=0", "HEAD")
+	revList := gitCmd(t, repoPath, "rev-list", "--max-parents=0", "HEAD")
 	id, _ := repo.ParseHash(revList)
 	if _, ok := cg.CommitPosition(id); !ok {
 		t.Fatalf("base commit not found in commit-graph chain")

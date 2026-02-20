@@ -22,26 +22,26 @@ func TestDiffTreesComplexNestedChanges(t *testing.T) {
 	writeTestFile(t, filepath.Join(workDir, "treeB", "legacy.txt"), "legacy root\n")
 	writeTestFile(t, filepath.Join(workDir, "treeB", "sub", "retired.txt"), "retired\n")
 
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
-	baseTreeHash := gitCmd(t, repoPath, nil, "--work-tree="+workDir, "write-tree")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	baseTreeHash := gitCmd(t, repoPath, "--work-tree="+workDir, "write-tree")
 
 	writeTestFile(t, filepath.Join(workDir, "README.md"), "updated readme\n")
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "rm", "-f", "dir/file_a.txt")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "rm", "-f", "dir/file_a.txt")
 	writeTestFile(t, filepath.Join(workDir, "dir", "nested", "file_b.txt"), "beta v2\n")
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "rm", "-f", "dir/nested/deeper/old.txt")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "rm", "-f", "dir/nested/deeper/old.txt")
 	writeTestFile(t, filepath.Join(workDir, "dir", "nested", "deeper", "new.txt"), "new branch entry\n")
 	writeTestFile(t, filepath.Join(workDir, "dir", "nested", "deeper", "branch", "info.md"), "branch info\n")
 	writeTestFile(t, filepath.Join(workDir, "dir", "nested", "deeper", "branch", "subbranch", "leaf.txt"), "leaf data\n")
 	writeTestFile(t, filepath.Join(workDir, "dir", "nested", "deeper", "branch", "subbranch", "deep", "final.txt"), "final artifact\n")
 	writeTestFile(t, filepath.Join(workDir, "dir", "newchild.txt"), "brand new sibling\n")
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "rm", "-r", "-f", "treeB")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "rm", "-r", "-f", "treeB")
 	writeTestFile(t, filepath.Join(workDir, "features", "alpha", "README.md"), "alpha docs\n")
 	writeTestFile(t, filepath.Join(workDir, "features", "alpha", "beta", "gamma.txt"), "gamma payload\n")
 	writeTestFile(t, filepath.Join(workDir, "modules", "v2", "core", "main.go"), "package core\n")
 	writeTestFile(t, filepath.Join(workDir, "root_addition.txt"), "root level file\n")
 
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
-	updatedTreeHash := gitCmd(t, repoPath, nil, "--work-tree="+workDir, "write-tree")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	updatedTreeHash := gitCmd(t, repoPath, "--work-tree="+workDir, "write-tree")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -108,16 +108,16 @@ func TestDiffTreesDirectoryAddDeleteDeep(t *testing.T) {
 	writeTestFile(t, filepath.Join(workDir, "old_dir", "sub1", "legacy.txt"), "legacy path\n")
 	writeTestFile(t, filepath.Join(workDir, "old_dir", "sub1", "nested", "end.txt"), "legacy end\n")
 
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
-	originalTreeHash := gitCmd(t, repoPath, nil, "--work-tree="+workDir, "write-tree")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	originalTreeHash := gitCmd(t, repoPath, "--work-tree="+workDir, "write-tree")
 
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "rm", "-r", "-f", "old_dir")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "rm", "-r", "-f", "old_dir")
 	writeTestFile(t, filepath.Join(workDir, "fresh", "alpha", "beta", "new.txt"), "brand new directory\n")
 	writeTestFile(t, filepath.Join(workDir, "fresh", "alpha", "docs", "note.md"), "docs note\n")
 	writeTestFile(t, filepath.Join(workDir, "fresh", "alpha", "beta", "gamma", "delta.txt"), "delta payload\n")
 
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
-	nextTreeHash := gitCmd(t, repoPath, nil, "--work-tree="+workDir, "write-tree")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	nextTreeHash := gitCmd(t, repoPath, "--work-tree="+workDir, "write-tree")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {

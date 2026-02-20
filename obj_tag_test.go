@@ -19,9 +19,9 @@ func TestTagWrite(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to write file.txt: %v", err)
 	}
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", "Tagged commit")
-	commitHash := gitCmd(t, repoPath, nil, "rev-parse", "HEAD")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "Tagged commit")
+	commitHash := gitCmd(t, repoPath, "rev-parse", "HEAD")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -90,12 +90,12 @@ func TestTagRead(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to write file.txt: %v", err)
 	}
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", "Commit for tag")
-	commitHash := gitCmd(t, repoPath, nil, "rev-parse", "HEAD")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "Commit for tag")
+	commitHash := gitCmd(t, repoPath, "rev-parse", "HEAD")
 
-	gitCmd(t, repoPath, nil, "tag", "-a", "-m", "Tag message", "v1.0.0", commitHash)
-	tagHash := gitCmd(t, repoPath, nil, "rev-parse", "v1.0.0")
+	gitCmd(t, repoPath, "tag", "-a", "-m", "Tag message", "v1.0.0", commitHash)
+	tagHash := gitCmd(t, repoPath, "rev-parse", "v1.0.0")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {
@@ -136,9 +136,9 @@ func TestTagRoundtrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to write file.txt: %v", err)
 	}
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "add", ".")
-	gitCmd(t, repoPath, nil, "--work-tree="+workDir, "commit", "-m", "Commit")
-	commitHash := gitCmd(t, repoPath, nil, "rev-parse", "HEAD")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "add", ".")
+	gitCmd(t, repoPath, "--work-tree="+workDir, "commit", "-m", "Commit")
+	commitHash := gitCmd(t, repoPath, "rev-parse", "HEAD")
 
 	repo, err := OpenRepository(repoPath)
 	if err != nil {

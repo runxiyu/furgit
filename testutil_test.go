@@ -17,13 +17,10 @@ func setupWorkDir(t *testing.T) (string, func()) {
 	return workDir, func() { _ = os.RemoveAll(workDir) }
 }
 
-func gitCmd(t *testing.T, dir string, stdin []byte, args ...string) string {
+func gitCmd(t *testing.T, dir string, args ...string) string {
 	t.Helper()
 	cmd := exec.Command("git", args...)
 	cmd.Dir = dir
-	if stdin != nil {
-		cmd.Stdin = bytes.NewReader(stdin)
-	}
 	cmd.Env = append(os.Environ(),
 		"GIT_CONFIG_GLOBAL=/dev/null",
 		"GIT_CONFIG_SYSTEM=/dev/null",
