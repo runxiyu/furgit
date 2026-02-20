@@ -21,12 +21,8 @@ Furgit is a fast Git library in pure Go
   but the `sha1` build tag makes it test SHA-1)
 * Reading loose objects
 * Writing loose objects
-* Reading packfiles
-  * Delta resolution
-* Writing packfiles
-  * Delta compression
-  * Thin packs
-* Reading commit-graph's
+* Reading packfiles (with deltas)
+* Writing packfiles (with deltas and thin packs)
 * General support for blobs, trees, commits, and tags
 
 ## Future features
