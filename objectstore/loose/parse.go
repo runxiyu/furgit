@@ -23,11 +23,15 @@ func decodeAll(file *os.File) ([]byte, error) {
 
 // parseRaw parses a loose object payload in "type size\0content" format.
 func parseRaw(raw []byte) (objecttype.Type, []byte, error) {
-	ty, _, headerLen, ok := objectheader.Parse(raw)
+	ty, size, headerLen, ok := objectheader.Parse(raw)
 	if !ok {
 		return objecttype.TypeInvalid, nil, errors.New("objectstore/loose: malformed object header")
 	}
-	return ty, raw[headerLen:], nil
+	content := raw[headerLen:]
+	if int64(len(content)) != size {
+		return objecttype.TypeInvalid, nil, errors.New("objectstore/loose: object header size/content mismatch")
+	}
+	return ty, content, nil
 }
 
 // readHeader reads and parses a loose object header from br.
