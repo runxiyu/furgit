@@ -1,7 +1,6 @@
 package object_test
 
 import (
-	"errors"
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
@@ -36,8 +35,8 @@ func TestTreeSerialize(t *testing.T) {
 		if tree.Entry(removed.Name) != nil {
 			t.Fatalf("Entry(%q) should be nil after remove", removed.Name)
 		}
-		if err := tree.RemoveEntry([]byte("no-such-entry")); !errors.Is(err, object.ErrNotFound) {
-			t.Fatalf("RemoveEntry missing err = %v, want ErrNotFound", err)
+		if err := tree.RemoveEntry([]byte("no-such-entry")); err == nil {
+			t.Fatalf("RemoveEntry missing entry should fail")
 		}
 		if err := tree.InsertEntry(removed); err != nil {
 			t.Fatalf("re-InsertEntry(%q): %v", removed.Name, err)

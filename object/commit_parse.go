@@ -11,7 +11,7 @@ import (
 // ParseCommit decodes a commit object body.
 func ParseCommit(body []byte, algo oid.Algorithm) (*Commit, error) {
 	if algo.Size() == 0 {
-		return nil, ErrInvalidObject
+		return nil, fmt.Errorf("object: commit: invalid hash algorithm %q", algo)
 	}
 
 	c := new(Commit)
@@ -79,7 +79,7 @@ func ParseCommit(body []byte, algo oid.Algorithm) (*Commit, error) {
 	}
 
 	if i > len(body) {
-		return nil, ErrInvalidObject
+		return nil, errors.New("object: commit: parser position out of bounds")
 	}
 	c.Message = append([]byte(nil), body[i:]...)
 	return c, nil

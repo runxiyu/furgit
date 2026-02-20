@@ -2,6 +2,7 @@ package object
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/internal/objectheader"
@@ -11,7 +12,7 @@ import (
 // SerializeWithoutHeader renders the raw tag body bytes.
 func (tag *Tag) SerializeWithoutHeader() ([]byte, error) {
 	if tag.Target.Size() == 0 {
-		return nil, ErrInvalidObject
+		return nil, errors.New("object: tag: missing target id")
 	}
 
 	var buf bytes.Buffer
@@ -52,7 +53,7 @@ func (tag *Tag) SerializeWithHeader() ([]byte, error) {
 	}
 	header, ok := objectheader.Encode(objecttype.TypeTag, int64(len(body)))
 	if !ok {
-		return nil, ErrInvalidObject
+		return nil, errors.New("object: tag: failed to encode object header")
 	}
 	raw := make([]byte, len(header)+len(body))
 	copy(raw, header)

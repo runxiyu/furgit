@@ -11,7 +11,7 @@ import (
 // ParseTree decodes a tree object body.
 func ParseTree(body []byte, algo oid.Algorithm) (*Tree, error) {
 	if algo.Size() == 0 {
-		return nil, ErrInvalidObject
+		return nil, fmt.Errorf("object: tree: invalid hash algorithm %q", algo)
 	}
 
 	var entries []TreeEntry

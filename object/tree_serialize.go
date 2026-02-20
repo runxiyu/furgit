@@ -1,6 +1,7 @@
 package object
 
 import (
+	"errors"
 	"strconv"
 
 	"codeberg.org/lindenii/furgit/internal/objectheader"
@@ -40,7 +41,7 @@ func (tree *Tree) SerializeWithHeader() ([]byte, error) {
 	}
 	header, ok := objectheader.Encode(objecttype.TypeTree, int64(len(body)))
 	if !ok {
-		return nil, ErrInvalidObject
+		return nil, errors.New("object: tree: failed to encode object header")
 	}
 	raw := make([]byte, len(header)+len(body))
 	copy(raw, header)

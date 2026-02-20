@@ -1,6 +1,8 @@
 package object
 
 import (
+	"errors"
+
 	"codeberg.org/lindenii/furgit/internal/objectheader"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
@@ -18,7 +20,7 @@ func (blob *Blob) SerializeWithHeader() ([]byte, error) {
 	}
 	header, ok := objectheader.Encode(objecttype.TypeBlob, int64(len(body)))
 	if !ok {
-		return nil, ErrInvalidObject
+		return nil, errors.New("object: blob: failed to encode object header")
 	}
 	raw := make([]byte, len(header)+len(body))
 	copy(raw, header)

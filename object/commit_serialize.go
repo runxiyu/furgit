@@ -2,6 +2,7 @@ package object
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/internal/objectheader"
@@ -13,7 +14,7 @@ func (commit *Commit) SerializeWithoutHeader() ([]byte, error) {
 	var buf bytes.Buffer
 
 	if commit.Tree.Size() == 0 {
-		return nil, ErrInvalidObject
+		return nil, errors.New("object: commit: missing tree id")
 	}
 	fmt.Fprintf(&buf, "tree %s\n", commit.Tree.String())
 	for _, parent := range commit.Parents {
@@ -43,7 +44,7 @@ func (commit *Commit) SerializeWithoutHeader() ([]byte, error) {
 	}
 	for _, h := range commit.ExtraHeaders {
 		if h.Key == "" {
-			return nil, ErrInvalidObject
+			return nil, errors.New("object: commit: extra header has empty key")
 		}
 		buf.WriteString(h.Key)
 		buf.WriteByte(' ')
@@ -64,7 +65,7 @@ func (commit *Commit) SerializeWithHeader() ([]byte, error) {
 	}
 	header, ok := objectheader.Encode(objecttype.TypeCommit, int64(len(body)))
 	if !ok {
-		return nil, ErrInvalidObject
+		return nil, errors.New("object: commit: failed to encode object header")
 	}
 	raw := make([]byte, len(header)+len(body))
 	copy(raw, header)
