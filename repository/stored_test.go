@@ -161,3 +161,106 @@ func TestResolveTreeEntryErrors(t *testing.T) {
 		})
 	})
 }
+
+func TestResolveTreeEntryDeepPath(t *testing.T) {
+	t.Parallel()
+
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		const depth = 50
+
+		repoHarness := testgit.NewRepo(t, testgit.RepoOptions{
+			ObjectFormat: algo,
+			Bare:         true,
+			RefFormat:    "files",
+		})
+
+		leafBlobID := repoHarness.HashObject(t, "blob", []byte("deep-content\n"))
+		currentTree := repoHarness.Mktree(t, fmt.Sprintf("100644 blob %s\tleaf.txt\n", leafBlobID))
+
+		parts := make([][]byte, 0, depth+1)
+		for i := depth - 1; i >= 0; i-- {
+			name := fmt.Sprintf("level%02d", i)
+			currentTree = repoHarness.Mktree(t, fmt.Sprintf("040000 tree %s\t%s\n", currentTree, name))
+			parts = append([][]byte{[]byte(name)}, parts...)
+		}
+		parts = append(parts, []byte("leaf.txt"))
+
+		repo, err := repository.Open(repoHarness.Dir())
+		if err != nil {
+			t.Fatalf("repository.Open: %v", err)
+		}
+		defer func() { _ = repo.Close() }()
+
+		rootTree, err := repo.ReadStoredTree(currentTree)
+		if err != nil {
+			t.Fatalf("ReadStoredTree(root): %v", err)
+		}
+
+		entry, err := repo.ResolveTreeEntry(rootTree, parts)
+		if err != nil {
+			t.Fatalf("ResolveTreeEntry(deep): %v", err)
+		}
+		if entry.Mode != object.FileModeRegular {
+			t.Fatalf("ResolveTreeEntry(deep) mode = %o, want %o", entry.Mode, object.FileModeRegular)
+		}
+		if entry.ID != leafBlobID {
+			t.Fatalf("ResolveTreeEntry(deep) id = %s, want %s", entry.ID, leafBlobID)
+		}
+	})
+}
+
+func TestReadStoredTreeMixedModes(t *testing.T) {
+	t.Parallel()
+
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		repoHarness := testgit.NewRepo(t, testgit.RepoOptions{
+			ObjectFormat: algo,
+			Bare:         true,
+			RefFormat:    "files",
+		})
+
+		normalID := repoHarness.HashObject(t, "blob", []byte("normal-file\n"))
+		execID := repoHarness.HashObject(t, "blob", []byte("#!/bin/sh\necho hi\n"))
+		symID := repoHarness.HashObject(t, "blob", []byte("normal.txt"))
+		nestedBlobID := repoHarness.HashObject(t, "blob", []byte("nested\n"))
+		nestedTreeID := repoHarness.Mktree(t, fmt.Sprintf("100644 blob %s\tleaf.txt\n", nestedBlobID))
+
+		rootTreeID := repoHarness.Mktree(t,
+			fmt.Sprintf(
+				"100644 blob %s\tnormal.txt\n100755 blob %s\trun.sh\n120000 blob %s\tlink.txt\n040000 tree %s\tdir\n",
+				normalID,
+				execID,
+				symID,
+				nestedTreeID,
+			),
+		)
+
+		repo, err := repository.Open(repoHarness.Dir())
+		if err != nil {
+			t.Fatalf("repository.Open: %v", err)
+		}
+		defer func() { _ = repo.Close() }()
+
+		rootTree, err := repo.ReadStoredTree(rootTreeID)
+		if err != nil {
+			t.Fatalf("ReadStoredTree(root): %v", err)
+		}
+
+		expect := map[string]object.FileMode{
+			"normal.txt": object.FileModeRegular,
+			"run.sh":     object.FileModeExecutable,
+			"link.txt":   object.FileModeSymlink,
+			"dir":        object.FileModeDir,
+		}
+
+		for name, wantMode := range expect {
+			entry := rootTree.Tree().Entry([]byte(name))
+			if entry == nil {
+				t.Fatalf("Entry(%q) returned nil", name)
+			}
+			if entry.Mode != wantMode {
+				t.Fatalf("Entry(%q) mode = %o, want %o", name, entry.Mode, wantMode)
+			}
+		}
+	})
+}

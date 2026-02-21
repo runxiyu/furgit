@@ -133,6 +133,70 @@ func TestLooseListPattern(t *testing.T) {
 	})
 }
 
+func TestLooseListPatternMatrix(t *testing.T) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+		_, _, commitID := testRepo.MakeCommit(t, "loose refs pattern matrix")
+		testRepo.UpdateRef(t, "refs/heads/main", commitID)
+		testRepo.UpdateRef(t, "refs/heads/feature/one", commitID)
+		testRepo.UpdateRef(t, "refs/notes/review", commitID)
+		testRepo.UpdateRef(t, "refs/tags/v1", commitID)
+		testRepo.SymbolicRef(t, "HEAD", "refs/heads/main")
+
+		store := openLooseStore(t, testRepo.Dir(), algo)
+
+		tests := []struct {
+			pattern string
+			want    []string
+		}{
+			{
+				pattern: "refs/heads/*",
+				want:    []string{"refs/heads/main"},
+			},
+			{
+				pattern: "refs/heads/*/*",
+				want:    []string{"refs/heads/feature/one"},
+			},
+			{
+				pattern: "refs/*/feature/one",
+				want:    []string{"refs/heads/feature/one"},
+			},
+			{
+				pattern: "refs/heads/feat?re/one",
+				want:    []string{"refs/heads/feature/one"},
+			},
+			{
+				pattern: "refs/tags/v[0-9]",
+				want:    []string{"refs/tags/v1"},
+			},
+			{
+				pattern: "refs/*/*",
+				want:    []string{"refs/heads/main", "refs/notes/review", "refs/tags/v1"},
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.pattern, func(t *testing.T) {
+				got, err := store.List(tt.pattern)
+				if err != nil {
+					t.Fatalf("List(%q): %v", tt.pattern, err)
+				}
+				gotNames := make([]string, 0, len(got))
+				for _, entry := range got {
+					gotNames = append(gotNames, entry.Name())
+				}
+				slices.Sort(gotNames)
+				wantNames := append([]string(nil), tt.want...)
+				slices.Sort(wantNames)
+				if !slices.Equal(gotNames, wantNames) {
+					t.Fatalf("List(%q) names = %v, want %v", tt.pattern, gotNames, wantNames)
+				}
+			})
+		}
+	})
+}
+
 func TestLooseMalformedDetachedRef(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper

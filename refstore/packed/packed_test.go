@@ -133,6 +133,67 @@ func TestPackedListAndShorten(t *testing.T) {
 	})
 }
 
+func TestPackedListPatternMatrix(t *testing.T) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+		_, _, commitID := testRepo.MakeCommit(t, "packed refs pattern matrix")
+		testRepo.UpdateRef(t, "refs/heads/main", commitID)
+		testRepo.UpdateRef(t, "refs/heads/feature/one", commitID)
+		testRepo.UpdateRef(t, "refs/notes/review", commitID)
+		testRepo.UpdateRef(t, "refs/tags/v1", commitID)
+		testRepo.PackRefs(t, "--all", "--prune")
+
+		store := openPackedRefStoreFromRepo(t, testRepo.Dir(), algo)
+
+		tests := []struct {
+			pattern string
+			want    []string
+		}{
+			{
+				pattern: "refs/heads/*",
+				want:    []string{"refs/heads/main"},
+			},
+			{
+				pattern: "refs/heads/*/*",
+				want:    []string{"refs/heads/feature/one"},
+			},
+			{
+				pattern: "refs/*/feature/one",
+				want:    []string{"refs/heads/feature/one"},
+			},
+			{
+				pattern: "refs/heads/feat?re/one",
+				want:    []string{"refs/heads/feature/one"},
+			},
+			{
+				pattern: "refs/tags/v[0-9]",
+				want:    []string{"refs/tags/v1"},
+			},
+			{
+				pattern: "refs/*/*",
+				want:    []string{"refs/heads/main", "refs/notes/review", "refs/tags/v1"},
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.pattern, func(t *testing.T) {
+				got, err := store.List(tt.pattern)
+				if err != nil {
+					t.Fatalf("List(%q): %v", tt.pattern, err)
+				}
+				gotNames := refNames(got)
+				slices.Sort(gotNames)
+				wantNames := append([]string(nil), tt.want...)
+				slices.Sort(wantNames)
+				if !slices.Equal(gotNames, wantNames) {
+					t.Fatalf("List(%q) names = %v, want %v", tt.pattern, gotNames, wantNames)
+				}
+			})
+		}
+	})
+}
+
 func TestPackedParseErrors(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
@@ -173,6 +234,14 @@ func TestPackedNewValidation(t *testing.T) {
 	if _, err := packed.New(nil, objectid.AlgorithmSHA1); err == nil {
 		t.Fatalf("packed.New nil reader expected error")
 	}
+}
+
+func refNames(refs []ref.Ref) []string {
+	names := make([]string, 0, len(refs))
+	for _, entry := range refs {
+		names = append(names, entry.Name())
+	}
+	return names
 }
 
 func stringsOfLen(ch string, n int) string {

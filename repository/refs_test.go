@@ -94,3 +94,75 @@ func TestResolveRefErrorSurface(t *testing.T) {
 		}
 	})
 }
+
+func TestListRefsLooseOverridesPacked(t *testing.T) {
+	t.Parallel()
+
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		repoHarness := testgit.NewRepo(t, testgit.RepoOptions{
+			ObjectFormat: algo,
+			Bare:         true,
+			RefFormat:    "files",
+		})
+
+		repoHarness.SymbolicRef(t, "HEAD", "refs/heads/main")
+		_, _, commit1 := repoHarness.MakeCommit(t, "commit-one")
+		repoHarness.UpdateRef(t, "refs/heads/main", commit1)
+		repoHarness.UpdateRef(t, "refs/heads/feature", commit1)
+		repoHarness.PackRefs(t, "--all", "--prune")
+
+		_, _, commit2 := repoHarness.MakeCommit(t, "commit-two")
+		repoHarness.UpdateRef(t, "refs/heads/main", commit2)
+
+		repo, err := repository.Open(repoHarness.Dir())
+		if err != nil {
+			t.Fatalf("repository.Open: %v", err)
+		}
+		defer func() { _ = repo.Close() }()
+
+		mainRef, err := repo.ResolveRefFully("refs/heads/main")
+		if err != nil {
+			t.Fatalf("ResolveRefFully(main): %v", err)
+		}
+		if mainRef.ID != commit2 {
+			t.Fatalf("ResolveRefFully(main) id = %s, want %s", mainRef.ID, commit2)
+		}
+
+		refs, err := repo.ListRefs("refs/heads/*")
+		if err != nil {
+			t.Fatalf("ListRefs(refs/heads/*): %v", err)
+		}
+		byName := make(map[string]ref.Ref, len(refs))
+		for _, entry := range refs {
+			name := entry.Name()
+			if _, exists := byName[name]; exists {
+				t.Fatalf("duplicate ref %q in ListRefs output", name)
+			}
+			byName[name] = entry
+		}
+
+		main, ok := byName["refs/heads/main"]
+		if !ok {
+			t.Fatalf("missing refs/heads/main in ListRefs output")
+		}
+		mainDetached, ok := main.(ref.Detached)
+		if !ok {
+			t.Fatalf("refs/heads/main type = %T, want ref.Detached", main)
+		}
+		if mainDetached.ID != commit2 {
+			t.Fatalf("refs/heads/main id = %s, want %s", mainDetached.ID, commit2)
+		}
+
+		feature, ok := byName["refs/heads/feature"]
+		if !ok {
+			t.Fatalf("missing refs/heads/feature in ListRefs output")
+		}
+		featureDetached, ok := feature.(ref.Detached)
+		if !ok {
+			t.Fatalf("refs/heads/feature type = %T, want ref.Detached", feature)
+		}
+		if featureDetached.ID != commit1 {
+			t.Fatalf("refs/heads/feature id = %s, want %s", featureDetached.ID, commit1)
+		}
+	})
+}
