@@ -34,16 +34,16 @@ func parseRaw(raw []byte) (objecttype.Type, []byte, error) {
 	return ty, content, nil
 }
 
-// readHeader reads and parses a loose object header from br.
-// br must be positioned at the start of decoded loose object bytes.
-func readHeader(br *bufio.Reader) (objecttype.Type, int64, error) {
+// readHeader reads and parses a loose object header from br, and returns
+// the raw header bytes including the trailing NUL.
+func readHeader(br *bufio.Reader) ([]byte, objecttype.Type, int64, error) {
 	header, err := br.ReadSlice(0)
 	if err != nil {
-		return objecttype.TypeInvalid, 0, err
+		return nil, objecttype.TypeInvalid, 0, err
 	}
 	ty, size, _, ok := objectheader.Parse(header)
 	if !ok {
-		return objecttype.TypeInvalid, 0, errors.New("objectstore/loose: malformed object header")
+		return nil, objecttype.TypeInvalid, 0, errors.New("objectstore/loose: malformed object header")
 	}
-	return ty, size, nil
+	return header, ty, size, nil
 }

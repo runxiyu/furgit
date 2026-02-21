@@ -2,18 +2,19 @@ package loose
 
 import (
 	"bufio"
+	"bytes"
 	"compress/zlib"
 	"errors"
 	"io"
 	"os"
 
+	"codeberg.org/lindenii/furgit/internal/iolimit"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
 type objectReader struct {
-	// reader is the stream exposed by Read. It may be the raw zlib reader
-	// (full object) or a buffered reader positioned at content bytes only.
+	// reader is the stream exposed by Read.
 	reader io.Reader
 	// file is the underlying loose object file and is closed by Close.
 	file *os.File
@@ -53,10 +54,22 @@ func (store *Store) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) 
 	if err != nil {
 		return nil, err
 	}
+
+	br := bufio.NewReader(zr)
+	header, _, size, err := readHeader(br)
+	if err != nil {
+		_ = zr.Close()
+		_ = file.Close()
+		return nil, err
+	}
+
 	return &objectReader{
-		reader: zr,
-		file:   file,
-		zr:     zr,
+		reader: io.MultiReader(
+			bytes.NewReader(header),
+			iolimit.ExpectLengthReader(br, size),
+		),
+		file: file,
+		zr:   zr,
 	}, nil
 }
 
@@ -69,7 +82,7 @@ func (store *Store) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, in
 	}
 
 	br := bufio.NewReader(zr)
-	ty, size, err := readHeader(br)
+	_, ty, size, err := readHeader(br)
 	if err != nil {
 		_ = zr.Close()
 		_ = file.Close()
@@ -77,7 +90,7 @@ func (store *Store) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, in
 	}
 
 	return ty, size, &objectReader{
-		reader: br,
+		reader: iolimit.ExpectLengthReader(br, size),
 		file:   file,
 		zr:     zr,
 	}, nil

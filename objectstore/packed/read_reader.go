@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"codeberg.org/lindenii/furgit/internal/iolimit"
 	"codeberg.org/lindenii/furgit/objectheader"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
@@ -45,7 +46,7 @@ func (store *Store) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, in
 			return objecttype.TypeInvalid, 0, nil, err
 		}
 		return meta.ty, meta.size, &readCloser{
-			reader: io.LimitReader(zr, meta.size),
+			reader: iolimit.ExpectLengthReader(zr, meta.size),
 			closer: zr,
 		}, nil
 	}
@@ -80,7 +81,7 @@ func (store *Store) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) 
 			return nil, err
 		}
 		return &readCloser{
-			reader: io.MultiReader(bytes.NewReader(header), io.LimitReader(zr, meta.size)),
+			reader: io.MultiReader(bytes.NewReader(header), iolimit.ExpectLengthReader(zr, meta.size)),
 			closer: zr,
 		}, nil
 	}

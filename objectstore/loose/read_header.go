@@ -22,7 +22,7 @@ func (store *Store) ReadHeader(id objectid.ObjectID) (objecttype.Type, int64, er
 	}
 	defer func() { _ = zr.Close() }()
 
-	ty, size, err := readHeader(bufio.NewReader(zr))
+	_, ty, size, err := readHeader(bufio.NewReader(zr))
 	if err != nil {
 		return objecttype.TypeInvalid, 0, err
 	}
