@@ -24,6 +24,9 @@ type Store interface {
 	// Implementations may use backend-local lookup semantics for symbolic hops.
 	// Callers that need cross-backend symbolic resolution (for example in a
 	// chain of stores) should prefer repeatedly calling Resolve.
+	//
+	// ResolveFully resolves symbolic references only. It does not imply peeling
+	// annotated tag objects.
 	ResolveFully(name string) (ref.Detached, error)
 	// List returns references matching pattern.
 	//
