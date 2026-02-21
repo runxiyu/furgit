@@ -124,8 +124,11 @@ func (store *Store) discoverCandidates() ([]packCandidate, error) {
 }
 
 // touchCandidate moves one candidate to the front of the lookup order.
+// This is done on a best-effort basis.
 func (store *Store) touchCandidate(packName string) {
-	store.candidatesMu.Lock()
+	if !store.candidatesMu.TryLock() {
+		return
+	}
 	defer store.candidatesMu.Unlock()
 
 	node := store.candidateNodeByPack[packName]
