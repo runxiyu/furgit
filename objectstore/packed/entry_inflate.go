@@ -2,9 +2,10 @@ package packed
 
 import (
 	"bytes"
-	"compress/zlib"
 	"fmt"
 	"io"
+
+	"codeberg.org/lindenii/furgit/internal/zlib"
 )
 
 // zlibReaderAt opens a zlib reader starting at data offset within pack.

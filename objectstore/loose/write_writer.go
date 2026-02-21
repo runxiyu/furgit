@@ -2,7 +2,6 @@ package loose
 
 import (
 	"bytes"
-	"compress/zlib"
 	"crypto/rand"
 	"errors"
 	"hash"
@@ -10,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"codeberg.org/lindenii/furgit/internal/zlib"
 	"codeberg.org/lindenii/furgit/objectheader"
 	"codeberg.org/lindenii/furgit/objectid"
 )

@@ -2,11 +2,11 @@ package loose
 
 import (
 	"bufio"
-	"compress/zlib"
 	"errors"
 	"io"
 	"os"
 
+	"codeberg.org/lindenii/furgit/internal/zlib"
 	"codeberg.org/lindenii/furgit/objectheader"
 	"codeberg.org/lindenii/furgit/objecttype"
 )

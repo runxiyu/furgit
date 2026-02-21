@@ -2,8 +2,8 @@ package loose
 
 import (
 	"bufio"
-	"compress/zlib"
 
+	"codeberg.org/lindenii/furgit/internal/zlib"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
