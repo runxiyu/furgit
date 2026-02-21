@@ -127,6 +127,29 @@ func TestBytesReturnsCopy(t *testing.T) {
 	}
 }
 
+func TestRawBytesAliasesStorage(t *testing.T) {
+	t.Parallel()
+
+	id, err := objectid.ParseHex(objectid.AlgorithmSHA1, "0123456789abcdef0123456789abcdef01234567")
+	if err != nil {
+		t.Fatalf("ParseHex failed: %v", err)
+	}
+
+	b := id.RawBytes()
+	if len(b) != id.Size() {
+		t.Fatalf("RawBytes len = %d, want %d", len(b), id.Size())
+	}
+	if cap(b) != len(b) {
+		t.Fatalf("RawBytes cap = %d, want %d", cap(b), len(b))
+	}
+
+	orig := id.String()
+	b[0] ^= 0xff
+	if id.String() == orig {
+		t.Fatalf("RawBytes should alias object ID storage")
+	}
+}
+
 func TestAlgorithmSum(t *testing.T) {
 	t.Parallel()
 

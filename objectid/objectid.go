@@ -159,6 +159,17 @@ func (id ObjectID) Bytes() []byte {
 	return append([]byte(nil), id.data[:size]...)
 }
 
+// RawBytes returns a direct byte slice view of the object ID bytes.
+//
+// The returned slice aliases the object ID's internal storage. Callers MUST
+// treat it as read-only and MUST NOT modify its contents.
+//
+// Use Bytes when an independent copy is required.
+func (id *ObjectID) RawBytes() []byte {
+	size := id.Size()
+	return id.data[:size:size]
+}
+
 // ParseHex parses an object ID from hex for the specified algorithm.
 func ParseHex(algo Algorithm, s string) (ObjectID, error) {
 	var id ObjectID
