@@ -25,15 +25,23 @@ type Store struct {
 	discoverOnce sync.Once
 	// discoverErr stores candidate discovery failures.
 	discoverErr error
-	// candidates stores known pack/index pairs in lookup priority order.
-	candidates []packCandidate
+	// candidateHead is the first candidate in lookup priority order.
+	candidateHead *packCandidateNode
+	// candidateTail is the last candidate in lookup priority order.
+	candidateTail *packCandidateNode
 	// candidateByPack maps pack basename to discovered candidate.
 	candidateByPack map[string]packCandidate
+	// candidateNodeByPack maps pack basename to linked-list node.
+	candidateNodeByPack map[string]*packCandidateNode
 	// idxByPack caches opened and parsed indexes by pack basename.
 	idxByPack map[string]*idxFile
 
-	// stateMu guards index publication, pack cache, and close state.
+	// stateMu guards pack cache and close state.
 	stateMu sync.RWMutex
+	// candidatesMu guards discovered candidates and MRU order.
+	candidatesMu sync.RWMutex
+	// idxMu guards parsed index cache.
+	idxMu sync.RWMutex
 	// cacheMu guards delta cache operations.
 	cacheMu sync.RWMutex
 	// packs caches opened .pack handles by basename.
@@ -54,12 +62,13 @@ func New(root *os.Root, algo objectid.Algorithm) (*Store, error) {
 		return nil, objectid.ErrInvalidAlgorithm
 	}
 	return &Store{
-		root:            root,
-		algo:            algo,
-		candidateByPack: make(map[string]packCandidate),
-		idxByPack:       make(map[string]*idxFile),
-		packs:           make(map[string]*packFile),
-		deltaCache:      newDeltaCache(defaultDeltaCacheMaxBytes),
+		root:                root,
+		algo:                algo,
+		candidateByPack:     make(map[string]packCandidate),
+		candidateNodeByPack: make(map[string]*packCandidateNode),
+		idxByPack:           make(map[string]*idxFile),
+		packs:               make(map[string]*packFile),
+		deltaCache:          newDeltaCache(defaultDeltaCacheMaxBytes),
 	}, nil
 }
 
@@ -73,8 +82,10 @@ func (store *Store) Close() error {
 	store.closed = true
 	root := store.root
 	packs := store.packs
-	indexes := store.idxByPack
 	store.stateMu.Unlock()
+	store.idxMu.RLock()
+	indexes := store.idxByPack
+	store.idxMu.RUnlock()
 
 	var closeErr error
 	for _, pack := range packs {
@@ -107,11 +118,14 @@ func (store *Store) lookup(id objectid.ObjectID) (location, error) {
 		return zero, err
 	}
 
-	store.stateMu.RLock()
-	candidates := append([]packCandidate(nil), store.candidates...)
-	store.stateMu.RUnlock()
-
-	for _, candidate := range candidates {
+	nextPackName := store.firstCandidatePackName()
+	for nextPackName != "" {
+		candidate, ok := store.candidateForPack(nextPackName)
+		if !ok {
+			nextPackName = store.firstCandidatePackName()
+			continue
+		}
+		nextPackName = store.nextCandidatePackName(candidate.packName)
 		index, err := store.openIndex(candidate)
 		if err != nil {
 			return zero, err

@@ -23,24 +23,50 @@ type packCandidate struct {
 	mtime int64
 }
 
+// packCandidateNode is one node in the candidate MRU order list.
+type packCandidateNode struct {
+	candidate packCandidate
+	prev      *packCandidateNode
+	next      *packCandidateNode
+}
+
 // ensureCandidates discovers pack/index pairs once.
 func (store *Store) ensureCandidates() error {
 	store.discoverOnce.Do(func() {
 		candidates, err := store.discoverCandidates()
 		candidateByPack := make(map[string]packCandidate, len(candidates))
+		nodeByPack := make(map[string]*packCandidateNode, len(candidates))
+
+		var head *packCandidateNode
+		var tail *packCandidateNode
 		for _, candidate := range candidates {
+			node := &packCandidateNode{
+				candidate: candidate,
+				prev:      tail,
+			}
+			if tail != nil {
+				tail.next = node
+			}
+			if head == nil {
+				head = node
+			}
+			tail = node
 			candidateByPack[candidate.packName] = candidate
+			nodeByPack[candidate.packName] = node
 		}
-		store.stateMu.Lock()
-		store.candidates = candidates
+
+		store.candidatesMu.Lock()
+		store.candidateHead = head
+		store.candidateTail = tail
 		store.candidateByPack = candidateByPack
+		store.candidateNodeByPack = nodeByPack
 		store.discoverErr = err
-		store.stateMu.Unlock()
+		store.candidatesMu.Unlock()
 	})
 
-	store.stateMu.RLock()
+	store.candidatesMu.RLock()
 	err := store.discoverErr
-	store.stateMu.RUnlock()
+	store.candidatesMu.RUnlock()
 	return err
 }
 
@@ -99,18 +125,54 @@ func (store *Store) discoverCandidates() ([]packCandidate, error) {
 
 // touchCandidate moves one candidate to the front of the lookup order.
 func (store *Store) touchCandidate(packName string) {
-	store.stateMu.Lock()
-	defer store.stateMu.Unlock()
-	for i := range store.candidates {
-		if store.candidates[i].packName != packName {
-			continue
-		}
-		if i == 0 {
-			return
-		}
-		candidate := store.candidates[i]
-		copy(store.candidates[1:i+1], store.candidates[0:i])
-		store.candidates[0] = candidate
+	store.candidatesMu.Lock()
+	defer store.candidatesMu.Unlock()
+
+	node := store.candidateNodeByPack[packName]
+	if node == nil || node == store.candidateHead {
 		return
 	}
+
+	if node.prev != nil {
+		node.prev.next = node.next
+	}
+	if node.next != nil {
+		node.next.prev = node.prev
+	}
+	if store.candidateTail == node {
+		store.candidateTail = node.prev
+	}
+
+	node.prev = nil
+	node.next = store.candidateHead
+	if store.candidateHead != nil {
+		store.candidateHead.prev = node
+	}
+	store.candidateHead = node
+	if store.candidateTail == nil {
+		store.candidateTail = node
+	}
+}
+
+// firstCandidatePackName returns the current head pack name, or "" when none
+// are available.
+func (store *Store) firstCandidatePackName() string {
+	store.candidatesMu.RLock()
+	defer store.candidatesMu.RUnlock()
+	if store.candidateHead == nil {
+		return ""
+	}
+	return store.candidateHead.candidate.packName
+}
+
+// nextCandidatePackName returns the pack name after currentPack in current MRU
+// order, or "" at end / when currentPack is not present.
+func (store *Store) nextCandidatePackName(currentPack string) string {
+	store.candidatesMu.RLock()
+	defer store.candidatesMu.RUnlock()
+	node := store.candidateNodeByPack[currentPack]
+	if node == nil || node.next == nil {
+		return ""
+	}
+	return node.next.candidate.packName
 }

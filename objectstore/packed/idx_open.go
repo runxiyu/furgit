@@ -40,34 +40,34 @@ type idxFile struct {
 
 // candidateForPack returns one discovered candidate for a pack basename.
 func (store *Store) candidateForPack(packName string) (packCandidate, bool) {
-	store.stateMu.RLock()
+	store.candidatesMu.RLock()
 	candidate, ok := store.candidateByPack[packName]
-	store.stateMu.RUnlock()
+	store.candidatesMu.RUnlock()
 	return candidate, ok
 }
 
 // openIndex returns one opened and parsed index, caching it by pack basename.
 func (store *Store) openIndex(candidate packCandidate) (*idxFile, error) {
-	store.stateMu.RLock()
+	store.idxMu.RLock()
 	if index, ok := store.idxByPack[candidate.packName]; ok {
-		store.stateMu.RUnlock()
+		store.idxMu.RUnlock()
 		return index, nil
 	}
-	store.stateMu.RUnlock()
+	store.idxMu.RUnlock()
 
 	index, err := openIdxFile(store.root, candidate.idxName, candidate.packName, store.algo)
 	if err != nil {
 		return nil, err
 	}
 
-	store.stateMu.Lock()
+	store.idxMu.Lock()
 	if existing, ok := store.idxByPack[candidate.packName]; ok {
-		store.stateMu.Unlock()
+		store.idxMu.Unlock()
 		_ = index.close()
 		return existing, nil
 	}
 	store.idxByPack[candidate.packName] = index
-	store.stateMu.Unlock()
+	store.idxMu.Unlock()
 	return index, nil
 }
 
