@@ -3,7 +3,10 @@ package packed_test
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"os"
+	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -149,4 +152,79 @@ func TestPackedStoreInvalidAlgorithm(t *testing.T) {
 	if _, err := packed.New(root, objectid.AlgorithmUnknown); !errors.Is(err, objectid.ErrInvalidAlgorithm) {
 		t.Fatalf("packed.New invalid algorithm error = %v", err)
 	}
+}
+
+func TestPackedStoreReadHeaderUsesResolvedObjectSizeForDelta(t *testing.T) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+
+		var parent objectid.ObjectID
+		for i := range 96 {
+			content := strings.Repeat("common-line-"+strconv.Itoa(i%7)+"\n", 384) + fmt.Sprintf("tail-%03d\n", i)
+			_, treeID := testRepo.MakeSingleFileTree(t, "file.txt", []byte(content))
+			if i == 0 {
+				parent = testRepo.CommitTree(t, treeID, "delta-header-size-0")
+				continue
+			}
+			parent = testRepo.CommitTree(t, treeID, fmt.Sprintf("delta-header-size-%03d", i), parent)
+		}
+		testRepo.UpdateRef(t, "refs/heads/main", parent)
+		testRepo.Repack(t, "-a", "-d", "-f", "--window=128", "--depth=128")
+
+		deltaID, wantResolvedSize := findDeltaObjectWithResolvedSizeMismatch(t, testRepo, algo)
+		store := openPackedStore(t, testRepo.Dir(), algo)
+
+		_, gotSize, err := store.ReadHeader(deltaID)
+		if err != nil {
+			t.Fatalf("ReadHeader(%s): %v", deltaID, err)
+		}
+		if gotSize != wantResolvedSize {
+			t.Fatalf("ReadHeader(%s) size = %d, want resolved size %d", deltaID, gotSize, wantResolvedSize)
+		}
+	})
+}
+
+func findDeltaObjectWithResolvedSizeMismatch(t *testing.T, testRepo *testgit.TestRepo, algo objectid.Algorithm) (objectid.ObjectID, int64) {
+	t.Helper()
+
+	idxFiles, err := filepath.Glob(filepath.Join(testRepo.Dir(), "objects", "pack", "*.idx"))
+	if err != nil {
+		t.Fatalf("Glob idx: %v", err)
+	}
+	if len(idxFiles) == 0 {
+		t.Fatalf("no idx files found")
+	}
+
+	verifyOut := testRepo.Run(t, "verify-pack", "-v", idxFiles[0])
+	for _, line := range strings.Split(strings.TrimSpace(verifyOut), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) < 7 {
+			continue
+		}
+
+		idHex := fields[0]
+		deltaStreamSize, err := strconv.ParseInt(fields[2], 10, 64)
+		if err != nil {
+			continue
+		}
+
+		resolvedSizeStr := testRepo.Run(t, "cat-file", "-s", idHex)
+		resolvedSize, err := strconv.ParseInt(strings.TrimSpace(resolvedSizeStr), 10, 64)
+		if err != nil {
+			t.Fatalf("parse cat-file size for %s: %v", idHex, err)
+		}
+		if deltaStreamSize == resolvedSize {
+			continue
+		}
+
+		id, err := objectid.ParseHex(algo, idHex)
+		if err != nil {
+			t.Fatalf("ParseHex(%s): %v", idHex, err)
+		}
+		return id, resolvedSize
+	}
+
+	t.Fatalf("did not find a delta object with mismatched stream/resolved size")
+	return objectid.ObjectID{}, 0
 }
