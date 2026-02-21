@@ -17,6 +17,9 @@ type Detached struct {
 	ID      objectid.ObjectID
 
 	// Peeled is the peeled target when available (for annotated tags).
+	//
+	// This field is optional backend-provided metadata. Backends that do not
+	// have peel metadata available may leave it nil.
 	Peeled *objectid.ObjectID
 }
 
