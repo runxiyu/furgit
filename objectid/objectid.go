@@ -2,7 +2,7 @@
 package objectid
 
 import (
-	"crypto/sha1"
+	"crypto/sha1" //#nosec G505
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
@@ -42,15 +42,13 @@ var algorithmTable = [...]algorithmDetails{
 		name: "sha1",
 		size: sha1.Size,
 		sum: func(data []byte) ObjectID {
-			sum := sha1.Sum(data)
+			sum := sha1.Sum(data) //#nosec G401
 			var id ObjectID
 			copy(id.data[:], sum[:])
 			id.algo = AlgorithmSHA1
 			return id
 		},
-		new: func() hash.Hash {
-			return sha1.New()
-		},
+		new: sha1.New,
 	},
 	AlgorithmSHA256: {
 		name: "sha256",
@@ -62,9 +60,7 @@ var algorithmTable = [...]algorithmDetails{
 			id.algo = AlgorithmSHA256
 			return id
 		},
-		new: func() hash.Hash {
-			return sha256.New()
-		},
+		new: sha256.New,
 	},
 }
 
@@ -72,18 +68,14 @@ var algorithmByName = map[string]Algorithm{}
 var supportedAlgorithms []Algorithm
 
 func init() {
-	for algo, info := range algorithmTable {
+	for algo := Algorithm(0); int(algo) < len(algorithmTable); algo++ {
+		info := algorithmTable[algo]
 		if info.name == "" {
 			continue
 		}
-		parsed := Algorithm(algo)
-		algorithmByName[info.name] = parsed
-		supportedAlgorithms = append(supportedAlgorithms, parsed)
+		algorithmByName[info.name] = algo
+		supportedAlgorithms = append(supportedAlgorithms, algo)
 	}
-}
-
-func (algo Algorithm) info() algorithmDetails {
-	return algorithmTable[algo]
 }
 
 // SupportedAlgorithms returns all object ID algorithms supported by furgit.
@@ -131,7 +123,13 @@ func (algo Algorithm) New() (hash.Hash, error) {
 	return newFn(), nil
 }
 
+func (algo Algorithm) info() algorithmDetails {
+	return algorithmTable[algo]
+}
+
 // ObjectID represents a Git object ID.
+//
+//nolint:recvcheck
 type ObjectID struct {
 	algo Algorithm
 	data [maxObjectIDSize]byte
@@ -184,7 +182,7 @@ func ParseHex(algo Algorithm, s string) (ObjectID, error) {
 	}
 	decoded, err := hex.DecodeString(s)
 	if err != nil {
-		return id, fmt.Errorf("%w: decode: %v", ErrInvalidObjectID, err)
+		return id, fmt.Errorf("%w: decode: %w", ErrInvalidObjectID, err)
 	}
 	copy(id.data[:], decoded)
 	id.algo = algo

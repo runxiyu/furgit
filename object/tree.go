@@ -49,27 +49,6 @@ func (tree *Tree) Entry(name []byte) *TreeEntry {
 	return tree.entry(name, false)
 }
 
-func (tree *Tree) entry(name []byte, searchIsTree bool) *TreeEntry {
-	low, high := 0, len(tree.Entries)-1
-	for low <= high {
-		mid := low + (high-low)/2
-		entry := &tree.Entries[mid]
-		cmp := TreeEntryNameCompare(entry.Name, entry.Mode, name, searchIsTree)
-		if cmp == 0 {
-			if bytes.Equal(entry.Name, name) {
-				return entry
-			}
-			return nil
-		}
-		if cmp < 0 {
-			low = mid + 1
-		} else {
-			high = mid - 1
-		}
-	}
-	return nil
-}
-
 // InsertEntry inserts a tree entry while preserving Git ordering.
 func (tree *Tree) InsertEntry(newEntry TreeEntry) error {
 	if tree.entry(newEntry.Name, true) != nil || tree.entry(newEntry.Name, false) != nil {
@@ -100,6 +79,27 @@ func (tree *Tree) RemoveEntry(name []byte) error {
 	return fmt.Errorf("object: tree: entry %q not found", name)
 }
 
+func (tree *Tree) entry(name []byte, searchIsTree bool) *TreeEntry {
+	low, high := 0, len(tree.Entries)-1
+	for low <= high {
+		mid := low + (high-low)/2
+		entry := &tree.Entries[mid]
+		cmp := TreeEntryNameCompare(entry.Name, entry.Mode, name, searchIsTree)
+		if cmp == 0 {
+			if bytes.Equal(entry.Name, name) {
+				return entry
+			}
+			return nil
+		}
+		if cmp < 0 {
+			low = mid + 1
+		} else {
+			high = mid - 1
+		}
+	}
+	return nil
+}
+
 // TreeEntryNameCompare compares names using Git tree ordering rules.
 func TreeEntryNameCompare(entryName []byte, entryMode FileMode, searchName []byte, searchIsTree bool) int {
 	isEntryTree := entryMode == FileModeDir
@@ -115,7 +115,7 @@ func TreeEntryNameCompare(entryName []byte, entryMode FileMode, searchName []byt
 
 	n := min(searchLen, entryLen)
 
-	for i := 0; i < n; i++ {
+	for i := range n {
 		var ec, sc byte
 		if i < len(entryName) {
 			ec = entryName[i]

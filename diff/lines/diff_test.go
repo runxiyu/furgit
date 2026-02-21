@@ -1,10 +1,12 @@
-package lines
+package lines_test
 
 import (
 	"bytes"
 	"strconv"
 	"strings"
 	"testing"
+
+	"codeberg.org/lindenii/furgit/diff/lines"
 )
 
 func TestDiff(t *testing.T) {
@@ -14,260 +16,260 @@ func TestDiff(t *testing.T) {
 		name     string
 		oldInput string
 		newInput string
-		expected []Chunk
+		expected []lines.Chunk
 	}{
 		{
 			name:     "empty inputs produce no chunks",
 			oldInput: "",
 			newInput: "",
-			expected: []Chunk{},
+			expected: []lines.Chunk{},
 		},
 		{
 			name:     "only additions",
 			oldInput: "",
 			newInput: "alpha\nbeta\n",
-			expected: []Chunk{
-				{Kind: ChunkKindAdded, Data: []byte("alpha\nbeta\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindAdded, Data: []byte("alpha\nbeta\n")},
 			},
 		},
 		{
 			name:     "only deletions",
 			oldInput: "alpha\nbeta\n",
 			newInput: "",
-			expected: []Chunk{
-				{Kind: ChunkKindDeleted, Data: []byte("alpha\nbeta\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindDeleted, Data: []byte("alpha\nbeta\n")},
 			},
 		},
 		{
 			name:     "unchanged content is grouped",
 			oldInput: "same\nlines\n",
 			newInput: "same\nlines\n",
-			expected: []Chunk{
-				{Kind: ChunkKindUnchanged, Data: []byte("same\nlines\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("same\nlines\n")},
 			},
 		},
 		{
 			name:     "insertion in the middle",
 			oldInput: "a\nb\nc\n",
 			newInput: "a\nb\nX\nc\n",
-			expected: []Chunk{
-				{Kind: ChunkKindUnchanged, Data: []byte("a\nb\n")},
-				{Kind: ChunkKindAdded, Data: []byte("X\n")},
-				{Kind: ChunkKindUnchanged, Data: []byte("c\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("a\nb\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("X\n")},
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("c\n")},
 			},
 		},
 		{
 			name:     "replacement without trailing newline",
 			oldInput: "first\nsecond",
 			newInput: "first\nsecond\n",
-			expected: []Chunk{
-				{Kind: ChunkKindUnchanged, Data: []byte("first\n")},
-				{Kind: ChunkKindDeleted, Data: []byte("second")},
-				{Kind: ChunkKindAdded, Data: []byte("second\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("first\n")},
+				{Kind: lines.ChunkKindDeleted, Data: []byte("second")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("second\n")},
 			},
 		},
 		{
 			name:     "line replacement",
 			oldInput: "a\nb\nc\n",
 			newInput: "a\nB\nc\n",
-			expected: []Chunk{
-				{Kind: ChunkKindUnchanged, Data: []byte("a\n")},
-				{Kind: ChunkKindDeleted, Data: []byte("b\n")},
-				{Kind: ChunkKindAdded, Data: []byte("B\n")},
-				{Kind: ChunkKindUnchanged, Data: []byte("c\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("a\n")},
+				{Kind: lines.ChunkKindDeleted, Data: []byte("b\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("B\n")},
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("c\n")},
 			},
 		},
 		{
 			name:     "swap adjacent lines",
 			oldInput: "A\nB\n",
 			newInput: "B\nA\n",
-			expected: []Chunk{
-				{Kind: ChunkKindDeleted, Data: []byte("A\n")},
-				{Kind: ChunkKindUnchanged, Data: []byte("B\n")},
-				{Kind: ChunkKindAdded, Data: []byte("A\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindDeleted, Data: []byte("A\n")},
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("B\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("A\n")},
 			},
 		},
 		{
 			name:     "indentation change is a full line replacement",
 			oldInput: "func main() {\n\treturn\n}\n",
 			newInput: "func main() {\n    return\n}\n",
-			expected: []Chunk{
-				{Kind: ChunkKindUnchanged, Data: []byte("func main() {\n")},
-				{Kind: ChunkKindDeleted, Data: []byte("\treturn\n")},
-				{Kind: ChunkKindAdded, Data: []byte("    return\n")},
-				{Kind: ChunkKindUnchanged, Data: []byte("}\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("func main() {\n")},
+				{Kind: lines.ChunkKindDeleted, Data: []byte("\treturn\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("    return\n")},
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("}\n")},
 			},
 		},
 		{
 			name:     "commenting out lines",
 			oldInput: "code\n",
 			newInput: "// code\n",
-			expected: []Chunk{
-				{Kind: ChunkKindDeleted, Data: []byte("code\n")},
-				{Kind: ChunkKindAdded, Data: []byte("// code\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindDeleted, Data: []byte("code\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("// code\n")},
 			},
 		},
 		{
 			name:     "reducing repeating lines",
 			oldInput: "log\nlog\nlog\n",
 			newInput: "log\n",
-			expected: []Chunk{
-				{Kind: ChunkKindUnchanged, Data: []byte("log\n")},
-				{Kind: ChunkKindDeleted, Data: []byte("log\nlog\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("log\n")},
+				{Kind: lines.ChunkKindDeleted, Data: []byte("log\nlog\n")},
 			},
 		},
 		{
 			name:     "expanding repeating lines",
 			oldInput: "tick\n",
 			newInput: "tick\ntick\ntick\n",
-			expected: []Chunk{
-				{Kind: ChunkKindUnchanged, Data: []byte("tick\n")},
-				{Kind: ChunkKindAdded, Data: []byte("tick\ntick\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("tick\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("tick\ntick\n")},
 			},
 		},
 		{
 			name:     "interleaved modifications",
 			oldInput: "keep\nchange\nkeep\nchange\n",
 			newInput: "keep\nfixed\nkeep\nfixed\n",
-			expected: []Chunk{
-				{Kind: ChunkKindUnchanged, Data: []byte("keep\n")},
-				{Kind: ChunkKindDeleted, Data: []byte("change\n")},
-				{Kind: ChunkKindAdded, Data: []byte("fixed\n")},
-				{Kind: ChunkKindUnchanged, Data: []byte("keep\n")},
-				{Kind: ChunkKindDeleted, Data: []byte("change\n")},
-				{Kind: ChunkKindAdded, Data: []byte("fixed\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("keep\n")},
+				{Kind: lines.ChunkKindDeleted, Data: []byte("change\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("fixed\n")},
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("keep\n")},
+				{Kind: lines.ChunkKindDeleted, Data: []byte("change\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("fixed\n")},
 			},
 		},
 		{
 			name:     "large common header and footer",
 			oldInput: "header\nheader\nheader\nOLD\nfooter\nfooter\n",
 			newInput: "header\nheader\nheader\nNEW\nfooter\nfooter\n",
-			expected: []Chunk{
-				{Kind: ChunkKindUnchanged, Data: []byte("header\nheader\nheader\n")},
-				{Kind: ChunkKindDeleted, Data: []byte("OLD\n")},
-				{Kind: ChunkKindAdded, Data: []byte("NEW\n")},
-				{Kind: ChunkKindUnchanged, Data: []byte("footer\nfooter\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("header\nheader\nheader\n")},
+				{Kind: lines.ChunkKindDeleted, Data: []byte("OLD\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("NEW\n")},
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("footer\nfooter\n")},
 			},
 		},
 		{
 			name:     "completely different content",
 			oldInput: "apple\nbanana\n",
 			newInput: "cherry\ndate\n",
-			expected: []Chunk{
-				{Kind: ChunkKindDeleted, Data: []byte("apple\nbanana\n")},
-				{Kind: ChunkKindAdded, Data: []byte("cherry\ndate\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindDeleted, Data: []byte("apple\nbanana\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("cherry\ndate\n")},
 			},
 		},
 		{
 			name:     "unicode and emoji changes",
 			oldInput: "Hello 🌍\nYay\n",
 			newInput: "Hello 🌎\nYay\n",
-			expected: []Chunk{
-				{Kind: ChunkKindDeleted, Data: []byte("Hello 🌍\n")},
-				{Kind: ChunkKindAdded, Data: []byte("Hello 🌎\n")},
-				{Kind: ChunkKindUnchanged, Data: []byte("Yay\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindDeleted, Data: []byte("Hello 🌍\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("Hello 🌎\n")},
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("Yay\n")},
 			},
 		},
 		{
 			name:     "binary data with embedded newlines",
 			oldInput: "\x00\x01\n\x02\x03\n",
 			newInput: "\x00\x01\n\x02\xFF\n",
-			expected: []Chunk{
-				{Kind: ChunkKindUnchanged, Data: []byte("\x00\x01\n")},
-				{Kind: ChunkKindDeleted, Data: []byte("\x02\x03\n")},
-				{Kind: ChunkKindAdded, Data: []byte("\x02\xFF\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("\x00\x01\n")},
+				{Kind: lines.ChunkKindDeleted, Data: []byte("\x02\x03\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("\x02\xFF\n")},
 			},
 		},
 		{
 			name:     "adding trailing newline to last line",
 			oldInput: "Line 1\nLine 2",
 			newInput: "Line 1\nLine 2\n",
-			expected: []Chunk{
-				{Kind: ChunkKindUnchanged, Data: []byte("Line 1\n")},
-				{Kind: ChunkKindDeleted, Data: []byte("Line 2")},
-				{Kind: ChunkKindAdded, Data: []byte("Line 2\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("Line 1\n")},
+				{Kind: lines.ChunkKindDeleted, Data: []byte("Line 2")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("Line 2\n")},
 			},
 		},
 		{
 			name:     "removing trailing newline",
 			oldInput: "A\nB\n",
 			newInput: "A\nB",
-			expected: []Chunk{
-				{Kind: ChunkKindUnchanged, Data: []byte("A\n")},
-				{Kind: ChunkKindDeleted, Data: []byte("B\n")},
-				{Kind: ChunkKindAdded, Data: []byte("B")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("A\n")},
+				{Kind: lines.ChunkKindDeleted, Data: []byte("B\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("B")},
 			},
 		},
 		{
 			name:     "inserting blank lines",
 			oldInput: "A\nB\n",
 			newInput: "A\n\n\nB\n",
-			expected: []Chunk{
-				{Kind: ChunkKindUnchanged, Data: []byte("A\n")},
-				{Kind: ChunkKindAdded, Data: []byte("\n\n")},
-				{Kind: ChunkKindUnchanged, Data: []byte("B\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("A\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("\n\n")},
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("B\n")},
 			},
 		},
 		{
 			name:     "collapsing blank lines",
 			oldInput: "A\n\n\n\nB\n",
 			newInput: "A\nB\n",
-			expected: []Chunk{
-				{Kind: ChunkKindUnchanged, Data: []byte("A\n")},
-				{Kind: ChunkKindDeleted, Data: []byte("\n\n\n")},
-				{Kind: ChunkKindUnchanged, Data: []byte("B\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("A\n")},
+				{Kind: lines.ChunkKindDeleted, Data: []byte("\n\n\n")},
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("B\n")},
 			},
 		},
 		{
 			name:     "case sensitivity check",
 			oldInput: "FOO\nbar\n",
 			newInput: "foo\nbar\n",
-			expected: []Chunk{
-				{Kind: ChunkKindDeleted, Data: []byte("FOO\n")},
-				{Kind: ChunkKindAdded, Data: []byte("foo\n")},
-				{Kind: ChunkKindUnchanged, Data: []byte("bar\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindDeleted, Data: []byte("FOO\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("foo\n")},
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("bar\n")},
 			},
 		},
 		{
 			name:     "partial line match is full mismatch",
 			oldInput: "The quick brown fox\n",
 			newInput: "The quick brown fox jumps\n",
-			expected: []Chunk{
-				{Kind: ChunkKindDeleted, Data: []byte("The quick brown fox\n")},
-				{Kind: ChunkKindAdded, Data: []byte("The quick brown fox jumps\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindDeleted, Data: []byte("The quick brown fox\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("The quick brown fox jumps\n")},
 			},
 		},
 		{
 			name:     "inserting middle content",
 			oldInput: "Top\nBottom\n",
 			newInput: "Top\nMiddle\nBottom\n",
-			expected: []Chunk{
-				{Kind: ChunkKindUnchanged, Data: []byte("Top\n")},
-				{Kind: ChunkKindAdded, Data: []byte("Middle\n")},
-				{Kind: ChunkKindUnchanged, Data: []byte("Bottom\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("Top\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("Middle\n")},
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("Bottom\n")},
 			},
 		},
 		{
 			name:     "block move simulated",
 			oldInput: "BlockA\nBlockB\nBlockC\n",
 			newInput: "BlockA\nBlockC\nBlockB\n",
-			expected: []Chunk{
-				{Kind: ChunkKindUnchanged, Data: []byte("BlockA\n")},
-				{Kind: ChunkKindDeleted, Data: []byte("BlockB\n")},
-				{Kind: ChunkKindUnchanged, Data: []byte("BlockC\n")},
-				{Kind: ChunkKindAdded, Data: []byte("BlockB\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("BlockA\n")},
+				{Kind: lines.ChunkKindDeleted, Data: []byte("BlockB\n")},
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("BlockC\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("BlockB\n")},
 			},
 		},
 		{
 			name:     "alternating additions",
 			oldInput: "A\nB\nC\n",
 			newInput: "A\n1\nB\n2\nC\n",
-			expected: []Chunk{
-				{Kind: ChunkKindUnchanged, Data: []byte("A\n")},
-				{Kind: ChunkKindAdded, Data: []byte("1\n")},
-				{Kind: ChunkKindUnchanged, Data: []byte("B\n")},
-				{Kind: ChunkKindAdded, Data: []byte("2\n")},
-				{Kind: ChunkKindUnchanged, Data: []byte("C\n")},
+			expected: []lines.Chunk{
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("A\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("1\n")},
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("B\n")},
+				{Kind: lines.ChunkKindAdded, Data: []byte("2\n")},
+				{Kind: lines.ChunkKindUnchanged, Data: []byte("C\n")},
 			},
 		},
 	}
@@ -276,7 +278,7 @@ func TestDiff(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			chunks, err := Diff([]byte(tt.oldInput), []byte(tt.newInput))
+			chunks, err := lines.Diff([]byte(tt.oldInput), []byte(tt.newInput))
 			if err != nil {
 				t.Fatalf("Diff returned error: %v", err)
 			}
@@ -297,7 +299,7 @@ func TestDiff(t *testing.T) {
 	}
 }
 
-func formatChunks(chunks []Chunk) string {
+func formatChunks(chunks []lines.Chunk) string {
 	var b strings.Builder
 	b.WriteByte('[')
 	for i, chunk := range chunks {
@@ -312,13 +314,13 @@ func formatChunks(chunks []Chunk) string {
 	return b.String()
 }
 
-func chunkKindName(kind ChunkKind) string {
+func chunkKindName(kind lines.ChunkKind) string {
 	switch kind {
-	case ChunkKindUnchanged:
+	case lines.ChunkKindUnchanged:
 		return "U"
-	case ChunkKindDeleted:
+	case lines.ChunkKindDeleted:
 		return "D"
-	case ChunkKindAdded:
+	case lines.ChunkKindAdded:
 		return "A"
 	default:
 		return "?"

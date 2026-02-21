@@ -90,6 +90,7 @@ func (cache *Cache[K, V]) Get(key K) (V, bool) {
 		return zero, false
 	}
 	cache.lru.MoveToBack(elem)
+	//nolint:forcetypeassert
 	return elem.Value.(*entry[K, V]).value, true
 }
 
@@ -100,6 +101,7 @@ func (cache *Cache[K, V]) Peek(key K) (V, bool) {
 		var zero V
 		return zero, false
 	}
+	//nolint:forcetypeassert
 	return elem.Value.(*entry[K, V]).value, true
 }
 
@@ -161,6 +163,7 @@ func (cache *Cache[K, V]) evictOverBudget() {
 }
 
 func (cache *Cache[K, V]) removeElem(elem *list.Element) *entry[K, V] {
+	//nolint:forcetypeassert
 	ent := elem.Value.(*entry[K, V])
 	cache.lru.Remove(elem)
 	delete(cache.items, ent.key)

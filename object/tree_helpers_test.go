@@ -10,30 +10,15 @@ import (
 	"codeberg.org/lindenii/furgit/object"
 )
 
-func mktreeTypeFromMode(t *testing.T, mode object.FileMode) string {
-	t.Helper()
-	switch mode {
-	case object.FileModeDir:
-		return "tree"
-	case object.FileModeRegular, object.FileModeExecutable, object.FileModeSymlink:
-		return "blob"
-	case object.FileModeGitlink:
-		return "commit"
-	default:
-		t.Fatalf("unsupported file mode: %o", mode)
-		return ""
-	}
-}
-
 func buildGitMktreeInput(entries []object.TreeEntry) string {
 	var b strings.Builder
 	for _, e := range entries {
-		fmt.Fprintf(&b, "%o %s %s\t%s\n", e.Mode, mktreeTypeFromModeNoTB(e.Mode), e.ID.String(), e.Name)
+		fmt.Fprintf(&b, "%o %s %s\t%s\n", e.Mode, mktreeTypeFromMode(e.Mode), e.ID.String(), e.Name)
 	}
 	return b.String()
 }
 
-func mktreeTypeFromModeNoTB(mode object.FileMode) string {
+func mktreeTypeFromMode(mode object.FileMode) string {
 	switch mode {
 	case object.FileModeDir:
 		return "tree"

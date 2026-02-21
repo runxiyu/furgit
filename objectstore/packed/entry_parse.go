@@ -3,6 +3,7 @@ package packed
 import (
 	"fmt"
 
+	"codeberg.org/lindenii/furgit/internal/intconv"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
@@ -28,7 +29,10 @@ func parseEntryMeta(pack *packFile, algo objectid.Algorithm, offset uint64) (ent
 		return zero, fmt.Errorf("objectstore/packed: pack %q offset %d out of bounds", pack.name, offset)
 	}
 
-	pos := int(offset)
+	pos, err := intconv.Uint64ToInt(offset)
+	if err != nil {
+		return zero, fmt.Errorf("objectstore/packed: pack %q offset conversion: %w", pack.name, err)
+	}
 	first := pack.data[pos]
 	pos++
 
@@ -76,6 +80,8 @@ func parseEntryMeta(pack *packFile, algo objectid.Algorithm, offset uint64) (ent
 			return zero, fmt.Errorf("objectstore/packed: pack %q has invalid ofs-delta base", pack.name)
 		}
 		meta.baseOfs = offset - dist
+	case objecttype.TypeInvalid, objecttype.TypeFuture:
+		return zero, fmt.Errorf("objectstore/packed: pack %q has unsupported object type %d", pack.name, meta.ty)
 	default:
 		return zero, fmt.Errorf("objectstore/packed: pack %q has unsupported object type %d", pack.name, meta.ty)
 	}
@@ -111,6 +117,8 @@ func isBaseObjectType(ty objecttype.Type) bool {
 	switch ty {
 	case objecttype.TypeCommit, objecttype.TypeTree, objecttype.TypeBlob, objecttype.TypeTag:
 		return true
+	case objecttype.TypeInvalid, objecttype.TypeFuture, objecttype.TypeOfsDelta, objecttype.TypeRefDelta:
+		return false
 	default:
 		return false
 	}

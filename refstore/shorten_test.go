@@ -10,6 +10,7 @@ func TestShortenName(t *testing.T) {
 	t.Parallel()
 
 	t.Run("simple", func(t *testing.T) {
+		t.Parallel()
 		got := refstore.ShortenName("refs/heads/main", []string{"refs/heads/main"})
 		if got != "main" {
 			t.Fatalf("ShortenName simple = %q, want %q", got, "main")
@@ -17,6 +18,7 @@ func TestShortenName(t *testing.T) {
 	})
 
 	t.Run("ambiguous with tags", func(t *testing.T) {
+		t.Parallel()
 		got := refstore.ShortenName(
 			"refs/heads/main",
 			[]string{
@@ -30,6 +32,7 @@ func TestShortenName(t *testing.T) {
 	})
 
 	t.Run("strict remote head ambiguity", func(t *testing.T) {
+		t.Parallel()
 		// In strict mode, refs/remotes/%s/HEAD blocks shortening to "%s".
 		got := refstore.ShortenName(
 			"refs/heads/main",
@@ -44,6 +47,7 @@ func TestShortenName(t *testing.T) {
 	})
 
 	t.Run("deep fallback still shortens", func(t *testing.T) {
+		t.Parallel()
 		// refs/remotes/origin/main conflicts with refs/heads/origin/main for
 		// "origin/main", so it should fall back to "remotes/origin/main".
 		got := refstore.ShortenName(
@@ -59,6 +63,7 @@ func TestShortenName(t *testing.T) {
 	})
 
 	t.Run("refs-prefix fallback", func(t *testing.T) {
+		t.Parallel()
 		name := "refs/notes/review/topic"
 		got := refstore.ShortenName(name, []string{name})
 		if got != "notes/review/topic" {

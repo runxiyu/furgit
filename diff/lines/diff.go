@@ -64,11 +64,11 @@ func Diff(oldB, newB []byte) ([]Chunk, error) {
 		newIDs[i] = id
 	}
 
-	max := n + m
-	offset := max
-	trace := make([][]int, 0, max+1)
+	maxDist := n + m
+	offset := maxDist
+	trace := make([][]int, 0, maxDist+1)
 
-	Vprev := make([]int, 2*max+1)
+	Vprev := make([]int, 2*maxDist+1)
 	for i := range Vprev {
 		Vprev[i] = -1
 	}
@@ -84,8 +84,8 @@ func Diff(oldB, newB []byte) ([]Chunk, error) {
 
 	found := x0 >= n && y0 >= m
 
-	for D := 1; D <= max && !found; D++ {
-		V := make([]int, 2*max+1)
+	for D := 1; D <= maxDist && !found; D++ {
+		V := make([]int, 2*maxDist+1)
 		for i := range V {
 			V[i] = -1
 		}

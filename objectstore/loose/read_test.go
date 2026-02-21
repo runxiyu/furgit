@@ -14,7 +14,8 @@ import (
 )
 
 func TestLooseStoreReadAgainstGit(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		blobID := testRepo.HashObject(t, "blob", []byte("blob body\n"))
 		_, treeID, commitID := testRepo.MakeCommit(t, "subject\n\nbody")
@@ -93,7 +94,8 @@ func TestLooseStoreReadAgainstGit(t *testing.T) {
 }
 
 func TestLooseStoreErrors(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		store := openLooseStore(t, testRepo.Dir(), algo)
 
@@ -136,6 +138,7 @@ func TestLooseStoreErrors(t *testing.T) {
 }
 
 func TestLooseStoreNewValidation(t *testing.T) {
+	t.Parallel()
 	root, err := os.OpenRoot(t.TempDir())
 	if err != nil {
 		t.Fatalf("OpenRoot: %v", err)

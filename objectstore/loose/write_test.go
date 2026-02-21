@@ -12,7 +12,8 @@ import (
 )
 
 func TestLooseStoreWriteWriterContentAgainstGit(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		store := openLooseStore(t, testRepo.Dir(), algo)
 
@@ -68,7 +69,8 @@ func TestLooseStoreWriteWriterContentAgainstGit(t *testing.T) {
 }
 
 func TestLooseStoreWriteWriterFullAgainstGit(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		store := openLooseStore(t, testRepo.Dir(), algo)
 
@@ -108,11 +110,13 @@ func TestLooseStoreWriteWriterFullAgainstGit(t *testing.T) {
 }
 
 func TestLooseStoreWriterValidationErrors(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
-		store := openLooseStore(t, testRepo.Dir(), algo)
-
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		t.Run("content overflow", func(t *testing.T) {
+			t.Parallel()
+			testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+			store := openLooseStore(t, testRepo.Dir(), algo)
+
 			writer, finalize, err := store.WriteWriterContent(objecttype.TypeBlob, 1)
 			if err != nil {
 				t.Fatalf("WriteWriterContent: %v", err)
@@ -127,6 +131,10 @@ func TestLooseStoreWriterValidationErrors(t *testing.T) {
 		})
 
 		t.Run("content short", func(t *testing.T) {
+			t.Parallel()
+			testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+			store := openLooseStore(t, testRepo.Dir(), algo)
+
 			writer, finalize, err := store.WriteWriterContent(objecttype.TypeBlob, 5)
 			if err != nil {
 				t.Fatalf("WriteWriterContent: %v", err)
@@ -143,6 +151,10 @@ func TestLooseStoreWriterValidationErrors(t *testing.T) {
 		})
 
 		t.Run("full malformed header", func(t *testing.T) {
+			t.Parallel()
+			testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+			store := openLooseStore(t, testRepo.Dir(), algo)
+
 			writer, finalize, err := store.WriteWriterFull()
 			if err != nil {
 				t.Fatalf("WriteWriterFull: %v", err)
@@ -159,6 +171,10 @@ func TestLooseStoreWriterValidationErrors(t *testing.T) {
 		})
 
 		t.Run("full size mismatch", func(t *testing.T) {
+			t.Parallel()
+			testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+			store := openLooseStore(t, testRepo.Dir(), algo)
+
 			writer, finalize, err := store.WriteWriterFull()
 			if err != nil {
 				t.Fatalf("WriteWriterFull: %v", err)

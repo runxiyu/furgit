@@ -9,7 +9,8 @@ import (
 // CommitTree creates a commit from a tree and message, optionally with parents.
 func (testRepo *TestRepo) CommitTree(tb testing.TB, tree objectid.ObjectID, message string, parents ...objectid.ObjectID) objectid.ObjectID {
 	tb.Helper()
-	args := []string{"commit-tree", tree.String()}
+	args := make([]string, 0, 2+2*len(parents)+2)
+	args = append(args, "commit-tree", tree.String())
 	for _, p := range parents {
 		args = append(args, "-p", p.String())
 	}

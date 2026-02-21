@@ -19,6 +19,8 @@ func ParseObjectWithoutHeader(ty objecttype.Type, body []byte, algo objectid.Alg
 		return ParseCommit(body, algo)
 	case objecttype.TypeTag:
 		return ParseTag(body, algo)
+	case objecttype.TypeInvalid, objecttype.TypeFuture, objecttype.TypeOfsDelta, objecttype.TypeRefDelta:
+		return nil, fmt.Errorf("object: unsupported object type %d", ty)
 	default:
 		return nil, fmt.Errorf("object: unsupported object type %d", ty)
 	}

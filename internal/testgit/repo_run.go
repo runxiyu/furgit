@@ -35,7 +35,8 @@ func (testRepo *TestRepo) RunInputBytes(tb testing.TB, stdin []byte, args ...str
 
 func (testRepo *TestRepo) runBytes(tb testing.TB, stdin []byte, dir string, args ...string) []byte {
 	tb.Helper()
-	cmd := exec.Command("git", args...)
+	//nolint:noctx
+	cmd := exec.Command("git", args...) //#nosec G204
 	cmd.Dir = dir
 	cmd.Env = testRepo.env
 	if stdin != nil {

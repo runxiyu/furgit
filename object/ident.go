@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 	"time"
+
+	"codeberg.org/lindenii/furgit/internal/intconv"
 )
 
 // Ident represents a Git identity (author/committer/tagger).
@@ -76,11 +77,10 @@ func ParseIdent(line []byte) (*Ident, error) {
 		return nil, errors.New("object: ident: invalid timezone minutes range")
 	}
 	total := int64(hh)*60 + int64(mm)
-	if total > math.MaxInt32 {
+	offset, err := intconv.Int64ToInt32(total)
+	if err != nil {
 		return nil, errors.New("object: ident: timezone overflow")
 	}
-
-	offset := int32(total)
 	if sign < 0 {
 		offset = -offset
 	}

@@ -74,6 +74,10 @@ func (store *Store) deltaPlanFor(start location) (deltaPlan, error) {
 				packName: current.packName,
 				offset:   meta.baseOfs,
 			}
+		case objecttype.TypeCommit, objecttype.TypeTree, objecttype.TypeBlob, objecttype.TypeTag:
+			return deltaPlan{}, fmt.Errorf("objectstore/packed: internal invariant violation for base type %d", meta.ty)
+		case objecttype.TypeInvalid, objecttype.TypeFuture:
+			return deltaPlan{}, fmt.Errorf("objectstore/packed: unsupported pack type %d", meta.ty)
 		default:
 			return deltaPlan{}, fmt.Errorf("objectstore/packed: unsupported pack type %d", meta.ty)
 		}

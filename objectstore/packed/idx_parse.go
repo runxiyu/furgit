@@ -62,10 +62,7 @@ func (index *idxFile) parse() error {
 		return fmt.Errorf("objectstore/packed: idx %q has malformed 64-bit offset table", index.idxName)
 	}
 	index.offset64Count = offset64Bytes / 8
-	maxOffset64Count := index.numObjects - 1
-	if maxOffset64Count < 0 {
-		maxOffset64Count = 0
-	}
+	maxOffset64Count := max(index.numObjects-1, 0)
 	if index.offset64Count > maxOffset64Count {
 		return fmt.Errorf("objectstore/packed: idx %q has oversized 64-bit offset table", index.idxName)
 	}

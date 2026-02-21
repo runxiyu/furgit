@@ -8,6 +8,7 @@ import (
 	"os"
 	"syscall"
 
+	"codeberg.org/lindenii/furgit/internal/intconv"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/ref"
 )
@@ -80,7 +81,12 @@ func openTableFile(root *os.Root, name string, algo objectid.Algorithm) (*tableF
 		_ = file.Close()
 		return nil, fmt.Errorf("refstore/reftable: table %q has unsupported size", name)
 	}
-	data, err := syscall.Mmap(int(file.Fd()), 0, int(size), syscall.PROT_READ, syscall.MAP_PRIVATE)
+	fd, err := intconv.UintptrToInt(file.Fd())
+	if err != nil {
+		_ = file.Close()
+		return nil, err
+	}
+	data, err := syscall.Mmap(fd, 0, int(size), syscall.PROT_READ, syscall.MAP_PRIVATE)
 	if err != nil {
 		_ = file.Close()
 		return nil, err
@@ -178,7 +184,10 @@ func (table *tableFile) parseMeta() error {
 	_ = objIndexPos
 	_ = logIndexPos
 
-	refEnd := uint64(footerStart)
+	refEnd, err := intconv.IntToUint64(footerStart)
+	if err != nil {
+		return fmt.Errorf("refstore/reftable: table %q: invalid footer offset: %w", table.name, err)
+	}
 	if table.refIndexPos != 0 && table.refIndexPos < refEnd {
 		refEnd = table.refIndexPos
 	}
@@ -188,13 +197,25 @@ func (table *tableFile) parseMeta() error {
 	if logPos != 0 && logPos < refEnd {
 		refEnd = logPos
 	}
-	if refEnd < uint64(table.headerLen) || refEnd > uint64(len(table.data)) {
+	headerLenU64, err := intconv.IntToUint64(table.headerLen)
+	if err != nil {
+		return fmt.Errorf("refstore/reftable: table %q: invalid header length: %w", table.name, err)
+	}
+	dataLenU64, err := intconv.IntToUint64(len(table.data))
+	if err != nil {
+		return fmt.Errorf("refstore/reftable: table %q: invalid data length: %w", table.name, err)
+	}
+	if refEnd < headerLenU64 || refEnd > dataLenU64 {
 		return fmt.Errorf("refstore/reftable: table %q: invalid ref section", table.name)
 	}
-	if table.refIndexPos > uint64(len(table.data)) {
+	if table.refIndexPos > dataLenU64 {
 		return fmt.Errorf("refstore/reftable: table %q: invalid ref index position", table.name)
 	}
-	table.refEnd = int(refEnd)
+	refEndInt, err := intconv.Uint64ToInt(refEnd)
+	if err != nil {
+		return fmt.Errorf("refstore/reftable: table %q: invalid ref section end: %w", table.name, err)
+	}
+	table.refEnd = refEndInt
 	return nil
 }
 

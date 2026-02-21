@@ -101,7 +101,7 @@ func (p *configParser) parse() (*Config, error) {
 
 	for {
 		ch, err := p.nextChar()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
@@ -115,7 +115,7 @@ func (p *configParser) parse() (*Config, error) {
 
 		// Comments
 		if ch == '#' || ch == ';' {
-			if err := p.skipToEOL(); err != nil && err != io.EOF {
+			if err := p.skipToEOL(); err != nil && !errors.Is(err, io.EOF) {
 				return nil, err
 			}
 			continue
@@ -182,7 +182,7 @@ func (p *configParser) unreadChar(ch rune) {
 
 func (p *configParser) skipBOM() error {
 	first, _, err := p.reader.ReadRune()
-	if err == io.EOF {
+	if errors.Is(err, io.EOF) {
 		return nil
 	}
 	if err != nil {
@@ -332,7 +332,7 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 
 	for {
 		ch, err := p.nextChar()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			cfg.entries = append(cfg.entries, ConfigEntry{
 				Section:    p.currentSection,
 				Subsection: p.currentSubsec,
@@ -356,7 +356,7 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 		}
 
 		if ch == '#' || ch == ';' {
-			if err := p.skipToEOL(); err != nil && err != io.EOF {
+			if err := p.skipToEOL(); err != nil && !errors.Is(err, io.EOF) {
 				return err
 			}
 			cfg.entries = append(cfg.entries, ConfigEntry{
@@ -400,7 +400,7 @@ func (p *configParser) parseValue() (string, error) {
 
 	for {
 		ch, err := p.nextChar()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			if inQuote {
 				return "", errors.New("unexpected EOF in quoted value")
 			}
@@ -448,7 +448,7 @@ func (p *configParser) parseValue() (string, error) {
 
 		if ch == '\\' {
 			next, err := p.nextChar()
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				return "", errors.New("unexpected EOF after backslash")
 			}
 			if err != nil {

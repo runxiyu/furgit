@@ -26,11 +26,7 @@ func NewRepo(tb testing.TB, opts RepoOptions) *TestRepo {
 		tb.Fatalf("invalid algorithm: %v", algo)
 	}
 
-	dir, err := os.MkdirTemp("", "furgit-testgit-*")
-	if err != nil {
-		tb.Fatalf("create temp dir: %v", err)
-	}
-	tb.Cleanup(func() { _ = os.RemoveAll(dir) })
+	dir := tb.TempDir()
 
 	testRepo := &TestRepo{
 		dir:  dir,

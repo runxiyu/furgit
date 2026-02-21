@@ -26,7 +26,8 @@ func gitConfigGet(t *testing.T, testRepo *testgit.TestRepo, key string) string {
 }
 
 func TestConfigAgainstGit(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		testRepo.Run(t, "config", "core.bare", "true")
 		testRepo.Run(t, "config", "core.filemode", "false")
@@ -57,7 +58,8 @@ func TestConfigAgainstGit(t *testing.T) {
 }
 
 func TestConfigSubsectionAgainstGit(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		testRepo.Run(t, "config", "remote.origin.url", "https://example.org/repo.git")
 		testRepo.Run(t, "config", "remote.origin.fetch", "+refs/heads/*:refs/remotes/origin/*")
@@ -80,7 +82,8 @@ func TestConfigSubsectionAgainstGit(t *testing.T) {
 }
 
 func TestConfigMultiValueAgainstGit(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		testRepo.Run(t, "config", "--add", "remote.origin.fetch", "+refs/heads/main:refs/remotes/origin/main")
 		testRepo.Run(t, "config", "--add", "remote.origin.fetch", "+refs/heads/dev:refs/remotes/origin/dev")
@@ -113,7 +116,8 @@ func TestConfigMultiValueAgainstGit(t *testing.T) {
 }
 
 func TestConfigCaseInsensitiveAgainstGit(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		testRepo.Run(t, "config", "Core.Bare", "true")
 		testRepo.Run(t, "config", "CORE.FileMode", "false")
@@ -142,7 +146,8 @@ func TestConfigCaseInsensitiveAgainstGit(t *testing.T) {
 }
 
 func TestConfigBooleanAgainstGit(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		testRepo.Run(t, "config", "test.flag1", "true")
 		testRepo.Run(t, "config", "test.flag2", "false")
@@ -176,7 +181,8 @@ func TestConfigBooleanAgainstGit(t *testing.T) {
 }
 
 func TestConfigComplexValuesAgainstGit(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		testRepo.Run(t, "config", "test.spaced", "value with spaces")
 		testRepo.Run(t, "config", "test.special", "value=with=equals")
@@ -202,7 +208,8 @@ func TestConfigComplexValuesAgainstGit(t *testing.T) {
 }
 
 func TestConfigEntriesAgainstGit(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		testRepo.Run(t, "config", "core.bare", "true")
 		testRepo.Run(t, "config", "core.filemode", "false")
@@ -238,6 +245,7 @@ func TestConfigEntriesAgainstGit(t *testing.T) {
 }
 
 func TestConfigErrorCases(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name   string
 		config string
@@ -266,6 +274,7 @@ func TestConfigErrorCases(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			r := strings.NewReader(tt.config)
 			_, err := config.ParseConfig(r)
 			if err == nil {

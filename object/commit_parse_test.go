@@ -10,7 +10,8 @@ import (
 )
 
 func TestCommitParseFromGit(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		_, treeID, commitID := testRepo.MakeCommit(t, "subject\n\nbody")
 

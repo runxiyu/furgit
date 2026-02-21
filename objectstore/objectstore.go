@@ -10,7 +10,7 @@ import (
 )
 
 // ErrObjectNotFound indicates that an object does not exist in a backend.
-// TODO: This might need to be an interface or otherwise be able to encapsulate multiple concrete backends'
+// TODO: This might need to be an interface or otherwise be able to encapsulate multiple concrete backends'.
 var ErrObjectNotFound = errors.New("objectstore: object not found")
 
 // Store reads Git objects by object ID.

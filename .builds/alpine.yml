@@ -1,0 +1,27 @@
+image: alpine/edge
+packages:
+  - go
+  - git
+  - golangci-lint
+tasks:
+  - build: |
+      cd furgit
+      go build ./...
+  - test: |
+      cd furgit
+      go test -v ./...
+  - test-race: |
+      cd furgit
+      go test -race -v ./...
+  - test-purego: |
+      cd furgit
+      go test -v -tags purego ./...
+  - lint: |
+      cd furgit
+      golangci-lint run ./...
+  - vet: |
+      cd furgit
+      go vet ./...
+  - fmt-check: |
+      cd furgit
+      test -z "$(gofmt -l .)"

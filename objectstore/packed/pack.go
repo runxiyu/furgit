@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"syscall"
+
+	"codeberg.org/lindenii/furgit/internal/intconv"
 )
 
 const packSignature = 0x5041434b
@@ -27,7 +29,11 @@ func openPackFile(name string, file *os.File, size int64) (*packFile, error) {
 	if size > int64(int(^uint(0)>>1)) {
 		return nil, fmt.Errorf("objectstore/packed: pack %q has unsupported size", name)
 	}
-	data, err := syscall.Mmap(int(file.Fd()), 0, int(size), syscall.PROT_READ, syscall.MAP_PRIVATE)
+	fd, err := intconv.UintptrToInt(file.Fd())
+	if err != nil {
+		return nil, err
+	}
+	data, err := syscall.Mmap(fd, 0, int(size), syscall.PROT_READ, syscall.MAP_PRIVATE)
 	if err != nil {
 		return nil, err
 	}

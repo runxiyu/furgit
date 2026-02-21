@@ -40,7 +40,8 @@ func openStore(tb testing.TB, repoDir string, algo objectid.Algorithm) *reftable
 }
 
 func TestResolveAndResolveFully(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		repo := newBareReftableRepo(t, algo)
 		_, _, id := repo.MakeCommit(t, "resolve")
 		repo.UpdateRef(t, "refs/heads/main", id)
@@ -74,7 +75,8 @@ func TestResolveAndResolveFully(t *testing.T) {
 }
 
 func TestResolveFullyCycle(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		repo := newBareReftableRepo(t, algo)
 		repo.SymbolicRef(t, "refs/heads/a", "refs/heads/b")
 		repo.SymbolicRef(t, "refs/heads/b", "refs/heads/a")
@@ -87,7 +89,8 @@ func TestResolveFullyCycle(t *testing.T) {
 }
 
 func TestListAndShorten(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		repo := newBareReftableRepo(t, algo)
 		_, _, id := repo.MakeCommit(t, "list")
 		repo.UpdateRef(t, "refs/heads/main", id)
@@ -133,7 +136,8 @@ func TestListAndShorten(t *testing.T) {
 }
 
 func TestTombstoneNewestWins(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		repo := newBareReftableRepo(t, algo)
 		_, _, oldID := repo.MakeCommit(t, "old")
 		repo.UpdateRef(t, "refs/heads/main", oldID)
@@ -149,7 +153,8 @@ func TestTombstoneNewestWins(t *testing.T) {
 }
 
 func TestAnnotatedTagPeeled(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		repo := newBareReftableRepo(t, algo)
 		_, _, commitID := repo.MakeCommit(t, "tagged")
 		tagID := repo.TagAnnotated(t, "v1.0.0", commitID, "annotated")

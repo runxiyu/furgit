@@ -30,7 +30,8 @@ func openLooseStore(t *testing.T, repoPath string, algo objectid.Algorithm) *loo
 }
 
 func TestLooseResolveAndResolveFully(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		_, _, commitID := testRepo.MakeCommit(t, "loose refs commit")
 		testRepo.UpdateRef(t, "refs/heads/main", commitID)
@@ -77,7 +78,8 @@ func TestLooseResolveAndResolveFully(t *testing.T) {
 }
 
 func TestLooseResolveFullyCycle(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		testRepo.SymbolicRef(t, "refs/heads/a", "refs/heads/b")
 		testRepo.SymbolicRef(t, "refs/heads/b", "refs/heads/a")
@@ -90,7 +92,8 @@ func TestLooseResolveFullyCycle(t *testing.T) {
 }
 
 func TestLooseListPattern(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		_, _, commitID := testRepo.MakeCommit(t, "list refs commit")
 		testRepo.UpdateRef(t, "refs/heads/main", commitID)
@@ -131,7 +134,8 @@ func TestLooseListPattern(t *testing.T) {
 }
 
 func TestLooseMalformedDetachedRef(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		refPath := filepath.Join(testRepo.Dir(), "refs", "heads", "bad")
 		if err := os.MkdirAll(filepath.Dir(refPath), 0o755); err != nil {
@@ -149,7 +153,8 @@ func TestLooseMalformedDetachedRef(t *testing.T) {
 }
 
 func TestLooseShorten(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		_, _, commitID := testRepo.MakeCommit(t, "shorten refs commit")
 		testRepo.UpdateRef(t, "refs/heads/main", commitID)

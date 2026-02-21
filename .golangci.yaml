@@ -1,0 +1,44 @@
+version: "2"
+
+linters:
+  default: all
+  disable:
+    - depguard         # not sensible for us
+    - dupword          # extremely normal in tests and a pretty unnecessary linter
+    - goconst          # unnecessary especially for our parsing code; many false positives
+    - mnd              # same as above
+    - lll              # poor standard
+    - ireturn          # not an issue
+    - perfsprint       # silly fmt.Errorf vs errors.New suggestion
+    - noinlineerr      # not an issue
+    - gosmopolitan     # completely normal to have CJK and such in tests
+    - gochecknoglobals # unlikely to be introduce accidentally and are usually intentional
+    - nonamedreturns   # named returns are often good for clarity
+    - exhaustruct      # tmp: should fix... but too annoying at the moment
+    - wsl_v5           # tmp
+    - wsl              # tmp
+    - err113           # tmp: will enable when we properly use defined errors
+    - gochecknoinits   # tmp
+    - nlreturn         # tmp
+    - cyclop           # tmp
+    - gocognit         # tmp
+    - varnamelen       # tmp
+    - funlen           # tmp
+    - godox            # tmp
+    - nestif           # tmp
+    - maintidx         # tmp
+    - gocyclo          # tmp
+    - wrapcheck        # unsure
+  settings:
+    gosec:
+      excludes:
+        - G301         # UNIX permissions
+        - G306
+    revive:
+      rules:
+        - name: error-strings
+          disabled: true
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

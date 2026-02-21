@@ -169,6 +169,7 @@ func TestCachePanicsForInvalidConfiguration(t *testing.T) {
 	t.Parallel()
 
 	t.Run("negative max", func(t *testing.T) {
+		t.Parallel()
 		defer func() {
 			if recover() == nil {
 				t.Fatalf("expected panic")
@@ -178,6 +179,7 @@ func TestCachePanicsForInvalidConfiguration(t *testing.T) {
 	})
 
 	t.Run("nil weight function", func(t *testing.T) {
+		t.Parallel()
 		defer func() {
 			if recover() == nil {
 				t.Fatalf("expected panic")
@@ -187,6 +189,7 @@ func TestCachePanicsForInvalidConfiguration(t *testing.T) {
 	})
 
 	t.Run("negative entry weight", func(t *testing.T) {
+		t.Parallel()
 		cache := lru.New[string, testValue](10, func(_ string, _ testValue) int64 {
 			return -1
 		}, nil)
@@ -199,6 +202,7 @@ func TestCachePanicsForInvalidConfiguration(t *testing.T) {
 	})
 
 	t.Run("set negative max", func(t *testing.T) {
+		t.Parallel()
 		cache := lru.New[string, testValue](10, weightFn, nil)
 		defer func() {
 			if recover() == nil {

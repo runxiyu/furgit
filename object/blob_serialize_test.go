@@ -9,7 +9,8 @@ import (
 )
 
 func TestBlobSerialize(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		body := []byte("hello\nblob\n")
 		wantID := testRepo.HashObject(t, "blob", body)

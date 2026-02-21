@@ -14,12 +14,12 @@ import (
 )
 
 func TestPackedStoreReadAgainstGit(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo, ids := createPackedFixtureRepo(t, algo)
 		store := openPackedStore(t, testRepo.Dir(), algo)
 
 		for _, id := range ids {
-			id := id
 			t.Run(id.String(), func(t *testing.T) {
 				wantType, wantBody, wantRaw := expectedRawObject(t, testRepo, id)
 
@@ -80,7 +80,8 @@ func TestPackedStoreReadAgainstGit(t *testing.T) {
 }
 
 func TestPackedStoreErrors(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo, _ := createPackedFixtureRepo(t, algo)
 		store := openPackedStore(t, testRepo.Dir(), algo)
 
@@ -125,6 +126,7 @@ func TestPackedStoreErrors(t *testing.T) {
 }
 
 func TestPackedStoreNewValidation(t *testing.T) {
+	t.Parallel()
 	testRepo, _ := createPackedFixtureRepo(t, objectid.AlgorithmSHA1)
 	store := openPackedStore(t, testRepo.Dir(), objectid.AlgorithmSHA1)
 	if err := store.Close(); err != nil {
@@ -136,6 +138,7 @@ func TestPackedStoreNewValidation(t *testing.T) {
 }
 
 func TestPackedStoreInvalidAlgorithm(t *testing.T) {
+	t.Parallel()
 	testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: objectid.AlgorithmSHA1, Bare: true})
 	root, err := os.OpenRoot(testRepo.Dir())
 	if err != nil {

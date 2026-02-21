@@ -17,7 +17,7 @@ import (
 
 func openPackedRefStoreFromRepo(t *testing.T, repoPath string, algo objectid.Algorithm) *packed.Store {
 	t.Helper()
-	file, err := os.Open(filepath.Join(repoPath, "packed-refs"))
+	file, err := os.Open(filepath.Join(repoPath, "packed-refs")) //#nosec G304
 	if err != nil {
 		t.Fatalf("open packed-refs: %v", err)
 	}
@@ -31,7 +31,8 @@ func openPackedRefStoreFromRepo(t *testing.T, repoPath string, algo objectid.Alg
 }
 
 func TestPackedResolveAndPeeled(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		_, _, commitID := testRepo.MakeCommit(t, "packed refs commit")
 		testRepo.UpdateRef(t, "refs/heads/main", commitID)
@@ -85,7 +86,8 @@ func TestPackedResolveAndPeeled(t *testing.T) {
 }
 
 func TestPackedListAndShorten(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		_, _, commitID := testRepo.MakeCommit(t, "packed refs list commit")
 		testRepo.UpdateRef(t, "refs/heads/main", commitID)
@@ -132,7 +134,8 @@ func TestPackedListAndShorten(t *testing.T) {
 }
 
 func TestPackedParseErrors(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		cases := []struct {
 			name string
 			data string
@@ -163,6 +166,7 @@ func TestPackedParseErrors(t *testing.T) {
 }
 
 func TestPackedNewValidation(t *testing.T) {
+	t.Parallel()
 	if _, err := packed.New(bytes.NewReader(nil), objectid.AlgorithmUnknown); !errors.Is(err, objectid.ErrInvalidAlgorithm) {
 		t.Fatalf("packed.New invalid algorithm error = %v", err)
 	}

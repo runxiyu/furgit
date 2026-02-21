@@ -7,6 +7,7 @@ import (
 	"strings"
 	"syscall"
 
+	"codeberg.org/lindenii/furgit/internal/intconv"
 	"codeberg.org/lindenii/furgit/objectid"
 )
 
@@ -106,7 +107,12 @@ func openIdxFile(root *os.Root, idxName, packName string, algo objectid.Algorith
 		_ = file.Close()
 		return nil, fmt.Errorf("objectstore/packed: idx %q has unsupported size", idxName)
 	}
-	data, err := syscall.Mmap(int(file.Fd()), 0, int(size), syscall.PROT_READ, syscall.MAP_PRIVATE)
+	fd, err := intconv.UintptrToInt(file.Fd())
+	if err != nil {
+		_ = file.Close()
+		return nil, err
+	}
+	data, err := syscall.Mmap(fd, 0, int(size), syscall.PROT_READ, syscall.MAP_PRIVATE)
 	if err != nil {
 		_ = file.Close()
 		return nil, err

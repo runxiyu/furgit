@@ -47,6 +47,7 @@ func TestParseHexRoundtrip(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			id, err := objectid.ParseHex(tt.algo, tt.hex)
 			if err != nil {
 				t.Fatalf("ParseHex failed: %v", err)
@@ -90,6 +91,7 @@ func TestParseHexErrors(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if _, err := objectid.ParseHex(tt.algo, tt.hex); err == nil {
 				t.Fatalf("expected ParseHex error")
 			}

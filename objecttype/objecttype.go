@@ -49,6 +49,8 @@ func Name(ty Type) (string, bool) {
 		return typeNameCommit, true
 	case TypeTag:
 		return typeNameTag, true
+	case TypeInvalid, TypeFuture, TypeOfsDelta, TypeRefDelta:
+		return "", false
 	default:
 		return "", false
 	}

@@ -15,7 +15,8 @@ import (
 )
 
 func TestDiffComplexNestedChanges(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		repo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: false})
 
 		writeTestFile(t, filepath.Join(repo.Dir(), "README.md"), "initial readme\n")
@@ -98,7 +99,8 @@ func TestDiffComplexNestedChanges(t *testing.T) {
 }
 
 func TestDiffDirectoryAddDeleteDeep(t *testing.T) {
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		repo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: false})
 
 		writeTestFile(t, filepath.Join(repo.Dir(), "old_dir", "old.txt"), "stale directory\n")

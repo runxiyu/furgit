@@ -5,13 +5,18 @@ import (
 	"fmt"
 	"strings"
 
+	"codeberg.org/lindenii/furgit/internal/intconv"
 	"codeberg.org/lindenii/furgit/objectid"
 )
 
 // resolveRecord resolves one ref name inside a single table file.
 func (table *tableFile) resolveRecord(name string) (recordValue, bool, error) {
 	if table.refIndexPos != 0 {
-		pos, ok, err := table.resolveRefBlockPosFromIndex(name, int(table.refIndexPos))
+		indexPos, err := intconv.Uint64ToInt(table.refIndexPos)
+		if err != nil {
+			return recordValue{}, false, err
+		}
+		pos, ok, err := table.resolveRefBlockPosFromIndex(name, indexPos)
 		if err != nil {
 			return recordValue{}, false, err
 		}
@@ -204,10 +209,11 @@ func lookupChildPosInIndexBlock(block blockView, key string) (int, bool, error) 
 			return 0, false, err
 		}
 		if strings.Compare(key, name) <= 0 {
-			if childPos > uint64(int(^uint(0)>>1)) {
-				return 0, false, fmt.Errorf("index child position overflows int")
+			childPosInt, err := intconv.Uint64ToInt(childPos)
+			if err != nil {
+				return 0, false, fmt.Errorf("index child position conversion: %w", err)
 			}
-			return int(childPos), true, nil
+			return childPosInt, true, nil
 		}
 		prev = name
 		off = nextOff
@@ -309,7 +315,7 @@ func parseBlockLayout(block blockView) (recordsStart int, recordsEnd int, restar
 	if restartsStart < 4 {
 		return 0, 0, nil, fmt.Errorf("invalid restart table")
 	}
-	for i := 0; i < restartCount; i++ {
+	for i := range restartCount {
 		off := restartsStart + i*3
 		rel := int(readUint24(block.payload[off : off+3]))
 		base := block.start
@@ -357,14 +363,18 @@ func parseKeyedRecord(buf []byte, off, end int, prev string) (name string, rawTy
 	if err != nil {
 		return "", 0, 0, err
 	}
-	suffixLen := int(suffixAndType >> 3)
-	if suffixLen < 0 || next+suffixLen > end {
+	suffixLen, err := intconv.Uint64ToInt(suffixAndType >> 3)
+	if err != nil || suffixLen < 0 || next+suffixLen > end {
 		return "", 0, 0, fmt.Errorf("invalid suffix length")
 	}
-	if int(prefixLen) > len(prev) {
+	prefixLenInt, err := intconv.Uint64ToInt(prefixLen)
+	if err != nil {
 		return "", 0, 0, fmt.Errorf("invalid prefix length")
 	}
-	name = prev[:prefixLen] + string(buf[next:next+suffixLen])
+	if prefixLenInt > len(prev) {
+		return "", 0, 0, fmt.Errorf("invalid prefix length")
+	}
+	name = prev[:prefixLenInt] + string(buf[next:next+suffixLen])
 	next += suffixLen
 	if prev != "" && strings.Compare(name, prev) <= 0 {
 		return "", 0, 0, fmt.Errorf("keys not strictly increasing")
@@ -399,11 +409,23 @@ func parseRefValue(buf []byte, off, end int, algo objectid.Algorithm, valueType 
 		if err != nil {
 			return recordValue{}, 0, err
 		}
-		if targetLen > uint64(end-next) {
+		remaining := end - next
+		if remaining < 0 {
 			return recordValue{}, 0, fmt.Errorf("invalid symref target length")
 		}
-		target := string(buf[next : next+int(targetLen)])
-		next += int(targetLen)
+		remainingU64, err := intconv.IntToUint64(remaining)
+		if err != nil {
+			return recordValue{}, 0, fmt.Errorf("invalid symref target length")
+		}
+		if targetLen > remainingU64 {
+			return recordValue{}, 0, fmt.Errorf("invalid symref target length")
+		}
+		targetLenInt, err := intconv.Uint64ToInt(targetLen)
+		if err != nil {
+			return recordValue{}, 0, fmt.Errorf("invalid symref target length")
+		}
+		target := string(buf[next : next+targetLenInt])
+		next += targetLenInt
 		return recordValue{symbolicTarget: target}, next, nil
 	default:
 		return recordValue{}, 0, fmt.Errorf("unsupported ref value type %d", valueType)
