@@ -21,16 +21,16 @@ type Store struct {
 	// algo is the expected object ID algorithm for lookups.
 	algo objectid.Algorithm
 
-	// loadOnce guards one-time index loading.
-	loadOnce sync.Once
-	// loadErr stores index loading failures.
-	loadErr error
-	// indexesLoaded reports whether indexes/loadErr have been initialized.
-	indexesLoaded bool
-	// indexes stores parsed .idx handles.
-	indexes []*idxFile
-	// indexByPack maps one pack basename to its parsed index.
-	indexByPack map[string]*idxFile
+	// discoverOnce guards one-time pack candidate discovery.
+	discoverOnce sync.Once
+	// discoverErr stores candidate discovery failures.
+	discoverErr error
+	// candidates stores known pack/index pairs in lookup priority order.
+	candidates []packCandidate
+	// candidateByPack maps pack basename to discovered candidate.
+	candidateByPack map[string]packCandidate
+	// idxByPack caches opened and parsed indexes by pack basename.
+	idxByPack map[string]*idxFile
 
 	// stateMu guards index publication, pack cache, and close state.
 	stateMu sync.RWMutex
@@ -54,10 +54,12 @@ func New(root *os.Root, algo objectid.Algorithm) (*Store, error) {
 		return nil, objectid.ErrInvalidAlgorithm
 	}
 	return &Store{
-		root:       root,
-		algo:       algo,
-		packs:      make(map[string]*packFile),
-		deltaCache: newDeltaCache(defaultDeltaCacheMaxBytes),
+		root:            root,
+		algo:            algo,
+		candidateByPack: make(map[string]packCandidate),
+		idxByPack:       make(map[string]*idxFile),
+		packs:           make(map[string]*packFile),
+		deltaCache:      newDeltaCache(defaultDeltaCacheMaxBytes),
 	}, nil
 }
 
@@ -71,7 +73,7 @@ func (store *Store) Close() error {
 	store.closed = true
 	root := store.root
 	packs := store.packs
-	indexes := store.indexes
+	indexes := store.idxByPack
 	store.stateMu.Unlock()
 
 	var closeErr error
@@ -81,9 +83,6 @@ func (store *Store) Close() error {
 		}
 	}
 	for _, index := range indexes {
-		if index == nil {
-			continue
-		}
 		if err := index.close(); err != nil && closeErr == nil {
 			closeErr = err
 		}
@@ -98,45 +97,31 @@ func (store *Store) Close() error {
 	return closeErr
 }
 
-// ensureIndexes loads and validates all pack indexes once.
-func (store *Store) ensureIndexes() error {
-	store.loadOnce.Do(func() {
-		indexes, err := store.loadIndexes()
-		indexByPack := make(map[string]*idxFile, len(indexes))
-		for _, index := range indexes {
-			indexByPack[index.packName] = index
-		}
-		store.stateMu.Lock()
-		store.indexes = indexes
-		store.indexByPack = indexByPack
-		store.loadErr = err
-		store.indexesLoaded = true
-		store.stateMu.Unlock()
-	})
-
-	store.stateMu.RLock()
-	defer store.stateMu.RUnlock()
-	if store.indexesLoaded {
-		return store.loadErr
-	}
-	return errors.New("objectstore/packed: indexes were not initialized")
-}
-
 // lookup resolves one object ID to its pack location.
 func (store *Store) lookup(id objectid.ObjectID) (location, error) {
 	var zero location
 	if id.Algorithm() != store.algo {
 		return zero, errors.New("objectstore/packed: object id algorithm mismatch")
 	}
-	if err := store.ensureIndexes(); err != nil {
+	if err := store.ensureCandidates(); err != nil {
 		return zero, err
 	}
-	for _, index := range store.indexes {
+
+	store.stateMu.RLock()
+	candidates := append([]packCandidate(nil), store.candidates...)
+	store.stateMu.RUnlock()
+
+	for _, candidate := range candidates {
+		index, err := store.openIndex(candidate)
+		if err != nil {
+			return zero, err
+		}
 		offset, ok, err := index.lookup(id)
 		if err != nil {
 			return zero, err
 		}
 		if ok {
+			store.touchCandidate(candidate.packName)
 			return location{packName: index.packName, offset: offset}, nil
 		}
 	}
@@ -185,16 +170,16 @@ func (store *Store) openPack(name string) (*packFile, error) {
 // verifyPackMatchesIndexes checks that one opened pack's trailer hash matches
 // every loaded index that references the same pack name.
 func (store *Store) verifyPackMatchesIndexes(pack *packFile) error {
-	store.stateMu.RLock()
-	index := store.indexByPack[pack.name]
-	indexesLoaded := store.indexesLoaded
-	store.stateMu.RUnlock()
-
-	if !indexesLoaded {
-		return nil
+	if err := store.ensureCandidates(); err != nil {
+		return err
 	}
-	if index == nil {
-		return nil
+	candidate, ok := store.candidateForPack(pack.name)
+	if !ok {
+		return fmt.Errorf("objectstore/packed: missing index for pack %q", pack.name)
+	}
+	index, err := store.openIndex(candidate)
+	if err != nil {
+		return err
 	}
 	if err := packchecksum.VerifyPackMatchesIdx(pack.data, index.data, store.algo); err != nil {
 		return fmt.Errorf("objectstore/packed: pack %q does not match idx %q: %w", pack.name, index.idxName, err)
