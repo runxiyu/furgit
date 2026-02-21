@@ -136,7 +136,7 @@ func TestPackedStoreNewValidation(t *testing.T) {
 }
 
 func TestPackedStoreInvalidAlgorithm(t *testing.T) {
-	testRepo := testgit.NewBareRepo(t, objectid.AlgorithmSHA1)
+	testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: objectid.AlgorithmSHA1, Bare: true})
 	root, err := os.OpenRoot(testRepo.Dir())
 	if err != nil {
 		t.Fatalf("OpenRoot(%q): %v", testRepo.Dir(), err)

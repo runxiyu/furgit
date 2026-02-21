@@ -68,7 +68,7 @@ func expectedRawObject(t *testing.T, testRepo *testgit.TestRepo, id objectid.Obj
 func createPackedFixtureRepo(t *testing.T, algo objectid.Algorithm) (*testgit.TestRepo, []objectid.ObjectID) {
 	t.Helper()
 
-	testRepo := testgit.NewBareRepo(t, algo)
+	testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 	blobID, treeID, commitID := testRepo.MakeCommit(t, "packed store base commit")
 	testRepo.Run(t, "update-ref", "refs/heads/main", commitID.String())
 	tagID := testRepo.TagAnnotated(t, "v1.0.0", commitID, "packed-store-tag")

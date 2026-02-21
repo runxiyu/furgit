@@ -17,7 +17,11 @@ import (
 // newBareReftableRepo creates a bare repository that uses reftable ref storage.
 func newBareReftableRepo(tb testing.TB, algo objectid.Algorithm) *testgit.TestRepo {
 	tb.Helper()
-	return testgit.NewRepo(tb, algo, testgit.RepoOptions{Bare: true, RefFormat: "reftable"})
+	return testgit.NewRepo(tb, testgit.RepoOptions{
+		ObjectFormat: algo,
+		Bare:         true,
+		RefFormat:    "reftable",
+	})
 }
 
 // openStore opens a reftable store against repoDir/reftable.

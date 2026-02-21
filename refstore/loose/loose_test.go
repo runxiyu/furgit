@@ -31,7 +31,7 @@ func openLooseStore(t *testing.T, repoPath string, algo objectid.Algorithm) *loo
 
 func TestLooseResolveAndResolveFully(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		_, _, commitID := testRepo.MakeCommit(t, "loose refs commit")
 		testRepo.UpdateRef(t, "refs/heads/main", commitID)
 		testRepo.SymbolicRef(t, "HEAD", "refs/heads/main")
@@ -78,7 +78,7 @@ func TestLooseResolveAndResolveFully(t *testing.T) {
 
 func TestLooseResolveFullyCycle(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		testRepo.SymbolicRef(t, "refs/heads/a", "refs/heads/b")
 		testRepo.SymbolicRef(t, "refs/heads/b", "refs/heads/a")
 
@@ -91,7 +91,7 @@ func TestLooseResolveFullyCycle(t *testing.T) {
 
 func TestLooseListPattern(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		_, _, commitID := testRepo.MakeCommit(t, "list refs commit")
 		testRepo.UpdateRef(t, "refs/heads/main", commitID)
 		testRepo.UpdateRef(t, "refs/heads/feature", commitID)
@@ -132,7 +132,7 @@ func TestLooseListPattern(t *testing.T) {
 
 func TestLooseMalformedDetachedRef(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		refPath := filepath.Join(testRepo.Dir(), "refs", "heads", "bad")
 		if err := os.MkdirAll(filepath.Dir(refPath), 0o755); err != nil {
 			t.Fatalf("MkdirAll: %v", err)
@@ -150,7 +150,7 @@ func TestLooseMalformedDetachedRef(t *testing.T) {
 
 func TestLooseShorten(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		_, _, commitID := testRepo.MakeCommit(t, "shorten refs commit")
 		testRepo.UpdateRef(t, "refs/heads/main", commitID)
 		testRepo.UpdateRef(t, "refs/tags/main", commitID)

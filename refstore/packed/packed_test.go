@@ -32,7 +32,7 @@ func openPackedRefStoreFromRepo(t *testing.T, repoPath string, algo objectid.Alg
 
 func TestPackedResolveAndPeeled(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		_, _, commitID := testRepo.MakeCommit(t, "packed refs commit")
 		testRepo.UpdateRef(t, "refs/heads/main", commitID)
 		tagID := testRepo.TagAnnotated(t, "v1.0.0", commitID, "annotated tag")
@@ -86,7 +86,7 @@ func TestPackedResolveAndPeeled(t *testing.T) {
 
 func TestPackedListAndShorten(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		_, _, commitID := testRepo.MakeCommit(t, "packed refs list commit")
 		testRepo.UpdateRef(t, "refs/heads/main", commitID)
 		testRepo.UpdateRef(t, "refs/tags/main", commitID)

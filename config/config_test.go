@@ -27,7 +27,7 @@ func gitConfigGet(t *testing.T, testRepo *testgit.TestRepo, key string) string {
 
 func TestConfigAgainstGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		testRepo.Run(t, "config", "core.bare", "true")
 		testRepo.Run(t, "config", "core.filemode", "false")
 		testRepo.Run(t, "config", "user.name", "Jane Doe")
@@ -58,7 +58,7 @@ func TestConfigAgainstGit(t *testing.T) {
 
 func TestConfigSubsectionAgainstGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		testRepo.Run(t, "config", "remote.origin.url", "https://example.org/repo.git")
 		testRepo.Run(t, "config", "remote.origin.fetch", "+refs/heads/*:refs/remotes/origin/*")
 
@@ -81,7 +81,7 @@ func TestConfigSubsectionAgainstGit(t *testing.T) {
 
 func TestConfigMultiValueAgainstGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		testRepo.Run(t, "config", "--add", "remote.origin.fetch", "+refs/heads/main:refs/remotes/origin/main")
 		testRepo.Run(t, "config", "--add", "remote.origin.fetch", "+refs/heads/dev:refs/remotes/origin/dev")
 		testRepo.Run(t, "config", "--add", "remote.origin.fetch", "+refs/tags/*:refs/tags/*")
@@ -114,7 +114,7 @@ func TestConfigMultiValueAgainstGit(t *testing.T) {
 
 func TestConfigCaseInsensitiveAgainstGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		testRepo.Run(t, "config", "Core.Bare", "true")
 		testRepo.Run(t, "config", "CORE.FileMode", "false")
 
@@ -143,7 +143,7 @@ func TestConfigCaseInsensitiveAgainstGit(t *testing.T) {
 
 func TestConfigBooleanAgainstGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		testRepo.Run(t, "config", "test.flag1", "true")
 		testRepo.Run(t, "config", "test.flag2", "false")
 		testRepo.Run(t, "config", "test.flag3", "yes")
@@ -177,7 +177,7 @@ func TestConfigBooleanAgainstGit(t *testing.T) {
 
 func TestConfigComplexValuesAgainstGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		testRepo.Run(t, "config", "test.spaced", "value with spaces")
 		testRepo.Run(t, "config", "test.special", "value=with=equals")
 		testRepo.Run(t, "config", "test.path", "/path/to/something")
@@ -203,7 +203,7 @@ func TestConfigComplexValuesAgainstGit(t *testing.T) {
 
 func TestConfigEntriesAgainstGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		testRepo.Run(t, "config", "core.bare", "true")
 		testRepo.Run(t, "config", "core.filemode", "false")
 		testRepo.Run(t, "config", "user.name", "Test User")

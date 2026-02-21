@@ -10,7 +10,7 @@ import (
 
 func TestTreeSerialize(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		entries := adversarialRootEntries(t, testRepo)
 		tree := &object.Tree{}
 

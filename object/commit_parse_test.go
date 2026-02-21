@@ -11,7 +11,7 @@ import (
 
 func TestCommitParseFromGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		testRepo := testgit.NewBareRepo(t, algo)
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		_, treeID, commitID := testRepo.MakeCommit(t, "subject\n\nbody")
 
 		rawBody := testRepo.CatFile(t, "commit", commitID)
