@@ -73,7 +73,7 @@ func TestRepositoryDepthFirstEnumerationCurrentWorktree(t *testing.T) {
 		gitdirPath = filepath.Join(worktreeRoot, gitdirPath)
 	}
 	commondirPath := filepath.Join(gitdirPath, "commondir")
-	commondirContent, err := os.ReadFile(commondirPath)
+	commondirContent, err := os.ReadFile(commondirPath) //#nosec:G304
 	if err != nil {
 		t.Fatalf("read %q: %v", commondirPath, err)
 	}
