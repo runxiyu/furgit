@@ -12,6 +12,11 @@ func (repo *Repository) ReadStoredHeader(id objectid.ObjectID) (objecttype.Type,
 	return repo.objects.ReadHeader(id)
 }
 
+// ReadStoredSize reads an object's declared content length.
+func (repo *Repository) ReadStoredSize(id objectid.ObjectID) (int64, error) {
+	return repo.objects.ReadSize(id)
+}
+
 // ReadStoredBytesFull reads a full serialized object as "type size\\x00content".
 func (repo *Repository) ReadStoredBytesFull(id objectid.ObjectID) ([]byte, error) {
 	return repo.objects.ReadBytesFull(id)

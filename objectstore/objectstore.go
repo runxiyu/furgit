@@ -30,6 +30,11 @@ type Store interface {
 	// and content stream.
 	// Caller must close the returned reader.
 	ReadReaderContent(id objectid.ObjectID) (objecttype.Type, int64, io.ReadCloser, error)
+	// ReadSize reads an object's declared content length.
+	//
+	// This is equivalent to ReadHeader(...).size and may be cheaper than
+	// ReadHeader when callers do not need object type.
+	ReadSize(id objectid.ObjectID) (int64, error)
 	// ReadHeader reads an object's type and declared content length.
 	ReadHeader(id objectid.ObjectID) (objecttype.Type, int64, error)
 	// Close releases resources associated with the backend.

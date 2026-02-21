@@ -36,6 +36,13 @@ func TestPackedStoreReadAgainstGit(t *testing.T) {
 				if gotHeaderSize != int64(len(wantBody)) {
 					t.Fatalf("ReadHeader size = %d, want %d", gotHeaderSize, len(wantBody))
 				}
+				gotSize, err := store.ReadSize(id)
+				if err != nil {
+					t.Fatalf("ReadSize: %v", err)
+				}
+				if gotSize != int64(len(wantBody)) {
+					t.Fatalf("ReadSize = %d, want %d", gotSize, len(wantBody))
+				}
 
 				gotRaw, err := store.ReadBytesFull(id)
 				if err != nil {
@@ -107,6 +114,9 @@ func TestPackedStoreErrors(t *testing.T) {
 		}
 		if _, _, err := store.ReadHeader(notFoundID); !errors.Is(err, objectstore.ErrObjectNotFound) {
 			t.Fatalf("ReadHeader not-found error = %v", err)
+		}
+		if _, err := store.ReadSize(notFoundID); !errors.Is(err, objectstore.ErrObjectNotFound) {
+			t.Fatalf("ReadSize not-found error = %v", err)
 		}
 
 		var otherAlgo objectid.Algorithm
@@ -181,6 +191,13 @@ func TestPackedStoreReadHeaderUsesResolvedObjectSizeForDelta(t *testing.T) {
 		}
 		if gotSize != wantResolvedSize {
 			t.Fatalf("ReadHeader(%s) size = %d, want resolved size %d", deltaID, gotSize, wantResolvedSize)
+		}
+		gotReadSize, err := store.ReadSize(deltaID)
+		if err != nil {
+			t.Fatalf("ReadSize(%s): %v", deltaID, err)
+		}
+		if gotReadSize != wantResolvedSize {
+			t.Fatalf("ReadSize(%s) = %d, want resolved size %d", deltaID, gotReadSize, wantResolvedSize)
 		}
 	})
 }

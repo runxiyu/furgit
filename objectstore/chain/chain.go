@@ -96,6 +96,24 @@ func (chain *Chain) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, in
 	return objecttype.TypeInvalid, 0, nil, objectstore.ErrObjectNotFound
 }
 
+// ReadSize reads object content length from the first backend that has it.
+func (chain *Chain) ReadSize(id objectid.ObjectID) (int64, error) {
+	for i, backend := range chain.backends {
+		if backend == nil {
+			continue
+		}
+		size, err := backend.ReadSize(id)
+		if err == nil {
+			return size, nil
+		}
+		if errors.Is(err, objectstore.ErrObjectNotFound) {
+			continue
+		}
+		return 0, fmt.Errorf("objectstore: backend %d read size: %w", i, err)
+	}
+	return 0, objectstore.ErrObjectNotFound
+}
+
 // ReadHeader reads object header data from the first backend that has it.
 func (chain *Chain) ReadHeader(id objectid.ObjectID) (objecttype.Type, int64, error) {
 	for i, backend := range chain.backends {
