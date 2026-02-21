@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 
@@ -10,7 +11,7 @@ import (
 
 // WriteLooseBytesFull writes one loose object from raw "type size\0content".
 func (repo *Repository) WriteLooseBytesFull(raw []byte) (objectid.ObjectID, error) {
-	id, err := repo.objectsLooseForWritingOnly.WriteBytesFull(raw)
+	id, err := repo.objectsLooseForWritingOnly.WriteReaderFull(bytes.NewReader(raw))
 	if err != nil {
 		return objectid.ObjectID{}, fmt.Errorf("repository: write loose full bytes: %w", err)
 	}
@@ -19,32 +20,29 @@ func (repo *Repository) WriteLooseBytesFull(raw []byte) (objectid.ObjectID, erro
 
 // WriteLooseBytesContent writes one loose object from typed content bytes.
 func (repo *Repository) WriteLooseBytesContent(ty objecttype.Type, content []byte) (objectid.ObjectID, error) {
-	id, err := repo.objectsLooseForWritingOnly.WriteBytesContent(ty, content)
+	id, err := repo.objectsLooseForWritingOnly.WriteReaderContent(ty, int64(len(content)), bytes.NewReader(content))
 	if err != nil {
 		return objectid.ObjectID{}, fmt.Errorf("repository: write loose content bytes: %w", err)
 	}
 	return id, nil
 }
 
-// WriteLooseWriterFull returns a writer for one full serialized object stream.
-//
-// The caller must close the writer, then call finalize to publish the object.
-func (repo *Repository) WriteLooseWriterFull() (io.WriteCloser, func() (objectid.ObjectID, error), error) {
-	writer, finalize, err := repo.objectsLooseForWritingOnly.WriteWriterFull()
+// WriteLooseReaderFull writes one loose object from raw bytes
+// "type size\0content" read from src.
+func (repo *Repository) WriteLooseReaderFull(src io.Reader) (objectid.ObjectID, error) {
+	id, err := repo.objectsLooseForWritingOnly.WriteReaderFull(src)
 	if err != nil {
-		return nil, nil, fmt.Errorf("repository: create loose full writer: %w", err)
+		return objectid.ObjectID{}, fmt.Errorf("repository: write loose full reader: %w", err)
 	}
-	return writer, finalize, nil
+	return id, nil
 }
 
-// WriteLooseWriterContent returns a writer for one typed object content stream.
-//
-// The caller must write exactly size bytes, close the writer, then call
-// finalize to publish the object.
-func (repo *Repository) WriteLooseWriterContent(ty objecttype.Type, size int64) (io.WriteCloser, func() (objectid.ObjectID, error), error) {
-	writer, finalize, err := repo.objectsLooseForWritingOnly.WriteWriterContent(ty, size)
+// WriteLooseReaderContent writes one loose object from typed content bytes read
+// from src. src must provide exactly size bytes.
+func (repo *Repository) WriteLooseReaderContent(ty objecttype.Type, size int64, src io.Reader) (objectid.ObjectID, error) {
+	id, err := repo.objectsLooseForWritingOnly.WriteReaderContent(ty, size, src)
 	if err != nil {
-		return nil, nil, fmt.Errorf("repository: create loose content writer: %w", err)
+		return objectid.ObjectID{}, fmt.Errorf("repository: write loose content reader: %w", err)
 	}
-	return writer, finalize, nil
+	return id, nil
 }

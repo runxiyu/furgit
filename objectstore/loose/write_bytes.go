@@ -7,38 +7,12 @@ import (
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
-// WriteBytesFull writes a full serialized object as "type size\\x00content".
+// WriteBytesFull writes a full serialized object as "type size\0content".
 func (store *Store) WriteBytesFull(raw []byte) (objectid.ObjectID, error) {
-	var zero objectid.ObjectID
-
-	writer, finalize, err := store.WriteWriterFull()
-	if err != nil {
-		return zero, err
-	}
-	if _, err := bytes.NewReader(raw).WriteTo(writer); err != nil {
-		_ = writer.Close()
-		return zero, err
-	}
-	if err := writer.Close(); err != nil {
-		return zero, err
-	}
-	return finalize()
+	return store.WriteReaderFull(bytes.NewReader(raw))
 }
 
 // WriteBytesContent writes typed content bytes as a loose object.
 func (store *Store) WriteBytesContent(ty objecttype.Type, content []byte) (objectid.ObjectID, error) {
-	var zero objectid.ObjectID
-
-	writer, finalize, err := store.WriteWriterContent(ty, int64(len(content)))
-	if err != nil {
-		return zero, err
-	}
-	if _, err := bytes.NewReader(content).WriteTo(writer); err != nil {
-		_ = writer.Close()
-		return zero, err
-	}
-	if err := writer.Close(); err != nil {
-		return zero, err
-	}
-	return finalize()
+	return store.WriteReaderContent(ty, int64(len(content)), bytes.NewReader(content))
 }

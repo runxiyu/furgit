@@ -5,57 +5,16 @@ import (
 	"compress/zlib"
 	"crypto/rand"
 	"errors"
-	"fmt"
 	"hash"
-	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
 
 	"codeberg.org/lindenii/furgit/objectheader"
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/objecttype"
 )
 
 const tempObjectFilePrefix = "tmp_obj_"
-
-// WriteWriterContent returns a writer for object content bytes.
-// The writer accepts exactly size bytes. After closing the writer,
-// call finalize to atomically publish the loose object and get its ID.
-func (store *Store) WriteWriterContent(ty objecttype.Type, size int64) (io.WriteCloser, func() (objectid.ObjectID, error), error) {
-	if size < 0 {
-		return nil, nil, errors.New("objectstore/loose: negative content size")
-	}
-
-	header, ok := objectheader.Encode(ty, size)
-	if !ok {
-		return nil, nil, fmt.Errorf("objectstore/loose: failed to encode object header for type %d", ty)
-	}
-
-	writer, err := store.newStreamWriter(false)
-	if err != nil {
-		return nil, nil, err
-	}
-	writer.headerDone = true
-	writer.expectedContentLeft = size
-	if err := writer.writeRawChunk(header); err != nil {
-		_ = writer.Close()
-		return nil, nil, err
-	}
-
-	return writer, writer.Finalize, nil
-}
-
-// WriteWriterFull returns a writer for full raw object bytes:
-// "type size\0content". After closing the writer, call finalize
-// to atomically publish the loose object and get its ID.
-func (store *Store) WriteWriterFull() (io.WriteCloser, func() (objectid.ObjectID, error), error) {
-	writer, err := store.newStreamWriter(true)
-	if err != nil {
-		return nil, nil, err
-	}
-	return writer, writer.Finalize, nil
-}
 
 // streamWriter incrementally hashes and deflates an object into a temp file.
 // Finalize validates size accounting and atomically renames the temp file.
@@ -152,10 +111,10 @@ func (writer *streamWriter) Close() error {
 	return errors.Join(errZlib, errSync, errFile)
 }
 
-// Finalize validates write completeness and atomically publishes the object.
+// finalize validates write completeness and atomically publishes the object.
 // Publication is no-clobber: it links tmpRelPath to the object path and treats
 // existing destination objects as success.
-func (writer *streamWriter) Finalize() (objectid.ObjectID, error) {
+func (writer *streamWriter) finalize() (objectid.ObjectID, error) {
 	if writer.finalized {
 		return writer.finalID, writer.finalErr
 	}

@@ -2,7 +2,6 @@ package loose_test
 
 import (
 	"bytes"
-	"io"
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
@@ -11,35 +10,25 @@ import (
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
-func TestLooseStoreWriteWriterContentAgainstGit(t *testing.T) {
+func TestLooseStoreWriteReaderContentAgainstGit(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		store := openLooseStore(t, testRepo.Dir(), algo)
 
-		content := []byte("written-by-content-writer\n")
+		content := []byte("written-by-content-reader\n")
 		expectedHex := testRepo.RunInput(t, content, "hash-object", "-t", "blob", "--stdin")
 		expectedID, err := objectid.ParseHex(algo, expectedHex)
 		if err != nil {
 			t.Fatalf("ParseHex(expected): %v", err)
 		}
 
-		writer, finalize, err := store.WriteWriterContent(objecttype.TypeBlob, int64(len(content)))
+		writtenID, err := store.WriteReaderContent(objecttype.TypeBlob, int64(len(content)), bytes.NewReader(content))
 		if err != nil {
-			t.Fatalf("WriteWriterContent: %v", err)
-		}
-		if _, err := io.Copy(writer, bytes.NewReader(content)); err != nil {
-			t.Fatalf("WriteWriterContent write: %v", err)
-		}
-		if err := writer.Close(); err != nil {
-			t.Fatalf("WriteWriterContent close: %v", err)
-		}
-		writtenID, err := finalize()
-		if err != nil {
-			t.Fatalf("WriteWriterContent finalize: %v", err)
+			t.Fatalf("WriteReaderContent: %v", err)
 		}
 		if writtenID != expectedID {
-			t.Fatalf("WriteWriterContent id = %s, want %s", writtenID, expectedID)
+			t.Fatalf("WriteReaderContent id = %s, want %s", writtenID, expectedID)
 		}
 
 		gotBody := testRepo.CatFile(t, "blob", writtenID)
@@ -48,33 +37,23 @@ func TestLooseStoreWriteWriterContentAgainstGit(t *testing.T) {
 		}
 
 		// Writing the same object again should succeed and return the same ID.
-		writer, finalize, err = store.WriteWriterContent(objecttype.TypeBlob, int64(len(content)))
+		writtenID2, err := store.WriteReaderContent(objecttype.TypeBlob, int64(len(content)), bytes.NewReader(content))
 		if err != nil {
-			t.Fatalf("WriteWriterContent second: %v", err)
-		}
-		if _, err := io.Copy(writer, bytes.NewReader(content)); err != nil {
-			t.Fatalf("WriteWriterContent second write: %v", err)
-		}
-		if err := writer.Close(); err != nil {
-			t.Fatalf("WriteWriterContent second close: %v", err)
-		}
-		writtenID2, err := finalize()
-		if err != nil {
-			t.Fatalf("WriteWriterContent second finalize: %v", err)
+			t.Fatalf("WriteReaderContent second: %v", err)
 		}
 		if writtenID2 != expectedID {
-			t.Fatalf("WriteWriterContent second id = %s, want %s", writtenID2, expectedID)
+			t.Fatalf("WriteReaderContent second id = %s, want %s", writtenID2, expectedID)
 		}
 	})
 }
 
-func TestLooseStoreWriteWriterFullAgainstGit(t *testing.T) {
+func TestLooseStoreWriteReaderFullAgainstGit(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		store := openLooseStore(t, testRepo.Dir(), algo)
 
-		body := []byte("full-writer-body\n")
+		body := []byte("full-reader-body\n")
 		header, ok := objectheader.Encode(objecttype.TypeBlob, int64(len(body)))
 		if !ok {
 			t.Fatalf("objectheader.Encode failed")
@@ -84,22 +63,12 @@ func TestLooseStoreWriteWriterFullAgainstGit(t *testing.T) {
 		copy(raw[len(header):], body)
 
 		wantID := algo.Sum(raw)
-		writer, finalize, err := store.WriteWriterFull()
+		gotID, err := store.WriteReaderFull(bytes.NewReader(raw))
 		if err != nil {
-			t.Fatalf("WriteWriterFull: %v", err)
-		}
-		if _, err := io.Copy(writer, bytes.NewReader(raw)); err != nil {
-			t.Fatalf("WriteWriterFull write: %v", err)
-		}
-		if err := writer.Close(); err != nil {
-			t.Fatalf("WriteWriterFull close: %v", err)
-		}
-		gotID, err := finalize()
-		if err != nil {
-			t.Fatalf("WriteWriterFull finalize: %v", err)
+			t.Fatalf("WriteReaderFull: %v", err)
 		}
 		if gotID != wantID {
-			t.Fatalf("WriteWriterFull id = %s, want %s", gotID, wantID)
+			t.Fatalf("WriteReaderFull id = %s, want %s", gotID, wantID)
 		}
 
 		gotBody := testRepo.CatFile(t, "blob", gotID)
@@ -109,7 +78,7 @@ func TestLooseStoreWriteWriterFullAgainstGit(t *testing.T) {
 	})
 }
 
-func TestLooseStoreWriterValidationErrors(t *testing.T) {
+func TestLooseStoreReaderValidationErrors(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		t.Run("content overflow", func(t *testing.T) {
@@ -117,16 +86,8 @@ func TestLooseStoreWriterValidationErrors(t *testing.T) {
 			testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 			store := openLooseStore(t, testRepo.Dir(), algo)
 
-			writer, finalize, err := store.WriteWriterContent(objecttype.TypeBlob, 1)
-			if err != nil {
-				t.Fatalf("WriteWriterContent: %v", err)
-			}
-			if _, err := writer.Write([]byte("hello")); err == nil {
-				t.Fatalf("expected overflow error")
-			}
-			_ = writer.Close()
-			if _, err := finalize(); err == nil {
-				t.Fatalf("expected finalize error after overflow")
+			if _, err := store.WriteReaderContent(objecttype.TypeBlob, 1, bytes.NewReader([]byte("hello"))); err == nil {
+				t.Fatalf("expected error after overflow")
 			}
 		})
 
@@ -135,18 +96,8 @@ func TestLooseStoreWriterValidationErrors(t *testing.T) {
 			testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 			store := openLooseStore(t, testRepo.Dir(), algo)
 
-			writer, finalize, err := store.WriteWriterContent(objecttype.TypeBlob, 5)
-			if err != nil {
-				t.Fatalf("WriteWriterContent: %v", err)
-			}
-			if _, err := writer.Write([]byte("x")); err != nil {
-				t.Fatalf("write short: %v", err)
-			}
-			if err := writer.Close(); err != nil {
-				t.Fatalf("close short: %v", err)
-			}
-			if _, err := finalize(); err == nil {
-				t.Fatalf("expected finalize error for short content")
+			if _, err := store.WriteReaderContent(objecttype.TypeBlob, 5, bytes.NewReader([]byte("x"))); err == nil {
+				t.Fatalf("expected error for short content")
 			}
 		})
 
@@ -155,18 +106,8 @@ func TestLooseStoreWriterValidationErrors(t *testing.T) {
 			testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 			store := openLooseStore(t, testRepo.Dir(), algo)
 
-			writer, finalize, err := store.WriteWriterFull()
-			if err != nil {
-				t.Fatalf("WriteWriterFull: %v", err)
-			}
-			if _, err := writer.Write([]byte("not-a-header")); err != nil {
-				t.Fatalf("write malformed header bytes unexpectedly failed: %v", err)
-			}
-			if err := writer.Close(); err != nil {
-				t.Fatalf("close malformed header: %v", err)
-			}
-			if _, err := finalize(); err == nil {
-				t.Fatalf("expected finalize error for malformed header")
+			if _, err := store.WriteReaderFull(bytes.NewReader([]byte("not-a-header"))); err == nil {
+				t.Fatalf("expected error for malformed header")
 			}
 		})
 
@@ -175,17 +116,9 @@ func TestLooseStoreWriterValidationErrors(t *testing.T) {
 			testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 			store := openLooseStore(t, testRepo.Dir(), algo)
 
-			writer, finalize, err := store.WriteWriterFull()
-			if err != nil {
-				t.Fatalf("WriteWriterFull: %v", err)
-			}
 			raw := []byte("blob 1\x00hello")
-			if _, err := io.Copy(writer, bytes.NewReader(raw)); err == nil {
-				t.Fatalf("expected overflow error")
-			}
-			_ = writer.Close()
-			if _, err := finalize(); err == nil {
-				t.Fatalf("expected finalize error after mismatch")
+			if _, err := store.WriteReaderFull(bytes.NewReader(raw)); err == nil {
+				t.Fatalf("expected error after mismatch")
 			}
 		})
 	})

@@ -2,7 +2,6 @@ package repository_test
 
 import (
 	"bytes"
-	"io"
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
@@ -51,7 +50,7 @@ func TestWriteLooseBytesContent(t *testing.T) {
 	})
 }
 
-func TestWriteLooseWriterContent(t *testing.T) {
+func TestWriteLooseReaderContent(t *testing.T) {
 	t.Parallel()
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
@@ -67,29 +66,15 @@ func TestWriteLooseWriterContent(t *testing.T) {
 		}
 		defer func() { _ = repo.Close() }()
 
-		content := []byte("write-loose-writer-content\n")
-		writer, finalize, err := repo.WriteLooseWriterContent(objecttype.TypeBlob, int64(len(content)))
+		content := []byte("write-loose-reader-content\n")
+		gotID, err := repo.WriteLooseReaderContent(objecttype.TypeBlob, int64(len(content)), bytes.NewReader(content))
 		if err != nil {
-			t.Fatalf("WriteLooseWriterContent: %v", err)
-		}
-
-		if _, err := writer.Write(content[:6]); err != nil {
-			t.Fatalf("WriteLooseWriterContent first write: %v", err)
-		}
-		if _, err := writer.Write(content[6:]); err != nil {
-			t.Fatalf("WriteLooseWriterContent second write: %v", err)
-		}
-		if err := writer.Close(); err != nil {
-			t.Fatalf("WriteLooseWriterContent close: %v", err)
-		}
-		gotID, err := finalize()
-		if err != nil {
-			t.Fatalf("WriteLooseWriterContent finalize: %v", err)
+			t.Fatalf("WriteLooseReaderContent: %v", err)
 		}
 
 		wantID := repoHarness.HashObject(t, "blob", content)
 		if gotID != wantID {
-			t.Fatalf("WriteLooseWriterContent id = %s, want %s", gotID, wantID)
+			t.Fatalf("WriteLooseReaderContent id = %s, want %s", gotID, wantID)
 		}
 	})
 }
@@ -124,22 +109,12 @@ func TestWriteLooseFull(t *testing.T) {
 			t.Fatalf("WriteLooseBytesFull id = %s, want %s", idFromBytes, commitID)
 		}
 
-		writer, finalize, err := repo.WriteLooseWriterFull()
+		idFromReader, err := repo.WriteLooseReaderFull(bytes.NewReader(raw))
 		if err != nil {
-			t.Fatalf("WriteLooseWriterFull: %v", err)
+			t.Fatalf("WriteLooseReaderFull: %v", err)
 		}
-		if _, err := io.Copy(writer, bytes.NewReader(raw)); err != nil {
-			t.Fatalf("WriteLooseWriterFull copy: %v", err)
-		}
-		if err := writer.Close(); err != nil {
-			t.Fatalf("WriteLooseWriterFull close: %v", err)
-		}
-		idFromWriter, err := finalize()
-		if err != nil {
-			t.Fatalf("WriteLooseWriterFull finalize: %v", err)
-		}
-		if idFromWriter != commitID {
-			t.Fatalf("WriteLooseWriterFull id = %s, want %s", idFromWriter, commitID)
+		if idFromReader != commitID {
+			t.Fatalf("WriteLooseReaderFull id = %s, want %s", idFromReader, commitID)
 		}
 	})
 }
