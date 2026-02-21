@@ -2,6 +2,7 @@ package packed
 
 import (
 	"fmt"
+	"io"
 
 	"codeberg.org/lindenii/furgit/objecttype"
 )
@@ -40,12 +41,20 @@ func (store *Store) deltaPlanFor(start location) (deltaPlan, error) {
 		}
 		visited[current] = struct{}{}
 
-		_, meta, err := store.entryMetaAt(current)
+		pack, meta, err := store.entryMetaAt(current)
 		if err != nil {
 			return deltaPlan{}, err
 		}
 		if plan.declaredSize < 0 {
-			plan.declaredSize = meta.size
+			if isBaseObjectType(meta.ty) {
+				plan.declaredSize = meta.size
+			} else {
+				declaredSize, err := deltaDeclaredSizeAt(pack, meta.dataOffset)
+				if err != nil {
+					return deltaPlan{}, err
+				}
+				plan.declaredSize = declaredSize
+			}
 		}
 
 		if isBaseObjectType(meta.ty) {
@@ -82,4 +91,63 @@ func (store *Store) deltaPlanFor(start location) (deltaPlan, error) {
 			return deltaPlan{}, fmt.Errorf("objectstore/packed: unsupported pack type %d", meta.ty)
 		}
 	}
+}
+
+// deltaDeclaredSizeAt returns the resolved object size declared by one delta
+// stream header at dataOffset.
+func deltaDeclaredSizeAt(pack *packFile, dataOffset int) (int64, error) {
+	reader, err := zlibReaderAt(pack, dataOffset)
+	if err != nil {
+		return 0, err
+	}
+	defer func() { _ = reader.Close() }()
+
+	_, size, err := readDeltaHeaderSizes(reader)
+	if err != nil {
+		return 0, err
+	}
+	return int64(size), nil
+}
+
+// readDeltaHeaderSizes reads the first two varints in one inflated delta stream.
+func readDeltaHeaderSizes(reader io.Reader) (int, int, error) {
+	// Two Git varints are read here. Each can take up to 10 bytes.
+	var buf [20]byte
+	n := 0
+
+	for {
+		if n >= len(buf) {
+			return 0, 0, fmt.Errorf("objectstore/packed: malformed delta varint")
+		}
+		if _, err := io.ReadFull(reader, buf[n:n+1]); err != nil {
+			return 0, 0, fmt.Errorf("objectstore/packed: malformed delta varint: %w", err)
+		}
+		n++
+		if buf[n-1]&0x80 == 0 {
+			break
+		}
+	}
+	pos := 0
+	srcSize, err := readDeltaVarint(buf[:n], &pos)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	for {
+		if n >= len(buf) {
+			return 0, 0, fmt.Errorf("objectstore/packed: malformed delta varint")
+		}
+		if _, err := io.ReadFull(reader, buf[n:n+1]); err != nil {
+			return 0, 0, fmt.Errorf("objectstore/packed: malformed delta varint: %w", err)
+		}
+		n++
+		if buf[n-1]&0x80 == 0 {
+			break
+		}
+	}
+	dstSize, err := readDeltaVarint(buf[:n], &pos)
+	if err != nil {
+		return 0, 0, err
+	}
+	return srcSize, dstSize, nil
 }
