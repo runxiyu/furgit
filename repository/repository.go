@@ -24,11 +24,6 @@ import (
 // Open expects path to be the Git directory itself:
 // a bare repository root or a non-bare ".git" directory.
 type Repository struct {
-	root         *os.Root
-	objectsRoot  *os.Root
-	packRoot     *os.Root
-	reftableRoot *os.Root
-
 	config *config.Config
 	algo   objectid.Algorithm
 
@@ -38,19 +33,20 @@ type Repository struct {
 
 // Open opens a repository and wires object/ref stores from its on-disk format.
 func Open(path string) (repo *Repository, err error) {
-	root, err := os.OpenRoot(path)
+	setupRoot, err := os.OpenRoot(path)
 	if err != nil {
 		return nil, err
 	}
+	defer func() { _ = setupRoot.Close() }()
 
-	repo = &Repository{root: root}
+	repo = &Repository{}
 	defer func() {
 		if err != nil {
 			_ = repo.Close()
 		}
 	}()
 
-	cfg, err := parseRepositoryConfig(root)
+	cfg, err := parseRepositoryConfig(setupRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -62,20 +58,17 @@ func Open(path string) (repo *Repository, err error) {
 	}
 	repo.algo = algo
 
-	objects, objectsRoot, packRoot, err := openObjectStore(root, algo)
+	objects, err := openObjectStore(path, algo)
 	if err != nil {
 		return nil, err
 	}
 	repo.objects = objects
-	repo.objectsRoot = objectsRoot
-	repo.packRoot = packRoot
 
-	refs, reftableRoot, err := openRefStore(root, algo)
+	refs, err := openRefStore(path, algo)
 	if err != nil {
 		return nil, err
 	}
 	repo.refs = refs
-	repo.reftableRoot = reftableRoot
 
 	return repo, nil
 }
@@ -112,38 +105,11 @@ func (repo *Repository) Close() error {
 		if err := repo.refs.Close(); err != nil {
 			errs = append(errs, err)
 		}
-		repo.refs = nil
 	}
 	if repo.objects != nil {
 		if err := repo.objects.Close(); err != nil {
 			errs = append(errs, err)
 		}
-		repo.objects = nil
-	}
-
-	if repo.reftableRoot != nil {
-		if err := repo.reftableRoot.Close(); err != nil {
-			errs = append(errs, err)
-		}
-		repo.reftableRoot = nil
-	}
-	if repo.packRoot != nil {
-		if err := repo.packRoot.Close(); err != nil {
-			errs = append(errs, err)
-		}
-		repo.packRoot = nil
-	}
-	if repo.objectsRoot != nil {
-		if err := repo.objectsRoot.Close(); err != nil {
-			errs = append(errs, err)
-		}
-		repo.objectsRoot = nil
-	}
-	if repo.root != nil {
-		if err := repo.root.Close(); err != nil {
-			errs = append(errs, err)
-		}
-		repo.root = nil
 	}
 
 	return errors.Join(errs...)
@@ -175,11 +141,18 @@ func detectObjectAlgorithm(cfg *config.Config) (objectid.Algorithm, error) {
 	return algo, nil
 }
 
-func openObjectStore(root *os.Root, algo objectid.Algorithm) (out objectstore.Store, objectsRoot *os.Root, packRoot *os.Root, err error) {
-	objectsRoot, err = root.OpenRoot("objects")
+func openObjectStore(path string, algo objectid.Algorithm) (out objectstore.Store, err error) {
+	repoRoot, err := os.OpenRoot(path)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("repository: open objects: %w", err)
+		return nil, fmt.Errorf("repository: open root: %w", err)
 	}
+	defer func() { _ = repoRoot.Close() }()
+
+	objectsRoot, err := repoRoot.OpenRoot("objects")
+	if err != nil {
+		return nil, fmt.Errorf("repository: open objects: %w", err)
+	}
+	var packRoot *os.Root
 	defer func() {
 		if err != nil {
 			if out != nil {
@@ -194,7 +167,7 @@ func openObjectStore(root *os.Root, algo objectid.Algorithm) (out objectstore.St
 
 	looseStore, err := objectloose.New(objectsRoot, algo)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	backends := []objectstore.Store{looseStore}
 
@@ -203,77 +176,68 @@ func openObjectStore(root *os.Root, algo objectid.Algorithm) (out objectstore.St
 		var packedStore *objectpacked.Store
 		packedStore, err = objectpacked.New(packRoot, algo)
 		if err != nil {
-			return nil, nil, nil, err
+			return nil, err
 		}
 		backends = append(backends, packedStore)
 	} else if !errors.Is(err, os.ErrNotExist) {
-		return nil, nil, nil, fmt.Errorf("repository: open objects/pack: %w", err)
+		return nil, fmt.Errorf("repository: open objects/pack: %w", err)
 	}
 	err = nil
 	out = objectchain.New(backends...)
 
-	return out, objectsRoot, packRoot, nil
+	return out, nil
 }
 
-func openRefStore(root *os.Root, algo objectid.Algorithm) (out refstore.Store, reftableRoot *os.Root, err error) {
-	var closePackedStore refstore.Store
-	defer func() {
-		if err != nil {
-			if out != nil {
-				_ = out.Close()
-			}
-			if closePackedStore != nil {
-				_ = closePackedStore.Close()
-			}
-			if reftableRoot != nil {
-				_ = reftableRoot.Close()
-			}
-		}
-	}()
-
-	hasReftable, err := hasReftableStack(root)
+func openRefStore(path string, algo objectid.Algorithm) (out refstore.Store, err error) {
+	metaRoot, err := os.OpenRoot(path)
 	if err != nil {
-		return nil, nil, err
+		return nil, fmt.Errorf("repository: open root: %w", err)
+	}
+	defer func() { _ = metaRoot.Close() }()
+
+	hasReftable, err := hasReftableStack(metaRoot)
+	if err != nil {
+		return nil, err
 	}
 	if hasReftable {
-		reftableRoot, err = root.OpenRoot("reftable")
+		reftableRoot, err := metaRoot.OpenRoot("reftable")
 		if err != nil {
-			return nil, nil, fmt.Errorf("repository: open reftable: %w", err)
+			return nil, fmt.Errorf("repository: open reftable: %w", err)
 		}
-		var reftableStore *reftable.Store
-		reftableStore, err = reftable.New(reftableRoot, algo)
+		reftableStore, err := reftable.New(reftableRoot, algo)
 		if err != nil {
-			return nil, nil, err
+			_ = reftableRoot.Close()
+			return nil, err
 		}
-		err = nil
-		out = reftableStore
-		return reftableStore, reftableRoot, nil
+		return reftableStore, nil
 	}
 
-	looseStore, err := refloose.New(root, algo)
+	looseRoot, err := os.OpenRoot(path)
 	if err != nil {
-		return nil, nil, err
+		return nil, fmt.Errorf("repository: open root for loose refs: %w", err)
+	}
+	looseStore, err := refloose.New(looseRoot, algo)
+	if err != nil {
+		_ = looseRoot.Close()
+		return nil, err
 	}
 	backends := []refstore.Store{looseStore}
 
-	packedRefsFile, err := root.Open("packed-refs")
+	packedRefsFile, err := metaRoot.Open("packed-refs")
 	if err == nil {
 		packedStore, packedErr := refpacked.New(packedRefsFile, algo)
 		_ = packedRefsFile.Close()
 		if packedErr != nil {
-			err = packedErr
-			return nil, nil, err
+			_ = looseStore.Close()
+			return nil, packedErr
 		}
-		closePackedStore = packedStore
 		backends = append(backends, packedStore)
 	} else if !errors.Is(err, os.ErrNotExist) {
-		return nil, nil, fmt.Errorf("repository: open packed-refs: %w", err)
+		_ = looseStore.Close()
+		return nil, fmt.Errorf("repository: open packed-refs: %w", err)
 	}
-	err = nil
-	out = refchain.New(backends...)
-	closePackedStore = nil
 
-	return out, nil, nil
+	return refchain.New(backends...), nil
 }
 
 func hasReftableStack(root *os.Root) (bool, error) {

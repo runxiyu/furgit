@@ -15,7 +15,7 @@ import (
 
 // Store reads references from a reftable stack rooted at $GIT_DIR/reftable.
 //
-// Store does not own root. Callers are responsible for closing root.
+// Store owns root and closes it in Close.
 type Store struct {
 	// root is the reftable directory capability.
 	root *os.Root
@@ -53,8 +53,8 @@ func (store *Store) Close() error {
 		return nil
 	}
 	store.closed = true
+	root := store.root
 	tables := store.tables
-	store.tables = nil
 	store.stateMu.Unlock()
 
 	var closeErr error
@@ -65,6 +65,9 @@ func (store *Store) Close() error {
 		if err := table.close(); err != nil && closeErr == nil {
 			closeErr = err
 		}
+	}
+	if err := root.Close(); err != nil && closeErr == nil {
+		closeErr = err
 	}
 	return closeErr
 }

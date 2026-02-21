@@ -9,11 +9,11 @@ import (
 
 // Store reads loose Git objects from an objects directory root.
 //
-// Store does not own root. Callers are responsible for closing root.
+// Store owns root and closes it in Close.
 type Store struct {
 	// root is the objects directory capability used for all object file access.
 	// Object files are opened by relative paths like "<first2>/<rest>".
-	// Store does not own this root.
+	// Store owns this root.
 	root *os.Root
 	// algo is the expected object ID algorithm for lookups.
 	algo objectid.Algorithm
@@ -32,6 +32,5 @@ func New(root *os.Root, algo objectid.Algorithm) (*Store, error) {
 
 // Close releases resources associated with the backend.
 func (store *Store) Close() error {
-	_ = store
-	return nil
+	return store.root.Close()
 }

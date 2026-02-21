@@ -10,7 +10,7 @@ import (
 
 // Store reads loose references from a repository root.
 //
-// Store does not own root. Callers are responsible for closing root.
+// Store owns root and closes it in Close.
 type Store struct {
 	// root is the repository root capability.
 	root *os.Root
@@ -33,5 +33,5 @@ func New(root *os.Root, algo objectid.Algorithm) (*Store, error) {
 
 // Close releases resources associated with the backend.
 func (store *Store) Close() error {
-	return nil
+	return store.root.Close()
 }

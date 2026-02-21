@@ -12,7 +12,7 @@ import (
 
 // Store reads Git objects from pack/index files under an objects/pack root.
 //
-// Store does not own root. Callers are responsible for closing root.
+// Store owns root and closes it in Close.
 type Store struct {
 	// root is the objects/pack capability used for all file access.
 	root *os.Root
@@ -65,10 +65,9 @@ func (store *Store) Close() error {
 		return nil
 	}
 	store.closed = true
+	root := store.root
 	packs := store.packs
-	store.packs = make(map[string]*packFile)
 	indexes := store.indexes
-	store.indexes = nil
 	store.stateMu.Unlock()
 
 	var closeErr error
@@ -86,10 +85,12 @@ func (store *Store) Close() error {
 		}
 	}
 	store.cacheMu.Lock()
-	if store.deltaCache != nil {
-		store.deltaCache.clear()
-	}
+	store.deltaCache.clear()
 	store.cacheMu.Unlock()
+
+	if err := root.Close(); err != nil && closeErr == nil {
+		closeErr = err
+	}
 	return closeErr
 }
 
