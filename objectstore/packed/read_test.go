@@ -197,7 +197,7 @@ func findDeltaObjectWithResolvedSizeMismatch(t *testing.T, testRepo *testgit.Tes
 	}
 
 	verifyOut := testRepo.Run(t, "verify-pack", "-v", idxFiles[0])
-	for _, line := range strings.Split(strings.TrimSpace(verifyOut), "\n") {
+	for line := range strings.SplitSeq(strings.TrimSpace(verifyOut), "\n") {
 		fields := strings.Fields(line)
 		if len(fields) < 7 {
 			continue
