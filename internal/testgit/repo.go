@@ -1,3 +1,4 @@
+// Package testgit provides helpers for integration tests with upstream git(1).
 package testgit
 
 import "codeberg.org/lindenii/furgit/objectid"
