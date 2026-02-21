@@ -131,7 +131,7 @@ func (z *reader) Read(p []byte) (int, error) {
 	return n, io.EOF
 }
 
-// Calling Close does not close the wrapped [io.Reader] originally passed to [NewReader].
+// Close does not close the wrapped [io.Reader] originally passed to [NewReader].
 // In order for the ZLIB checksum to be verified, the reader must be
 // fully consumed until the [io.EOF].
 func (z *reader) Close() error {

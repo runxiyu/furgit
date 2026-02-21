@@ -206,7 +206,7 @@ func (z *Writer) writeHeader() (err error) {
 	if z.dict != nil {
 		z.scratch[1] |= 1 << 5
 	}
-	z.scratch[1] += uint8(31 - binary.BigEndian.Uint16(z.scratch[:2])%31)
+	z.scratch[1] += uint8(31 - binary.BigEndian.Uint16(z.scratch[:2])%31) //#nosec G115
 	if _, err = z.w.Write(z.scratch[0:2]); err != nil {
 		return err
 	}

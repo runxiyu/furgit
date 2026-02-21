@@ -54,7 +54,7 @@ func TestRepositoryDepthFirstEnumerationCurrentWorktree(t *testing.T) {
 		t.Fatalf("%q is neither a directory nor a regular file", gitPath)
 	}
 
-	content, err := os.ReadFile(gitPath) //#nosec:G304
+	content, err := os.ReadFile(gitPath) //#nosec G304
 	if err != nil {
 		t.Fatalf("read %q: %v", gitPath, err)
 	}
@@ -73,7 +73,7 @@ func TestRepositoryDepthFirstEnumerationCurrentWorktree(t *testing.T) {
 		gitdirPath = filepath.Join(worktreeRoot, gitdirPath)
 	}
 	commondirPath := filepath.Join(gitdirPath, "commondir")
-	commondirContent, err := os.ReadFile(commondirPath) //#nosec:G304
+	commondirContent, err := os.ReadFile(commondirPath) //#nosec G304
 	if err != nil {
 		t.Fatalf("read %q: %v", commondirPath, err)
 	}

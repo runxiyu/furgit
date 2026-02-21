@@ -55,7 +55,8 @@ func TestBorrowUsesLargerPools(t *testing.T) {
 	}
 
 	b := Borrow(request)
-	if b.pool != poolIndex(classIdx) { //#nosec:G115
+	//#nosec G115
+	if b.pool != poolIndex(classIdx) {
 		t.Fatalf("expected pooled buffer in class %d, got %d", classIdx, b.pool)
 	}
 	if cap(b.buf) != classCap {
@@ -65,7 +66,8 @@ func TestBorrowUsesLargerPools(t *testing.T) {
 
 	b2 := Borrow(request)
 	defer b2.Release()
-	if b2.pool != poolIndex(classIdx) { //#nosec:G115
+	//#nosec G115
+	if b2.pool != poolIndex(classIdx) {
 		t.Fatalf("expected pooled buffer in class %d on reuse, got %d", classIdx, b2.pool)
 	}
 	if cap(b2.buf) != classCap {

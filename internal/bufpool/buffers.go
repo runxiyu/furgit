@@ -85,7 +85,7 @@ func Borrow(capHint int) Buffer {
 		*buf = make([]byte, 0, classCap)
 	}
 	slice := (*buf)[:0]
-	return Buffer{buf: slice, pool: poolIndex(classIdx)} //#nosec:G115
+	return Buffer{buf: slice, pool: poolIndex(classIdx)} //#nosec G115
 }
 
 // FromOwned constructs a Buffer from a caller-owned byte slice. The resulting
@@ -167,7 +167,7 @@ func (buf *Buffer) ensureCapacity(needed int) {
 	buf.returnToPool()
 	buf.buf = newBuf
 	if pooled {
-		buf.pool = poolIndex(classIdx) //#nosec:G115
+		buf.pool = poolIndex(classIdx) //#nosec G115
 	} else {
 		buf.pool = unpooled
 	}
