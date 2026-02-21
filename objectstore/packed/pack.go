@@ -6,10 +6,9 @@ import (
 	"os"
 	"syscall"
 
+	packfmt "codeberg.org/lindenii/furgit/format/pack"
 	"codeberg.org/lindenii/furgit/internal/intconv"
 )
-
-const packSignature = 0x5041434b
 
 // packFile stores one mapped and validated .pack file.
 type packFile struct {
@@ -37,12 +36,12 @@ func openPackFile(name string, file *os.File, size int64) (*packFile, error) {
 	if err != nil {
 		return nil, err
 	}
-	if binary.BigEndian.Uint32(data[:4]) != packSignature {
+	if binary.BigEndian.Uint32(data[:4]) != packfmt.Signature {
 		_ = syscall.Munmap(data)
 		return nil, fmt.Errorf("objectstore/packed: pack %q invalid signature", name)
 	}
 	version := binary.BigEndian.Uint32(data[4:8])
-	if version != 2 && version != 3 {
+	if !packfmt.VersionSupported(version) {
 		_ = syscall.Munmap(data)
 		return nil, fmt.Errorf("objectstore/packed: pack %q unsupported version %d", name, version)
 	}

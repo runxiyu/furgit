@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	deltaapply "codeberg.org/lindenii/furgit/format/delta/apply"
+	packfmt "codeberg.org/lindenii/furgit/format/pack"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
@@ -46,7 +47,7 @@ func (store *Store) deltaPlanFor(start location) (deltaPlan, error) {
 			return deltaPlan{}, err
 		}
 		if plan.declaredSize < 0 {
-			if isBaseObjectType(meta.ty) {
+			if packfmt.IsBaseObjectType(meta.ty) {
 				plan.declaredSize = meta.size
 			} else {
 				declaredSize, err := deltaDeclaredSizeAt(pack, meta.dataOffset)
@@ -57,7 +58,7 @@ func (store *Store) deltaPlanFor(start location) (deltaPlan, error) {
 			}
 		}
 
-		if isBaseObjectType(meta.ty) {
+		if packfmt.IsBaseObjectType(meta.ty) {
 			plan.baseLoc = current
 			plan.baseType = meta.ty
 			return plan, nil

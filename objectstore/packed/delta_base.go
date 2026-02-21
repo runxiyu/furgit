@@ -3,6 +3,7 @@ package packed
 import (
 	"fmt"
 
+	packfmt "codeberg.org/lindenii/furgit/format/pack"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
@@ -24,7 +25,7 @@ func (store *Store) deltaResolveBase(plan deltaPlan) (objecttype.Type, []byte, e
 	if err != nil {
 		return objecttype.TypeInvalid, nil, err
 	}
-	if !isBaseObjectType(meta.ty) {
+	if !packfmt.IsBaseObjectType(meta.ty) {
 		return objecttype.TypeInvalid, nil, fmt.Errorf("objectstore/packed: delta plan base is not a base object")
 	}
 	base, err := inflateAt(pack, meta.dataOffset, meta.size)

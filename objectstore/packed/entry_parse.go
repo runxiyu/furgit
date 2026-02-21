@@ -3,6 +3,7 @@ package packed
 import (
 	"fmt"
 
+	packfmt "codeberg.org/lindenii/furgit/format/pack"
 	"codeberg.org/lindenii/furgit/internal/intconv"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
@@ -33,93 +34,28 @@ func parseEntryMeta(pack *packFile, algo objectid.Algorithm, offset uint64) (ent
 	if err != nil {
 		return zero, fmt.Errorf("objectstore/packed: pack %q offset conversion: %w", pack.name, err)
 	}
-	first := pack.data[pos]
-	pos++
+	entry, err := packfmt.ParseEntry(pack.data[pos:], algo.Size())
+	if err != nil {
+		return zero, fmt.Errorf("objectstore/packed: pack %q: %w", pack.name, err)
+	}
 
 	meta := entryMeta{
-		ty:   objecttype.Type((first >> 4) & 0x07),
-		size: int64(first & 0x0f),
+		ty:         entry.Type,
+		size:       entry.Size,
+		dataOffset: pos + entry.DataOffset,
 	}
-
-	shift := uint(4)
-	b := first
-	for b&0x80 != 0 {
-		if pos >= len(pack.data) {
-			return zero, fmt.Errorf("objectstore/packed: pack %q truncated entry header", pack.name)
-		}
-		b = pack.data[pos]
-		pos++
-		meta.size |= int64(b&0x7f) << shift
-		shift += 7
-	}
-	if meta.size < 0 {
-		return zero, fmt.Errorf("objectstore/packed: pack %q entry has negative size", pack.name)
-	}
-
 	switch meta.ty {
-	case objecttype.TypeCommit, objecttype.TypeTree, objecttype.TypeBlob, objecttype.TypeTag:
-		// Base object entries have no extra header fields.
 	case objecttype.TypeRefDelta:
-		hashSize := algo.Size()
-		if pos+hashSize > len(pack.data) {
-			return zero, fmt.Errorf("objectstore/packed: pack %q truncated ref-delta base id", pack.name)
-		}
-		baseID, err := objectid.FromBytes(algo, pack.data[pos:pos+hashSize])
+		baseID, err := objectid.FromBytes(algo, entry.RefBaseID)
 		if err != nil {
-			return zero, err
+			return zero, fmt.Errorf("objectstore/packed: pack %q invalid ref-delta base id: %w", pack.name, err)
 		}
 		meta.baseRefID = baseID
-		pos += hashSize
 	case objecttype.TypeOfsDelta:
-		dist, consumed, err := parseOfsDeltaDistance(pack.data[pos:])
-		if err != nil {
-			return zero, err
-		}
-		pos += consumed
-		if offset <= dist {
+		if offset <= entry.OfsBaseDistance {
 			return zero, fmt.Errorf("objectstore/packed: pack %q has invalid ofs-delta base", pack.name)
 		}
-		meta.baseOfs = offset - dist
-	case objecttype.TypeInvalid, objecttype.TypeFuture:
-		return zero, fmt.Errorf("objectstore/packed: pack %q has unsupported object type %d", pack.name, meta.ty)
-	default:
-		return zero, fmt.Errorf("objectstore/packed: pack %q has unsupported object type %d", pack.name, meta.ty)
-	}
-
-	meta.dataOffset = pos
-	if meta.dataOffset > len(pack.data) {
-		return zero, fmt.Errorf("objectstore/packed: pack %q entry data offset out of bounds", pack.name)
+		meta.baseOfs = offset - entry.OfsBaseDistance
 	}
 	return meta, nil
-}
-
-// parseOfsDeltaDistance parses one ofs-delta backward distance.
-func parseOfsDeltaDistance(buf []byte) (uint64, int, error) {
-	if len(buf) == 0 {
-		return 0, 0, fmt.Errorf("objectstore/packed: malformed ofs-delta distance")
-	}
-	b := buf[0]
-	dist := uint64(b & 0x7f)
-	consumed := 1
-	for b&0x80 != 0 {
-		if consumed >= len(buf) {
-			return 0, 0, fmt.Errorf("objectstore/packed: malformed ofs-delta distance")
-		}
-		b = buf[consumed]
-		consumed++
-		dist = ((dist + 1) << 7) + uint64(b&0x7f)
-	}
-	return dist, consumed, nil
-}
-
-// isBaseObjectType reports whether ty is one of the four canonical object types.
-func isBaseObjectType(ty objecttype.Type) bool {
-	switch ty {
-	case objecttype.TypeCommit, objecttype.TypeTree, objecttype.TypeBlob, objecttype.TypeTag:
-		return true
-	case objecttype.TypeInvalid, objecttype.TypeFuture, objecttype.TypeOfsDelta, objecttype.TypeRefDelta:
-		return false
-	default:
-		return false
-	}
 }
