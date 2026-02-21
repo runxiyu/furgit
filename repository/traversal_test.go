@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/object"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/repository"
 )
@@ -103,43 +102,11 @@ func walkRepositoryFromHead(t *testing.T, repoPath string) {
 	if err != nil {
 		t.Fatalf("ResolveRefFully(HEAD): %v", err)
 	}
-
-	visited := make(map[objectid.ObjectID]bool)
-	queue := []objectid.ObjectID{head.ID}
-	objectsRead := 0
-
-	for len(queue) > 0 {
-		id := queue[0]
-		queue = queue[1:]
-
-		if visited[id] {
-			continue
-		}
-		visited[id] = true
-
-		stored, err := repo.ReadStored(id)
-		if err != nil {
-			t.Fatalf("ReadStored(%s): %v", id, err)
-		}
-		objectsRead++
-
-		switch obj := stored.Object().(type) {
-		case *object.Commit:
-			queue = append(queue, obj.Tree)
-			queue = append(queue, obj.Parents...)
-		case *object.Tree:
-			for _, entry := range obj.Entries {
-				queue = append(queue, entry.ID)
-			}
-		case *object.Tag:
-			queue = append(queue, obj.Target)
-		case *object.Blob:
-		default:
-			t.Fatalf("unexpected object type: %T", obj)
-		}
+	objectsRead, err := traverseReachableIter(repo, head.ID)
+	if err != nil {
+		t.Fatalf("traverseReachableIter(%s): %v", head.ID, err)
 	}
-
-	if objectsRead == 0 {
+	if objectsRead <= 0 {
 		t.Fatalf("no objects were enumerated from HEAD (%s)", fmt.Sprintf("%q", repoPath))
 	}
 }
