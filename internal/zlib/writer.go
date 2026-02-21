@@ -5,13 +5,14 @@
 package zlib
 
 import (
-	"compress/flate"
 	"encoding/binary"
 	"fmt"
 	"hash"
 	"hash/adler32"
 	"io"
 	"sync"
+
+	"github.com/klauspost/compress/flate"
 )
 
 // These constants are copied from the [flate] package, so that code that imports

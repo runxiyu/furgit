@@ -35,13 +35,14 @@ package zlib
 
 import (
 	"bufio"
-	"compress/flate"
 	"encoding/binary"
 	"errors"
 	"hash"
 	"hash/adler32"
 	"io"
 	"sync"
+
+	"github.com/klauspost/compress/flate"
 )
 
 const (
