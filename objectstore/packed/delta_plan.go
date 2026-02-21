@@ -2,8 +2,8 @@ package packed
 
 import (
 	"fmt"
-	"io"
 
+	deltaapply "codeberg.org/lindenii/furgit/format/delta/apply"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
@@ -102,52 +102,9 @@ func deltaDeclaredSizeAt(pack *packFile, dataOffset int) (int64, error) {
 	}
 	defer func() { _ = reader.Close() }()
 
-	_, size, err := readDeltaHeaderSizes(reader)
+	_, size, err := deltaapply.ReadHeaderSizes(reader)
 	if err != nil {
 		return 0, err
 	}
 	return int64(size), nil
-}
-
-// readDeltaHeaderSizes reads the first two varints in one inflated delta stream.
-func readDeltaHeaderSizes(reader io.Reader) (int, int, error) {
-	// Two Git varints are read here. Each can take up to 10 bytes.
-	var buf [20]byte
-	n := 0
-
-	for {
-		if n >= len(buf) {
-			return 0, 0, fmt.Errorf("objectstore/packed: malformed delta varint")
-		}
-		if _, err := io.ReadFull(reader, buf[n:n+1]); err != nil {
-			return 0, 0, fmt.Errorf("objectstore/packed: malformed delta varint: %w", err)
-		}
-		n++
-		if buf[n-1]&0x80 == 0 {
-			break
-		}
-	}
-	pos := 0
-	srcSize, err := readDeltaVarint(buf[:n], &pos)
-	if err != nil {
-		return 0, 0, err
-	}
-
-	for {
-		if n >= len(buf) {
-			return 0, 0, fmt.Errorf("objectstore/packed: malformed delta varint")
-		}
-		if _, err := io.ReadFull(reader, buf[n:n+1]); err != nil {
-			return 0, 0, fmt.Errorf("objectstore/packed: malformed delta varint: %w", err)
-		}
-		n++
-		if buf[n-1]&0x80 == 0 {
-			break
-		}
-	}
-	dstSize, err := readDeltaVarint(buf[:n], &pos)
-	if err != nil {
-		return 0, 0, err
-	}
-	return srcSize, dstSize, nil
 }
