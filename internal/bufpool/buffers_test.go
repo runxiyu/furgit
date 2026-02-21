@@ -1,8 +1,11 @@
+//nolint:testpackage
 package bufpool
 
 import "testing"
 
 func TestBorrowBufferResizeAndAppend(t *testing.T) {
+	t.Parallel()
+
 	b := Borrow(1)
 	defer b.Release()
 
@@ -31,6 +34,8 @@ func TestBorrowBufferResizeAndAppend(t *testing.T) {
 }
 
 func TestBorrowBufferRelease(t *testing.T) {
+	t.Parallel()
+
 	b := Borrow(DefaultBufferCap / 2)
 	b.Append([]byte("data"))
 	b.Release()
@@ -40,6 +45,8 @@ func TestBorrowBufferRelease(t *testing.T) {
 }
 
 func TestBorrowUsesLargerPools(t *testing.T) {
+	t.Parallel()
+
 	const request = DefaultBufferCap * 4
 
 	classIdx, classCap, pooled := classFor(request)
@@ -48,7 +55,7 @@ func TestBorrowUsesLargerPools(t *testing.T) {
 	}
 
 	b := Borrow(request)
-	if b.pool != poolIndex(classIdx) {
+	if b.pool != poolIndex(classIdx) { //#nosec:G115
 		t.Fatalf("expected pooled buffer in class %d, got %d", classIdx, b.pool)
 	}
 	if cap(b.buf) != classCap {
@@ -58,7 +65,7 @@ func TestBorrowUsesLargerPools(t *testing.T) {
 
 	b2 := Borrow(request)
 	defer b2.Release()
-	if b2.pool != poolIndex(classIdx) {
+	if b2.pool != poolIndex(classIdx) { //#nosec:G115
 		t.Fatalf("expected pooled buffer in class %d on reuse, got %d", classIdx, b2.pool)
 	}
 	if cap(b2.buf) != classCap {
@@ -67,6 +74,8 @@ func TestBorrowUsesLargerPools(t *testing.T) {
 }
 
 func TestGrowingBufferStaysPooled(t *testing.T) {
+	t.Parallel()
+
 	b := Borrow(DefaultBufferCap)
 	defer b.Release()
 
