@@ -13,6 +13,12 @@ func (testRepo *TestRepo) UpdateRef(tb testing.TB, name string, id objectid.Obje
 	testRepo.Run(tb, "update-ref", name, id.String())
 }
 
+// DeleteRef deletes a ref.
+func (testRepo *TestRepo) DeleteRef(tb testing.TB, name string) {
+	tb.Helper()
+	testRepo.Run(tb, "update-ref", "-d", name)
+}
+
 // SymbolicRef sets a symbolic reference target.
 func (testRepo *TestRepo) SymbolicRef(tb testing.TB, name, target string) {
 	tb.Helper()

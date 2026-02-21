@@ -7,19 +7,29 @@ import (
 	"codeberg.org/lindenii/furgit/objectid"
 )
 
+// RepoOptions controls git-init options for test repositories.
+type RepoOptions struct {
+	// Bare selects whether the repository is initialized as bare.
+	Bare bool
+	// RefFormat selects the git ref storage format (for example "files" or
+	// "reftable"). Empty means git's default format.
+	RefFormat string
+}
+
 // NewBareRepo creates a temporary bare repository initialized with the requested algorithm.
 func NewBareRepo(tb testing.TB, algo objectid.Algorithm) *TestRepo {
 	tb.Helper()
-	return newRepo(tb, algo, true)
+	return NewRepo(tb, algo, RepoOptions{Bare: true})
 }
 
 // NewWorkRepo creates a temporary non-bare repository initialized with the requested algorithm.
 func NewWorkRepo(tb testing.TB, algo objectid.Algorithm) *TestRepo {
 	tb.Helper()
-	return newRepo(tb, algo, false)
+	return NewRepo(tb, algo, RepoOptions{Bare: false})
 }
 
-func newRepo(tb testing.TB, algo objectid.Algorithm, bare bool) *TestRepo {
+// NewRepo creates a temporary repository initialized with the requested options.
+func NewRepo(tb testing.TB, algo objectid.Algorithm, opts RepoOptions) *TestRepo {
 	tb.Helper()
 	if algo.Size() == 0 {
 		tb.Fatalf("invalid algorithm: %v", algo)
@@ -47,8 +57,11 @@ func newRepo(tb testing.TB, algo objectid.Algorithm, bare bool) *TestRepo {
 	}
 
 	args := []string{"init", "--object-format=" + algo.String()}
-	if bare {
+	if opts.Bare {
 		args = append(args, "--bare")
+	}
+	if opts.RefFormat != "" {
+		args = append(args, "--ref-format="+opts.RefFormat)
 	}
 	args = append(args, dir)
 	testRepo.runBytes(tb, nil, "", args...)
