@@ -3,6 +3,7 @@ package repository_test
 import (
 	"codeberg.org/lindenii/furgit/object"
 	"codeberg.org/lindenii/furgit/objectid"
+	"codeberg.org/lindenii/furgit/objecttype"
 	"codeberg.org/lindenii/furgit/repository"
 )
 
@@ -14,18 +15,21 @@ func traverseTreeIter(repo *repository.Repository, root objectid.ObjectID) (int,
 		id := stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
 
-		stored, err := repo.ReadStored(id)
+		ty, _, err := repo.Objects().ReadHeader(id)
 		if err != nil {
 			return 0, err
 		}
 		total++
-
-		tree, ok := stored.Object().(*object.Tree)
-		if !ok {
+		if ty != objecttype.TypeTree {
 			continue
 		}
-		for i := len(tree.Entries) - 1; i >= 0; i-- {
-			entry := tree.Entries[i]
+
+		tree, err := repo.ReadStoredTree(id)
+		if err != nil {
+			return 0, err
+		}
+		for i := len(tree.Tree().Entries) - 1; i >= 0; i-- {
+			entry := tree.Tree().Entries[i]
 			if entry.Mode == object.FileModeGitlink {
 				continue
 			}
