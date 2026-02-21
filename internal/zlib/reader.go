@@ -105,8 +105,11 @@ func (z *reader) Read(p []byte) (int, error) {
 
 	var n int
 	n, z.err = z.decompressor.Read(p)
-	z.digest.Write(p[0:n])
-	if z.err != io.EOF {
+	if _, err := z.digest.Write(p[0:n]); err != nil {
+		z.err = err
+		return n, z.err
+	}
+	if !errors.Is(z.err, io.EOF) {
 		// In the normal case we return here.
 		return n, z.err
 	}
@@ -132,7 +135,7 @@ func (z *reader) Read(p []byte) (int, error) {
 // In order for the ZLIB checksum to be verified, the reader must be
 // fully consumed until the [io.EOF].
 func (z *reader) Close() error {
-	if z.err != nil && z.err != io.EOF {
+	if z.err != nil && !errors.Is(z.err, io.EOF) {
 		return z.err
 	}
 	z.err = z.decompressor.Close()
@@ -155,7 +158,7 @@ func (z *reader) Reset(r io.Reader, dict []byte) error {
 	// Read the header (RFC 1950 section 2.2.).
 	_, z.err = io.ReadFull(z.r, z.scratch[0:2])
 	if z.err != nil {
-		if z.err == io.EOF {
+		if errors.Is(z.err, io.EOF) {
 			z.err = io.ErrUnexpectedEOF
 		}
 		return z.err
@@ -169,7 +172,7 @@ func (z *reader) Reset(r io.Reader, dict []byte) error {
 	if haveDict {
 		_, z.err = io.ReadFull(z.r, z.scratch[0:4])
 		if z.err != nil {
-			if z.err == io.EOF {
+			if errors.Is(z.err, io.EOF) {
 				z.err = io.ErrUnexpectedEOF
 			}
 			return z.err
@@ -188,7 +191,11 @@ func (z *reader) Reset(r io.Reader, dict []byte) error {
 			z.decompressor = flate.NewReader(z.r)
 		}
 	} else {
-		z.err = z.decompressor.(flate.Resetter).Reset(z.r, dict)
+		resetter, ok := z.decompressor.(flate.Resetter)
+		if !ok {
+			panic("zlib: pooled decompressor does not implement flate.Resetter")
+		}
+		z.err = resetter.Reset(z.r, dict)
 		if z.err != nil {
 			return z.err
 		}

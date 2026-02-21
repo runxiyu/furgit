@@ -118,6 +118,68 @@ func (z *Writer) Reset(w io.Writer) {
 	z.wroteHeader = false
 }
 
+// Write writes a compressed form of p to the underlying [io.Writer]. The
+// compressed bytes are not necessarily flushed until the [Writer] is closed or
+// explicitly flushed.
+func (z *Writer) Write(p []byte) (n int, err error) {
+	if !z.wroteHeader {
+		z.err = z.writeHeader()
+	}
+	if z.err != nil {
+		return 0, z.err
+	}
+	if len(p) == 0 {
+		return 0, nil
+	}
+	n, err = z.compressor.Write(p)
+	if err != nil {
+		z.err = err
+		return
+	}
+	if _, err = z.digest.Write(p); err != nil {
+		z.err = err
+		return 0, z.err
+	}
+	return
+}
+
+// Flush flushes the Writer to its underlying [io.Writer].
+func (z *Writer) Flush() error {
+	if !z.wroteHeader {
+		z.err = z.writeHeader()
+	}
+	if z.err != nil {
+		return z.err
+	}
+	z.err = z.compressor.Flush()
+	return z.err
+}
+
+// Close closes the Writer, flushing any unwritten data to the underlying
+// [io.Writer], but does not close the underlying io.Writer.
+func (z *Writer) Close() error {
+	if !z.wroteHeader {
+		z.err = z.writeHeader()
+	}
+	if z.err != nil {
+		return z.err
+	}
+	z.err = z.compressor.Close()
+	if z.err != nil {
+		return z.err
+	}
+	checksum := z.digest.Sum32()
+	// ZLIB (RFC 1950) is big-endian, unlike GZIP (RFC 1952).
+	binary.BigEndian.PutUint32(z.scratch[:], checksum)
+	_, z.err = z.w.Write(z.scratch[0:4])
+	if z.err != nil {
+		return z.err
+	}
+
+	writerPool.Put(z)
+	return nil
+}
+
 // writeHeader writes the ZLIB header.
 func (z *Writer) writeHeader() (err error) {
 	z.wroteHeader = true
@@ -164,64 +226,5 @@ func (z *Writer) writeHeader() (err error) {
 		}
 		z.digest = adler32.New()
 	}
-	return nil
-}
-
-// Write writes a compressed form of p to the underlying [io.Writer]. The
-// compressed bytes are not necessarily flushed until the [Writer] is closed or
-// explicitly flushed.
-func (z *Writer) Write(p []byte) (n int, err error) {
-	if !z.wroteHeader {
-		z.err = z.writeHeader()
-	}
-	if z.err != nil {
-		return 0, z.err
-	}
-	if len(p) == 0 {
-		return 0, nil
-	}
-	n, err = z.compressor.Write(p)
-	if err != nil {
-		z.err = err
-		return
-	}
-	z.digest.Write(p)
-	return
-}
-
-// Flush flushes the Writer to its underlying [io.Writer].
-func (z *Writer) Flush() error {
-	if !z.wroteHeader {
-		z.err = z.writeHeader()
-	}
-	if z.err != nil {
-		return z.err
-	}
-	z.err = z.compressor.Flush()
-	return z.err
-}
-
-// Close closes the Writer, flushing any unwritten data to the underlying
-// [io.Writer], but does not close the underlying io.Writer.
-func (z *Writer) Close() error {
-	if !z.wroteHeader {
-		z.err = z.writeHeader()
-	}
-	if z.err != nil {
-		return z.err
-	}
-	z.err = z.compressor.Close()
-	if z.err != nil {
-		return z.err
-	}
-	checksum := z.digest.Sum32()
-	// ZLIB (RFC 1950) is big-endian, unlike GZIP (RFC 1952).
-	binary.BigEndian.PutUint32(z.scratch[:], checksum)
-	_, z.err = z.w.Write(z.scratch[0:4])
-	if z.err != nil {
-		return z.err
-	}
-
-	writerPool.Put(z)
 	return nil
 }
