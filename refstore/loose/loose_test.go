@@ -147,3 +147,35 @@ func TestLooseMalformedDetachedRef(t *testing.T) {
 		}
 	})
 }
+
+func TestLooseShorten(t *testing.T) {
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+		testRepo := testgit.NewBareRepo(t, algo)
+		_, _, commitID := testRepo.MakeCommit(t, "shorten refs commit")
+		testRepo.UpdateRef(t, "refs/heads/main", commitID)
+		testRepo.UpdateRef(t, "refs/tags/main", commitID)
+		testRepo.UpdateRef(t, "refs/remotes/origin/main", commitID)
+
+		store := openLooseStore(t, testRepo.Dir(), algo)
+
+		shortHead, err := store.Shorten("refs/heads/main")
+		if err != nil {
+			t.Fatalf("Shorten(head): %v", err)
+		}
+		if shortHead != "heads/main" {
+			t.Fatalf("Shorten(refs/heads/main) = %q, want %q", shortHead, "heads/main")
+		}
+
+		shortRemote, err := store.Shorten("refs/remotes/origin/main")
+		if err != nil {
+			t.Fatalf("Shorten(remote): %v", err)
+		}
+		if shortRemote != "origin/main" {
+			t.Fatalf("Shorten(remote) = %q, want %q", shortRemote, "origin/main")
+		}
+
+		if _, err := store.Shorten("refs/heads/does-not-exist"); !errors.Is(err, refstore.ErrReferenceNotFound) {
+			t.Fatalf("Shorten(not-found) error = %v", err)
+		}
+	})
+}

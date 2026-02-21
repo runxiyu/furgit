@@ -29,6 +29,12 @@ type Store interface {
 	//
 	// The exact pattern language is backend-defined.
 	List(pattern string) ([]ref.Ref, error)
+	// Shorten returns the shortest unambiguous shorthand for a full
+	// reference name within this store's visible namespace.
+	//
+	// If name does not exist in this store, implementations should return
+	// ErrReferenceNotFound.
+	Shorten(name string) (string, error)
 	// Close releases resources associated with the store.
 	Close() error
 }
