@@ -56,6 +56,12 @@ func parseEntryMeta(pack *packFile, algo objectid.Algorithm, offset uint64) (ent
 			return zero, fmt.Errorf("objectstore/packed: pack %q has invalid ofs-delta base", pack.name)
 		}
 		meta.baseOfs = offset - entry.OfsBaseDistance
+	case objecttype.TypeCommit, objecttype.TypeTree, objecttype.TypeBlob, objecttype.TypeTag:
+		// Base object types do not have delta base metadata.
+	case objecttype.TypeInvalid, objecttype.TypeFuture:
+		return zero, fmt.Errorf("objectstore/packed: pack %q has unsupported entry type %d", pack.name, meta.ty)
+	default:
+		return zero, fmt.Errorf("objectstore/packed: pack %q has unsupported entry type %d", pack.name, meta.ty)
 	}
 	return meta, nil
 }

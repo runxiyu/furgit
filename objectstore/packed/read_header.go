@@ -11,9 +11,5 @@ func (store *Store) ReadHeader(id objectid.ObjectID) (objecttype.Type, int64, er
 	if err != nil {
 		return objecttype.TypeInvalid, 0, err
 	}
-	chain, err := store.deltaBuildChain(loc)
-	if err != nil {
-		return objecttype.TypeInvalid, 0, err
-	}
-	return chain.baseType, chain.declaredSize, nil
+	return store.resolveHeaderAt(loc)
 }

@@ -14,11 +14,22 @@ func (store *Store) deltaResolveContent(start location) (objecttype.Type, []byte
 	if err != nil {
 		return objecttype.TypeInvalid, nil, err
 	}
-	return store.deltaResolveChain(chain)
+	pack, meta, err := store.entryMetaAt(start)
+	if err != nil {
+		return objecttype.TypeInvalid, nil, err
+	}
+	declaredSize := meta.size
+	if !packfmt.IsBaseObjectType(meta.ty) {
+		declaredSize, err = deltaDeclaredSizeAt(pack, meta.dataOffset)
+		if err != nil {
+			return objecttype.TypeInvalid, nil, err
+		}
+	}
+	return store.deltaResolveChain(chain, declaredSize)
 }
 
 // deltaResolveChain resolves one object chain into content bytes.
-func (store *Store) deltaResolveChain(chain deltaChain) (objecttype.Type, []byte, error) {
+func (store *Store) deltaResolveChain(chain deltaChain, declaredSize int64) (objecttype.Type, []byte, error) {
 	ty, out, nextDelta, err := store.deltaResolveChainStart(chain)
 	if err != nil {
 		return objecttype.TypeInvalid, nil, err
@@ -47,11 +58,11 @@ func (store *Store) deltaResolveChain(chain deltaChain) (objecttype.Type, []byte
 		store.cacheMu.Unlock()
 	}
 
-	if int64(len(out)) != chain.declaredSize {
+	if int64(len(out)) != declaredSize {
 		return objecttype.TypeInvalid, nil, fmt.Errorf(
 			"objectstore/packed: resolved content size mismatch: got %d want %d",
 			len(out),
-			chain.declaredSize,
+			declaredSize,
 		)
 	}
 	if ty != chain.baseType {

@@ -18,8 +18,6 @@ type deltaNode struct {
 
 // deltaChain describes how to reconstruct one requested object.
 type deltaChain struct {
-	// declaredSize is the target object's declared content size.
-	declaredSize int64
 	// baseLoc points to the innermost base object.
 	baseLoc location
 	// baseType is the canonical object type resolved from baseLoc.
@@ -34,7 +32,6 @@ func (store *Store) deltaBuildChain(start location) (deltaChain, error) {
 	current := start
 
 	var chain deltaChain
-	chain.declaredSize = -1
 
 	for {
 		if _, ok := visited[current]; ok {
@@ -42,20 +39,9 @@ func (store *Store) deltaBuildChain(start location) (deltaChain, error) {
 		}
 		visited[current] = struct{}{}
 
-		pack, meta, err := store.entryMetaAt(current)
+		_, meta, err := store.entryMetaAt(current)
 		if err != nil {
 			return deltaChain{}, err
-		}
-		if chain.declaredSize < 0 {
-			if packfmt.IsBaseObjectType(meta.ty) {
-				chain.declaredSize = meta.size
-			} else {
-				declaredSize, err := deltaDeclaredSizeAt(pack, meta.dataOffset)
-				if err != nil {
-					return deltaChain{}, err
-				}
-				chain.declaredSize = declaredSize
-			}
 		}
 
 		if packfmt.IsBaseObjectType(meta.ty) {
