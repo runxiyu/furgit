@@ -1,4 +1,4 @@
-// Package loose provides loose-object reads from a Git objects directory.
+// Package loose provides a loose object backend (objects/XX/YYYYY..).
 package loose
 
 import (

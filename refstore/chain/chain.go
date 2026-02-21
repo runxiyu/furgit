@@ -1,4 +1,5 @@
-// Package chain provides an ordered reference store chain implementation.
+// Package chain provides a wrapper reference storage backend to query a chain
+// of backends.
 package chain
 
 import (

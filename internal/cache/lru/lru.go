@@ -1,4 +1,4 @@
-// Package lru provides a weighted least-recently-used cache.
+// Package lru provides a size-cost bounded LRU cache.
 package lru
 
 import "container/list"

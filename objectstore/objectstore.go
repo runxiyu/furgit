@@ -1,4 +1,4 @@
-// Package objectstore provides storage interfaces for Git objects.
+// Package objectstore provides interfaces for object storage backends.
 package objectstore
 
 import (

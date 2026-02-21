@@ -1,4 +1,4 @@
-// Package objectid provides object ID and algorithm primitives for Git objects.
+// Package objectid provides utilities around object IDs and hash algorithms.
 package objectid
 
 import (

@@ -1,4 +1,4 @@
-// Package loose provides read access to loose Git references.
+// Package loose provides a loose ref backend (refs/... as a directory tree).
 package loose
 
 import (

@@ -1,4 +1,4 @@
-// Package objecttype defines Git object type identifiers.
+// Package objecttype provides object type constants and names.
 package objecttype
 
 // Type mirrors Git object type tags in packfiles.

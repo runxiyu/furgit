@@ -1,4 +1,4 @@
-// Package ref provides Git reference models.
+// Package ref provides general, detached, and symbolic references.
 package ref
 
 import "codeberg.org/lindenii/furgit/objectid"

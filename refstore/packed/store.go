@@ -1,4 +1,4 @@
-// Package packed provides read access to packed Git references.
+// Package packed provides a packed refs backend.
 package packed
 
 import (

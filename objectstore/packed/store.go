@@ -1,4 +1,4 @@
-// Package packed provides read access to packed Git objects from objects/pack.
+// Package packed provides packfile reading and associated indexes.
 package packed
 
 import (

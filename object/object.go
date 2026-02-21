@@ -1,4 +1,5 @@
-// Package object provides Git object models and codecs.
+// Package object parses and serializes objects such as blob, tree, commit, and
+// tag.
 package object
 
 import "codeberg.org/lindenii/furgit/objecttype"

@@ -1,7 +1,7 @@
 .
 ├── config         Configuration parsing
 ├── internal       Private packages and helpers
-│   ├── cache
+│   ├── cache      Encapsulates cache-providing subpackages for direct use
 │   │   └── lru    Size-cost bounded LRU cache (e.g., for delta base caching)
 │   └── testgit    Helpers for integration tests with upstream git(1)
 ├── object         Parse/serialize objects such as blob, tree, commit, tag

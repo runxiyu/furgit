@@ -1,4 +1,5 @@
-// Package chain provides an ordered object database chain implementation.
+// Package chain provides a wrapper object storage backend to query a chain of
+// backends.
 package chain
 
 import (

@@ -1,5 +1,4 @@
-// Package reftable provides read access to Git reftable reference storage.
-// This store is experimental, has many issues, and should not be used in any serious capacity for now.
+// Package reftable provides an experimental reftable backend.
 package reftable
 
 import (
