@@ -3,9 +3,11 @@ package packed
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"sync"
 
+	packchecksum "codeberg.org/lindenii/furgit/format/pack/checksum"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
 )
@@ -27,6 +29,8 @@ type Store struct {
 	indexesLoaded bool
 	// indexes stores parsed .idx handles.
 	indexes []*idxFile
+	// indexByPack maps one pack basename to its parsed index.
+	indexByPack map[string]*idxFile
 
 	// stateMu guards index publication, pack cache, and close state.
 	stateMu sync.RWMutex
@@ -98,8 +102,13 @@ func (store *Store) Close() error {
 func (store *Store) ensureIndexes() error {
 	store.loadOnce.Do(func() {
 		indexes, err := store.loadIndexes()
+		indexByPack := make(map[string]*idxFile, len(indexes))
+		for _, index := range indexes {
+			indexByPack[index.packName] = index
+		}
 		store.stateMu.Lock()
 		store.indexes = indexes
+		store.indexByPack = indexByPack
 		store.loadErr = err
 		store.indexesLoaded = true
 		store.stateMu.Unlock()
@@ -157,6 +166,10 @@ func (store *Store) openPack(name string) (*packFile, error) {
 		_ = file.Close()
 		return nil, err
 	}
+	if err := store.verifyPackMatchesIndexes(pack); err != nil {
+		_ = pack.close()
+		return nil, err
+	}
 
 	store.stateMu.Lock()
 	if existing, ok := store.packs[name]; ok {
@@ -167,6 +180,26 @@ func (store *Store) openPack(name string) (*packFile, error) {
 	store.packs[name] = pack
 	store.stateMu.Unlock()
 	return pack, nil
+}
+
+// verifyPackMatchesIndexes checks that one opened pack's trailer hash matches
+// every loaded index that references the same pack name.
+func (store *Store) verifyPackMatchesIndexes(pack *packFile) error {
+	store.stateMu.RLock()
+	index := store.indexByPack[pack.name]
+	indexesLoaded := store.indexesLoaded
+	store.stateMu.RUnlock()
+
+	if !indexesLoaded {
+		return nil
+	}
+	if index == nil {
+		return nil
+	}
+	if err := packchecksum.VerifyPackMatchesIdx(pack.data, index.data, store.algo); err != nil {
+		return fmt.Errorf("objectstore/packed: pack %q does not match idx %q: %w", pack.name, index.idxName, err)
+	}
+	return nil
 }
 
 // entryMetaAt parses one pack entry header at location.
