@@ -9,6 +9,8 @@ import (
 
 // RepoOptions controls git-init options for test repositories.
 type RepoOptions struct {
+	// ObjectFormat is the object ID algorithm used for repository objects.
+	ObjectFormat objectid.Algorithm
 	// Bare selects whether the repository is initialized as bare.
 	Bare bool
 	// RefFormat selects the git ref storage format (for example "files" or
@@ -16,21 +18,10 @@ type RepoOptions struct {
 	RefFormat string
 }
 
-// NewBareRepo creates a temporary bare repository initialized with the requested algorithm.
-func NewBareRepo(tb testing.TB, algo objectid.Algorithm) *TestRepo {
-	tb.Helper()
-	return NewRepo(tb, algo, RepoOptions{Bare: true})
-}
-
-// NewWorkRepo creates a temporary non-bare repository initialized with the requested algorithm.
-func NewWorkRepo(tb testing.TB, algo objectid.Algorithm) *TestRepo {
-	tb.Helper()
-	return NewRepo(tb, algo, RepoOptions{Bare: false})
-}
-
 // NewRepo creates a temporary repository initialized with the requested options.
-func NewRepo(tb testing.TB, algo objectid.Algorithm, opts RepoOptions) *TestRepo {
+func NewRepo(tb testing.TB, opts RepoOptions) *TestRepo {
 	tb.Helper()
+	algo := opts.ObjectFormat
 	if algo.Size() == 0 {
 		tb.Fatalf("invalid algorithm: %v", algo)
 	}
