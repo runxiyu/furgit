@@ -10,7 +10,7 @@ type Tag struct {
 	Target     objectid.ObjectID
 	TargetType objecttype.Type
 	Name       []byte
-	Tagger     *Ident
+	Tagger     *Signature
 	Message    []byte
 }
 

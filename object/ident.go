@@ -11,24 +11,24 @@ import (
 	"codeberg.org/lindenii/furgit/internal/intconv"
 )
 
-// Ident represents a Git identity (author/committer/tagger).
-type Ident struct {
+// Signature represents a Git signature (author/committer/tagger).
+type Signature struct {
 	Name          []byte
 	Email         []byte
 	WhenUnix      int64
 	OffsetMinutes int32
 }
 
-// ParseIdent parses a canonical Git identity line:
+// ParseSignature parses a canonical Git signature line:
 // "Name <email> 123456789 +0000".
-func ParseIdent(line []byte) (*Ident, error) {
+func ParseSignature(line []byte) (*Signature, error) {
 	lt := bytes.IndexByte(line, '<')
 	if lt < 0 {
-		return nil, errors.New("object: ident: missing opening <")
+		return nil, errors.New("object: signature: missing opening <")
 	}
 	gtRel := bytes.IndexByte(line[lt+1:], '>')
 	if gtRel < 0 {
-		return nil, errors.New("object: ident: missing closing >")
+		return nil, errors.New("object: signature: missing closing >")
 	}
 	gt := lt + 1 + gtRel
 
@@ -37,21 +37,21 @@ func ParseIdent(line []byte) (*Ident, error) {
 
 	rest := line[gt+1:]
 	if len(rest) == 0 || rest[0] != ' ' {
-		return nil, errors.New("object: ident: missing timestamp separator")
+		return nil, errors.New("object: signature: missing timestamp separator")
 	}
 	rest = rest[1:]
 	before, after, ok := bytes.Cut(rest, []byte{' '})
 	if !ok {
-		return nil, errors.New("object: ident: missing timezone separator")
+		return nil, errors.New("object: signature: missing timezone separator")
 	}
 	when, err := strconv.ParseInt(string(before), 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("object: ident: invalid timestamp: %w", err)
+		return nil, fmt.Errorf("object: signature: invalid timestamp: %w", err)
 	}
 
 	tz := after
 	if len(tz) < 5 {
-		return nil, errors.New("object: ident: invalid timezone encoding")
+		return nil, errors.New("object: signature: invalid timezone encoding")
 	}
 	sign := 1
 	switch tz[0] {
@@ -59,32 +59,32 @@ func ParseIdent(line []byte) (*Ident, error) {
 		sign = -1
 	case '+':
 	default:
-		return nil, errors.New("object: ident: invalid timezone sign")
+		return nil, errors.New("object: signature: invalid timezone sign")
 	}
 
 	hh, err := strconv.Atoi(string(tz[1:3]))
 	if err != nil {
-		return nil, fmt.Errorf("object: ident: invalid timezone hours: %w", err)
+		return nil, fmt.Errorf("object: signature: invalid timezone hours: %w", err)
 	}
 	mm, err := strconv.Atoi(string(tz[3:5]))
 	if err != nil {
-		return nil, fmt.Errorf("object: ident: invalid timezone minutes: %w", err)
+		return nil, fmt.Errorf("object: signature: invalid timezone minutes: %w", err)
 	}
 	if hh < 0 || hh > 23 {
-		return nil, errors.New("object: ident: invalid timezone hours range")
+		return nil, errors.New("object: signature: invalid timezone hours range")
 	}
 	if mm < 0 || mm > 59 {
-		return nil, errors.New("object: ident: invalid timezone minutes range")
+		return nil, errors.New("object: signature: invalid timezone minutes range")
 	}
 	total := int64(hh)*60 + int64(mm)
 	offset, err := intconv.Int64ToInt32(total)
 	if err != nil {
-		return nil, errors.New("object: ident: timezone overflow")
+		return nil, errors.New("object: signature: timezone overflow")
 	}
 	if sign < 0 {
 		offset = -offset
 	}
-	return &Ident{
+	return &Signature{
 		Name:          nameBytes,
 		Email:         emailBytes,
 		WhenUnix:      when,
@@ -92,18 +92,18 @@ func ParseIdent(line []byte) (*Ident, error) {
 	}, nil
 }
 
-// Serialize renders the identity in canonical Git format.
-func (ident Ident) Serialize() ([]byte, error) {
+// Serialize renders the signature in canonical Git format.
+func (signature Signature) Serialize() ([]byte, error) {
 	var b strings.Builder
-	b.Grow(len(ident.Name) + len(ident.Email) + 32)
-	b.Write(ident.Name)
+	b.Grow(len(signature.Name) + len(signature.Email) + 32)
+	b.Write(signature.Name)
 	b.WriteString(" <")
-	b.Write(ident.Email)
+	b.Write(signature.Email)
 	b.WriteString("> ")
-	b.WriteString(strconv.FormatInt(ident.WhenUnix, 10))
+	b.WriteString(strconv.FormatInt(signature.WhenUnix, 10))
 	b.WriteByte(' ')
 
-	offset := ident.OffsetMinutes
+	offset := signature.OffsetMinutes
 	sign := '+'
 	if offset < 0 {
 		sign = '-'
@@ -115,8 +115,8 @@ func (ident Ident) Serialize() ([]byte, error) {
 	return []byte(b.String()), nil
 }
 
-// When returns a time.Time with the identity's timezone offset.
-func (ident Ident) When() time.Time {
-	loc := time.FixedZone("git", int(ident.OffsetMinutes)*60)
-	return time.Unix(ident.WhenUnix, 0).In(loc)
+// When returns a time.Time with the signature's timezone offset.
+func (signature Signature) When() time.Time {
+	loc := time.FixedZone("git", int(signature.OffsetMinutes)*60)
+	return time.Unix(signature.WhenUnix, 0).In(loc)
 }

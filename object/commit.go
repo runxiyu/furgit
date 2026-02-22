@@ -9,8 +9,8 @@ import (
 type Commit struct {
 	Tree         objectid.ObjectID
 	Parents      []objectid.ObjectID
-	Author       Ident
-	Committer    Ident
+	Author       Signature
+	Committer    Signature
 	Message      []byte
 	ChangeID     string
 	ExtraHeaders []ExtraHeader

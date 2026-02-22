@@ -42,13 +42,13 @@ func ParseCommit(body []byte, algo objectid.Algorithm) (*Commit, error) {
 			}
 			c.Parents = append(c.Parents, id)
 		case "author":
-			idt, err := ParseIdent(value)
+			idt, err := ParseSignature(value)
 			if err != nil {
 				return nil, fmt.Errorf("object: commit: author: %w", err)
 			}
 			c.Author = *idt
 		case "committer":
-			idt, err := ParseIdent(value)
+			idt, err := ParseSignature(value)
 			if err != nil {
 				return nil, fmt.Errorf("object: commit: committer: %w", err)
 			}

@@ -49,7 +49,7 @@ func ParseTag(body []byte, algo objectid.Algorithm) (*Tag, error) {
 		case "tag":
 			t.Name = append([]byte(nil), value...)
 		case "tagger":
-			idt, err := ParseIdent(value)
+			idt, err := ParseSignature(value)
 			if err != nil {
 				return nil, fmt.Errorf("object: tag: tagger: %w", err)
 			}
