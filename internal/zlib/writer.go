@@ -8,9 +8,10 @@ import (
 	"encoding/binary"
 	"fmt"
 	"hash"
-	"hash/adler32"
 	"io"
 	"sync"
+
+	"codeberg.org/lindenii/furgit/internal/adler32"
 
 	"github.com/klauspost/compress/flate"
 )
