@@ -47,7 +47,7 @@ func (store *Store) openInflated(id objectid.ObjectID) (*os.File, io.ReadCloser,
 	return file, zr, nil
 }
 
-// ReadReaderFull reads a full serialized object stream as "type size\\x00content".
+// ReadReaderFull reads a full serialized object stream as "type size\0content".
 // The caller must close the returned reader.
 func (store *Store) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) {
 	file, zr, err := store.openInflated(id)
