@@ -46,7 +46,7 @@ func BenchmarkTraverseHeadTree(b *testing.B) {
 	b.ResetTimer()
 
 	var lastCount int
-	for range b.N {
+	for b.Loop() {
 		lastCount, err = traverseTreeIter(repo, commit.Tree)
 		if err != nil {
 			b.Fatalf("traverseTreeIter: %v", err)
