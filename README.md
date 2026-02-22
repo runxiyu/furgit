@@ -12,7 +12,7 @@ Furgit is a somewhat fast Git library in Go.
 * Do not use in production
 * May use [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) later
 
-Currently undergoing a massive redesign; see tag `v0.1.9` for a usable version.
+Currently undergoing a massive redesign; see the `legacy` branch too.
 
 ## Repos and mirrors
 
