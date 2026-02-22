@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"math"
 
 	"codeberg.org/lindenii/furgit/internal/zlib"
 )
@@ -17,8 +18,6 @@ func zlibReaderAt(pack *packFile, offset int) (io.ReadCloser, error) {
 }
 
 // inflateAt inflates one entry payload from data offset.
-//
-// When expectedSize is non-negative, the inflated length must match.
 func inflateAt(pack *packFile, offset int, expectedSize int64) ([]byte, error) {
 	reader, err := zlibReaderAt(pack, offset)
 	if err != nil {
@@ -26,17 +25,25 @@ func inflateAt(pack *packFile, offset int, expectedSize int64) ([]byte, error) {
 	}
 	defer func() { _ = reader.Close() }()
 
+	if expectedSize >= 0 {
+		if expectedSize > int64(math.MaxInt) {
+			return nil, fmt.Errorf(
+				"objectstore/packed: pack %q expected inflated size overflows int: %d",
+				pack.name,
+				expectedSize,
+			)
+		}
+
+		body := make([]byte, int(expectedSize))
+		if _, err := io.ReadFull(reader, body); err != nil {
+			return nil, err
+		}
+		return body, nil
+	}
+
 	body, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
-	}
-	if expectedSize >= 0 && int64(len(body)) != expectedSize {
-		return nil, fmt.Errorf(
-			"objectstore/packed: pack %q inflated size mismatch: got %d want %d",
-			pack.name,
-			len(body),
-			expectedSize,
-		)
 	}
 	return body, nil
 }
