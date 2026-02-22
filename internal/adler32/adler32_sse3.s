@@ -28,11 +28,11 @@ TEXT ·adler32_sse3(SB), NOSPLIT, $0-36
 	WORD    $0xd189             // MOVL DX, CX                          // mov	ecx, edx
 	WORD    $0xe183; BYTE $0x1f // ANDL $0x1f, CX                       // and	ecx, 31
 	CMPQ    DX, $0x20           // <--                                  // cmp	rdx, 32
-	JAE     LBB0_2              // <--                                  // jae	.LBB0_2
+	JAE     vector_entry        // <--                                  // jae	.vector_entry
 	WORD    $0x8944; BYTE $0xcf // MOVL R9, DI                          // mov	edi, r9d
-	JMP     LBB0_6              // <--                                  // jmp	.LBB0_6
+	JMP     scalar_entry        // <--                                  // jmp	.scalar_entry
 
-LBB0_2:
+vector_entry:
 	SHRQ $0x5, DX                  // <--                                  // shr	rdx, 5
 	LONG $0xc0ef0f66               // PXOR X0, X0                          // pxor	xmm0, xmm0
 	MOVO LCPI0_0<>(SB), X1         // <--                                  // movdqa	xmm1, xmmword ptr [rip + .LCPI0_0]
@@ -40,7 +40,7 @@ LBB0_2:
 	MOVO LCPI0_2<>(SB), X3         // <--                                  // movdqa	xmm3, xmmword ptr [rip + .LCPI0_2]
 	LONG $0x8071b841; WORD $0x8007 // MOVL $-0x7ff87f8f, R8                // mov	r8d, 2147975281
 
-LBB0_3:
+vector_chunk_outer:
 	CMPQ DX, $0xad                 // <--                                  // cmp	rdx, 173
 	LONG $0x00adba41; WORD $0x0000 // MOVL $0xad, R10                      // mov	r10d, 173
 	LONG $0xd2420f4c               // CMOVB DX, R10                        // cmovb	r10, rdx
@@ -51,7 +51,7 @@ LBB0_3:
 	WORD $0x8944; BYTE $0xd0       // MOVL R10, AX                         // mov	eax, r10d
 	LONG $0xf6ef0f66               // PXOR X6, X6                          // pxor	xmm6, xmm6
 
-LBB0_4:
+vector_chunk_loop:
 	LONG  $0x3e6f0ff3                           // MOVDQU 0(SI), X7                     // movdqu	xmm7, xmmword ptr [rsi]
 	LONG  $0x6f0f4466; BYTE $0xc7               // MOVDQA X7, X8                        // movdqa	xmm8, xmm7
 	LONG  $0x04380f66; BYTE $0xf9               // PMADDUBSW X1, X7                     // pmaddubsw	xmm7, xmm1
@@ -69,7 +69,7 @@ LBB0_4:
 	LONG  $0xe7fe0f66                           // PADDD X7, X4                         // paddd	xmm4, xmm7
 	ADDQ  $0x20, SI                             // <--                                  // add	rsi, 32
 	WORD  $0xc8ff                               // DECL AX                              // dec	eax
-	JNE   LBB0_4                                // <--                                  // jne	.LBB0_4
+	JNE   vector_chunk_loop                     // <--                                  // jne	.vector_chunk_loop
 	LONG  $0xf5720f66; BYTE $0x05               // PSLLD $0x5, X5                       // pslld	xmm5, 5
 	LONG  $0xe5fe0f66                           // PADDD X5, X4                         // paddd	xmm4, xmm5
 	LONG  $0xee700f66; BYTE $0xb1               // PSHUFD $0xb1, X6, X5                 // pshufd	xmm5, xmm6, 177
@@ -95,13 +95,13 @@ LBB0_4:
 	WORD  $0x2944; BYTE $0xc8                   // SUBL R9, AX                          // sub	eax, r9d
 	WORD  $0x8941; BYTE $0xf9                   // MOVL DI, R9                          // mov	r9d, edi
 	SUBQ  R10, DX                               // <--                                  // sub	rdx, r10
-	JNE   LBB0_3                                // <--                                  // jne	.LBB0_3
+	JNE   vector_chunk_outer                    // <--                                  // jne	.vector_chunk_outer
 
-LBB0_6:
+scalar_entry:
 	WORD $0x8548; BYTE $0xc9     // TESTQ CX, CX                         // test	rcx, rcx
-	JE   LBB0_18                 // <--                                  // je	.LBB0_18
+	JE   return_final                 // <--                                  // je	.return_final
 	CMPL CX, $0x10               // <--                                  // cmp	ecx, 16
-	JB   LBB0_10                 // <--                                  // jb	.LBB0_10
+	JB   scalar_byte_prelude                 // <--                                  // jb	.scalar_byte_prelude
 	WORD $0xb60f; BYTE $0x16     // MOVZX 0(SI), DX                      // movzx	edx, byte ptr [rsi]
 	WORD $0xd701                 // ADDL DX, DI                          // add	edi, edx
 	WORD $0xf801                 // ADDL DI, AX                          // add	eax, edi
@@ -151,32 +151,32 @@ LBB0_6:
 	WORD $0x0144; BYTE $0xc7     // ADDL R8, DI                          // add	edi, r8d
 	WORD $0xf801                 // ADDL DI, AX                          // add	eax, edi
 	ADDQ $-0x10, CX              // <--                                  // add	rcx, -16
-	JE   LBB0_17                 // <--                                  // je	.LBB0_17
+	JE   scalar_finalize         // <--                                  // je	.scalar_finalize
 	ADDQ $0x10, SI               // <--                                  // add	rsi, 16
 
-LBB0_10:
+scalar_byte_prelude:
 	LEAQ -0x1(CX), DX // <--                                  // lea	rdx, [rcx - 1]
 	MOVQ CX, R9       // <--                                  // mov	r9, rcx
 	ANDQ $0x3, R9     // <--                                  // and	r9, 3
-	JE   LBB0_14      // <--                                  // je	.LBB0_14
+	JE   scalar_dword_prelude      // <--                                  // je	.scalar_dword_prelude
 	XORL R8, R8       // <--                                  // xor	r8d, r8d
 
-LBB0_12:
+scalar_byte_prelude_loop:
 	LONG $0x14b60f46; BYTE $0x06 // MOVZX 0(SI)(R8*1), R10               // movzx	r10d, byte ptr [rsi + r8]
 	WORD $0x0144; BYTE $0xd7     // ADDL R10, DI                         // add	edi, r10d
 	WORD $0xf801                 // ADDL DI, AX                          // add	eax, edi
 	INCQ R8                      // <--                                  // inc	r8
 	CMPQ R9, R8                  // <--                                  // cmp	r9, r8
-	JNE  LBB0_12                 // <--                                  // jne	.LBB0_12
+	JNE  scalar_byte_prelude_loop// <--                                  // jne	.scalar_byte_prelude_loop
 	ADDQ R8, SI                  // <--                                  // add	rsi, r8
 	SUBQ R8, CX                  // <--                                  // sub	rcx, r8
 
-LBB0_14:
+scalar_dword_prelude:
 	CMPQ DX, $0x3 // <--                                  // cmp	rdx, 3
-	JB   LBB0_17  // <--                                  // jb	.LBB0_17
+	JB   scalar_finalize  // <--                                  // jb	.scalar_finalize
 	XORL DX, DX   // <--                                  // xor	edx, edx
 
-LBB0_16:
+scalar_dword_loop:
 	LONG $0x04b60f44; BYTE $0x16   // MOVZX 0(SI)(DX*1), R8                // movzx	r8d, byte ptr [rsi + rdx]
 	WORD $0x0141; BYTE $0xf8       // ADDL DI, R8                          // add	r8d, edi
 	WORD $0x0144; BYTE $0xc0       // ADDL R8, AX                          // add	eax, r8d
@@ -191,9 +191,9 @@ LBB0_16:
 	WORD $0xf801                   // ADDL DI, AX                          // add	eax, edi
 	ADDQ $0x4, DX                  // <--                                  // add	rdx, 4
 	CMPQ CX, DX                    // <--                                  // cmp	rcx, rdx
-	JNE  LBB0_16                   // <--                                  // jne	.LBB0_16
+	JNE  scalar_dword_loop         // <--                                  // jne	.scalar_dword_loop
 
-LBB0_17:
+scalar_finalize:
 	LONG  $0x000f8f8d; WORD $0xffff // LEAL -0xfff1(DI), CX                 // lea	ecx, [rdi - 65521]
 	CMPL  DI, $0xfff1               // <--                                  // cmp	edi, 65521
 	WORD  $0x420f; BYTE $0xcf       // CMOVB DI, CX                         // cmovb	ecx, edi
@@ -205,7 +205,7 @@ LBB0_17:
 	WORD  $0xd029                   // SUBL DX, AX                          // sub	eax, edx
 	WORD  $0xcf89                   // MOVL CX, DI                          // mov	edi, ecx
 
-LBB0_18:
+return_final:
 	WORD $0xe0c1; BYTE $0x10 // SHLL $0x10, AX                       // shl	eax, 16
 	WORD $0xf809             // ORL DI, AX                           // or	eax, edi
 	NOP                      // (skipped)                            // mov	rsp, rbp

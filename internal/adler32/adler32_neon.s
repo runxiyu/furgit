@@ -22,18 +22,18 @@ TEXT ·adler32_neon(SB), NOSPLIT, $0-36
 	ANDW $65535, R0, R8     // <--                                  // and	w8, w0, #0xffff
 	LSRW $16, R0, R9        // <--                                  // lsr	w9, w0, #16
 	NOP                     // (skipped)                            // mov	x29, sp
-	BEQ  LBB0_4             // <--                                  // b.eq	.LBB0_4
+	BEQ  vector_entry       // <--                                  // b.eq	.vector_entry
 	ADD  $1, R1, R11        // <--                                  // add	x11, x1, #1
 	MOVD R1, R12            // <--                                  // mov	x12, x1
 
-LBB0_2:
+align_prologue_loop:
 	WORD  $0x3840158d       // MOVBU.P 1(R12), R13                  // ldrb	w13, [x12], #1
 	SUB   $1, R2, R2        // <--                                  // sub	x2, x2, #1
 	TST   $15, R11          // <--                                  // tst	x11, #0xf
 	ADD   $1, R11, R11      // <--                                  // add	x11, x11, #1
 	ADDW  R13, R8, R8       // <--                                  // add	w8, w8, w13
 	ADDW  R9, R8, R9        // <--                                  // add	w9, w8, w9
-	BNE   LBB0_2            // <--                                  // b.ne	.LBB0_2
+	BNE   align_prologue_loop            // <--                                  // b.ne	.align_prologue_loop
 	MOVW  $32881, R11       // <--                                  // mov	w11, #32881
 	MOVW  $65521, R13       // <--                                  // mov	w13, #65521
 	MOVKW $(32775<<16), R11 // <--                                  // movk	w11, #32775, lsl #16
@@ -48,10 +48,10 @@ LBB0_2:
 	CSELW HI, R12, R8, R8   // <--                                  // csel	w8, w12, w8, hi
 	MSUBW R13, R9, R11, R9  // <--                                  // msub	w9, w11, w13, w9
 
-LBB0_4:
+vector_entry:
 	AND   $31, R2, R10                        // <--                                  // and	x10, x2, #0x1f
 	CMP   $32, R2                             // <--                                  // cmp	x2, #32
-	BCC   LBB0_9                              // <--                                  // b.lo	.LBB0_9
+	BCC   scalar_entry                        // <--                                  // b.lo	.scalar_entry
 	MOVD  $mult_table<>(SB), R11              // <--                                  // adrp	x11, mult_table
 	ADD   $0, R11, R11                        // <--                                  // add	x11, x11, :lo12:mult_table
 	MOVW  $32881, R14                         // <--                                  // mov	w14, #32881
@@ -66,7 +66,7 @@ LBB0_4:
 	VEXT  $8, V2.B16, V2.B16, V6.B16          // <--                                  // ext	v6.16b, v2.16b, v2.16b, #8
 	VEXT  $8, V3.B16, V3.B16, V7.B16          // <--                                  // ext	v7.16b, v3.16b, v3.16b, #8
 
-LBB0_6:
+vector_chunk_outer:
 	CMP  $173, R11               // <--                                  // cmp	x11, #173
 	MOVD R1, R2                  // <--                                  // mov	x2, x1
 	CSEL LO, R11, R12, R16       // <--                                  // csel	x16, x11, x12, lo
@@ -82,7 +82,7 @@ LBB0_6:
 	MOVW R16, R0                 // <--                                  // mov	w0, w16
 	WORD $0x6f00e411             // VMOVI $0, V17.D2                     // movi	v17.2d, #0000000000000000
 
-LBB0_7:
+vector_chunk_inner:
 	WORD  $0xacc15857                   // FLDPQ.P 32(R2), (F23, F22)           // ldp	q23, q22, [x2], #32
 	SUBSW $1, R0, R0                    // <--                                  // subs	w0, w0, #1
 	VADD  V17.S4, V20.S4, V20.S4        // <--                                  // add	v20.4s, v20.4s, v17.4s
@@ -93,7 +93,7 @@ LBB0_7:
 	WORD  $0x6e361210                   // VUADDW2 V22.B16, V16.H8, V16.H8      // uaddw2	v16.8h, v16.8h, v22.16b
 	WORD  $0x6e206af8                   // VUADALP V23.B16, V24.H8              // uadalp	v24.8h, v23.16b
 	WORD  $0x6e606b11                   // VUADALP V24.H8, V17.S4               // uadalp	v17.4s, v24.8h
-	BNE   LBB0_7                        // <--                                  // b.ne	.LBB0_7
+	BNE   vector_chunk_inner            // <--                                  // b.ne	.vector_chunk_inner
 	VSHL  $5, V20.S4, V20.S4            // <--                                  // shl	v20.4s, v20.4s, #5
 	ADD   R17, R1, R17                  // <--                                  // add	x17, x1, x17
 	SUBS  R16, R11, R11                 // <--                                  // subs	x11, x11, x16
@@ -123,12 +123,12 @@ LBB0_7:
 	LSR   $47, R2, R2                   // <--                                  // lsr	x2, x2, #47
 	MSUBW R15, R8, R0, R8               // <--                                  // msub	w8, w0, w15, w8
 	MSUBW R15, R9, R2, R9               // <--                                  // msub	w9, w2, w15, w9
-	BNE   LBB0_6                        // <--                                  // b.ne	.LBB0_6
+	BNE   vector_chunk_outer            // <--                                  // b.ne	.vector_chunk_outer
 
-LBB0_9:
-	CBZ  R10, LBB0_15  // <--                                  // cbz	x10, .LBB0_15
+scalar_entry:
+	CBZ  R10, return_final  // <--                                  // cbz	x10, .return_final
 	CMP  $16, R10      // <--                                  // cmp	x10, #16
-	BCC  LBB0_13       // <--                                  // b.lo	.LBB0_13
+	BCC  scalar_byte_loop   // <--                                  // b.lo	.scalar_byte_loop
 	WORD $0x3940002b   // MOVBU (R1), R11                      // ldrb	w11, [x1]
 	SUBS $16, R10, R10 // <--                                  // subs	x10, x10, #16
 	WORD $0x3940042c   // MOVBU 1(R1), R12                     // ldrb	w12, [x1, #1]
@@ -178,17 +178,17 @@ LBB0_9:
 	ADDW R8, R9, R9    // <--                                  // add	w9, w9, w8
 	ADDW R11, R8, R8   // <--                                  // add	w8, w8, w11
 	ADDW R8, R9, R9    // <--                                  // add	w9, w9, w8
-	BEQ  LBB0_14       // <--                                  // b.eq	.LBB0_14
+	BEQ  scalar_finalize       // <--                                  // b.eq	.scalar_finalize
 	ADD  $16, R1, R1   // <--                                  // add	x1, x1, #16
 
-LBB0_13:
+scalar_byte_loop:
 	WORD $0x3840142b  // MOVBU.P 1(R1), R11                   // ldrb	w11, [x1], #1
 	SUBS $1, R10, R10 // <--                                  // subs	x10, x10, #1
 	ADDW R11, R8, R8  // <--                                  // add	w8, w8, w11
 	ADDW R9, R8, R9   // <--                                  // add	w9, w8, w9
-	BNE  LBB0_13      // <--                                  // b.ne	.LBB0_13
+	BNE  scalar_byte_loop      // <--                                  // b.ne	.scalar_byte_loop
 
-LBB0_14:
+scalar_finalize:
 	MOVW  $32881, R10       // <--                                  // mov	w10, #32881
 	MOVW  $65521, R12       // <--                                  // mov	w12, #65521
 	MOVKW $(32775<<16), R10 // <--                                  // movk	w10, #32775, lsl #16
@@ -201,7 +201,7 @@ LBB0_14:
 	LSR   $47, R10, R10     // <--                                  // lsr	x10, x10, #47
 	MSUBW R12, R9, R10, R9  // <--                                  // msub	w9, w10, w12, w9
 
-LBB0_15:
+return_final:
 	ORRW R9<<16, R8, R0 // <--                                  // orr	w0, w8, w9, lsl #16
 	NOP                 // (skipped)                            // ldp	x29, x30, [sp], #16
 	MOVW R0, ret+32(FP) // <--
