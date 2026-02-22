@@ -22,12 +22,6 @@ type Chain struct {
 	backendNodeByStore map[objectstore.Store]*backendNode
 }
 
-type backendNode struct {
-	backend objectstore.Store
-	prev    *backendNode
-	next    *backendNode
-}
-
 // New creates a Chain from backends.
 func New(backends ...objectstore.Store) *Chain {
 	nodeByStore := make(map[objectstore.Store]*backendNode, len(backends))
@@ -56,59 +50,6 @@ func New(backends ...objectstore.Store) *Chain {
 		backendHead:        head,
 		backendTail:        tail,
 		backendNodeByStore: nodeByStore,
-	}
-}
-
-func (chain *Chain) firstBackend() objectstore.Store {
-	chain.mu.RLock()
-	defer chain.mu.RUnlock()
-	if chain.backendHead == nil {
-		return nil
-	}
-	return chain.backendHead.backend
-}
-
-func (chain *Chain) nextBackend(current objectstore.Store) objectstore.Store {
-	chain.mu.RLock()
-	defer chain.mu.RUnlock()
-	node := chain.backendNodeByStore[current]
-	if node == nil || node.next == nil {
-		return nil
-	}
-	return node.next.backend
-}
-
-func (chain *Chain) touchBackend(backend objectstore.Store) {
-	if backend == nil {
-		return
-	}
-	if !chain.mu.TryLock() {
-		return
-	}
-	defer chain.mu.Unlock()
-
-	node := chain.backendNodeByStore[backend]
-	if node == nil || node == chain.backendHead {
-		return
-	}
-	if node.prev != nil {
-		node.prev.next = node.next
-	}
-	if node.next != nil {
-		node.next.prev = node.prev
-	}
-	if chain.backendTail == node {
-		chain.backendTail = node.prev
-	}
-
-	node.prev = nil
-	node.next = chain.backendHead
-	if chain.backendHead != nil {
-		chain.backendHead.prev = node
-	}
-	chain.backendHead = node
-	if chain.backendTail == nil {
-		chain.backendTail = node
 	}
 }
 
@@ -227,4 +168,63 @@ func (chain *Chain) Close() error {
 		}
 	}
 	return errors.Join(errs...)
+}
+
+type backendNode struct {
+	backend objectstore.Store
+	prev    *backendNode
+	next    *backendNode
+}
+
+func (chain *Chain) firstBackend() objectstore.Store {
+	chain.mu.RLock()
+	defer chain.mu.RUnlock()
+	if chain.backendHead == nil {
+		return nil
+	}
+	return chain.backendHead.backend
+}
+
+func (chain *Chain) nextBackend(current objectstore.Store) objectstore.Store {
+	chain.mu.RLock()
+	defer chain.mu.RUnlock()
+	node := chain.backendNodeByStore[current]
+	if node == nil || node.next == nil {
+		return nil
+	}
+	return node.next.backend
+}
+
+func (chain *Chain) touchBackend(backend objectstore.Store) {
+	if backend == nil {
+		return
+	}
+	if !chain.mu.TryLock() {
+		return
+	}
+	defer chain.mu.Unlock()
+
+	node := chain.backendNodeByStore[backend]
+	if node == nil || node == chain.backendHead {
+		return
+	}
+	if node.prev != nil {
+		node.prev.next = node.next
+	}
+	if node.next != nil {
+		node.next.prev = node.prev
+	}
+	if chain.backendTail == node {
+		chain.backendTail = node.prev
+	}
+
+	node.prev = nil
+	node.next = chain.backendHead
+	if chain.backendHead != nil {
+		chain.backendHead.prev = node
+	}
+	chain.backendHead = node
+	if chain.backendTail == nil {
+		chain.backendTail = node
+	}
 }
