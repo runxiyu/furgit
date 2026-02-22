@@ -1,4 +1,4 @@
-//go:build (!arm64 && !amd64) || purego
+//go:build !amd64 || purego
 
 package adler32
 
