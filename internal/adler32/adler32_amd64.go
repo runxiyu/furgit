@@ -70,8 +70,7 @@ func (d *digest) Write(data []byte) (nn int, err error) {
 func (d *digest) Sum32() uint32 { return uint32(*d) }
 
 func (d *digest) Sum(in []byte) []byte {
-	s := uint32(*d)
-	return append(in, byte(s>>24), byte(s>>16), byte(s>>8), byte(s))
+	return binary.BigEndian.AppendUint32(in, uint32(*d))
 }
 
 // Checksum returns the Adler-32 checksum of data.
