@@ -1,7 +1,7 @@
 package packed
 
 import (
-	"codeberg.org/lindenii/furgit/internal/cache/lru"
+	"codeberg.org/lindenii/furgit/internal/lru"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
