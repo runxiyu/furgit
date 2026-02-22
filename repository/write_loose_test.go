@@ -2,6 +2,7 @@ package repository_test
 
 import (
 	"bytes"
+	"os"
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
@@ -20,7 +21,13 @@ func TestWriteLooseBytesContent(t *testing.T) {
 			RefFormat:    "files",
 		})
 
-		repo, err := repository.Open(repoHarness.Dir())
+		root, err := os.OpenRoot(repoHarness.Dir())
+		if err != nil {
+			t.Fatalf("os.OpenRoot: %v", err)
+		}
+		defer func() { _ = root.Close() }()
+
+		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}
@@ -60,7 +67,13 @@ func TestWriteLooseReaderContent(t *testing.T) {
 			RefFormat:    "files",
 		})
 
-		repo, err := repository.Open(repoHarness.Dir())
+		root, err := os.OpenRoot(repoHarness.Dir())
+		if err != nil {
+			t.Fatalf("os.OpenRoot: %v", err)
+		}
+		defer func() { _ = root.Close() }()
+
+		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}
@@ -90,7 +103,13 @@ func TestWriteLooseFull(t *testing.T) {
 		})
 		_, _, commitID := repoHarness.MakeCommit(t, "write-loose-full")
 
-		repo, err := repository.Open(repoHarness.Dir())
+		root, err := os.OpenRoot(repoHarness.Dir())
+		if err != nil {
+			t.Fatalf("os.OpenRoot: %v", err)
+		}
+		defer func() { _ = root.Close() }()
+
+		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}

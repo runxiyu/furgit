@@ -3,6 +3,7 @@ package repository_test
 import (
 	"bytes"
 	"io"
+	"os"
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
@@ -23,7 +24,13 @@ func TestReadStoredPassThroughs(t *testing.T) {
 
 		_, _, commitID := repoHarness.MakeCommit(t, "pass-through")
 
-		repo, err := repository.Open(repoHarness.Dir())
+		root, err := os.OpenRoot(repoHarness.Dir())
+		if err != nil {
+			t.Fatalf("os.OpenRoot: %v", err)
+		}
+		defer func() { _ = root.Close() }()
+
+		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}

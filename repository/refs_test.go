@@ -1,6 +1,7 @@
 package repository_test
 
 import (
+	"os"
 	"strings"
 	"testing"
 
@@ -25,7 +26,13 @@ func TestRefConvenienceMethods(t *testing.T) {
 		repoHarness.SymbolicRef(t, "HEAD", "refs/heads/main")
 		repoHarness.UpdateRef(t, "refs/tags/v1", commitID)
 
-		repo, err := repository.Open(repoHarness.Dir())
+		root, err := os.OpenRoot(repoHarness.Dir())
+		if err != nil {
+			t.Fatalf("os.OpenRoot: %v", err)
+		}
+		defer func() { _ = root.Close() }()
+
+		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}
@@ -79,7 +86,13 @@ func TestResolveRefErrorSurface(t *testing.T) {
 			RefFormat:    "files",
 		})
 
-		repo, err := repository.Open(repoHarness.Dir())
+		root, err := os.OpenRoot(repoHarness.Dir())
+		if err != nil {
+			t.Fatalf("os.OpenRoot: %v", err)
+		}
+		defer func() { _ = root.Close() }()
+
+		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}
@@ -114,7 +127,13 @@ func TestListRefsLooseOverridesPacked(t *testing.T) {
 		_, _, commit2 := repoHarness.MakeCommit(t, "commit-two")
 		repoHarness.UpdateRef(t, "refs/heads/main", commit2)
 
-		repo, err := repository.Open(repoHarness.Dir())
+		root, err := os.OpenRoot(repoHarness.Dir())
+		if err != nil {
+			t.Fatalf("os.OpenRoot: %v", err)
+		}
+		defer func() { _ = root.Close() }()
+
+		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}

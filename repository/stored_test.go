@@ -2,6 +2,7 @@ package repository_test
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -23,7 +24,13 @@ func TestReadStoredTyped(t *testing.T) {
 
 		blobID, treeID, commitID := repoHarness.MakeCommit(t, "stored types")
 
-		repo, err := repository.Open(repoHarness.Dir())
+		root, err := os.OpenRoot(repoHarness.Dir())
+		if err != nil {
+			t.Fatalf("os.OpenRoot: %v", err)
+		}
+		defer func() { _ = root.Close() }()
+
+		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}
@@ -78,7 +85,13 @@ func TestResolveTreeEntry(t *testing.T) {
 		childTreeID := repoHarness.Mktree(t, fmt.Sprintf("100644 blob %s\tleaf.txt\n", blobID))
 		rootTreeID := repoHarness.Mktree(t, fmt.Sprintf("040000 tree %s\tdir\n", childTreeID))
 
-		repo, err := repository.Open(repoHarness.Dir())
+		root, err := os.OpenRoot(repoHarness.Dir())
+		if err != nil {
+			t.Fatalf("os.OpenRoot: %v", err)
+		}
+		defer func() { _ = root.Close() }()
+
+		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}
@@ -116,7 +129,13 @@ func TestResolveTreeEntryErrors(t *testing.T) {
 			blobID := repoHarness.HashObject(t, "blob", []byte("body\n"))
 			rootTreeID := repoHarness.Mktree(t, fmt.Sprintf("100644 blob %s\tfile.txt\n", blobID))
 
-			repo, err := repository.Open(repoHarness.Dir())
+			root, err := os.OpenRoot(repoHarness.Dir())
+			if err != nil {
+				t.Fatalf("os.OpenRoot: %v", err)
+			}
+			defer func() { _ = root.Close() }()
+
+			repo, err := repository.Open(root)
 			if err != nil {
 				t.Fatalf("repository.Open: %v", err)
 			}
@@ -143,7 +162,13 @@ func TestResolveTreeEntryErrors(t *testing.T) {
 			blobID := repoHarness.HashObject(t, "blob", []byte("body\n"))
 			rootTreeID := repoHarness.Mktree(t, fmt.Sprintf("100644 blob %s\tdir\n", blobID))
 
-			repo, err := repository.Open(repoHarness.Dir())
+			root, err := os.OpenRoot(repoHarness.Dir())
+			if err != nil {
+				t.Fatalf("os.OpenRoot: %v", err)
+			}
+			defer func() { _ = root.Close() }()
+
+			repo, err := repository.Open(root)
 			if err != nil {
 				t.Fatalf("repository.Open: %v", err)
 			}
@@ -185,7 +210,13 @@ func TestResolveTreeEntryDeepPath(t *testing.T) {
 		}
 		parts = append(parts, []byte("leaf.txt"))
 
-		repo, err := repository.Open(repoHarness.Dir())
+		root, err := os.OpenRoot(repoHarness.Dir())
+		if err != nil {
+			t.Fatalf("os.OpenRoot: %v", err)
+		}
+		defer func() { _ = root.Close() }()
+
+		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}
@@ -235,7 +266,13 @@ func TestReadStoredTreeMixedModes(t *testing.T) {
 			),
 		)
 
-		repo, err := repository.Open(repoHarness.Dir())
+		root, err := os.OpenRoot(repoHarness.Dir())
+		if err != nil {
+			t.Fatalf("os.OpenRoot: %v", err)
+		}
+		defer func() { _ = root.Close() }()
+
+		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}

@@ -21,9 +21,17 @@ func BenchmarkTraverseHeadTree(b *testing.B) {
 		b.Fatalf("missing %s", benchRepoPathEnv)
 	}
 
-	repo, err := repository.Open(repoPath)
+	root, err := os.OpenRoot(repoPath)
 	if err != nil {
-		b.Fatalf("repository.Open(%q): %v", repoPath, err)
+		b.Fatalf("os.OpenRoot(%q): %v", repoPath, err)
+	}
+	b.Cleanup(func() {
+		_ = root.Close()
+	})
+
+	repo, err := repository.Open(root)
+	if err != nil {
+		b.Fatalf("repository.Open(root for %q): %v", repoPath, err)
 	}
 	b.Cleanup(func() {
 		_ = repo.Close()

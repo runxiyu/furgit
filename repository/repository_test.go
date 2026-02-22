@@ -1,6 +1,7 @@
 package repository_test
 
 import (
+	"os"
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
@@ -24,7 +25,13 @@ func TestOpenFilesRefFormat(t *testing.T) {
 		repoHarness.UpdateRef(t, "refs/heads/main", commitID)
 		repoHarness.SymbolicRef(t, "HEAD", "refs/heads/main")
 
-		repo, err := repository.Open(repoHarness.Dir())
+		root, err := os.OpenRoot(repoHarness.Dir())
+		if err != nil {
+			t.Fatalf("os.OpenRoot: %v", err)
+		}
+		defer func() { _ = root.Close() }()
+
+		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}
@@ -108,7 +115,13 @@ func writeMainAndHead(t *testing.T, repoHarness *testgit.TestRepo) objectid.Obje
 func assertResolveFully(t *testing.T, repoHarness *testgit.TestRepo, name string, want objectid.ObjectID) {
 	t.Helper()
 
-	repo, err := repository.Open(repoHarness.Dir())
+	root, err := os.OpenRoot(repoHarness.Dir())
+	if err != nil {
+		t.Fatalf("os.OpenRoot: %v", err)
+	}
+	defer func() { _ = root.Close() }()
+
+	repo, err := repository.Open(root)
 	if err != nil {
 		t.Fatalf("repository.Open: %v", err)
 	}

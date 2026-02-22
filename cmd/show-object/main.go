@@ -22,7 +22,13 @@ func main() {
 		log.Fatal("must provide -r <repo> and -h <ref-or-object-id>")
 	}
 
-	repo, err := repository.Open(*repoPath)
+	root, err := os.OpenRoot(*repoPath)
+	if err != nil {
+		log.Fatalf("open repo root: %v", err)
+	}
+	defer func() { _ = root.Close() }()
+
+	repo, err := repository.Open(root)
 	if err != nil {
 		log.Fatalf("open repository: %v", err)
 	}

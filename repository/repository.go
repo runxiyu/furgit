@@ -21,7 +21,7 @@ import (
 
 // Repository is a thin composition root for repository-local stores.
 //
-// Open expects path to be the Git directory itself:
+// Open expects a root for the Git directory itself:
 // a bare repository root or a non-bare ".git" directory.
 type Repository struct {
 	config *config.Config
@@ -33,13 +33,9 @@ type Repository struct {
 }
 
 // Open opens a repository and wires object/ref stores from its on-disk format.
-func Open(path string) (repo *Repository, err error) {
-	setupRoot, err := os.OpenRoot(path)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = setupRoot.Close() }()
-
+//
+// Open borrows root during construction and does not close it.
+func Open(root *os.Root) (repo *Repository, err error) {
 	repo = &Repository{}
 	defer func() {
 		if err != nil {
@@ -47,7 +43,7 @@ func Open(path string) (repo *Repository, err error) {
 		}
 	}()
 
-	cfg, err := parseRepositoryConfig(setupRoot)
+	cfg, err := parseRepositoryConfig(root)
 	if err != nil {
 		return nil, err
 	}
@@ -59,14 +55,14 @@ func Open(path string) (repo *Repository, err error) {
 	}
 	repo.algo = algo
 
-	objects, objectsLooseForWritingOnly, err := openObjectStore(path, algo)
+	objects, objectsLooseForWritingOnly, err := openObjectStore(root, algo)
 	if err != nil {
 		return nil, err
 	}
 	repo.objects = objects
 	repo.objectsLooseForWritingOnly = objectsLooseForWritingOnly
 
-	refs, err := openRefStore(path, algo)
+	refs, err := openRefStore(root, algo)
 	if err != nil {
 		return nil, err
 	}
@@ -148,14 +144,8 @@ func detectObjectAlgorithm(cfg *config.Config) (objectid.Algorithm, error) {
 	return algo, nil
 }
 
-func openObjectStore(path string, algo objectid.Algorithm) (objectstore.Store, *objectloose.Store, error) {
-	repoRoot, err := os.OpenRoot(path)
-	if err != nil {
-		return nil, nil, fmt.Errorf("repository: open root: %w", err)
-	}
-	defer func() { _ = repoRoot.Close() }()
-
-	objectsRoot, err := repoRoot.OpenRoot("objects")
+func openObjectStore(root *os.Root, algo objectid.Algorithm) (objectstore.Store, *objectloose.Store, error) {
+	objectsRoot, err := root.OpenRoot("objects")
 	if err != nil {
 		return nil, nil, fmt.Errorf("repository: open objects: %w", err)
 	}
@@ -182,7 +172,7 @@ func openObjectStore(path string, algo objectid.Algorithm) (objectstore.Store, *
 
 	objectsChain := objectchain.New(backends...)
 
-	objectsRootForWriting, err := repoRoot.OpenRoot("objects")
+	objectsRootForWriting, err := root.OpenRoot("objects")
 	if err != nil {
 		_ = objectsChain.Close()
 		return nil, nil, fmt.Errorf("repository: open objects for loose writing: %w", err)
@@ -197,19 +187,13 @@ func openObjectStore(path string, algo objectid.Algorithm) (objectstore.Store, *
 	return objectsChain, objectsLooseForWritingOnly, nil
 }
 
-func openRefStore(path string, algo objectid.Algorithm) (out refstore.Store, err error) {
-	metaRoot, err := os.OpenRoot(path)
-	if err != nil {
-		return nil, fmt.Errorf("repository: open root: %w", err)
-	}
-	defer func() { _ = metaRoot.Close() }()
-
-	hasReftable, err := hasReftableStack(metaRoot)
+func openRefStore(root *os.Root, algo objectid.Algorithm) (out refstore.Store, err error) {
+	hasReftable, err := hasReftableStack(root)
 	if err != nil {
 		return nil, err
 	}
 	if hasReftable {
-		reftableRoot, err := metaRoot.OpenRoot("reftable")
+		reftableRoot, err := root.OpenRoot("reftable")
 		if err != nil {
 			return nil, fmt.Errorf("repository: open reftable: %w", err)
 		}
@@ -221,7 +205,7 @@ func openRefStore(path string, algo objectid.Algorithm) (out refstore.Store, err
 		return reftableStore, nil
 	}
 
-	looseRoot, err := os.OpenRoot(path)
+	looseRoot, err := root.OpenRoot(".")
 	if err != nil {
 		return nil, fmt.Errorf("repository: open root for loose refs: %w", err)
 	}
@@ -232,7 +216,7 @@ func openRefStore(path string, algo objectid.Algorithm) (out refstore.Store, err
 	}
 	backends := []refstore.Store{looseStore}
 
-	packedRefsFile, err := metaRoot.Open("packed-refs")
+	packedRefsFile, err := root.Open("packed-refs")
 	if err == nil {
 		packedStore, packedErr := refpacked.New(packedRefsFile, algo)
 		_ = packedRefsFile.Close()
