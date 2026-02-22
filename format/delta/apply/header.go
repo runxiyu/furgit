@@ -6,44 +6,37 @@ import (
 )
 
 // ReadHeaderSizes reads the first two varints in one inflated delta stream.
-func ReadHeaderSizes(reader io.Reader) (int, int, error) {
-	// Two Git varints are read here. Each can take up to 10 bytes.
-	var buf [20]byte
-	n := 0
-
-	for {
-		if n >= len(buf) {
-			return 0, 0, fmt.Errorf("format/delta/apply: malformed delta varint")
-		}
-		if _, err := io.ReadFull(reader, buf[n:n+1]); err != nil {
-			return 0, 0, fmt.Errorf("format/delta/apply: malformed delta varint: %w", err)
-		}
-		n++
-		if buf[n-1]&0x80 == 0 {
-			break
-		}
-	}
-	pos := 0
-	srcSize, err := readVarint(buf[:n], &pos)
+//
+// Callers that continue reading the same stream should pass their own buffered
+// byte reader and keep using that same reader afterwards.
+func ReadHeaderSizes(reader io.ByteReader) (int, int, error) {
+	srcSize, err := readVarintFromByteReader(reader)
 	if err != nil {
 		return 0, 0, err
 	}
-
-	for {
-		if n >= len(buf) {
-			return 0, 0, fmt.Errorf("format/delta/apply: malformed delta varint")
-		}
-		if _, err := io.ReadFull(reader, buf[n:n+1]); err != nil {
-			return 0, 0, fmt.Errorf("format/delta/apply: malformed delta varint: %w", err)
-		}
-		n++
-		if buf[n-1]&0x80 == 0 {
-			break
-		}
-	}
-	dstSize, err := readVarint(buf[:n], &pos)
+	dstSize, err := readVarintFromByteReader(reader)
 	if err != nil {
 		return 0, 0, err
 	}
 	return srcSize, dstSize, nil
+}
+
+// readVarintFromByteReader parses one Git delta varint from reader.
+func readVarintFromByteReader(reader io.ByteReader) (int, error) {
+	value := 0
+	shift := uint(0)
+	for {
+		b, err := reader.ReadByte()
+		if err != nil {
+			return 0, fmt.Errorf("format/delta/apply: malformed delta varint: %w", err)
+		}
+		value |= int(b&0x7f) << shift
+		if b&0x80 == 0 {
+			return value, nil
+		}
+		shift += 7
+		if shift > 63 {
+			return 0, fmt.Errorf("format/delta/apply: delta varint overflow")
+		}
+	}
 }

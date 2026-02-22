@@ -1,6 +1,7 @@
 package packed
 
 import (
+	"bufio"
 	"fmt"
 
 	deltaapply "codeberg.org/lindenii/furgit/format/delta/apply"
@@ -89,7 +90,8 @@ func deltaDeclaredSizeAt(pack *packFile, dataOffset int) (int64, error) {
 	}
 	defer func() { _ = reader.Close() }()
 
-	_, size, err := deltaapply.ReadHeaderSizes(reader)
+	br := bufio.NewReaderSize(reader, 32)
+	_, size, err := deltaapply.ReadHeaderSizes(br)
 	if err != nil {
 		return 0, err
 	}
