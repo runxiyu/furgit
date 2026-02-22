@@ -11,7 +11,7 @@ import (
 	"golang.org/x/sys/cpu"
 )
 
-// The size of an Adler-32 checksum in bytes.
+// Size of an Adler-32 checksum in bytes.
 const Size = 4
 
 var (
