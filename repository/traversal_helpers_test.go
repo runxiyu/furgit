@@ -3,24 +3,28 @@ package repository_test
 import (
 	"codeberg.org/lindenii/furgit/object"
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/objecttype"
 	"codeberg.org/lindenii/furgit/repository"
 )
 
+type treeWalkFrame struct {
+	id     objectid.ObjectID
+	isTree bool
+}
+
 func traverseTreeIter(repo *repository.Repository, root objectid.ObjectID) (int, error) {
-	stack := []objectid.ObjectID{root}
+	stack := []treeWalkFrame{{id: root, isTree: true}}
 	total := 0
 
 	for len(stack) > 0 {
-		id := stack[len(stack)-1]
+		frame := stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
+		id := frame.id
 
-		ty, _, err := repo.Objects().ReadHeader(id)
-		if err != nil {
-			return 0, err
-		}
-		total++
-		if ty != objecttype.TypeTree {
+		if !frame.isTree {
+			if _, err := repo.ReadStoredSize(id); err != nil {
+				return 0, err
+			}
+			total++
 			continue
 		}
 
@@ -28,12 +32,16 @@ func traverseTreeIter(repo *repository.Repository, root objectid.ObjectID) (int,
 		if err != nil {
 			return 0, err
 		}
+		total++
 		for i := len(tree.Tree().Entries) - 1; i >= 0; i-- {
 			entry := tree.Tree().Entries[i]
 			if entry.Mode == object.FileModeGitlink {
 				continue
 			}
-			stack = append(stack, entry.ID)
+			stack = append(stack, treeWalkFrame{
+				id:     entry.ID,
+				isTree: entry.Mode == object.FileModeDir,
+			})
 		}
 	}
 
