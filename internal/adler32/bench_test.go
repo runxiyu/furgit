@@ -1,7 +1,9 @@
-package adler32
+package adler32_test
 
 import (
 	"testing"
+
+	"codeberg.org/lindenii/furgit/internal/adler32"
 )
 
 const benchmarkSize = 64 * 1024
@@ -16,7 +18,7 @@ func init() {
 
 func BenchmarkChecksum(b *testing.B) {
 	b.ReportAllocs()
-	for range b.N {
-		Checksum(data)
+	for b.Loop() {
+		adler32.Checksum(data)
 	}
 }
