@@ -22,33 +22,41 @@ func main() {
 		log.Fatal("must provide -r <repo> and -h <ref-or-object-id>")
 	}
 
+	if err := run(repoPath, name); err != nil {
+		log.Fatalf("run: %v", err)
+	}
+}
+
+func run(repoPath *string, name *string) error {
 	root, err := os.OpenRoot(*repoPath)
 	if err != nil {
-		log.Fatalf("open repo root: %v", err)
+		return fmt.Errorf("open repo root: %w", err)
 	}
 	defer func() { _ = root.Close() }()
 
 	repo, err := repository.Open(root)
 	if err != nil {
-		log.Fatalf("open repository: %v", err)
+		return fmt.Errorf("open repository: %w", err)
 	}
 
 	id, err := resolveInput(repo, *name)
 	if err != nil {
 		_ = repo.Close()
-		log.Fatalf("resolve %q: %v", *name, err)
+		return fmt.Errorf("resolve %q: %w", *name, err)
 	}
 
 	stored, err := repo.ReadStored(id)
 	if err != nil {
 		_ = repo.Close()
-		log.Fatalf("read object %s: %v", id, err)
+		return fmt.Errorf("read object %s: %w", id, err)
 	}
 
 	printStored(stored)
 	if err := repo.Close(); err != nil {
-		log.Fatalf("close repository: %v", err)
+		return fmt.Errorf("close repository: %w", err)
 	}
+
+	return nil
 }
 
 func resolveInput(repo *repository.Repository, input string) (objectid.ObjectID, error) {
