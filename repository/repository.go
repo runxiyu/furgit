@@ -133,7 +133,7 @@ func parseRepositoryConfig(root *os.Root) (*config.Config, error) {
 }
 
 func detectObjectAlgorithm(cfg *config.Config) (objectid.Algorithm, error) {
-	algoName := cfg.Get("extensions", "", "objectformat")
+	algoName := cfg.Lookup("extensions", "", "objectformat").Value
 	if algoName == "" {
 		algoName = objectid.AlgorithmSHA1.String()
 	}

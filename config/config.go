@@ -7,8 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
+	"strconv"
 	"strings"
-	"unicode"
 )
 
 // Config holds all parsed configuration entries from a Git config file.
@@ -23,6 +24,80 @@ type Config struct {
 	entries []ConfigEntry
 }
 
+// ValueKind describes the presence and form of a config value.
+type ValueKind uint8
+
+const (
+	// ValueMissing means the queried key does not exist.
+	ValueMissing ValueKind = iota
+	// ValueValueless means the key exists but has no "= <value>" part.
+	ValueValueless
+	// ValueString means the key exists and has an explicit value (possibly "").
+	ValueString
+)
+
+// LookupResult is a value returned by Lookup/LookupAll.
+type LookupResult struct {
+	Kind  ValueKind
+	Value string
+}
+
+// String returns the explicit string value.
+func (r LookupResult) String() (string, error) {
+	switch r.Kind {
+	case ValueMissing:
+		return "", errors.New("missing config value")
+	case ValueValueless:
+		return "", errors.New("valueless config key")
+	case ValueString:
+		return r.Value, nil
+	default:
+		return "", fmt.Errorf("unknown value kind %d", r.Kind)
+	}
+}
+
+// Bool interprets this lookup result using Git config boolean rules.
+func (r LookupResult) Bool() (bool, error) {
+	switch r.Kind {
+	case ValueMissing:
+		return false, errors.New("missing config value")
+	case ValueValueless:
+		return true, nil
+	case ValueString:
+		return parseBool(r.Value)
+	default:
+		return false, fmt.Errorf("unknown value kind %d", r.Kind)
+	}
+}
+
+// Int interprets this lookup result as a Git integer value.
+func (r LookupResult) Int() (int, error) {
+	switch r.Kind {
+	case ValueMissing:
+		return 0, errors.New("missing config value")
+	case ValueValueless:
+		return 0, errors.New("valueless config key")
+	case ValueString:
+		return parseInt(r.Value)
+	default:
+		return 0, fmt.Errorf("unknown value kind %d", r.Kind)
+	}
+}
+
+// Int64 interprets this lookup result as a Git int64 value.
+func (r LookupResult) Int64() (int64, error) {
+	switch r.Kind {
+	case ValueMissing:
+		return 0, errors.New("missing config value")
+	case ValueValueless:
+		return 0, errors.New("valueless config key")
+	case ValueString:
+		return parseInt64(r.Value)
+	default:
+		return 0, fmt.Errorf("unknown value kind %d", r.Kind)
+	}
+}
+
 // ConfigEntry represents a single parsed configuration directive.
 type ConfigEntry struct {
 	// The section name in canonical lowercase form.
@@ -31,6 +106,8 @@ type ConfigEntry struct {
 	Subsection string
 	// The key name in canonical lowercase form.
 	Key string
+	// Kind records whether this entry has no value or an explicit value.
+	Kind ValueKind
 	// The interpreted value of the configuration entry, including unescaped
 	// characters where appropriate.
 	Value string
@@ -45,31 +122,38 @@ func ParseConfig(r io.Reader) (*Config, error) {
 	return parser.parse()
 }
 
-// Get retrieves the first value for a given section, optional subsection, and key.
-// Returns an empty string if not found.
-func (c *Config) Get(section, subsection, key string) string {
+// Lookup retrieves the first value for a given section, optional subsection,
+// and key.
+func (c *Config) Lookup(section, subsection, key string) LookupResult {
 	section = strings.ToLower(section)
 	key = strings.ToLower(key)
 	for _, entry := range c.entries {
 		if strings.EqualFold(entry.Section, section) &&
 			entry.Subsection == subsection &&
 			strings.EqualFold(entry.Key, key) {
-			return entry.Value
+			return LookupResult{
+				Kind:  entry.Kind,
+				Value: entry.Value,
+			}
 		}
 	}
-	return ""
+	return LookupResult{Kind: ValueMissing}
 }
 
-// GetAll retrieves all values for a given section, optional subsection, and key.
-func (c *Config) GetAll(section, subsection, key string) []string {
+// LookupAll retrieves all values for a given section, optional subsection,
+// and key.
+func (c *Config) LookupAll(section, subsection, key string) []LookupResult {
 	section = strings.ToLower(section)
 	key = strings.ToLower(key)
-	var values []string
+	var values []LookupResult
 	for _, entry := range c.entries {
 		if strings.EqualFold(entry.Section, section) &&
 			entry.Subsection == subsection &&
 			strings.EqualFold(entry.Key, key) {
-			values = append(values, entry.Value)
+			values = append(values, LookupResult{
+				Kind:  entry.Kind,
+				Value: entry.Value,
+			})
 		}
 	}
 	return values
@@ -88,7 +172,7 @@ type configParser struct {
 	lineNum        int
 	currentSection string
 	currentSubsec  string
-	peeked         rune
+	peeked         byte
 	hasPeeked      bool
 }
 
@@ -108,8 +192,8 @@ func (p *configParser) parse() (*Config, error) {
 			return nil, err
 		}
 
-		// Skip whitespace and newlines
-		if ch == '\n' || unicode.IsSpace(ch) {
+		// Skip leading whitespace between entries.
+		if isWhitespace(ch) {
 			continue
 		}
 
@@ -130,7 +214,7 @@ func (p *configParser) parse() (*Config, error) {
 		}
 
 		// Key-value pair
-		if unicode.IsLetter(ch) {
+		if isLetter(ch) {
 			p.unreadChar(ch)
 			if err := p.parseKeyValue(cfg); err != nil {
 				return nil, fmt.Errorf("furgit: config: line %d: %w", p.lineNum, err)
@@ -144,24 +228,24 @@ func (p *configParser) parse() (*Config, error) {
 	return cfg, nil
 }
 
-func (p *configParser) nextChar() (rune, error) {
+func (p *configParser) nextChar() (byte, error) {
 	if p.hasPeeked {
 		p.hasPeeked = false
 		return p.peeked, nil
 	}
 
-	ch, _, err := p.reader.ReadRune()
+	ch, err := p.reader.ReadByte()
 	if err != nil {
 		return 0, err
 	}
 
 	if ch == '\r' {
-		next, _, err := p.reader.ReadRune()
+		next, err := p.reader.ReadByte()
 		if err == nil && next == '\n' {
 			ch = '\n'
 		} else if err == nil {
 			// Weird but ok
-			_ = p.reader.UnreadRune()
+			_ = p.reader.UnreadByte()
 		}
 	}
 
@@ -172,7 +256,7 @@ func (p *configParser) nextChar() (rune, error) {
 	return ch, nil
 }
 
-func (p *configParser) unreadChar(ch rune) {
+func (p *configParser) unreadChar(ch byte) {
 	p.peeked = ch
 	p.hasPeeked = true
 	if ch == '\n' && p.lineNum > 1 {
@@ -181,16 +265,40 @@ func (p *configParser) unreadChar(ch rune) {
 }
 
 func (p *configParser) skipBOM() error {
-	first, _, err := p.reader.ReadRune()
+	first, err := p.reader.ReadByte()
 	if errors.Is(err, io.EOF) {
 		return nil
 	}
 	if err != nil {
 		return err
 	}
-	if first != '\uFEFF' {
-		_ = p.reader.UnreadRune()
+	if first != 0xef {
+		_ = p.reader.UnreadByte()
+		return nil
 	}
+	second, err := p.reader.ReadByte()
+	if err != nil {
+		if errors.Is(err, io.EOF) {
+			_ = p.reader.UnreadByte()
+			return nil
+		}
+		return err
+	}
+	third, err := p.reader.ReadByte()
+	if err != nil {
+		if errors.Is(err, io.EOF) {
+			_ = p.reader.UnreadByte()
+			_ = p.reader.UnreadByte()
+			return nil
+		}
+		return err
+	}
+	if second == 0xbb && third == 0xbf {
+		return nil
+	}
+	_ = p.reader.UnreadByte()
+	_ = p.reader.UnreadByte()
+	_ = p.reader.UnreadByte()
 	return nil
 }
 
@@ -225,7 +333,7 @@ func (p *configParser) parseSection() error {
 			return nil
 		}
 
-		if unicode.IsSpace(ch) {
+		if isWhitespace(ch) {
 			return p.parseExtendedSection(&name)
 		}
 
@@ -233,7 +341,7 @@ func (p *configParser) parseSection() error {
 			return fmt.Errorf("invalid character in section name: %q", ch)
 		}
 
-		name.WriteRune(unicode.ToLower(ch))
+		name.WriteByte(toLower(ch))
 	}
 }
 
@@ -243,7 +351,7 @@ func (p *configParser) parseExtendedSection(sectionName *bytes.Buffer) error {
 		if err != nil {
 			return errors.New("unexpected EOF in section header")
 		}
-		if !unicode.IsSpace(ch) {
+		if !isWhitespace(ch) {
 			if ch != '"' {
 				return errors.New("expected quote after section name")
 			}
@@ -274,9 +382,9 @@ func (p *configParser) parseExtendedSection(sectionName *bytes.Buffer) error {
 			if next == '\n' {
 				return errors.New("newline after backslash in subsection")
 			}
-			subsec.WriteRune(next)
+			subsec.WriteByte(next)
 		} else {
-			subsec.WriteRune(ch)
+			subsec.WriteByte(ch)
 		}
 	}
 
@@ -306,11 +414,14 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 	var key bytes.Buffer
 	for {
 		ch, err := p.nextChar()
+		if errors.Is(err, io.EOF) {
+			break
+		}
 		if err != nil {
-			return errors.New("unexpected EOF reading key")
+			return err
 		}
 
-		if ch == '=' || ch == '\n' || unicode.IsSpace(ch) {
+		if ch == '=' || ch == '\n' || isSpace(ch) {
 			p.unreadChar(ch)
 			break
 		}
@@ -319,14 +430,14 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 			return fmt.Errorf("invalid character in key: %q", ch)
 		}
 
-		key.WriteRune(unicode.ToLower(ch))
+		key.WriteByte(toLower(ch))
 	}
 
 	keyStr := key.String()
 	if len(keyStr) == 0 {
 		return errors.New("empty key name")
 	}
-	if !unicode.IsLetter(rune(keyStr[0])) {
+	if !isLetter(keyStr[0]) {
 		return errors.New("key must start with a letter")
 	}
 
@@ -337,7 +448,8 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 				Section:    p.currentSection,
 				Subsection: p.currentSubsec,
 				Key:        keyStr,
-				Value:      "true",
+				Kind:       ValueValueless,
+				Value:      "",
 			})
 			return nil
 		}
@@ -350,7 +462,8 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 				Section:    p.currentSection,
 				Subsection: p.currentSubsec,
 				Key:        keyStr,
-				Value:      "true",
+				Kind:       ValueValueless,
+				Value:      "",
 			})
 			return nil
 		}
@@ -363,7 +476,8 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 				Section:    p.currentSection,
 				Subsection: p.currentSubsec,
 				Key:        keyStr,
-				Value:      "true",
+				Kind:       ValueValueless,
+				Value:      "",
 			})
 			return nil
 		}
@@ -372,7 +486,7 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 			break
 		}
 
-		if !unicode.IsSpace(ch) {
+		if !isSpace(ch) {
 			return fmt.Errorf("unexpected character after key: %q", ch)
 		}
 	}
@@ -386,6 +500,7 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 		Section:    p.currentSection,
 		Subsection: p.currentSubsec,
 		Key:        keyStr,
+		Kind:       ValueString,
 		Value:      value,
 	})
 
@@ -405,9 +520,9 @@ func (p *configParser) parseValue() (string, error) {
 				return "", errors.New("unexpected EOF in quoted value")
 			}
 			if trimLen > 0 {
-				return value.String()[:trimLen], nil
+				return truncateAtNUL(value.String()[:trimLen]), nil
 			}
-			return value.String(), nil
+			return truncateAtNUL(value.String()), nil
 		}
 		if err != nil {
 			return "", err
@@ -418,21 +533,21 @@ func (p *configParser) parseValue() (string, error) {
 				return "", errors.New("newline in quoted value")
 			}
 			if trimLen > 0 {
-				return value.String()[:trimLen], nil
+				return truncateAtNUL(value.String()[:trimLen]), nil
 			}
-			return value.String(), nil
+			return truncateAtNUL(value.String()), nil
 		}
 
 		if inComment {
 			continue
 		}
 
-		if unicode.IsSpace(ch) && !inQuote {
+		if isWhitespace(ch) && !inQuote {
 			if trimLen == 0 && value.Len() > 0 {
 				trimLen = value.Len()
 			}
 			if value.Len() > 0 {
-				value.WriteRune(ch)
+				value.WriteByte(ch)
 			}
 			continue
 		}
@@ -459,13 +574,13 @@ func (p *configParser) parseValue() (string, error) {
 			case '\n':
 				continue
 			case 'n':
-				value.WriteRune('\n')
+				value.WriteByte('\n')
 			case 't':
-				value.WriteRune('\t')
+				value.WriteByte('\t')
 			case 'b':
-				value.WriteRune('\b')
+				value.WriteByte('\b')
 			case '\\', '"':
-				value.WriteRune(next)
+				value.WriteByte(next)
 			default:
 				return "", fmt.Errorf("invalid escape sequence: \\%c", next)
 			}
@@ -477,7 +592,7 @@ func (p *configParser) parseValue() (string, error) {
 			continue
 		}
 
-		value.WriteRune(ch)
+		value.WriteByte(ch)
 	}
 }
 
@@ -485,14 +600,132 @@ func isValidSection(s string) bool {
 	if len(s) == 0 {
 		return false
 	}
-	for _, ch := range s {
-		if !unicode.IsLetter(ch) && !unicode.IsDigit(ch) && ch != '-' && ch != '.' {
+	for i := 0; i < len(s); i++ {
+		ch := s[i]
+		if !isLetter(ch) && !isDigit(ch) && ch != '-' && ch != '.' {
 			return false
 		}
 	}
 	return true
 }
 
-func isKeyChar(ch rune) bool {
-	return unicode.IsLetter(ch) || unicode.IsDigit(ch) || ch == '-'
+func isKeyChar(ch byte) bool {
+	return isLetter(ch) || isDigit(ch) || ch == '-'
+}
+
+func parseBool(value string) (bool, error) {
+	switch {
+	case strings.EqualFold(value, "true"),
+		strings.EqualFold(value, "yes"),
+		strings.EqualFold(value, "on"):
+		return true, nil
+	case strings.EqualFold(value, "false"),
+		strings.EqualFold(value, "no"),
+		strings.EqualFold(value, "off"),
+		value == "":
+		return false, nil
+	}
+
+	n, err := parseInt32(value)
+	if err != nil {
+		return false, fmt.Errorf("invalid boolean value %q", value)
+	}
+	return n != 0, nil
+}
+
+func parseInt32(value string) (int32, error) {
+	n64, err := parseInt64WithMax(value, math.MaxInt32)
+	if err != nil {
+		return 0, err
+	}
+	return int32(n64), nil
+}
+
+func parseInt(value string) (int, error) {
+	n64, err := parseInt64WithMax(value, int64(int(^uint(0)>>1)))
+	if err != nil {
+		return 0, err
+	}
+	return int(n64), nil
+}
+
+func parseInt64(value string) (int64, error) {
+	return parseInt64WithMax(value, int64(^uint64(0)>>1))
+}
+
+func parseInt64WithMax(value string, max int64) (int64, error) {
+	if value == "" {
+		return 0, errors.New("empty value")
+	}
+
+	trimmed := strings.TrimLeft(value, " \t\n\r\f\v")
+	if trimmed == "" {
+		return 0, errors.New("empty value")
+	}
+
+	numPart := trimmed
+	factor := int64(1)
+	if last := trimmed[len(trimmed)-1]; last == 'k' || last == 'K' || last == 'm' || last == 'M' || last == 'g' || last == 'G' {
+		switch toLower(last) {
+		case 'k':
+			factor = 1024
+		case 'm':
+			factor = 1024 * 1024
+		case 'g':
+			factor = 1024 * 1024 * 1024
+		}
+		numPart = trimmed[:len(trimmed)-1]
+	}
+	if numPart == "" {
+		return 0, errors.New("missing integer value")
+	}
+
+	n, err := strconv.ParseInt(numPart, 0, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	intMax := max
+	intMin := -max - 1
+	if n > 0 && n > intMax/factor {
+		return 0, errors.New("integer overflow")
+	}
+	if n < 0 && n < intMin/factor {
+		return 0, errors.New("integer overflow")
+	}
+
+	n *= factor
+	return n, nil
+}
+
+func truncateAtNUL(value string) string {
+	for i := 0; i < len(value); i++ {
+		if value[i] == 0 {
+			return value[:i]
+		}
+	}
+	return value
+}
+
+func isSpace(ch byte) bool {
+	return ch == ' ' || ch == '\t'
+}
+
+func isWhitespace(ch byte) bool {
+	return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '\v' || ch == '\f'
+}
+
+func isLetter(ch byte) bool {
+	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
+}
+
+func isDigit(ch byte) bool {
+	return ch >= '0' && ch <= '9'
+}
+
+func toLower(ch byte) byte {
+	if ch >= 'A' && ch <= 'Z' {
+		return ch + ('a' - 'A')
+	}
+	return ch
 }
