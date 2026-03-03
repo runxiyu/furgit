@@ -53,9 +53,11 @@ func TestTreeParseFromGit(t *testing.T) {
 
 		for _, want := range inserted.Entries {
 			got := tree.Entry(want.Name)
+			//nolint:staticcheck
 			if got == nil {
 				t.Fatalf("Entry(%q) returned nil", want.Name)
 			}
+			//nolint:staticcheck
 			if got.Mode != want.Mode || got.ID != want.ID {
 				t.Fatalf("Entry(%q) mismatch", want.Name)
 			}

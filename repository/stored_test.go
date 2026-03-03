@@ -292,9 +292,11 @@ func TestReadStoredTreeMixedModes(t *testing.T) {
 
 		for name, wantMode := range expect {
 			entry := rootTree.Tree().Entry([]byte(name))
+			//nolint:staticcheck
 			if entry == nil {
 				t.Fatalf("Entry(%q) returned nil", name)
 			}
+			//nolint:staticcheck
 			if entry.Mode != wantMode {
 				t.Fatalf("Entry(%q) mode = %o, want %o", name, entry.Mode, wantMode)
 			}
