@@ -2,6 +2,7 @@ Some basics to implement before we could really have network
 protocols:
 
 For client-side fetch, and server-side receive, we'll need:
+* Reachability walking
 * Creating indexes (.idx, .rev) from packs (streaming API)
 * A streaming hash verifier for the pack ingestion path.
 * Other things involving pack ingestion, such as reading and
