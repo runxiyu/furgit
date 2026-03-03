@@ -10,6 +10,8 @@ import (
 	"math"
 	"strconv"
 	"strings"
+
+	"codeberg.org/lindenii/furgit/internal/intconv"
 )
 
 // Config holds all parsed configuration entries from a Git config file.
@@ -600,7 +602,7 @@ func isValidSection(s string) bool {
 	if len(s) == 0 {
 		return false
 	}
-	for i := 0; i < len(s); i++ {
+	for i := range len(s) {
 		ch := s[i]
 		if !isLetter(ch) && !isDigit(ch) && ch != '-' && ch != '.' {
 			return false
@@ -638,7 +640,7 @@ func parseInt32(value string) (int32, error) {
 	if err != nil {
 		return 0, err
 	}
-	return int32(n64), nil
+	return intconv.Int64ToInt32(n64)
 }
 
 func parseInt(value string) (int, error) {
@@ -653,7 +655,7 @@ func parseInt64(value string) (int64, error) {
 	return parseInt64WithMax(value, int64(^uint64(0)>>1))
 }
 
-func parseInt64WithMax(value string, max int64) (int64, error) {
+func parseInt64WithMax(value string, maxValue int64) (int64, error) {
 	if value == "" {
 		return 0, errors.New("empty value")
 	}
@@ -685,8 +687,8 @@ func parseInt64WithMax(value string, max int64) (int64, error) {
 		return 0, err
 	}
 
-	intMax := max
-	intMin := -max - 1
+	intMax := maxValue
+	intMin := -maxValue - 1
 	if n > 0 && n > intMax/factor {
 		return 0, errors.New("integer overflow")
 	}
@@ -699,7 +701,7 @@ func parseInt64WithMax(value string, max int64) (int64, error) {
 }
 
 func truncateAtNUL(value string) string {
-	for i := 0; i < len(value); i++ {
+	for i := range len(value) {
 		if value[i] == 0 {
 			return value[:i]
 		}
