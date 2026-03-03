@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"os"
-	"path/filepath"
 	"slices"
 	"testing"
 
@@ -17,17 +16,31 @@ import (
 
 func openPackedRefStoreFromRepo(t *testing.T, repoPath string, algo objectid.Algorithm) *packed.Store {
 	t.Helper()
-	file, err := os.Open(filepath.Join(repoPath, "packed-refs")) //#nosec G304
+	root, err := os.OpenRoot(repoPath)
 	if err != nil {
-		t.Fatalf("open packed-refs: %v", err)
+		t.Fatalf("OpenRoot(repo): %v", err)
 	}
-	defer func() { _ = file.Close() }()
+	defer func() { _ = root.Close() }()
 
-	store, err := packed.New(file, algo)
+	store, err := packed.New(root, algo)
 	if err != nil {
 		t.Fatalf("packed.New: %v", err)
 	}
 	return store
+}
+
+func openPackedRefStoreFromContent(t *testing.T, content string, algo objectid.Algorithm) (*packed.Store, error) {
+	t.Helper()
+	dir := t.TempDir()
+	if err := os.WriteFile(dir+"/packed-refs", []byte(content), 0o644); err != nil {
+		t.Fatalf("WriteFile(packed-refs): %v", err)
+	}
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		t.Fatalf("OpenRoot(temp): %v", err)
+	}
+	defer func() { _ = root.Close() }()
+	return packed.New(root, algo)
 }
 
 func TestPackedResolveAndPeeled(t *testing.T) {
@@ -218,7 +231,7 @@ func TestPackedParseErrors(t *testing.T) {
 
 		for _, tt := range cases {
 			t.Run(tt.name, func(t *testing.T) {
-				if _, err := packed.New(bytes.NewBufferString(tt.data), algo); err == nil {
+				if _, err := openPackedRefStoreFromContent(t, tt.data, algo); err == nil {
 					t.Fatalf("packed.New expected parse error")
 				}
 			})
@@ -228,11 +241,18 @@ func TestPackedParseErrors(t *testing.T) {
 
 func TestPackedNewValidation(t *testing.T) {
 	t.Parallel()
-	if _, err := packed.New(bytes.NewReader(nil), objectid.AlgorithmUnknown); !errors.Is(err, objectid.ErrInvalidAlgorithm) {
+	dir := t.TempDir()
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		t.Fatalf("OpenRoot(temp): %v", err)
+	}
+	defer func() { _ = root.Close() }()
+
+	if _, err := packed.New(root, objectid.AlgorithmUnknown); !errors.Is(err, objectid.ErrInvalidAlgorithm) {
 		t.Fatalf("packed.New invalid algorithm error = %v", err)
 	}
-	if _, err := packed.New(nil, objectid.AlgorithmSHA1); err == nil {
-		t.Fatalf("packed.New nil reader expected error")
+	if _, err := packed.New(root, objectid.AlgorithmSHA256); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("packed.New missing packed-refs error = %v", err)
 	}
 }
 

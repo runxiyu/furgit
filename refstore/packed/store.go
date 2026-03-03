@@ -2,7 +2,8 @@
 package packed
 
 import (
-	"io"
+	"fmt"
+	"os"
 	"path"
 
 	"codeberg.org/lindenii/furgit/objectid"
@@ -18,15 +19,19 @@ type Store struct {
 
 var _ refstore.Store = (*Store)(nil)
 
-// New parses packed-refs content from r using the given object ID algorithm.
-func New(r io.Reader, algo objectid.Algorithm) (*Store, error) {
+// New parses packed-refs from one repository root using the given object ID
+// algorithm.
+func New(root *os.Root, algo objectid.Algorithm) (*Store, error) {
 	if algo.Size() == 0 {
 		return nil, objectid.ErrInvalidAlgorithm
 	}
-	if r == nil {
-		return nil, io.ErrUnexpectedEOF
+	packedRefs, err := root.Open("packed-refs")
+	if err != nil {
+		return nil, fmt.Errorf("refstore/packed: open packed-refs: %w", err)
 	}
-	byName, ordered, err := parsePackedRefs(r, algo)
+	defer func() { _ = packedRefs.Close() }()
+
+	byName, ordered, err := parsePackedRefs(packedRefs, algo)
 	if err != nil {
 		return nil, err
 	}

@@ -216,10 +216,8 @@ func openRefStore(root *os.Root, algo objectid.Algorithm) (out refstore.Store, e
 	}
 	backends := []refstore.Store{looseStore}
 
-	packedRefsFile, err := root.Open("packed-refs")
-	if err == nil {
-		packedStore, packedErr := refpacked.New(packedRefsFile, algo)
-		_ = packedRefsFile.Close()
+	if _, err := root.Stat("packed-refs"); err == nil {
+		packedStore, packedErr := refpacked.New(root, algo)
 		if packedErr != nil {
 			_ = looseStore.Close()
 			return nil, packedErr
@@ -227,7 +225,7 @@ func openRefStore(root *os.Root, algo objectid.Algorithm) (out refstore.Store, e
 		backends = append(backends, packedStore)
 	} else if !errors.Is(err, os.ErrNotExist) {
 		_ = looseStore.Close()
-		return nil, fmt.Errorf("repository: open packed-refs: %w", err)
+		return nil, fmt.Errorf("repository: stat packed-refs: %w", err)
 	}
 
 	return refchain.New(backends...), nil
