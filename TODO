@@ -1,0 +1,17 @@
+Some basics to implement before we could really have network
+protocols:
+
+For client-side fetch, and server-side receive, we'll need:
+* Creating indexes (.idx, .rev) from packs (streaming API)
+* A streaming hash verifier for the pack ingestion path.
+* Other things involving pack ingestion, such as reading and
+  validating the pack header, un-thinning thin objects, streaming
+  byte to a quarantined .pack while hashing the trailer, checking the
+  trailer near the end.
+
+For client-side send, and server-side upload, we'll need:
+* Reachability walk (always iterators or otherwise streaming;
+  haves/wants; never an entire slice/map of OIDs)
+* Delta compression based on FastCDC; see 9front git
+* Using bitmaps
+* Investigate in detail the architecture of creating thin packs
