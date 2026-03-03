@@ -7,7 +7,6 @@ import (
 	"os"
 	"sync"
 
-	packchecksum "codeberg.org/lindenii/furgit/format/pack/checksum"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
 )
@@ -195,7 +194,7 @@ func (store *Store) verifyPackMatchesIndexes(pack *packFile) error {
 	if err != nil {
 		return err
 	}
-	if err := packchecksum.VerifyPackMatchesIdx(pack.data, index.data, store.algo); err != nil {
+	if err := verifyMappedPackMatchesMappedIdx(pack.data, index.data, store.algo); err != nil {
 		return fmt.Errorf("objectstore/packed: pack %q does not match idx %q: %w", pack.name, index.idxName, err)
 	}
 	return nil
