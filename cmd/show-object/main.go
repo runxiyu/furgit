@@ -1,3 +1,4 @@
+// Command show-object provides a small command line utility to show the details of a specified Git object.
 package main
 
 import (
