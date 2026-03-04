@@ -73,6 +73,7 @@ func New(root *os.Root, algo objectid.Algorithm) (*Store, error) {
 // Close releases mapped pack/index resources associated with the store.
 func (store *Store) Close() error {
 	store.stateMu.Lock()
+
 	if store.closed {
 		store.stateMu.Unlock()
 
