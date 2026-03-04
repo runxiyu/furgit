@@ -1,0 +1,31 @@
+package chain
+
+import (
+	"errors"
+	"fmt"
+
+	"codeberg.org/lindenii/furgit/objectid"
+	"codeberg.org/lindenii/furgit/objectstore"
+)
+
+// ReadSize reads object content length from the first backend that has it.
+func (chain *Chain) ReadSize(id objectid.ObjectID) (int64, error) {
+	for i, backend := range chain.backends {
+		if backend == nil {
+			continue
+		}
+
+		size, err := backend.ReadSize(id)
+		if err == nil {
+			return size, nil
+		}
+
+		if errors.Is(err, objectstore.ErrObjectNotFound) {
+			continue
+		}
+
+		return 0, fmt.Errorf("objectstore: backend %d read size: %w", i, err)
+	}
+
+	return 0, objectstore.ErrObjectNotFound
+}
