@@ -10,7 +10,7 @@ Furgit is a low-level Git library in Go.
 * Initial development
 * Frequent breaking changes
 * Do not use in production
-* May use [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) later
+* Will use [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) later
 
 ## General goals
 
