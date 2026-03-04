@@ -86,10 +86,10 @@ Furgit is a low-level Git library in Go.
 
 | Implementation | Total  | User   | System |
 | -              | -      | -      | -      |
-| Git            | 337 ms | 226 ms | 108 ms |
-| libgit2        | 391 ms | 269 ms | 120 ms |
-| Furgit         | 487 ms | 457 ms | 49 ms  |
-| go-git         | 38 s   | 36 s   | 2 s    |
+| Git            | 337 ms | 226 ms | 108 ms |
+| libgit2        | 391 ms | 269 ms | 120 ms |
+| Furgit         | 487 ms | 457 ms | 49 ms  |
+| go-git         | 38 s   | 36 s   | 2 s    |
 
 ## Repos and mirrors
 
