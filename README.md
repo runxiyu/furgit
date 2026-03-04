@@ -3,7 +3,7 @@
 [![builds.sr.ht status](https://builds.sr.ht/~runxiyu/furgit.svg)](https://builds.sr.ht/~runxiyu/furgit)
 [![Go Reference](https://pkg.go.dev/badge/codeberg.org/lindenii/furgit.svg)](https://pkg.go.dev/codeberg.org/lindenii/furgit)
 
-Furgit is a somewhat fast Git library in Go.
+Furgit is a low-level Git library in Go.
 
 ## Project status
 
@@ -12,14 +12,16 @@ Furgit is a somewhat fast Git library in Go.
 * Do not use in production
 * May use [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) later
 
-Currently undergoing a massive redesign; see the `legacy` branch too.
+## General goals
 
-## Roadmap
+* General-purpose Git library for UNIX-like systems
+* Prioritize APIs for forges and other server-side uses first
+* Aim for clear architecture then high performance
 
-**Done**
+## Current features
 
 * Parsing configs
-* Object ID and hash algorithms
+* Object ID and hash algorithms (SHA-256, SHA-1)
 * Object type enums
 * Object representation types
 * Object header parsing
@@ -43,7 +45,7 @@ Currently undergoing a massive redesign; see the `legacy` branch too.
 * Adler-32 optimizations
 * ZLIB pooling
 
-**Planned**
+## Future features
 
 * Streaming `.pack`/`.idx` hash verifier
 * `.idx` and `.rev` writing
@@ -61,6 +63,14 @@ Currently undergoing a massive redesign; see the `legacy` branch too.
 * Thin packs
 * DEFLATE optimizations
 * Aggressive buffer pooling
+* Ref tables
+* Large object promisors
+* Repacking
+* Multi-pack indexes
+
+## Benchmarks
+
+See [gitbench](https://git.sr.ht/~runxiyu/gitbench).
 
 ## Repos and mirrors
 
