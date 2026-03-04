@@ -4,6 +4,9 @@ packages:
   - git
   - golangci-lint
 tasks:
+  - apk: |
+      sudo apk update
+      sudo apk upgrade
   - build: |
       cd furgit
       go build ./...
