@@ -1,6 +1,6 @@
-// Package chain provides an adaptive wrapper over multiple object storage
+// Package mix provides an adaptive wrapper over multiple object storage
 // backends.
-package chain
+package mix
 
 import (
 	"errors"
@@ -13,8 +13,8 @@ import (
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
-// Chain queries multiple object databases with an MRU backend preference.
-type Chain struct {
+// Mix queries multiple object databases with an MRU backend preference.
+type Mix struct {
 	mu sync.RWMutex
 
 	backendHead        *backendNode
@@ -22,8 +22,8 @@ type Chain struct {
 	backendNodeByStore map[objectstore.Store]*backendNode
 }
 
-// New creates a Chain from backends.
-func New(backends ...objectstore.Store) *Chain {
+// New creates a Mix from backends.
+func New(backends ...objectstore.Store) *Mix {
 	nodeByStore := make(map[objectstore.Store]*backendNode, len(backends))
 
 	var (
@@ -52,7 +52,7 @@ func New(backends ...objectstore.Store) *Chain {
 		nodeByStore[backend] = node
 	}
 
-	return &Chain{
+	return &Mix{
 		backendHead:        head,
 		backendTail:        tail,
 		backendNodeByStore: nodeByStore,
@@ -60,11 +60,11 @@ func New(backends ...objectstore.Store) *Chain {
 }
 
 // ReadBytesFull reads a full serialized object from one backend that has it.
-func (chain *Chain) ReadBytesFull(id objectid.ObjectID) ([]byte, error) {
-	for i, backend := 0, chain.firstBackend(); backend != nil; i, backend = i+1, chain.nextBackend(backend) {
+func (mix *Mix) ReadBytesFull(id objectid.ObjectID) ([]byte, error) {
+	for i, backend := 0, mix.firstBackend(); backend != nil; i, backend = i+1, mix.nextBackend(backend) {
 		full, err := backend.ReadBytesFull(id)
 		if err == nil {
-			chain.touchBackend(backend)
+			mix.touchBackend(backend)
 
 			return full, nil
 		}
@@ -81,11 +81,11 @@ func (chain *Chain) ReadBytesFull(id objectid.ObjectID) ([]byte, error) {
 
 // ReadBytesContent reads an object's type and content bytes from one backend
 // that has it.
-func (chain *Chain) ReadBytesContent(id objectid.ObjectID) (objecttype.Type, []byte, error) {
-	for i, backend := 0, chain.firstBackend(); backend != nil; i, backend = i+1, chain.nextBackend(backend) {
+func (mix *Mix) ReadBytesContent(id objectid.ObjectID) (objecttype.Type, []byte, error) {
+	for i, backend := 0, mix.firstBackend(); backend != nil; i, backend = i+1, mix.nextBackend(backend) {
 		ty, content, err := backend.ReadBytesContent(id)
 		if err == nil {
-			chain.touchBackend(backend)
+			mix.touchBackend(backend)
 
 			return ty, content, nil
 		}
@@ -102,11 +102,11 @@ func (chain *Chain) ReadBytesContent(id objectid.ObjectID) (objecttype.Type, []b
 
 // ReadReaderFull reads a full serialized object stream from one backend that
 // has it.
-func (chain *Chain) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) {
-	for i, backend := 0, chain.firstBackend(); backend != nil; i, backend = i+1, chain.nextBackend(backend) {
+func (mix *Mix) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) {
+	for i, backend := 0, mix.firstBackend(); backend != nil; i, backend = i+1, mix.nextBackend(backend) {
 		reader, err := backend.ReadReaderFull(id)
 		if err == nil {
-			chain.touchBackend(backend)
+			mix.touchBackend(backend)
 
 			return reader, nil
 		}
@@ -123,11 +123,11 @@ func (chain *Chain) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) 
 
 // ReadReaderContent reads an object's type, declared content length, and
 // content stream from one backend that has it.
-func (chain *Chain) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, int64, io.ReadCloser, error) {
-	for i, backend := 0, chain.firstBackend(); backend != nil; i, backend = i+1, chain.nextBackend(backend) {
+func (mix *Mix) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, int64, io.ReadCloser, error) {
+	for i, backend := 0, mix.firstBackend(); backend != nil; i, backend = i+1, mix.nextBackend(backend) {
 		ty, size, reader, err := backend.ReadReaderContent(id)
 		if err == nil {
-			chain.touchBackend(backend)
+			mix.touchBackend(backend)
 
 			return ty, size, reader, nil
 		}
@@ -143,11 +143,11 @@ func (chain *Chain) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, in
 }
 
 // ReadSize reads object content length from one backend that has it.
-func (chain *Chain) ReadSize(id objectid.ObjectID) (int64, error) {
-	for i, backend := 0, chain.firstBackend(); backend != nil; i, backend = i+1, chain.nextBackend(backend) {
+func (mix *Mix) ReadSize(id objectid.ObjectID) (int64, error) {
+	for i, backend := 0, mix.firstBackend(); backend != nil; i, backend = i+1, mix.nextBackend(backend) {
 		size, err := backend.ReadSize(id)
 		if err == nil {
-			chain.touchBackend(backend)
+			mix.touchBackend(backend)
 
 			return size, nil
 		}
@@ -163,11 +163,11 @@ func (chain *Chain) ReadSize(id objectid.ObjectID) (int64, error) {
 }
 
 // ReadHeader reads object header data from one backend that has it.
-func (chain *Chain) ReadHeader(id objectid.ObjectID) (objecttype.Type, int64, error) {
-	for i, backend := 0, chain.firstBackend(); backend != nil; i, backend = i+1, chain.nextBackend(backend) {
+func (mix *Mix) ReadHeader(id objectid.ObjectID) (objecttype.Type, int64, error) {
+	for i, backend := 0, mix.firstBackend(); backend != nil; i, backend = i+1, mix.nextBackend(backend) {
 		ty, size, err := backend.ReadHeader(id)
 		if err == nil {
-			chain.touchBackend(backend)
+			mix.touchBackend(backend)
 
 			return ty, size, nil
 		}
@@ -183,15 +183,15 @@ func (chain *Chain) ReadHeader(id objectid.ObjectID) (objecttype.Type, int64, er
 }
 
 // Close closes all backends and joins close errors.
-func (chain *Chain) Close() error {
-	chain.mu.RLock()
+func (mix *Mix) Close() error {
+	mix.mu.RLock()
 
-	backends := make([]objectstore.Store, 0, len(chain.backendNodeByStore))
-	for node := chain.backendHead; node != nil; node = node.next {
+	backends := make([]objectstore.Store, 0, len(mix.backendNodeByStore))
+	for node := mix.backendHead; node != nil; node = node.next {
 		backends = append(backends, node.backend)
 	}
 
-	chain.mu.RUnlock()
+	mix.mu.RUnlock()
 
 	var errs []error
 
@@ -211,22 +211,22 @@ type backendNode struct {
 	next    *backendNode
 }
 
-func (chain *Chain) firstBackend() objectstore.Store {
-	chain.mu.RLock()
-	defer chain.mu.RUnlock()
+func (mix *Mix) firstBackend() objectstore.Store {
+	mix.mu.RLock()
+	defer mix.mu.RUnlock()
 
-	if chain.backendHead == nil {
+	if mix.backendHead == nil {
 		return nil
 	}
 
-	return chain.backendHead.backend
+	return mix.backendHead.backend
 }
 
-func (chain *Chain) nextBackend(current objectstore.Store) objectstore.Store {
-	chain.mu.RLock()
-	defer chain.mu.RUnlock()
+func (mix *Mix) nextBackend(current objectstore.Store) objectstore.Store {
+	mix.mu.RLock()
+	defer mix.mu.RUnlock()
 
-	node := chain.backendNodeByStore[current]
+	node := mix.backendNodeByStore[current]
 	if node == nil || node.next == nil {
 		return nil
 	}
@@ -234,18 +234,18 @@ func (chain *Chain) nextBackend(current objectstore.Store) objectstore.Store {
 	return node.next.backend
 }
 
-func (chain *Chain) touchBackend(backend objectstore.Store) {
+func (mix *Mix) touchBackend(backend objectstore.Store) {
 	if backend == nil {
 		return
 	}
 
-	if !chain.mu.TryLock() {
+	if !mix.mu.TryLock() {
 		return
 	}
-	defer chain.mu.Unlock()
+	defer mix.mu.Unlock()
 
-	node := chain.backendNodeByStore[backend]
-	if node == nil || node == chain.backendHead {
+	node := mix.backendNodeByStore[backend]
+	if node == nil || node == mix.backendHead {
 		return
 	}
 
@@ -257,19 +257,19 @@ func (chain *Chain) touchBackend(backend objectstore.Store) {
 		node.next.prev = node.prev
 	}
 
-	if chain.backendTail == node {
-		chain.backendTail = node.prev
+	if mix.backendTail == node {
+		mix.backendTail = node.prev
 	}
 
 	node.prev = nil
 
-	node.next = chain.backendHead
-	if chain.backendHead != nil {
-		chain.backendHead.prev = node
+	node.next = mix.backendHead
+	if mix.backendHead != nil {
+		mix.backendHead.prev = node
 	}
 
-	chain.backendHead = node
-	if chain.backendTail == nil {
-		chain.backendTail = node
+	mix.backendHead = node
+	if mix.backendTail == nil {
+		mix.backendTail = node
 	}
 }

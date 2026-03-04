@@ -8,8 +8,8 @@ import (
 	"codeberg.org/lindenii/furgit/config"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
-	objectchain "codeberg.org/lindenii/furgit/objectstore/chain"
 	objectloose "codeberg.org/lindenii/furgit/objectstore/loose"
+	objectmix "codeberg.org/lindenii/furgit/objectstore/mix"
 	objectpacked "codeberg.org/lindenii/furgit/objectstore/packed"
 	"codeberg.org/lindenii/furgit/refstore"
 	refchain "codeberg.org/lindenii/furgit/refstore/chain"
@@ -123,7 +123,7 @@ func openObjectStore(root *os.Root, algo objectid.Algorithm) (objectstore.Store,
 		return nil, nil, fmt.Errorf("repository: open objects/pack: %w", err)
 	}
 
-	objectsChain := objectchain.New(backends...)
+	objectsChain := objectmix.New(backends...)
 
 	objectsRootForWriting, err := root.OpenRoot("objects")
 	if err != nil {
