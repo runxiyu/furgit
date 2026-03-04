@@ -169,19 +169,21 @@ func TestPackedStoreErrors(t *testing.T) {
 
 func TestPackedStoreNewValidation(t *testing.T) {
 	t.Parallel()
-	testRepo, _ := createPackedFixtureRepo(t, objectid.AlgorithmSHA1)
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		testRepo, _ := createPackedFixtureRepo(t, algo)
 
-	store := openPackedStore(t, testRepo.Dir(), objectid.AlgorithmSHA1)
+		store := openPackedStore(t, testRepo.Dir(), algo)
 
-	err := store.Close()
-	if err != nil {
-		t.Fatalf("Close: %v", err)
-	}
+		err := store.Close()
+		if err != nil {
+			t.Fatalf("Close: %v", err)
+		}
 
-	err = store.Close()
-	if err != nil {
-		t.Fatalf("Close second: %v", err)
-	}
+		err = store.Close()
+		if err != nil {
+			t.Fatalf("Close second: %v", err)
+		}
+	})
 }
 
 func TestPackedStoreInvalidAlgorithm(t *testing.T) {
