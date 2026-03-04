@@ -15,6 +15,7 @@ func (repo *Repository) WriteLooseBytesFull(raw []byte) (objectid.ObjectID, erro
 	if err != nil {
 		return objectid.ObjectID{}, fmt.Errorf("repository: write loose full bytes: %w", err)
 	}
+
 	return id, nil
 }
 
@@ -24,6 +25,7 @@ func (repo *Repository) WriteLooseBytesContent(ty objecttype.Type, content []byt
 	if err != nil {
 		return objectid.ObjectID{}, fmt.Errorf("repository: write loose content bytes: %w", err)
 	}
+
 	return id, nil
 }
 
@@ -34,6 +36,7 @@ func (repo *Repository) WriteLooseReaderFull(src io.Reader) (objectid.ObjectID, 
 	if err != nil {
 		return objectid.ObjectID{}, fmt.Errorf("repository: write loose full reader: %w", err)
 	}
+
 	return id, nil
 }
 
@@ -44,5 +47,6 @@ func (repo *Repository) WriteLooseReaderContent(ty objecttype.Type, size int64, 
 	if err != nil {
 		return objectid.ObjectID{}, fmt.Errorf("repository: write loose content reader: %w", err)
 	}
+
 	return id, nil
 }

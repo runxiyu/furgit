@@ -22,7 +22,9 @@ func containsOID(set map[objectid.ObjectID]struct{}, id objectid.ObjectID) bool 
 	if len(set) == 0 {
 		return false
 	}
+
 	_, ok := set[id]
+
 	return ok
 }
 
@@ -39,8 +41,10 @@ func (r *Reachability) readHeaderType(id objectid.ObjectID) (objecttype.Type, er
 		if errors.Is(err, objectstore.ErrObjectNotFound) {
 			return objecttype.TypeInvalid, &ErrObjectMissing{OID: id}
 		}
+
 		return objecttype.TypeInvalid, err
 	}
+
 	return ty, nil
 }
 
@@ -49,6 +53,7 @@ func (walk *Walk) readBytesContent(id objectid.ObjectID) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return content, nil
 }
 
@@ -58,7 +63,9 @@ func (r *Reachability) readBytesContent(id objectid.ObjectID) ([]byte, error) {
 		if errors.Is(err, objectstore.ErrObjectNotFound) {
 			return nil, &ErrObjectMissing{OID: id}
 		}
+
 		return nil, err
 	}
+
 	return content, nil
 }

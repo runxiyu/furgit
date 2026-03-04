@@ -9,7 +9,7 @@ import (
 	"codeberg.org/lindenii/furgit/diff/lines"
 )
 
-func TestDiff(t *testing.T) {
+func TestDiff(t *testing.T) { //nolint:maintidx
 	t.Parallel()
 
 	tests := []struct {
@@ -291,6 +291,7 @@ func TestDiff(t *testing.T) {
 				if chunks[i].Kind != tt.expected[i].Kind {
 					t.Fatalf("chunk %d kind mismatch: got %v, want %v; chunks: %s", i, chunks[i].Kind, tt.expected[i].Kind, formatChunks(chunks))
 				}
+
 				if !bytes.Equal(chunks[i].Data, tt.expected[i].Data) {
 					t.Fatalf("chunk %d data mismatch: got %q, want %q; chunks: %s", i, string(chunks[i].Data), string(tt.expected[i].Data), formatChunks(chunks))
 				}
@@ -302,15 +303,19 @@ func TestDiff(t *testing.T) {
 func formatChunks(chunks []lines.Chunk) string {
 	var b strings.Builder
 	b.WriteByte('[')
+
 	for i, chunk := range chunks {
 		if i > 0 {
 			b.WriteString(", ")
 		}
+
 		b.WriteString(chunkKindName(chunk.Kind))
 		b.WriteByte(':')
 		b.WriteString(strconv.Quote(string(chunk.Data)))
 	}
+
 	b.WriteByte(']')
+
 	return b.String()
 }
 

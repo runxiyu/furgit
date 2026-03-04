@@ -10,7 +10,7 @@ const benchmarkSize = 64 * 1024
 
 var data = make([]byte, benchmarkSize)
 
-func init() {
+func init() { //nolint:gochecknoinits
 	for i := range benchmarkSize {
 		data[i] = byte(i % 256)
 	}
@@ -18,6 +18,7 @@ func init() {
 
 func BenchmarkChecksum(b *testing.B) {
 	b.ReportAllocs()
+
 	for b.Loop() {
 		adler32.Checksum(data)
 	}

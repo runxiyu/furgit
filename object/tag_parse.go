@@ -13,6 +13,7 @@ import (
 func ParseTag(body []byte, algo objectid.Algorithm) (*Tag, error) {
 	t := new(Tag)
 	i := 0
+
 	var haveTarget, haveType bool
 
 	for i < len(body) {
@@ -20,8 +21,10 @@ func ParseTag(body []byte, algo objectid.Algorithm) (*Tag, error) {
 		if rel < 0 {
 			return nil, errors.New("object: tag: missing newline")
 		}
+
 		line := body[i : i+rel]
 		i += rel + 1
+
 		if len(line) == 0 {
 			break
 		}
@@ -37,6 +40,7 @@ func ParseTag(body []byte, algo objectid.Algorithm) (*Tag, error) {
 			if err != nil {
 				return nil, fmt.Errorf("object: tag: object: %w", err)
 			}
+
 			t.Target = id
 			haveTarget = true
 		case "type":
@@ -44,6 +48,7 @@ func ParseTag(body []byte, algo objectid.Algorithm) (*Tag, error) {
 			if !ok {
 				return nil, errors.New("object: tag: unknown target type")
 			}
+
 			t.TargetType = ty
 			haveType = true
 		case "tag":
@@ -53,6 +58,7 @@ func ParseTag(body []byte, algo objectid.Algorithm) (*Tag, error) {
 			if err != nil {
 				return nil, fmt.Errorf("object: tag: tagger: %w", err)
 			}
+
 			t.Tagger = idt
 		case "gpgsig", "gpgsig-sha256":
 			for i < len(body) {
@@ -60,9 +66,11 @@ func ParseTag(body []byte, algo objectid.Algorithm) (*Tag, error) {
 				if nextRel < 0 {
 					return nil, errors.New("object: tag: unterminated gpgsig")
 				}
+
 				if body[i] != ' ' {
 					break
 				}
+
 				i += nextRel + 1
 			}
 		default:
@@ -73,6 +81,8 @@ func ParseTag(body []byte, algo objectid.Algorithm) (*Tag, error) {
 	if !haveTarget || !haveType {
 		return nil, errors.New("object: tag: missing required headers")
 	}
+
 	t.Message = append([]byte(nil), body[i:]...)
+
 	return t, nil
 }

@@ -10,5 +10,6 @@ type Blob struct {
 // ObjectType returns TypeBlob.
 func (blob *Blob) ObjectType() objecttype.Type {
 	_ = blob
+
 	return objecttype.TypeBlob
 }

@@ -16,11 +16,13 @@ const (
 // Add p to the running checksum d.
 func update(d uint32, p []byte) uint32 {
 	s1, s2 := d&0xffff, d>>16
+
 	for len(p) > 0 {
 		var q []byte
 		if len(p) > nmax {
 			p, q = p[:nmax], p[nmax:]
 		}
+
 		for len(p) >= 4 {
 			s1 += uint32(p[0])
 			s2 += s1
@@ -32,13 +34,16 @@ func update(d uint32, p []byte) uint32 {
 			s2 += s1
 			p = p[4:]
 		}
+
 		for _, x := range p {
 			s1 += uint32(x)
 			s2 += s1
 		}
+
 		s1 %= mod
 		s2 %= mod
 		p = q
 	}
+
 	return s2<<16 | s1
 }

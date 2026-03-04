@@ -27,8 +27,10 @@ func New() hash.Hash32 {
 	if !hasAVX2 {
 		return adler32.New()
 	}
+
 	d := new(digest)
 	d.Reset()
+
 	return d
 }
 
@@ -36,6 +38,7 @@ func (d *digest) MarshalBinary() ([]byte, error) {
 	b := make([]byte, 0, marshaledSize)
 	b = append(b, magic...)
 	b = binary.BigEndian.AppendUint32(b, uint32(*d))
+
 	return b, nil
 }
 
@@ -43,10 +46,13 @@ func (d *digest) UnmarshalBinary(b []byte) error {
 	if len(b) < len(magic) || string(b[:len(magic)]) != magic {
 		return errors.New("hash/adler32: invalid hash state identifier")
 	}
+
 	if len(b) != marshaledSize {
 		return errors.New("hash/adler32: invalid hash state size")
 	}
+
 	*d = digest(binary.BigEndian.Uint32(b[len(magic):]))
+
 	return nil
 }
 
@@ -62,6 +68,7 @@ func (d *digest) Write(data []byte) (nn int, err error) {
 		h := update(uint32(*d), data)
 		*d = digest(h)
 	}
+
 	return len(data), nil
 }
 
@@ -76,5 +83,6 @@ func Checksum(data []byte) uint32 {
 	if hasAVX2 && len(data) >= 64 {
 		return adler32_avx2(1, data)
 	}
+
 	return adler32.Checksum(data)
 }

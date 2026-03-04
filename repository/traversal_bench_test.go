@@ -25,6 +25,7 @@ func BenchmarkTraverseHeadTree(b *testing.B) {
 	if err != nil {
 		b.Fatalf("os.OpenRoot(%q): %v", repoPath, err)
 	}
+
 	b.Cleanup(func() {
 		_ = root.Close()
 	})
@@ -33,6 +34,7 @@ func BenchmarkTraverseHeadTree(b *testing.B) {
 	if err != nil {
 		b.Fatalf("repository.Open(root for %q): %v", repoPath, err)
 	}
+
 	b.Cleanup(func() {
 		_ = repo.Close()
 	})
@@ -41,10 +43,12 @@ func BenchmarkTraverseHeadTree(b *testing.B) {
 	if err != nil {
 		b.Fatalf("ResolveRefFully(HEAD): %v", err)
 	}
+
 	stored, err := repo.ReadStored(head.ID)
 	if err != nil {
 		b.Fatalf("ReadStored(%s): %v", head.ID, err)
 	}
+
 	commit, ok := stored.Object().(*object.Commit)
 	if !ok {
 		b.Fatalf("HEAD object type %T, want *object.Commit", stored.Object())
@@ -62,6 +66,7 @@ func BenchmarkTraverseHeadTree(b *testing.B) {
 	}
 
 	b.StopTimer()
+
 	if lastCount <= 0 {
 		b.Fatalf("traverseTreeIter count = %d, want > 0", lastCount)
 	}

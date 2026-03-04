@@ -10,26 +10,22 @@ linters:
     - lll              # poor standard
     - ireturn          # not an issue
     - perfsprint       # silly fmt.Errorf vs errors.New suggestion
-    - noinlineerr      # not an issue
     - gosmopolitan     # completely normal to have CJK and such in tests
     - gochecknoglobals # unlikely to be introduce accidentally and are usually intentional
     - nonamedreturns   # named returns are often good for clarity
     - errname          # ErrXXX is better than XXXError
+    - wsl              # outdated, use wsl_v5 instead
+    - varnamelen       # it's rather reasonable to have counters like i, even when it spans quite a bit
+    - gocyclo          # cyclomatic metrics aren't that good
+    - cyclop           # cyclomatic metrics aren't that good
+    - godox            # TODO/etc comments are allowed in our codebase
+    - funlen           # long functions are fine
+    - wrapcheck        # rules around interface-return methods are a bit silly
+
     - exhaustruct      # tmp: should fix... but too annoying at the moment
-    - wsl_v5           # tmp
-    - wsl              # tmp
     - err113           # tmp: will enable when we properly use defined errors
-    - gochecknoinits   # tmp
-    - nlreturn         # tmp
-    - cyclop           # tmp
-    - gocognit         # tmp
-    - varnamelen       # tmp
-    - funlen           # tmp
-    - godox            # tmp
-    - nestif           # tmp
-    - maintidx         # tmp
-    - gocyclo          # tmp
-    - wrapcheck        # unsure
+    - gocognit         # tmp: should consider sometime
+
   settings:
     gosec:
       excludes:

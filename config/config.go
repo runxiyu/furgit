@@ -121,6 +121,7 @@ func ParseConfig(r io.Reader) (*Config, error) {
 		reader:  bufio.NewReader(r),
 		lineNum: 1,
 	}
+
 	return parser.parse()
 }
 
@@ -128,6 +129,7 @@ func ParseConfig(r io.Reader) (*Config, error) {
 // and key.
 func (c *Config) Lookup(section, subsection, key string) LookupResult {
 	section = strings.ToLower(section)
+
 	key = strings.ToLower(key)
 	for _, entry := range c.entries {
 		if strings.EqualFold(entry.Section, section) &&
@@ -139,6 +141,7 @@ func (c *Config) Lookup(section, subsection, key string) LookupResult {
 			}
 		}
 	}
+
 	return LookupResult{Kind: ValueMissing}
 }
 
@@ -147,7 +150,9 @@ func (c *Config) Lookup(section, subsection, key string) LookupResult {
 func (c *Config) LookupAll(section, subsection, key string) []LookupResult {
 	section = strings.ToLower(section)
 	key = strings.ToLower(key)
+
 	var values []LookupResult
+
 	for _, entry := range c.entries {
 		if strings.EqualFold(entry.Section, section) &&
 			entry.Subsection == subsection &&
@@ -158,6 +163,7 @@ func (c *Config) LookupAll(section, subsection, key string) []LookupResult {
 			})
 		}
 	}
+
 	return values
 }
 
@@ -166,6 +172,7 @@ func (c *Config) LookupAll(section, subsection, key string) []LookupResult {
 func (c *Config) Entries() []ConfigEntry {
 	result := make([]ConfigEntry, len(c.entries))
 	copy(result, c.entries)
+
 	return result
 }
 
@@ -181,7 +188,8 @@ type configParser struct {
 func (p *configParser) parse() (*Config, error) {
 	cfg := &Config{}
 
-	if err := p.skipBOM(); err != nil {
+	err := p.skipBOM()
+	if err != nil {
 		return nil, err
 	}
 
@@ -190,6 +198,7 @@ func (p *configParser) parse() (*Config, error) {
 		if errors.Is(err, io.EOF) {
 			break
 		}
+
 		if err != nil {
 			return nil, err
 		}
@@ -201,26 +210,33 @@ func (p *configParser) parse() (*Config, error) {
 
 		// Comments
 		if ch == '#' || ch == ';' {
-			if err := p.skipToEOL(); err != nil && !errors.Is(err, io.EOF) {
+			err := p.skipToEOL()
+			if err != nil && !errors.Is(err, io.EOF) {
 				return nil, err
 			}
+
 			continue
 		}
 
 		// Section header
 		if ch == '[' {
-			if err := p.parseSection(); err != nil {
+			err := p.parseSection()
+			if err != nil {
 				return nil, fmt.Errorf("furgit: config: line %d: %w", p.lineNum, err)
 			}
+
 			continue
 		}
 
 		// Key-value pair
 		if isLetter(ch) {
 			p.unreadChar(ch)
-			if err := p.parseKeyValue(cfg); err != nil {
+
+			err := p.parseKeyValue(cfg)
+			if err != nil {
 				return nil, fmt.Errorf("furgit: config: line %d: %w", p.lineNum, err)
 			}
+
 			continue
 		}
 
@@ -233,6 +249,7 @@ func (p *configParser) parse() (*Config, error) {
 func (p *configParser) nextChar() (byte, error) {
 	if p.hasPeeked {
 		p.hasPeeked = false
+
 		return p.peeked, nil
 	}
 
@@ -260,6 +277,7 @@ func (p *configParser) nextChar() (byte, error) {
 
 func (p *configParser) unreadChar(ch byte) {
 	p.peeked = ch
+
 	p.hasPeeked = true
 	if ch == '\n' && p.lineNum > 1 {
 		p.lineNum--
@@ -271,36 +289,48 @@ func (p *configParser) skipBOM() error {
 	if errors.Is(err, io.EOF) {
 		return nil
 	}
+
 	if err != nil {
 		return err
 	}
+
 	if first != 0xef {
 		_ = p.reader.UnreadByte()
+
 		return nil
 	}
+
 	second, err := p.reader.ReadByte()
 	if err != nil {
 		if errors.Is(err, io.EOF) {
 			_ = p.reader.UnreadByte()
+
 			return nil
 		}
+
 		return err
 	}
+
 	third, err := p.reader.ReadByte()
 	if err != nil {
 		if errors.Is(err, io.EOF) {
 			_ = p.reader.UnreadByte()
 			_ = p.reader.UnreadByte()
+
 			return nil
 		}
+
 		return err
 	}
+
 	if second == 0xbb && third == 0xbf {
 		return nil
 	}
+
 	_ = p.reader.UnreadByte()
 	_ = p.reader.UnreadByte()
 	_ = p.reader.UnreadByte()
+
 	return nil
 }
 
@@ -310,6 +340,7 @@ func (p *configParser) skipToEOL() error {
 		if err != nil {
 			return err
 		}
+
 		if ch == '\n' {
 			return nil
 		}
@@ -330,8 +361,10 @@ func (p *configParser) parseSection() error {
 			if !isValidSection(section) {
 				return fmt.Errorf("invalid section name: %q", section)
 			}
+
 			p.currentSection = strings.ToLower(section)
 			p.currentSubsec = ""
+
 			return nil
 		}
 
@@ -353,15 +386,18 @@ func (p *configParser) parseExtendedSection(sectionName *bytes.Buffer) error {
 		if err != nil {
 			return errors.New("unexpected EOF in section header")
 		}
+
 		if !isWhitespace(ch) {
 			if ch != '"' {
 				return errors.New("expected quote after section name")
 			}
+
 			break
 		}
 	}
 
 	var subsec bytes.Buffer
+
 	for {
 		ch, err := p.nextChar()
 		if err != nil {
@@ -381,9 +417,11 @@ func (p *configParser) parseExtendedSection(sectionName *bytes.Buffer) error {
 			if err != nil {
 				return errors.New("unexpected EOF after backslash in subsection")
 			}
+
 			if next == '\n' {
 				return errors.New("newline after backslash in subsection")
 			}
+
 			subsec.WriteByte(next)
 		} else {
 			subsec.WriteByte(ch)
@@ -394,6 +432,7 @@ func (p *configParser) parseExtendedSection(sectionName *bytes.Buffer) error {
 	if err != nil {
 		return errors.New("unexpected EOF after subsection")
 	}
+
 	if ch != ']' {
 		return fmt.Errorf("expected ']' after subsection, got %q", ch)
 	}
@@ -405,6 +444,7 @@ func (p *configParser) parseExtendedSection(sectionName *bytes.Buffer) error {
 
 	p.currentSection = strings.ToLower(section)
 	p.currentSubsec = subsec.String()
+
 	return nil
 }
 
@@ -414,17 +454,20 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 	}
 
 	var key bytes.Buffer
+
 	for {
 		ch, err := p.nextChar()
 		if errors.Is(err, io.EOF) {
 			break
 		}
+
 		if err != nil {
 			return err
 		}
 
 		if ch == '=' || ch == '\n' || isSpace(ch) {
 			p.unreadChar(ch)
+
 			break
 		}
 
@@ -439,6 +482,7 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 	if len(keyStr) == 0 {
 		return errors.New("empty key name")
 	}
+
 	if !isLetter(keyStr[0]) {
 		return errors.New("key must start with a letter")
 	}
@@ -453,8 +497,10 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 				Kind:       ValueValueless,
 				Value:      "",
 			})
+
 			return nil
 		}
+
 		if err != nil {
 			return err
 		}
@@ -467,13 +513,16 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 				Kind:       ValueValueless,
 				Value:      "",
 			})
+
 			return nil
 		}
 
 		if ch == '#' || ch == ';' {
-			if err := p.skipToEOL(); err != nil && !errors.Is(err, io.EOF) {
+			err := p.skipToEOL()
+			if err != nil && !errors.Is(err, io.EOF) {
 				return err
 			}
+
 			cfg.entries = append(cfg.entries, ConfigEntry{
 				Section:    p.currentSection,
 				Subsection: p.currentSubsec,
@@ -481,6 +530,7 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 				Kind:       ValueValueless,
 				Value:      "",
 			})
+
 			return nil
 		}
 
@@ -510,9 +560,12 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 }
 
 func (p *configParser) parseValue() (string, error) {
-	var value bytes.Buffer
-	var inQuote bool
-	var inComment bool
+	var (
+		value     bytes.Buffer
+		inQuote   bool
+		inComment bool
+	)
+
 	trimLen := 0
 
 	for {
@@ -521,11 +574,14 @@ func (p *configParser) parseValue() (string, error) {
 			if inQuote {
 				return "", errors.New("unexpected EOF in quoted value")
 			}
+
 			if trimLen > 0 {
 				return truncateAtNUL(value.String()[:trimLen]), nil
 			}
+
 			return truncateAtNUL(value.String()), nil
 		}
+
 		if err != nil {
 			return "", err
 		}
@@ -534,9 +590,11 @@ func (p *configParser) parseValue() (string, error) {
 			if inQuote {
 				return "", errors.New("newline in quoted value")
 			}
+
 			if trimLen > 0 {
 				return truncateAtNUL(value.String()[:trimLen]), nil
 			}
+
 			return truncateAtNUL(value.String()), nil
 		}
 
@@ -548,14 +606,17 @@ func (p *configParser) parseValue() (string, error) {
 			if trimLen == 0 && value.Len() > 0 {
 				trimLen = value.Len()
 			}
+
 			if value.Len() > 0 {
 				value.WriteByte(ch)
 			}
+
 			continue
 		}
 
 		if !inQuote && (ch == '#' || ch == ';') {
 			inComment = true
+
 			continue
 		}
 
@@ -568,6 +629,7 @@ func (p *configParser) parseValue() (string, error) {
 			if errors.Is(err, io.EOF) {
 				return "", errors.New("unexpected EOF after backslash")
 			}
+
 			if err != nil {
 				return "", err
 			}
@@ -586,11 +648,13 @@ func (p *configParser) parseValue() (string, error) {
 			default:
 				return "", fmt.Errorf("invalid escape sequence: \\%c", next)
 			}
+
 			continue
 		}
 
 		if ch == '"' {
 			inQuote = !inQuote
+
 			continue
 		}
 
@@ -602,12 +666,14 @@ func isValidSection(s string) bool {
 	if len(s) == 0 {
 		return false
 	}
+
 	for i := range len(s) {
 		ch := s[i]
 		if !isLetter(ch) && !isDigit(ch) && ch != '-' && ch != '.' {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -632,6 +698,7 @@ func parseBool(value string) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("invalid boolean value %q", value)
 	}
+
 	return n != 0, nil
 }
 
@@ -640,6 +707,7 @@ func parseInt32(value string) (int32, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return intconv.Int64ToInt32(n64)
 }
 
@@ -648,6 +716,7 @@ func parseInt(value string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return int(n64), nil
 }
 
@@ -667,6 +736,7 @@ func parseInt64WithMax(value string, maxValue int64) (int64, error) {
 
 	numPart := trimmed
 	factor := int64(1)
+
 	if last := trimmed[len(trimmed)-1]; last == 'k' || last == 'K' || last == 'm' || last == 'M' || last == 'g' || last == 'G' {
 		switch toLower(last) {
 		case 'k':
@@ -676,8 +746,10 @@ func parseInt64WithMax(value string, maxValue int64) (int64, error) {
 		case 'g':
 			factor = 1024 * 1024 * 1024
 		}
+
 		numPart = trimmed[:len(trimmed)-1]
 	}
+
 	if numPart == "" {
 		return 0, errors.New("missing integer value")
 	}
@@ -689,14 +761,17 @@ func parseInt64WithMax(value string, maxValue int64) (int64, error) {
 
 	intMax := maxValue
 	intMin := -maxValue - 1
+
 	if n > 0 && n > intMax/factor {
 		return 0, errors.New("integer overflow")
 	}
+
 	if n < 0 && n < intMin/factor {
 		return 0, errors.New("integer overflow")
 	}
 
 	n *= factor
+
 	return n, nil
 }
 
@@ -706,6 +781,7 @@ func truncateAtNUL(value string) string {
 			return value[:i]
 		}
 	}
+
 	return value
 }
 
@@ -729,5 +805,6 @@ func toLower(ch byte) byte {
 	if ch >= 'A' && ch <= 'Z' {
 		return ch + ('a' - 'A')
 	}
+
 	return ch
 }

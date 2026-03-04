@@ -25,43 +25,58 @@ func openPackFile(name string, file *os.File, size int64) (*packFile, error) {
 	if size < 12 {
 		return nil, fmt.Errorf("objectstore/packed: pack %q too short", name)
 	}
+
 	if size > int64(int(^uint(0)>>1)) {
 		return nil, fmt.Errorf("objectstore/packed: pack %q has unsupported size", name)
 	}
+
 	fd, err := intconv.UintptrToInt(file.Fd())
 	if err != nil {
 		return nil, err
 	}
+
 	data, err := syscall.Mmap(fd, 0, int(size), syscall.PROT_READ, syscall.MAP_PRIVATE)
 	if err != nil {
 		return nil, err
 	}
+
 	if binary.BigEndian.Uint32(data[:4]) != packfmt.Signature {
 		_ = syscall.Munmap(data)
+
 		return nil, fmt.Errorf("objectstore/packed: pack %q invalid signature", name)
 	}
+
 	version := binary.BigEndian.Uint32(data[4:8])
 	if !packfmt.VersionSupported(version) {
 		_ = syscall.Munmap(data)
+
 		return nil, fmt.Errorf("objectstore/packed: pack %q unsupported version %d", name, version)
 	}
+
 	return &packFile{name: name, file: file, data: data}, nil
 }
 
 // close unmaps and closes one pack handle.
 func (pack *packFile) close() error {
 	var closeErr error
+
 	if pack.data != nil {
-		if err := syscall.Munmap(pack.data); err != nil && closeErr == nil {
+		err := syscall.Munmap(pack.data)
+		if err != nil && closeErr == nil {
 			closeErr = err
 		}
+
 		pack.data = nil
 	}
+
 	if pack.file != nil {
-		if err := pack.file.Close(); err != nil && closeErr == nil {
+		err := pack.file.Close()
+		if err != nil && closeErr == nil {
 			closeErr = err
 		}
+
 		pack.file = nil
 	}
+
 	return closeErr
 }

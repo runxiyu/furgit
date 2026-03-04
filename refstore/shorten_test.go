@@ -11,6 +11,7 @@ func TestShortenName(t *testing.T) {
 
 	t.Run("simple", func(t *testing.T) {
 		t.Parallel()
+
 		got := refstore.ShortenName("refs/heads/main", []string{"refs/heads/main"})
 		if got != "main" {
 			t.Fatalf("ShortenName simple = %q, want %q", got, "main")
@@ -19,6 +20,7 @@ func TestShortenName(t *testing.T) {
 
 	t.Run("ambiguous with tags", func(t *testing.T) {
 		t.Parallel()
+
 		got := refstore.ShortenName(
 			"refs/heads/main",
 			[]string{
@@ -64,7 +66,9 @@ func TestShortenName(t *testing.T) {
 
 	t.Run("refs-prefix fallback", func(t *testing.T) {
 		t.Parallel()
+
 		name := "refs/notes/review/topic"
+
 		got := refstore.ShortenName(name, []string{name})
 		if got != "notes/review/topic" {
 			t.Fatalf("ShortenName refs-prefix fallback = %q, want %q", got, "notes/review/topic")

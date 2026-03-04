@@ -37,6 +37,7 @@ type Repository struct {
 // Open borrows root during construction and does not close it.
 func Open(root *os.Root) (repo *Repository, err error) {
 	repo = &Repository{}
+
 	defer func() {
 		if err != nil {
 			_ = repo.Close()
@@ -47,18 +48,21 @@ func Open(root *os.Root) (repo *Repository, err error) {
 	if err != nil {
 		return nil, err
 	}
+
 	repo.config = cfg
 
 	algo, err := detectObjectAlgorithm(cfg)
 	if err != nil {
 		return nil, err
 	}
+
 	repo.algo = algo
 
 	objects, objectsLooseForWritingOnly, err := openObjectStore(root, algo)
 	if err != nil {
 		return nil, err
 	}
+
 	repo.objects = objects
 	repo.objectsLooseForWritingOnly = objectsLooseForWritingOnly
 
@@ -66,6 +70,7 @@ func Open(root *os.Root) (repo *Repository, err error) {
 	if err != nil {
 		return nil, err
 	}
+
 	repo.refs = refs
 
 	return repo, nil
@@ -100,17 +105,22 @@ func (repo *Repository) Close() error {
 	var errs []error
 
 	if repo.refs != nil {
-		if err := repo.refs.Close(); err != nil {
+		err := repo.refs.Close()
+		if err != nil {
 			errs = append(errs, err)
 		}
 	}
+
 	if repo.objects != nil {
-		if err := repo.objects.Close(); err != nil {
+		err := repo.objects.Close()
+		if err != nil {
 			errs = append(errs, err)
 		}
 	}
+
 	if repo.objectsLooseForWritingOnly != nil {
-		if err := repo.objectsLooseForWritingOnly.Close(); err != nil {
+		err := repo.objectsLooseForWritingOnly.Close()
+		if err != nil {
 			errs = append(errs, err)
 		}
 	}
@@ -123,12 +133,14 @@ func parseRepositoryConfig(root *os.Root) (*config.Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("repository: open config: %w", err)
 	}
+
 	defer func() { _ = configFile.Close() }()
 
 	cfg, err := config.ParseConfig(configFile)
 	if err != nil {
 		return nil, fmt.Errorf("repository: parse config: %w", err)
 	}
+
 	return cfg, nil
 }
 
@@ -137,10 +149,12 @@ func detectObjectAlgorithm(cfg *config.Config) (objectid.Algorithm, error) {
 	if algoName == "" {
 		algoName = objectid.AlgorithmSHA1.String()
 	}
+
 	algo, ok := objectid.ParseAlgorithm(algoName)
 	if !ok {
 		return objectid.AlgorithmUnknown, fmt.Errorf("repository: unsupported object format %q", algoName)
 	}
+
 	return algo, nil
 }
 
@@ -154,19 +168,24 @@ func openObjectStore(root *os.Root, algo objectid.Algorithm) (objectstore.Store,
 	if err != nil {
 		return nil, nil, err
 	}
+
 	backends := []objectstore.Store{looseStore}
 
 	packRoot, err := objectsRoot.OpenRoot("pack")
 	if err == nil {
 		var packedStore *objectpacked.Store
+
 		packedStore, err = objectpacked.New(packRoot, algo)
 		if err != nil {
 			_ = looseStore.Close()
+
 			return nil, nil, err
 		}
+
 		backends = append(backends, packedStore)
 	} else if !errors.Is(err, os.ErrNotExist) {
 		_ = looseStore.Close()
+
 		return nil, nil, fmt.Errorf("repository: open objects/pack: %w", err)
 	}
 
@@ -175,12 +194,15 @@ func openObjectStore(root *os.Root, algo objectid.Algorithm) (objectstore.Store,
 	objectsRootForWriting, err := root.OpenRoot("objects")
 	if err != nil {
 		_ = objectsChain.Close()
+
 		return nil, nil, fmt.Errorf("repository: open objects for loose writing: %w", err)
 	}
+
 	objectsLooseForWritingOnly, err := objectloose.New(objectsRootForWriting, algo)
 	if err != nil {
 		_ = objectsRootForWriting.Close()
 		_ = objectsChain.Close()
+
 		return nil, nil, err
 	}
 
@@ -192,16 +214,20 @@ func openRefStore(root *os.Root, algo objectid.Algorithm) (out refstore.Store, e
 	if err != nil {
 		return nil, err
 	}
+
 	if hasReftable {
 		reftableRoot, err := root.OpenRoot("reftable")
 		if err != nil {
 			return nil, fmt.Errorf("repository: open reftable: %w", err)
 		}
+
 		reftableStore, err := reftable.New(reftableRoot, algo)
 		if err != nil {
 			_ = reftableRoot.Close()
+
 			return nil, err
 		}
+
 		return reftableStore, nil
 	}
 
@@ -209,22 +235,29 @@ func openRefStore(root *os.Root, algo objectid.Algorithm) (out refstore.Store, e
 	if err != nil {
 		return nil, fmt.Errorf("repository: open root for loose refs: %w", err)
 	}
+
 	looseStore, err := refloose.New(looseRoot, algo)
 	if err != nil {
 		_ = looseRoot.Close()
+
 		return nil, err
 	}
+
 	backends := []refstore.Store{looseStore}
 
-	if _, err := root.Stat("packed-refs"); err == nil {
+	_, err = root.Stat("packed-refs")
+	if err == nil {
 		packedStore, packedErr := refpacked.New(root, algo)
 		if packedErr != nil {
 			_ = looseStore.Close()
+
 			return nil, packedErr
 		}
+
 		backends = append(backends, packedStore)
 	} else if !errors.Is(err, os.ErrNotExist) {
 		_ = looseStore.Close()
+
 		return nil, fmt.Errorf("repository: stat packed-refs: %w", err)
 	}
 
@@ -236,8 +269,10 @@ func hasReftableStack(root *os.Root) (bool, error) {
 	if err == nil {
 		return true, nil
 	}
+
 	if errors.Is(err, os.ErrNotExist) {
 		return false, nil
 	}
+
 	return false, fmt.Errorf("repository: stat reftable/tables.list: %w", err)
 }

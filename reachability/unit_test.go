@@ -42,13 +42,16 @@ func (store *memStore) ReadBytesFull(id objectid.ObjectID) ([]byte, error) {
 	if !ok {
 		return nil, objectstore.ErrObjectNotFound
 	}
+
 	header, ok := objectheader.Encode(obj.ty, int64(len(obj.content)))
 	if !ok {
 		panic("failed to encode object header")
 	}
+
 	raw := make([]byte, len(header)+len(obj.content))
 	copy(raw, header)
 	copy(raw[len(header):], obj.content)
+
 	return raw, nil
 }
 
@@ -57,7 +60,9 @@ func (store *memStore) ReadBytesContent(id objectid.ObjectID) (objecttype.Type, 
 	if !ok {
 		return objecttype.TypeInvalid, nil, objectstore.ErrObjectNotFound
 	}
+
 	store.readBytesByObjectID[id]++
+
 	return obj.ty, append([]byte(nil), obj.content...), nil
 }
 
@@ -66,6 +71,7 @@ func (store *memStore) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, erro
 	if err != nil {
 		return nil, err
 	}
+
 	return io.NopCloser(bytes.NewReader(raw)), nil
 }
 
@@ -74,6 +80,7 @@ func (store *memStore) ReadReaderContent(id objectid.ObjectID) (objecttype.Type,
 	if err != nil {
 		return objecttype.TypeInvalid, 0, nil, err
 	}
+
 	return ty, int64(len(content)), io.NopCloser(bytes.NewReader(content)), nil
 }
 
@@ -82,6 +89,7 @@ func (store *memStore) ReadSize(id objectid.ObjectID) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return size, nil
 }
 
@@ -90,6 +98,7 @@ func (store *memStore) ReadHeader(id objectid.ObjectID) (objecttype.Type, int64,
 	if !ok {
 		return objecttype.TypeInvalid, 0, objectstore.ErrObjectNotFound
 	}
+
 	return obj.ty, int64(len(obj.content)), nil
 }
 
@@ -102,7 +111,9 @@ func commitBody(tree objectid.ObjectID, parents ...objectid.ObjectID) []byte {
 	for _, parent := range parents {
 		buf = append(buf, fmt.Appendf(nil, "parent %s\n", parent.String())...)
 	}
+
 	buf = append(buf, []byte("\nmsg\n")...)
+
 	return buf
 }
 
@@ -111,15 +122,19 @@ func tagBody(target objectid.ObjectID, targetType objecttype.Type) []byte {
 	if !ok {
 		panic("invalid tag target type")
 	}
+
 	return fmt.Appendf(nil, "object %s\ntype %s\ntag t\n\nmsg\n", target.String(), targetName)
 }
 
 func collectSeq(seq func(func(objectid.ObjectID) bool)) []objectid.ObjectID {
 	var out []objectid.ObjectID
+
 	seq(func(id objectid.ObjectID) bool {
 		out = append(out, id)
+
 		return true
 	})
+
 	return out
 }
 
@@ -128,6 +143,7 @@ func toSet(ids []objectid.ObjectID) map[objectid.ObjectID]struct{} {
 	for _, id := range ids {
 		set[id] = struct{}{}
 	}
+
 	return set
 }
 
@@ -149,12 +165,16 @@ func TestWalkDomainCommitsIncludesTagNodes(t *testing.T) {
 
 		r := reachability.New(store)
 		walk := r.Walk(reachability.DomainCommits, nil, map[objectid.ObjectID]struct{}{tag2: {}})
+
 		got := collectSeq(walk.Seq())
-		if err := walk.Err(); err != nil {
+
+		err := walk.Err()
+		if err != nil {
 			t.Fatalf("walk.Err(): %v", err)
 		}
 
 		gotSet := toSet(got)
+
 		wantSet := map[objectid.ObjectID]struct{}{tag2: {}, tag1: {}, commit2: {}, commit1: {}}
 		if !maps.Equal(gotSet, wantSet) {
 			t.Fatalf("walk output mismatch: got %v, want %v", slices.Collect(maps.Keys(gotSet)), slices.Collect(maps.Keys(wantSet)))
@@ -177,10 +197,14 @@ func TestWalkExcludesHavesCompletely(t *testing.T) {
 
 		r := reachability.New(store)
 		walk := r.Walk(reachability.DomainCommits, map[objectid.ObjectID]struct{}{commit: {}}, map[objectid.ObjectID]struct{}{commit: {}})
+
 		got := collectSeq(walk.Seq())
-		if err := walk.Err(); err != nil {
+
+		err := walk.Err()
+		if err != nil {
 			t.Fatalf("walk.Err(): %v", err)
 		}
+
 		if len(got) != 0 {
 			t.Fatalf("expected empty output, got %v", got)
 		}
@@ -203,14 +227,17 @@ func TestWalkDomainCommitsRejectsNonCommitRootAfterPeel(t *testing.T) {
 		r := reachability.New(store)
 		walk := r.Walk(reachability.DomainCommits, nil, map[objectid.ObjectID]struct{}{tag: {}})
 		_ = collectSeq(walk.Seq())
+
 		err := walk.Err()
 		if err == nil {
 			t.Fatal("expected error")
 		}
+
 		var typeErr *reachability.ErrObjectType
 		if !errors.As(err, &typeErr) {
 			t.Fatalf("expected ErrObjectType, got %T (%v)", err, err)
 		}
+
 		if typeErr.Got != objecttype.TypeTree || typeErr.Want != objecttype.TypeCommit {
 			t.Fatalf("unexpected type error: %+v", typeErr)
 		}
@@ -239,12 +266,16 @@ func TestWalkDomainCommitsHaveTagStopsTraversal(t *testing.T) {
 			map[objectid.ObjectID]struct{}{tag1: {}},
 			map[objectid.ObjectID]struct{}{tag2: {}},
 		)
+
 		got := collectSeq(walk.Seq())
-		if err := walk.Err(); err != nil {
+
+		err := walk.Err()
+		if err != nil {
 			t.Fatalf("walk.Err(): %v", err)
 		}
 
 		gotSet := toSet(got)
+
 		wantSet := map[objectid.ObjectID]struct{}{tag2: {}}
 		if !maps.Equal(gotSet, wantSet) {
 			t.Fatalf("walk output mismatch: got %v, want %v", slices.Collect(maps.Keys(gotSet)), slices.Collect(maps.Keys(wantSet)))
@@ -276,16 +307,21 @@ func TestWalkDomainObjectsRecursesTreesAndSkipsBlobContentReads(t *testing.T) {
 
 		r := reachability.New(store)
 		walk := r.Walk(reachability.DomainObjects, nil, map[objectid.ObjectID]struct{}{commit: {}})
+
 		got := collectSeq(walk.Seq())
-		if err := walk.Err(); err != nil {
+
+		err := walk.Err()
+		if err != nil {
 			t.Fatalf("walk.Err(): %v", err)
 		}
 
 		gotSet := toSet(got)
+
 		wantSet := map[objectid.ObjectID]struct{}{commit: {}, rootTree: {}, subtree: {}, blob1: {}, blob2: {}}
 		if !maps.Equal(gotSet, wantSet) {
 			t.Fatalf("walk output mismatch: got %v, want %v", slices.Collect(maps.Keys(gotSet)), slices.Collect(maps.Keys(wantSet)))
 		}
+
 		if store.readBytesByObjectID[blob1] != 0 || store.readBytesByObjectID[blob2] != 0 {
 			t.Fatalf("blob contents should not be read; counts: blob1=%d blob2=%d", store.readBytesByObjectID[blob1], store.readBytesByObjectID[blob2])
 		}
@@ -307,14 +343,17 @@ func TestCheckConnectedReturnsConcreteMissingObject(t *testing.T) {
 		commit := store.addObject(objecttype.TypeCommit, commitBody(tree, missingParent))
 
 		r := reachability.New(store)
+
 		err := r.CheckConnected(reachability.DomainCommits, nil, map[objectid.ObjectID]struct{}{commit: {}})
 		if err == nil {
 			t.Fatal("expected error")
 		}
+
 		var missing *reachability.ErrObjectMissing
 		if !errors.As(err, &missing) {
 			t.Fatalf("expected ErrObjectMissing, got %T (%v)", err, err)
 		}
+
 		if missing.OID != missingParent {
 			t.Fatalf("unexpected missing oid: got %s want %s", missing.OID, missingParent)
 		}
@@ -327,8 +366,11 @@ func TestWalkInvalidDomainReturnsPlainError(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		r := reachability.New(newMemStore(algo))
 		walk := r.Walk(reachability.Domain(99), nil, nil)
+
 		_ = collectSeq(walk.Seq())
-		if err := walk.Err(); err == nil {
+
+		err := walk.Err()
+		if err == nil {
 			t.Fatal("expected error")
 		}
 	})
@@ -357,10 +399,12 @@ func TestIsAncestor(t *testing.T) {
 		tag := store.addObject(objecttype.TypeTag, tagBody(c2, objecttype.TypeCommit))
 
 		r := reachability.New(store)
+
 		ok, err := r.IsAncestor(c1, tag)
 		if err != nil {
 			t.Fatalf("IsAncestor(c1, tag): %v", err)
 		}
+
 		if !ok {
 			t.Fatal("expected c1 to be ancestor of tag->c2")
 		}
@@ -369,6 +413,7 @@ func TestIsAncestor(t *testing.T) {
 		if err != nil {
 			t.Fatalf("IsAncestor(c3, c2): %v", err)
 		}
+
 		if ok {
 			t.Fatal("did not expect c3 to be ancestor of c2")
 		}
@@ -390,10 +435,12 @@ func TestIsAncestorRejectsNonCommitAfterPeel(t *testing.T) {
 		tagToTree := store.addObject(objecttype.TypeTag, tagBody(tree, objecttype.TypeTree))
 
 		r := reachability.New(store)
+
 		_, err := r.IsAncestor(commit, tagToTree)
 		if err == nil {
 			t.Fatal("expected error")
 		}
+
 		var typeErr *reachability.ErrObjectType
 		if !errors.As(err, &typeErr) {
 			t.Fatalf("expected ErrObjectType, got %T (%v)", err, err)
@@ -403,10 +450,12 @@ func TestIsAncestorRejectsNonCommitAfterPeel(t *testing.T) {
 
 func mustSerializeTree(tb testing.TB, tree *object.Tree) []byte {
 	tb.Helper()
+
 	body, err := tree.SerializeWithoutHeader()
 	if err != nil {
 		tb.Fatalf("SerializeWithoutHeader: %v", err)
 	}
+
 	return body
 }
 
@@ -415,8 +464,10 @@ func (store *memStore) addObject(ty objecttype.Type, body []byte) objectid.Objec
 	if !ok {
 		panic("failed to encode object header")
 	}
+
 	raw := append(append([]byte(nil), header...), body...)
 	id := store.algo.Sum(raw)
 	store.objects[id] = storeObject{ty: ty, content: append([]byte(nil), body...)}
+
 	return id
 }

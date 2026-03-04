@@ -15,6 +15,7 @@ func TestCommitSerialize(t *testing.T) {
 		_, _, commitID := testRepo.MakeCommit(t, "subject\n\nbody")
 
 		rawBody := testRepo.CatFile(t, "commit", commitID)
+
 		commit, err := object.ParseCommit(rawBody, algo)
 		if err != nil {
 			t.Fatalf("ParseCommit: %v", err)
@@ -24,6 +25,7 @@ func TestCommitSerialize(t *testing.T) {
 		if err != nil {
 			t.Fatalf("SerializeWithHeader: %v", err)
 		}
+
 		gotID := algo.Sum(rawObj)
 		if gotID != commitID {
 			t.Fatalf("commit id mismatch: got %s want %s", gotID, commitID)

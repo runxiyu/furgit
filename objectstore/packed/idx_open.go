@@ -43,16 +43,21 @@ func (store *Store) candidateForPack(packName string) (packCandidate, bool) {
 	store.candidatesMu.RLock()
 	candidate, ok := store.candidateByPack[packName]
 	store.candidatesMu.RUnlock()
+
 	return candidate, ok
 }
 
 // openIndex returns one opened and parsed index, caching it by pack basename.
 func (store *Store) openIndex(candidate packCandidate) (*idxFile, error) {
 	store.idxMu.RLock()
-	if index, ok := store.idxByPack[candidate.packName]; ok {
+
+	index, ok := store.idxByPack[candidate.packName]
+	if ok {
 		store.idxMu.RUnlock()
+
 		return index, nil
 	}
+
 	store.idxMu.RUnlock()
 
 	index, err := openIdxFile(store.root, candidate.idxName, candidate.packName, store.algo)
@@ -61,13 +66,19 @@ func (store *Store) openIndex(candidate packCandidate) (*idxFile, error) {
 	}
 
 	store.idxMu.Lock()
-	if existing, ok := store.idxByPack[candidate.packName]; ok {
+
+	existing, ok := store.idxByPack[candidate.packName]
+	if ok {
 		store.idxMu.Unlock()
+
 		_ = index.close()
+
 		return existing, nil
 	}
+
 	store.idxByPack[candidate.packName] = index
 	store.idxMu.Unlock()
+
 	return index, nil
 }
 
@@ -77,24 +88,32 @@ func openIdxFile(root *os.Root, idxName, packName string, algo objectid.Algorith
 	if err != nil {
 		return nil, err
 	}
+
 	info, err := file.Stat()
 	if err != nil {
 		_ = file.Close()
+
 		return nil, err
 	}
+
 	size := info.Size()
 	if size < 0 || size > int64(int(^uint(0)>>1)) {
 		_ = file.Close()
+
 		return nil, fmt.Errorf("objectstore/packed: idx %q has unsupported size", idxName)
 	}
+
 	fd, err := intconv.UintptrToInt(file.Fd())
 	if err != nil {
 		_ = file.Close()
+
 		return nil, err
 	}
+
 	data, err := syscall.Mmap(fd, 0, int(size), syscall.PROT_READ, syscall.MAP_PRIVATE)
 	if err != nil {
 		_ = file.Close()
+
 		return nil, err
 	}
 
@@ -105,27 +124,38 @@ func openIdxFile(root *os.Root, idxName, packName string, algo objectid.Algorith
 		file:     file,
 		data:     data,
 	}
-	if err := index.parse(); err != nil {
+
+	err = index.parse()
+	if err != nil {
 		_ = index.close()
+
 		return nil, err
 	}
+
 	return index, nil
 }
 
 // close unmaps and closes one idx handle.
 func (index *idxFile) close() error {
 	var closeErr error
+
 	if index.data != nil {
-		if err := syscall.Munmap(index.data); err != nil && closeErr == nil {
+		err := syscall.Munmap(index.data)
+		if err != nil && closeErr == nil {
 			closeErr = err
 		}
+
 		index.data = nil
 	}
+
 	if index.file != nil {
-		if err := index.file.Close(); err != nil && closeErr == nil {
+		err := index.file.Close()
+		if err != nil && closeErr == nil {
 			closeErr = err
 		}
+
 		index.file = nil
 	}
+
 	return closeErr
 }

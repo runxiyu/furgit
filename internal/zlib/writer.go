@@ -52,6 +52,7 @@ var writerPool = sync.Pool{
 // Writes may be buffered and not flushed until Close.
 func NewWriter(w io.Writer) *Writer {
 	z, _ := NewWriterLevelDict(w, DefaultCompression, nil)
+
 	return z
 }
 
@@ -74,7 +75,9 @@ func NewWriterLevelDict(w io.Writer, level int, dict []byte) (*Writer, error) {
 	if level < HuffmanOnly || level > BestCompression {
 		return nil, fmt.Errorf("zlib: invalid compression level: %d", level)
 	}
+
 	v := writerPool.Get()
+
 	z, ok := v.(*Writer)
 	if !ok {
 		panic("zlib: pool returned unexpected type")
@@ -86,6 +89,7 @@ func NewWriterLevelDict(w io.Writer, level int, dict []byte) (*Writer, error) {
 	if !reuseCompressor {
 		z.compressor = nil
 	}
+
 	if z.digest != nil {
 		z.digest.Reset()
 	}
@@ -100,6 +104,7 @@ func NewWriterLevelDict(w io.Writer, level int, dict []byte) (*Writer, error) {
 	if z.compressor != nil {
 		z.compressor.Reset(w)
 	}
+
 	return z, nil
 }
 
@@ -112,9 +117,11 @@ func (z *Writer) Reset(w io.Writer) {
 	if z.compressor != nil {
 		z.compressor.Reset(w)
 	}
+
 	if z.digest != nil {
 		z.digest.Reset()
 	}
+
 	z.err = nil
 	z.scratch = [4]byte{}
 	z.wroteHeader = false
@@ -127,21 +134,29 @@ func (z *Writer) Write(p []byte) (n int, err error) {
 	if !z.wroteHeader {
 		z.err = z.writeHeader()
 	}
+
 	if z.err != nil {
 		return 0, z.err
 	}
+
 	if len(p) == 0 {
 		return 0, nil
 	}
+
 	n, err = z.compressor.Write(p)
 	if err != nil {
 		z.err = err
+
 		return n, err
 	}
-	if _, err = z.digest.Write(p); err != nil {
+
+	_, err = z.digest.Write(p)
+	if err != nil {
 		z.err = err
+
 		return 0, z.err
 	}
+
 	return n, err
 }
 
@@ -150,10 +165,13 @@ func (z *Writer) Flush() error {
 	if !z.wroteHeader {
 		z.err = z.writeHeader()
 	}
+
 	if z.err != nil {
 		return z.err
 	}
+
 	z.err = z.compressor.Flush()
+
 	return z.err
 }
 
@@ -163,22 +181,27 @@ func (z *Writer) Close() error {
 	if !z.wroteHeader {
 		z.err = z.writeHeader()
 	}
+
 	if z.err != nil {
 		return z.err
 	}
+
 	z.err = z.compressor.Close()
 	if z.err != nil {
 		return z.err
 	}
+
 	checksum := z.digest.Sum32()
 	// ZLIB (RFC 1950) is big-endian, unlike GZIP (RFC 1952).
 	binary.BigEndian.PutUint32(z.scratch[:], checksum)
+
 	_, z.err = z.w.Write(z.scratch[0:4])
 	if z.err != nil {
 		return z.err
 	}
 
 	writerPool.Put(z)
+
 	return nil
 }
 
@@ -205,20 +228,28 @@ func (z *Writer) writeHeader() (err error) {
 	default:
 		panic("unreachable")
 	}
+
 	if z.dict != nil {
 		z.scratch[1] |= 1 << 5
 	}
+
 	z.scratch[1] += uint8(31 - binary.BigEndian.Uint16(z.scratch[:2])%31) //#nosec G115
-	if _, err = z.w.Write(z.scratch[0:2]); err != nil {
+
+	_, err = z.w.Write(z.scratch[0:2])
+	if err != nil {
 		return err
 	}
+
 	if z.dict != nil {
 		// The next four bytes are the Adler-32 checksum of the dictionary.
 		binary.BigEndian.PutUint32(z.scratch[:], adler32.Checksum(z.dict))
-		if _, err = z.w.Write(z.scratch[0:4]); err != nil {
+
+		_, err = z.w.Write(z.scratch[0:4])
+		if err != nil {
 			return err
 		}
 	}
+
 	if z.compressor == nil {
 		// Initialize deflater unless the Writer is being reused
 		// after a Reset call.
@@ -226,7 +257,9 @@ func (z *Writer) writeHeader() (err error) {
 		if err != nil {
 			return err
 		}
+
 		z.digest = adler32.New()
 	}
+
 	return nil
 }

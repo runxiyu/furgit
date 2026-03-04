@@ -15,6 +15,7 @@ func (repo *Repository) ReadStored(id objectid.ObjectID) (objectstored.StoredObj
 	if err != nil {
 		return nil, err
 	}
+
 	switch parsed := parsed.(type) {
 	case *object.Blob:
 		return objectstored.NewStoredBlob(id, parsed), nil
@@ -35,10 +36,12 @@ func (repo *Repository) ReadStoredBlob(id objectid.ObjectID) (*objectstored.Stor
 	if err != nil {
 		return nil, err
 	}
+
 	blob, ok := stored.(*objectstored.StoredBlob)
 	if !ok {
 		return nil, fmt.Errorf("repository: expected blob object %s, got %v", id, stored.Object().ObjectType())
 	}
+
 	return blob, nil
 }
 
@@ -48,10 +51,12 @@ func (repo *Repository) ReadStoredTree(id objectid.ObjectID) (*objectstored.Stor
 	if err != nil {
 		return nil, err
 	}
+
 	tree, ok := stored.(*objectstored.StoredTree)
 	if !ok {
 		return nil, fmt.Errorf("repository: expected tree object %s, got %v", id, stored.Object().ObjectType())
 	}
+
 	return tree, nil
 }
 
@@ -61,10 +66,12 @@ func (repo *Repository) ReadStoredCommit(id objectid.ObjectID) (*objectstored.St
 	if err != nil {
 		return nil, err
 	}
+
 	commit, ok := stored.(*objectstored.StoredCommit)
 	if !ok {
 		return nil, fmt.Errorf("repository: expected commit object %s, got %v", id, stored.Object().ObjectType())
 	}
+
 	return commit, nil
 }
 
@@ -74,10 +81,12 @@ func (repo *Repository) ReadStoredTag(id objectid.ObjectID) (*objectstored.Store
 	if err != nil {
 		return nil, err
 	}
+
 	tag, ok := stored.(*objectstored.StoredTag)
 	if !ok {
 		return nil, fmt.Errorf("repository: expected tag object %s, got %v", id, stored.Object().ObjectType())
 	}
+
 	return tag, nil
 }
 
@@ -87,13 +96,16 @@ func (repo *Repository) readParsedObject(id objectid.ObjectID) (object.Object, e
 	if err != nil {
 		return nil, err
 	}
+
 	parsed, err := object.ParseObjectWithoutHeader(ty, content, repo.algo)
 	if err != nil {
 		tyName, ok := objecttype.Name(ty)
 		if !ok {
 			tyName = fmt.Sprintf("type %d", ty)
 		}
+
 		return nil, fmt.Errorf("repository: parse object %s (%s): %w", id, tyName, err)
 	}
+
 	return parsed, nil
 }

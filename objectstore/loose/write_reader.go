@@ -27,12 +27,15 @@ func (store *Store) WriteReaderContent(ty objecttype.Type, size int64, src io.Re
 	if err != nil {
 		return objectid.ObjectID{}, err
 	}
+
 	writer.headerDone = true
 	writer.expectedContentLeft = size
 
-	if err := writer.writeRawChunk(header); err != nil {
+	err = writer.writeRawChunk(header)
+	if err != nil {
 		_ = writer.Close()
 		_ = store.root.Remove(writer.tmpRelPath)
+
 		return objectid.ObjectID{}, err
 	}
 
@@ -46,25 +49,33 @@ func (store *Store) WriteReaderFull(src io.Reader) (objectid.ObjectID, error) {
 	if err != nil {
 		return objectid.ObjectID{}, err
 	}
+
 	return writeReaderIntoStreamWriter(writer, src)
 }
 
 // writeReaderIntoStreamWriter copies src into writer and publishes the object.
 func writeReaderIntoStreamWriter(writer *streamWriter, src io.Reader) (objectid.ObjectID, error) {
-	if _, err := io.Copy(writer, src); err != nil {
+	_, err := io.Copy(writer, src)
+	if err != nil {
 		_ = writer.Close()
 		_ = writer.store.root.Remove(writer.tmpRelPath)
+
 		return objectid.ObjectID{}, err
 	}
-	if err := writer.Close(); err != nil {
+
+	err = writer.Close()
+	if err != nil {
 		_ = writer.store.root.Remove(writer.tmpRelPath)
+
 		return objectid.ObjectID{}, err
 	}
 
 	id, err := writer.finalize()
 	if err != nil {
 		_ = writer.store.root.Remove(writer.tmpRelPath)
+
 		return objectid.ObjectID{}, err
 	}
+
 	return id, nil
 }

@@ -18,30 +18,39 @@ import (
 
 func openPackedStore(t *testing.T, repoPath string, algo objectid.Algorithm) *packed.Store {
 	t.Helper()
+
 	packPath := filepath.Join(repoPath, "objects", "pack")
+
 	root, err := os.OpenRoot(packPath)
 	if err != nil {
 		t.Fatalf("OpenRoot(%q): %v", packPath, err)
 	}
+
 	t.Cleanup(func() { _ = root.Close() })
 
 	store, err := packed.New(root, algo)
 	if err != nil {
 		t.Fatalf("packed.New: %v", err)
 	}
+
 	return store
 }
 
 func mustReadAllAndClose(t *testing.T, reader io.ReadCloser) []byte {
 	t.Helper()
+
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		_ = reader.Close()
+
 		t.Fatalf("ReadAll: %v", err)
 	}
-	if err := reader.Close(); err != nil {
+
+	err = reader.Close()
+	if err != nil {
 		t.Fatalf("Close: %v", err)
 	}
+
 	return data
 }
 
@@ -49,11 +58,14 @@ func expectedRawObject(t *testing.T, testRepo *testgit.TestRepo, id objectid.Obj
 	t.Helper()
 
 	typeName := testRepo.Run(t, "cat-file", "-t", id.String())
+
 	ty, ok := objecttype.ParseName(typeName)
 	if !ok {
 		t.Fatalf("ParseName(%q) failed", typeName)
 	}
+
 	body := testRepo.CatFile(t, typeName, id)
+
 	header, ok := objectheader.Encode(ty, int64(len(body)))
 	if !ok {
 		t.Fatalf("objectheader.Encode failed")
@@ -62,6 +74,7 @@ func expectedRawObject(t *testing.T, testRepo *testgit.TestRepo, id objectid.Obj
 	raw := make([]byte, len(header)+len(body))
 	copy(raw, header)
 	copy(raw[len(header):], body)
+
 	return ty, body, raw
 }
 
@@ -74,6 +87,7 @@ func createPackedFixtureRepo(t *testing.T, algo objectid.Algorithm) (*testgit.Te
 	tagID := testRepo.TagAnnotated(t, "v1.0.0", commitID, "packed-store-tag")
 
 	parent := commitID
+
 	for i := range 24 {
 		content := "common-prefix\n" + strings.Repeat("line-"+strconv.Itoa(i%3)+"\n", 256) + fmt.Sprintf("tail-%d\n", i)
 		nextBlob, nextTree := testRepo.MakeSingleFileTree(t, fmt.Sprintf("file-%02d.txt", i), []byte(content))
@@ -86,6 +100,7 @@ func createPackedFixtureRepo(t *testing.T, algo objectid.Algorithm) (*testgit.Te
 	}
 
 	testRepo.Repack(t, "-a", "-d", "-f", "--window=64", "--depth=64")
+
 	return testRepo, []objectid.ObjectID{
 		blobID,
 		treeID,

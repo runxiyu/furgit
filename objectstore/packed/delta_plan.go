@@ -38,6 +38,7 @@ func (store *Store) deltaBuildChain(start location) (deltaChain, error) {
 		if _, ok := visited[current]; ok {
 			return deltaChain{}, fmt.Errorf("objectstore/packed: delta cycle while resolving object")
 		}
+
 		visited[current] = struct{}{}
 
 		_, meta, err := store.entryMetaAt(current)
@@ -48,6 +49,7 @@ func (store *Store) deltaBuildChain(start location) (deltaChain, error) {
 		if packfmt.IsBaseObjectType(meta.ty) {
 			chain.baseLoc = current
 			chain.baseType = meta.ty
+
 			return chain, nil
 		}
 
@@ -57,10 +59,12 @@ func (store *Store) deltaBuildChain(start location) (deltaChain, error) {
 				loc:        current,
 				dataOffset: meta.dataOffset,
 			})
+
 			next, err := store.lookup(meta.baseRefID)
 			if err != nil {
 				return deltaChain{}, err
 			}
+
 			current = next
 		case objecttype.TypeOfsDelta:
 			chain.deltas = append(chain.deltas, deltaNode{
@@ -88,12 +92,15 @@ func deltaDeclaredSizeAt(pack *packFile, dataOffset int) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	defer func() { _ = reader.Close() }()
 
 	br := bufio.NewReaderSize(reader, 32)
+
 	_, size, err := deltaapply.ReadHeaderSizes(br)
 	if err != nil {
 		return 0, err
 	}
+
 	return int64(size), nil
 }

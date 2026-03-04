@@ -11,5 +11,6 @@ func (store *Store) ReadHeader(id objectid.ObjectID) (objecttype.Type, int64, er
 	if err != nil {
 		return objecttype.TypeInvalid, 0, err
 	}
+
 	return store.resolveHeaderAt(loc)
 }

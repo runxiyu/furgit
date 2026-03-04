@@ -14,17 +14,20 @@ func (store *Store) ReadHeader(id objectid.ObjectID) (objecttype.Type, int64, er
 	if err != nil {
 		return objecttype.TypeInvalid, 0, err
 	}
+
 	defer func() { _ = file.Close() }()
 
 	zr, err := zlib.NewReader(file)
 	if err != nil {
 		return objecttype.TypeInvalid, 0, err
 	}
+
 	defer func() { _ = zr.Close() }()
 
 	_, ty, size, err := readHeader(bufio.NewReader(zr))
 	if err != nil {
 		return objecttype.TypeInvalid, 0, err
 	}
+
 	return ty, size, nil
 }

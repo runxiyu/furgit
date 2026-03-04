@@ -13,6 +13,7 @@ func alignUp(pos, blockSize int) int {
 	if rem == 0 {
 		return pos
 	}
+
 	return pos + (blockSize - rem)
 }
 
@@ -21,16 +22,20 @@ func readVarint(buf []byte, off, end int) (uint64, int, error) {
 	if off >= end {
 		return 0, 0, fmt.Errorf("unexpected EOF")
 	}
+
 	b := buf[off]
 	val := uint64(b & 0x7f)
+
 	off++
 	for b&0x80 != 0 {
 		if off >= end {
 			return 0, 0, fmt.Errorf("unexpected EOF")
 		}
+
 		b = buf[off]
 		off++
 		val = ((val + 1) << 7) | uint64(b&0x7f)
 	}
+
 	return val, off, nil
 }

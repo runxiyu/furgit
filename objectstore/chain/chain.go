@@ -25,13 +25,17 @@ type Chain struct {
 // New creates a Chain from backends.
 func New(backends ...objectstore.Store) *Chain {
 	nodeByStore := make(map[objectstore.Store]*backendNode, len(backends))
-	var head *backendNode
-	var tail *backendNode
+
+	var (
+		head *backendNode
+		tail *backendNode
+	)
 
 	for _, backend := range backends {
 		if backend == nil {
 			continue
 		}
+
 		node := &backendNode{
 			backend: backend,
 			prev:    tail,
@@ -39,9 +43,11 @@ func New(backends ...objectstore.Store) *Chain {
 		if tail != nil {
 			tail.next = node
 		}
+
 		if head == nil {
 			head = node
 		}
+
 		tail = node
 		nodeByStore[backend] = node
 	}
@@ -59,13 +65,17 @@ func (chain *Chain) ReadBytesFull(id objectid.ObjectID) ([]byte, error) {
 		full, err := backend.ReadBytesFull(id)
 		if err == nil {
 			chain.touchBackend(backend)
+
 			return full, nil
 		}
+
 		if errors.Is(err, objectstore.ErrObjectNotFound) {
 			continue
 		}
+
 		return nil, fmt.Errorf("objectstore: backend %d read bytes full: %w", i, err)
 	}
+
 	return nil, objectstore.ErrObjectNotFound
 }
 
@@ -76,13 +86,17 @@ func (chain *Chain) ReadBytesContent(id objectid.ObjectID) (objecttype.Type, []b
 		ty, content, err := backend.ReadBytesContent(id)
 		if err == nil {
 			chain.touchBackend(backend)
+
 			return ty, content, nil
 		}
+
 		if errors.Is(err, objectstore.ErrObjectNotFound) {
 			continue
 		}
+
 		return objecttype.TypeInvalid, nil, fmt.Errorf("objectstore: backend %d read bytes content: %w", i, err)
 	}
+
 	return objecttype.TypeInvalid, nil, objectstore.ErrObjectNotFound
 }
 
@@ -93,13 +107,17 @@ func (chain *Chain) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) 
 		reader, err := backend.ReadReaderFull(id)
 		if err == nil {
 			chain.touchBackend(backend)
+
 			return reader, nil
 		}
+
 		if errors.Is(err, objectstore.ErrObjectNotFound) {
 			continue
 		}
+
 		return nil, fmt.Errorf("objectstore: backend %d read reader full: %w", i, err)
 	}
+
 	return nil, objectstore.ErrObjectNotFound
 }
 
@@ -110,13 +128,17 @@ func (chain *Chain) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, in
 		ty, size, reader, err := backend.ReadReaderContent(id)
 		if err == nil {
 			chain.touchBackend(backend)
+
 			return ty, size, reader, nil
 		}
+
 		if errors.Is(err, objectstore.ErrObjectNotFound) {
 			continue
 		}
+
 		return objecttype.TypeInvalid, 0, nil, fmt.Errorf("objectstore: backend %d read reader content: %w", i, err)
 	}
+
 	return objecttype.TypeInvalid, 0, nil, objectstore.ErrObjectNotFound
 }
 
@@ -126,13 +148,17 @@ func (chain *Chain) ReadSize(id objectid.ObjectID) (int64, error) {
 		size, err := backend.ReadSize(id)
 		if err == nil {
 			chain.touchBackend(backend)
+
 			return size, nil
 		}
+
 		if errors.Is(err, objectstore.ErrObjectNotFound) {
 			continue
 		}
+
 		return 0, fmt.Errorf("objectstore: backend %d read size: %w", i, err)
 	}
+
 	return 0, objectstore.ErrObjectNotFound
 }
 
@@ -142,31 +168,40 @@ func (chain *Chain) ReadHeader(id objectid.ObjectID) (objecttype.Type, int64, er
 		ty, size, err := backend.ReadHeader(id)
 		if err == nil {
 			chain.touchBackend(backend)
+
 			return ty, size, nil
 		}
+
 		if errors.Is(err, objectstore.ErrObjectNotFound) {
 			continue
 		}
+
 		return objecttype.TypeInvalid, 0, fmt.Errorf("objectstore: backend %d read header: %w", i, err)
 	}
+
 	return objecttype.TypeInvalid, 0, objectstore.ErrObjectNotFound
 }
 
 // Close closes all backends and joins close errors.
 func (chain *Chain) Close() error {
 	chain.mu.RLock()
+
 	backends := make([]objectstore.Store, 0, len(chain.backendNodeByStore))
 	for node := chain.backendHead; node != nil; node = node.next {
 		backends = append(backends, node.backend)
 	}
+
 	chain.mu.RUnlock()
 
 	var errs []error
+
 	for _, backend := range backends {
-		if err := backend.Close(); err != nil {
+		err := backend.Close()
+		if err != nil {
 			errs = append(errs, err)
 		}
 	}
+
 	return errors.Join(errs...)
 }
 
@@ -179,19 +214,23 @@ type backendNode struct {
 func (chain *Chain) firstBackend() objectstore.Store {
 	chain.mu.RLock()
 	defer chain.mu.RUnlock()
+
 	if chain.backendHead == nil {
 		return nil
 	}
+
 	return chain.backendHead.backend
 }
 
 func (chain *Chain) nextBackend(current objectstore.Store) objectstore.Store {
 	chain.mu.RLock()
 	defer chain.mu.RUnlock()
+
 	node := chain.backendNodeByStore[current]
 	if node == nil || node.next == nil {
 		return nil
 	}
+
 	return node.next.backend
 }
 
@@ -199,6 +238,7 @@ func (chain *Chain) touchBackend(backend objectstore.Store) {
 	if backend == nil {
 		return
 	}
+
 	if !chain.mu.TryLock() {
 		return
 	}
@@ -208,21 +248,26 @@ func (chain *Chain) touchBackend(backend objectstore.Store) {
 	if node == nil || node == chain.backendHead {
 		return
 	}
+
 	if node.prev != nil {
 		node.prev.next = node.next
 	}
+
 	if node.next != nil {
 		node.next.prev = node.prev
 	}
+
 	if chain.backendTail == node {
 		chain.backendTail = node.prev
 	}
 
 	node.prev = nil
+
 	node.next = chain.backendHead
 	if chain.backendHead != nil {
 		chain.backendHead.prev = node
 	}
+
 	chain.backendHead = node
 	if chain.backendTail == nil {
 		chain.backendTail = node

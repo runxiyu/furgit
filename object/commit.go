@@ -19,5 +19,6 @@ type Commit struct {
 // ObjectType returns TypeCommit.
 func (commit *Commit) ObjectType() objecttype.Type {
 	_ = commit
+
 	return objecttype.TypeCommit
 }

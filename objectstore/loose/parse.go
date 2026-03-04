@@ -17,7 +17,9 @@ func decodeAll(file *os.File) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	defer func() { _ = zr.Close() }()
+
 	return io.ReadAll(zr)
 }
 
@@ -27,10 +29,12 @@ func parseRaw(raw []byte) (objecttype.Type, []byte, error) {
 	if !ok {
 		return objecttype.TypeInvalid, nil, errors.New("objectstore/loose: malformed object header")
 	}
+
 	content := raw[headerLen:]
 	if int64(len(content)) != size {
 		return objecttype.TypeInvalid, nil, errors.New("objectstore/loose: object header size/content mismatch")
 	}
+
 	return ty, content, nil
 }
 
@@ -41,9 +45,11 @@ func readHeader(br *bufio.Reader) ([]byte, objecttype.Type, int64, error) {
 	if err != nil {
 		return nil, objecttype.TypeInvalid, 0, err
 	}
+
 	ty, size, _, ok := objectheader.Parse(header)
 	if !ok {
 		return nil, objecttype.TypeInvalid, 0, errors.New("objectstore/loose: malformed object header")
 	}
+
 	return header, ty, size, nil
 }

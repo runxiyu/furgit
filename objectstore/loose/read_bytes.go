@@ -12,16 +12,19 @@ func (store *Store) readBytesParsed(id objectid.ObjectID) ([]byte, objecttype.Ty
 	if err != nil {
 		return nil, objecttype.TypeInvalid, nil, err
 	}
+
 	defer func() { _ = file.Close() }()
 
 	raw, err := decodeAll(file)
 	if err != nil {
 		return nil, objecttype.TypeInvalid, nil, err
 	}
+
 	ty, content, err := parseRaw(raw)
 	if err != nil {
 		return nil, objecttype.TypeInvalid, nil, err
 	}
+
 	return raw, ty, content, nil
 }
 
@@ -31,6 +34,7 @@ func (store *Store) ReadBytesFull(id objectid.ObjectID) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return raw, nil
 }
 
@@ -40,5 +44,6 @@ func (store *Store) ReadBytesContent(id objectid.ObjectID) (objecttype.Type, []b
 	if err != nil {
 		return objecttype.TypeInvalid, nil, err
 	}
+
 	return ty, content, nil
 }

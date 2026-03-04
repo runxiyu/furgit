@@ -43,9 +43,11 @@ var algorithmTable = [...]algorithmDetails{
 		size: sha1.Size,
 		sum: func(data []byte) ObjectID {
 			sum := sha1.Sum(data) //#nosec G401
+
 			var id ObjectID
 			copy(id.data[:], sum[:])
 			id.algo = AlgorithmSHA1
+
 			return id
 		},
 		new: sha1.New,
@@ -55,9 +57,11 @@ var algorithmTable = [...]algorithmDetails{
 		size: sha256.Size,
 		sum: func(data []byte) ObjectID {
 			sum := sha256.Sum256(data)
+
 			var id ObjectID
 			copy(id.data[:], sum[:])
 			id.algo = AlgorithmSHA256
+
 			return id
 		},
 		new: sha256.New,
@@ -69,12 +73,13 @@ var (
 	supportedAlgorithms []Algorithm
 )
 
-func init() {
+func init() { //nolint:gochecknoinits
 	for algo := Algorithm(0); int(algo) < len(algorithmTable); algo++ {
 		info := algorithmTable[algo]
 		if info.name == "" {
 			continue
 		}
+
 		algorithmByName[info.name] = algo
 		supportedAlgorithms = append(supportedAlgorithms, algo)
 	}
@@ -89,6 +94,7 @@ func SupportedAlgorithms() []Algorithm {
 // ParseAlgorithm parses a canonical algorithm name (e.g. "sha1", "sha256").
 func ParseAlgorithm(s string) (Algorithm, bool) {
 	algo, ok := algorithmByName[s]
+
 	return algo, ok
 }
 
@@ -103,6 +109,7 @@ func (algo Algorithm) String() string {
 	if inf.name == "" {
 		return "unknown"
 	}
+
 	return inf.name
 }
 
@@ -122,6 +129,7 @@ func (algo Algorithm) New() (hash.Hash, error) {
 	if newFn == nil {
 		return nil, ErrInvalidAlgorithm
 	}
+
 	return newFn(), nil
 }
 
@@ -150,12 +158,14 @@ func (id ObjectID) Size() int {
 // String returns the canonical hex representation.
 func (id ObjectID) String() string {
 	size := id.Size()
+
 	return hex.EncodeToString(id.data[:size])
 }
 
 // Bytes returns a copy of the object ID bytes.
 func (id ObjectID) Bytes() []byte {
 	size := id.Size()
+
 	return append([]byte(nil), id.data[:size]...)
 }
 
@@ -167,6 +177,7 @@ func (id ObjectID) Bytes() []byte {
 // Use Bytes when an independent copy is required.
 func (id *ObjectID) RawBytes() []byte {
 	size := id.Size()
+
 	return id.data[:size:size]
 }
 
@@ -176,18 +187,23 @@ func ParseHex(algo Algorithm, s string) (ObjectID, error) {
 	if algo.Size() == 0 {
 		return id, ErrInvalidAlgorithm
 	}
+
 	if len(s)%2 != 0 {
 		return id, fmt.Errorf("%w: odd hex length %d", ErrInvalidObjectID, len(s))
 	}
+
 	if len(s) != algo.HexLen() {
 		return id, fmt.Errorf("%w: got %d chars, expected %d", ErrInvalidObjectID, len(s), algo.HexLen())
 	}
+
 	decoded, err := hex.DecodeString(s)
 	if err != nil {
 		return id, fmt.Errorf("%w: decode: %w", ErrInvalidObjectID, err)
 	}
+
 	copy(id.data[:], decoded)
 	id.algo = algo
+
 	return id, nil
 }
 
@@ -197,10 +213,13 @@ func FromBytes(algo Algorithm, b []byte) (ObjectID, error) {
 	if algo.Size() == 0 {
 		return id, ErrInvalidAlgorithm
 	}
+
 	if len(b) != algo.Size() {
 		return id, fmt.Errorf("%w: got %d bytes, expected %d", ErrInvalidObjectID, len(b), algo.Size())
 	}
+
 	copy(id.data[:], b)
 	id.algo = algo
+
 	return id, nil
 }

@@ -26,18 +26,24 @@ func (walk *Walk) Seq() iter.Seq[objectid.ObjectID] {
 	if walk.seqUsed {
 		return func(yield func(objectid.ObjectID) bool) {
 			_ = yield
+
 			if walk.err == nil {
 				walk.err = errors.New("reachability: walk sequence already consumed")
 			}
 		}
 	}
+
 	walk.seqUsed = true
+
 	return func(yield func(objectid.ObjectID) bool) {
 		if walk.err != nil {
 			return
 		}
+
 		stack := walk.initialStack()
+
 		var err error
+
 		visited := make(map[objectid.ObjectID]struct{}, len(stack))
 		for len(stack) > 0 {
 			item := stack[len(stack)-1]
@@ -46,20 +52,26 @@ func (walk *Walk) Seq() iter.Seq[objectid.ObjectID] {
 			if containsOID(walk.haves, item.id) {
 				continue
 			}
+
 			if _, ok := visited[item.id]; ok {
 				continue
 			}
+
 			visited[item.id] = struct{}{}
 
 			var next []walkItem
+
 			next, err = walk.expand(item)
 			if err != nil {
 				walk.err = err
+
 				return
 			}
+
 			if !yield(item.id) {
 				return
 			}
+
 			stack = append(stack, next...)
 		}
 	}
@@ -79,10 +91,12 @@ func (walk *Walk) initialStack() []walkItem {
 	if len(walk.wants) == 0 {
 		return nil
 	}
+
 	stack := make([]walkItem, 0, len(walk.wants))
 	for want := range walk.wants {
 		stack = append(stack, walkItem{id: want, want: objecttype.TypeInvalid})
 	}
+
 	return stack
 }
 
@@ -90,6 +104,7 @@ func (walk *Walk) expand(item walkItem) ([]walkItem, error) {
 	if walk.domain == DomainCommits {
 		return walk.expandCommits(item)
 	}
+
 	return walk.expandObjects(item)
 }
 
@@ -98,35 +113,42 @@ func (walk *Walk) expandCommits(item walkItem) ([]walkItem, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	switch ty {
 	case objecttype.TypeCommit:
 		content, err := walk.readBytesContent(item.id)
 		if err != nil {
 			return nil, err
 		}
+
 		commit, err := object.ParseCommit(content, item.id.Algorithm())
 		if err != nil {
 			return nil, err
 		}
+
 		next := make([]walkItem, 0, len(commit.Parents))
 		for _, parent := range commit.Parents {
 			next = append(next, walkItem{id: parent, want: objecttype.TypeInvalid})
 		}
+
 		return next, nil
 	case objecttype.TypeTag:
 		content, err := walk.readBytesContent(item.id)
 		if err != nil {
 			return nil, err
 		}
+
 		tag, err := object.ParseTag(content, item.id.Algorithm())
 		if err != nil {
 			return nil, err
 		}
+
 		return []walkItem{{id: tag.Target, want: objecttype.TypeInvalid}}, nil
 	case objecttype.TypeTree, objecttype.TypeBlob, objecttype.TypeInvalid,
 		objecttype.TypeFuture, objecttype.TypeOfsDelta, objecttype.TypeRefDelta:
 		return nil, &ErrObjectType{OID: item.id, Got: ty, Want: objecttype.TypeCommit}
 	}
+
 	return nil, fmt.Errorf("reachability: unreachable object type %d", ty)
 }
 
@@ -135,6 +157,7 @@ func (walk *Walk) expandObjects(item walkItem) ([]walkItem, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if item.want != objecttype.TypeInvalid && ty != item.want {
 		return nil, &ErrObjectType{OID: item.id, Got: ty, Want: item.want}
 	}
@@ -147,25 +170,31 @@ func (walk *Walk) expandObjects(item walkItem) ([]walkItem, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		commit, err := object.ParseCommit(content, item.id.Algorithm())
 		if err != nil {
 			return nil, err
 		}
+
 		next := make([]walkItem, 0, len(commit.Parents)+1)
+
 		next = append(next, walkItem{id: commit.Tree, want: objecttype.TypeTree})
 		for _, parent := range commit.Parents {
 			next = append(next, walkItem{id: parent, want: objecttype.TypeCommit})
 		}
+
 		return next, nil
 	case objecttype.TypeTree:
 		content, err := walk.readBytesContent(item.id)
 		if err != nil {
 			return nil, err
 		}
+
 		tree, err := object.ParseTree(content, item.id.Algorithm())
 		if err != nil {
 			return nil, err
 		}
+
 		next := make([]walkItem, 0, len(tree.Entries))
 		for _, entry := range tree.Entries {
 			switch entry.Mode {
@@ -177,19 +206,23 @@ func (walk *Walk) expandObjects(item walkItem) ([]walkItem, error) {
 				next = append(next, walkItem{id: entry.ID, want: objecttype.TypeBlob})
 			}
 		}
+
 		return next, nil
 	case objecttype.TypeTag:
 		content, err := walk.readBytesContent(item.id)
 		if err != nil {
 			return nil, err
 		}
+
 		tag, err := object.ParseTag(content, item.id.Algorithm())
 		if err != nil {
 			return nil, err
 		}
+
 		return []walkItem{{id: tag.Target, want: tag.TargetType}}, nil
 	case objecttype.TypeInvalid, objecttype.TypeFuture, objecttype.TypeOfsDelta, objecttype.TypeRefDelta:
 		return nil, &ErrObjectType{OID: item.id, Got: ty, Want: item.want}
 	}
+
 	return nil, fmt.Errorf("reachability: unreachable object type %d", ty)
 }

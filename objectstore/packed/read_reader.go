@@ -41,11 +41,13 @@ func (store *Store) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, in
 	if err != nil {
 		return objecttype.TypeInvalid, 0, nil, err
 	}
+
 	if packfmt.IsBaseObjectType(meta.ty) {
 		zr, err := zlibReaderAt(pack, meta.dataOffset)
 		if err != nil {
 			return objecttype.TypeInvalid, 0, nil, err
 		}
+
 		return meta.ty, meta.size, &readCloser{
 			reader: iolimit.ExpectLengthReader(zr, meta.size),
 			closer: zr,
@@ -56,6 +58,7 @@ func (store *Store) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, in
 	if err != nil {
 		return objecttype.TypeInvalid, 0, nil, err
 	}
+
 	return ty, int64(len(content)), io.NopCloser(bytes.NewReader(content)), nil
 }
 
@@ -72,15 +75,18 @@ func (store *Store) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) 
 	if err != nil {
 		return nil, err
 	}
+
 	if packfmt.IsBaseObjectType(meta.ty) {
 		header, ok := objectheader.Encode(meta.ty, meta.size)
 		if !ok {
 			return nil, fmt.Errorf("objectstore/packed: failed to encode object header for type %d", meta.ty)
 		}
+
 		zr, err := zlibReaderAt(pack, meta.dataOffset)
 		if err != nil {
 			return nil, err
 		}
+
 		return &readCloser{
 			reader: io.MultiReader(bytes.NewReader(header), iolimit.ExpectLengthReader(zr, meta.size)),
 			closer: zr,
@@ -91,5 +97,6 @@ func (store *Store) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) 
 	if err != nil {
 		return nil, err
 	}
+
 	return io.NopCloser(bytes.NewReader(raw)), nil
 }

@@ -17,12 +17,14 @@ func (store *Store) resolveHeaderAt(start location) (objecttype.Type, int64, err
 		if _, ok := visited[current]; ok {
 			return objecttype.TypeInvalid, 0, fmt.Errorf("objectstore/packed: delta cycle while resolving object header")
 		}
+
 		visited[current] = struct{}{}
 
 		pack, meta, err := store.entryMetaAt(current)
 		if err != nil {
 			return objecttype.TypeInvalid, 0, err
 		}
+
 		if declaredSize < 0 {
 			if packfmt.IsBaseObjectType(meta.ty) {
 				declaredSize = meta.size
@@ -31,9 +33,11 @@ func (store *Store) resolveHeaderAt(start location) (objecttype.Type, int64, err
 				if err != nil {
 					return objecttype.TypeInvalid, 0, err
 				}
+
 				declaredSize = size
 			}
 		}
+
 		if packfmt.IsBaseObjectType(meta.ty) {
 			return meta.ty, declaredSize, nil
 		}
@@ -44,6 +48,7 @@ func (store *Store) resolveHeaderAt(start location) (objecttype.Type, int64, err
 			if err != nil {
 				return objecttype.TypeInvalid, 0, err
 			}
+
 			current = next
 		case objecttype.TypeOfsDelta:
 			current = location{

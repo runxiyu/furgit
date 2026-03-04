@@ -17,7 +17,8 @@ import (
 func (store *Store) List(pattern string) ([]ref.Ref, error) {
 	matchAll := pattern == ""
 	if !matchAll {
-		if _, err := path.Match(pattern, "HEAD"); err != nil {
+		_, err := path.Match(pattern, "HEAD")
+		if err != nil {
 			return nil, err
 		}
 	}
@@ -26,6 +27,7 @@ func (store *Store) List(pattern string) ([]ref.Ref, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	slices.Sort(names)
 
 	refs := make([]ref.Ref, 0, len(names))
@@ -35,19 +37,24 @@ func (store *Store) List(pattern string) ([]ref.Ref, error) {
 			if err != nil {
 				return nil, err
 			}
+
 			if !matched {
 				continue
 			}
 		}
+
 		resolved, err := store.resolveOne(name)
 		if err != nil {
 			if errors.Is(err, refstore.ErrReferenceNotFound) {
 				continue
 			}
+
 			return nil, err
 		}
+
 		refs = append(refs, resolved)
 	}
+
 	return refs, nil
 }
 
@@ -55,42 +62,53 @@ func (store *Store) List(pattern string) ([]ref.Ref, error) {
 func (store *Store) collectLooseRefNames() ([]string, error) {
 	names := make([]string, 0, 16)
 
-	if _, err := store.root.Stat("HEAD"); err == nil {
+	_, err := store.root.Stat("HEAD")
+	if err == nil {
 		names = append(names, "HEAD")
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return nil, err
 	}
 
 	var walk func(string) error
+
 	walk = func(dir string) error {
 		file, err := store.root.Open(dir)
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
 				return nil
 			}
+
 			return err
 		}
+
 		defer func() { _ = file.Close() }()
 
 		entries, err := file.ReadDir(-1)
 		if err != nil {
 			return err
 		}
+
 		for _, entry := range entries {
 			name := path.Join(dir, entry.Name())
 			if entry.IsDir() {
-				if err := walk(name); err != nil {
+				err := walk(name)
+				if err != nil {
 					return err
 				}
+
 				continue
 			}
+
 			names = append(names, name)
 		}
+
 		return nil
 	}
 
-	if err := walk("refs"); err != nil {
+	err = walk("refs")
+	if err != nil {
 		return nil, err
 	}
+
 	return names, nil
 }

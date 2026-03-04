@@ -15,15 +15,18 @@ import (
 
 func openConfig(t *testing.T, testRepo *testgit.TestRepo) *os.File {
 	t.Helper()
+
 	cfgFile, err := os.Open(filepath.Join(testRepo.Dir(), "config"))
 	if err != nil {
 		t.Fatalf("failed to open config: %v", err)
 	}
+
 	return cfgFile
 }
 
 func gitConfigGet(t *testing.T, testRepo *testgit.TestRepo, key string) string {
 	t.Helper()
+
 	return testRepo.Run(t, "config", "--get", key)
 }
 
@@ -31,11 +34,13 @@ func gitConfigGetE(testRepo *testgit.TestRepo, key string) (string, error) {
 	//nolint:noctx
 	cmd := exec.Command("git", "config", "--get", key) //#nosec G204
 	cmd.Dir = testRepo.Dir()
+
 	cmd.Env = append(os.Environ(),
 		"GIT_CONFIG_GLOBAL=/dev/null",
 		"GIT_CONFIG_SYSTEM=/dev/null",
 	)
 	out, err := cmd.CombinedOutput()
+
 	return strings.TrimSpace(string(out)), err
 }
 
@@ -44,15 +49,18 @@ func lookupValue(cfg *config.Config, section, subsection, key string) string {
 	if result.Kind == config.ValueMissing {
 		return ""
 	}
+
 	return result.Value
 }
 
 func lookupAllValues(cfg *config.Config, section, subsection, key string) []string {
 	results := cfg.LookupAll(section, subsection, key)
+
 	values := make([]string, 0, len(results))
 	for _, result := range results {
 		values = append(values, result.Value)
 	}
+
 	return values
 }
 
@@ -66,6 +74,7 @@ func TestConfigAgainstGit(t *testing.T) {
 		testRepo.Run(t, "config", "user.email", "jane@example.org")
 
 		cfgFile := openConfig(t, testRepo)
+
 		defer func() { _ = cfgFile.Close() }()
 
 		cfg, err := config.ParseConfig(cfgFile)
@@ -76,12 +85,15 @@ func TestConfigAgainstGit(t *testing.T) {
 		if got := lookupValue(cfg, "core", "", "bare"); got != "true" {
 			t.Errorf("core.bare: got %q, want %q", got, "true")
 		}
+
 		if got := lookupValue(cfg, "core", "", "filemode"); got != "false" {
 			t.Errorf("core.filemode: got %q, want %q", got, "false")
 		}
+
 		if got := lookupValue(cfg, "user", "", "name"); got != "Jane Doe" {
 			t.Errorf("user.name: got %q, want %q", got, "Jane Doe")
 		}
+
 		if got := lookupValue(cfg, "user", "", "email"); got != "jane@example.org" {
 			t.Errorf("user.email: got %q, want %q", got, "jane@example.org")
 		}
@@ -96,6 +108,7 @@ func TestConfigSubsectionAgainstGit(t *testing.T) {
 		testRepo.Run(t, "config", "remote.origin.fetch", "+refs/heads/*:refs/remotes/origin/*")
 
 		cfgFile := openConfig(t, testRepo)
+
 		defer func() { _ = cfgFile.Close() }()
 
 		cfg, err := config.ParseConfig(cfgFile)
@@ -106,6 +119,7 @@ func TestConfigSubsectionAgainstGit(t *testing.T) {
 		if got := lookupValue(cfg, "remote", "origin", "url"); got != "https://example.org/repo.git" {
 			t.Errorf("remote.origin.url: got %q, want %q", got, "https://example.org/repo.git")
 		}
+
 		if got := lookupValue(cfg, "remote", "origin", "fetch"); got != "+refs/heads/*:refs/remotes/origin/*" {
 			t.Errorf("remote.origin.fetch: got %q, want %q", got, "+refs/heads/*:refs/remotes/origin/*")
 		}
@@ -121,6 +135,7 @@ func TestConfigMultiValueAgainstGit(t *testing.T) {
 		testRepo.Run(t, "config", "--add", "remote.origin.fetch", "+refs/tags/*:refs/tags/*")
 
 		cfgFile := openConfig(t, testRepo)
+
 		defer func() { _ = cfgFile.Close() }()
 
 		cfg, err := config.ParseConfig(cfgFile)
@@ -157,6 +172,7 @@ func TestConfigCaseInsensitiveAgainstGit(t *testing.T) {
 		gitVerifyFilemode := gitConfigGet(t, testRepo, "core.filemode")
 
 		cfgFile := openConfig(t, testRepo)
+
 		defer func() { _ = cfgFile.Close() }()
 
 		cfg, err := config.ParseConfig(cfgFile)
@@ -167,9 +183,11 @@ func TestConfigCaseInsensitiveAgainstGit(t *testing.T) {
 		if got := lookupValue(cfg, "core", "", "bare"); got != gitVerifyBare {
 			t.Errorf("core.bare: got %q, want %q (from git)", got, gitVerifyBare)
 		}
+
 		if got := lookupValue(cfg, "CORE", "", "BARE"); got != gitVerifyBare {
 			t.Errorf("CORE.BARE: got %q, want %q (from git)", got, gitVerifyBare)
 		}
+
 		if got := lookupValue(cfg, "core", "", "filemode"); got != gitVerifyFilemode {
 			t.Errorf("core.filemode: got %q, want %q (from git)", got, gitVerifyFilemode)
 		}
@@ -186,6 +204,7 @@ func TestConfigBooleanAgainstGit(t *testing.T) {
 		testRepo.Run(t, "config", "test.flag4", "no")
 
 		cfgFile := openConfig(t, testRepo)
+
 		defer func() { _ = cfgFile.Close() }()
 
 		cfg, err := config.ParseConfig(cfgFile)
@@ -213,7 +232,9 @@ func TestConfigBooleanAgainstGit(t *testing.T) {
 
 func TestConfigLookupKindsAndBool(t *testing.T) {
 	t.Parallel()
+
 	cfgText := "[test]\nnovalue\nempty =\ntruthy = yes\nnumeric = -2\nleadspace = \" 1\"\nleadtab = \"\t-2\"\nksuffix = 1k\nhex = 0x10\nmaxi32 = 2147483647\ntoobig = 2147483648\ntoosmall = -2147483649\nbadnum = \" 2x\"\n"
+
 	cfg, err := config.ParseConfig(strings.NewReader(cfgText))
 	if err != nil {
 		t.Fatalf("ParseConfig failed: %v", err)
@@ -223,6 +244,7 @@ func TestConfigLookupKindsAndBool(t *testing.T) {
 	if novalue.Kind != config.ValueValueless {
 		t.Fatalf("novalue kind: got %v, want %v", novalue.Kind, config.ValueValueless)
 	}
+
 	novalueBool, err := novalue.Bool()
 	if err != nil || !novalueBool {
 		t.Fatalf("novalue bool: got (%v, %v), want (true, nil)", novalueBool, err)
@@ -232,6 +254,7 @@ func TestConfigLookupKindsAndBool(t *testing.T) {
 	if empty.Kind != config.ValueString || empty.Value != "" {
 		t.Fatalf("empty: got (%v, %q), want (%v, %q)", empty.Kind, empty.Value, config.ValueString, "")
 	}
+
 	emptyBool, err := empty.Bool()
 	if err != nil || emptyBool {
 		t.Fatalf("empty bool: got (%v, %v), want (false, nil)", emptyBool, err)
@@ -241,39 +264,52 @@ func TestConfigLookupKindsAndBool(t *testing.T) {
 	if err != nil || !truthyBool {
 		t.Fatalf("truthy bool: got (%v, %v), want (true, nil)", truthyBool, err)
 	}
+
 	numericBool, err := cfg.Lookup("test", "", "numeric").Bool()
 	if err != nil || !numericBool {
 		t.Fatalf("numeric bool: got (%v, %v), want (true, nil)", numericBool, err)
 	}
+
 	leadspaceBool, err := cfg.Lookup("test", "", "leadspace").Bool()
 	if err != nil || !leadspaceBool {
 		t.Fatalf("leadspace bool: got (%v, %v), want (true, nil)", leadspaceBool, err)
 	}
+
 	leadtabBool, err := cfg.Lookup("test", "", "leadtab").Bool()
 	if err != nil || !leadtabBool {
 		t.Fatalf("leadtab bool: got (%v, %v), want (true, nil)", leadtabBool, err)
 	}
+
 	ksuffixBool, err := cfg.Lookup("test", "", "ksuffix").Bool()
 	if err != nil || !ksuffixBool {
 		t.Fatalf("ksuffix bool: got (%v, %v), want (true, nil)", ksuffixBool, err)
 	}
+
 	maxi32Bool, err := cfg.Lookup("test", "", "maxi32").Bool()
 	if err != nil || !maxi32Bool {
 		t.Fatalf("maxi32 bool: got (%v, %v), want (true, nil)", maxi32Bool, err)
 	}
-	if _, err := cfg.Lookup("test", "", "toobig").Bool(); err == nil {
+
+	_, err = cfg.Lookup("test", "", "toobig").Bool()
+	if err == nil {
 		t.Fatal("toobig bool: expected error")
 	}
-	if _, err := cfg.Lookup("test", "", "toosmall").Bool(); err == nil {
+
+	_, err = cfg.Lookup("test", "", "toosmall").Bool()
+	if err == nil {
 		t.Fatal("toosmall bool: expected error")
 	}
-	if _, err := cfg.Lookup("test", "", "badnum").Bool(); err == nil {
+
+	_, err = cfg.Lookup("test", "", "badnum").Bool()
+	if err == nil {
 		t.Fatal("badnum bool: expected error")
 	}
 
-	if _, err := novalue.String(); err == nil {
+	_, err = novalue.String()
+	if err == nil {
 		t.Fatal("novalue string: expected error")
 	}
+
 	emptyString, err := empty.String()
 	if err != nil || emptyString != "" {
 		t.Fatalf("empty string: got (%q, %v), want (%q, nil)", emptyString, err, "")
@@ -283,15 +319,19 @@ func TestConfigLookupKindsAndBool(t *testing.T) {
 	if err != nil || numericInt != -2 {
 		t.Fatalf("numeric int: got (%v, %v), want (-2, nil)", numericInt, err)
 	}
+
 	ksuffixInt, err := cfg.Lookup("test", "", "ksuffix").Int()
 	if err != nil || ksuffixInt != 1024 {
 		t.Fatalf("ksuffix int: got (%v, %v), want (1024, nil)", ksuffixInt, err)
 	}
+
 	hexInt64, err := cfg.Lookup("test", "", "hex").Int64()
 	if err != nil || hexInt64 != 16 {
 		t.Fatalf("hex int64: got (%v, %v), want (16, nil)", hexInt64, err)
 	}
-	if _, err := cfg.Lookup("test", "", "badnum").Int(); err == nil {
+
+	_, err = cfg.Lookup("test", "", "badnum").Int()
+	if err == nil {
 		t.Fatal("badnum int: expected error")
 	}
 
@@ -299,13 +339,19 @@ func TestConfigLookupKindsAndBool(t *testing.T) {
 	if missing.Kind != config.ValueMissing {
 		t.Fatalf("missing kind: got %v, want %v", missing.Kind, config.ValueMissing)
 	}
-	if _, err := missing.Bool(); err == nil {
+
+	_, err = missing.Bool()
+	if err == nil {
 		t.Fatal("missing bool: expected error")
 	}
-	if _, err := missing.Int(); err == nil {
+
+	_, err = missing.Int()
+	if err == nil {
 		t.Fatal("missing int: expected error")
 	}
-	if _, err := missing.String(); err == nil {
+
+	_, err = missing.String()
+	if err == nil {
 		t.Fatal("missing string: expected error")
 	}
 }
@@ -320,6 +366,7 @@ func TestConfigComplexValuesAgainstGit(t *testing.T) {
 		testRepo.Run(t, "config", "test.number", "12345")
 
 		cfgFile := openConfig(t, testRepo)
+
 		defer func() { _ = cfgFile.Close() }()
 
 		cfg, err := config.ParseConfig(cfgFile)
@@ -346,6 +393,7 @@ func TestConfigEntriesAgainstGit(t *testing.T) {
 		testRepo.Run(t, "config", "user.name", "Test User")
 
 		cfgFile := openConfig(t, testRepo)
+
 		defer func() { _ = cfgFile.Close() }()
 
 		cfg, err := config.ParseConfig(cfgFile)
@@ -359,11 +407,13 @@ func TestConfigEntriesAgainstGit(t *testing.T) {
 		}
 
 		found := make(map[string]bool)
+
 		for _, entry := range entries {
 			key := entry.Section + "." + entry.Key
 			if entry.Subsection != "" {
 				key = entry.Section + "." + entry.Subsection + "." + entry.Key
 			}
+
 			found[key] = true
 
 			gitValue := gitConfigGet(t, testRepo, key)
@@ -376,6 +426,7 @@ func TestConfigEntriesAgainstGit(t *testing.T) {
 
 func TestConfigErrorCases(t *testing.T) {
 	t.Parallel()
+
 	tests := []struct {
 		name   string
 		config string
@@ -405,7 +456,9 @@ func TestConfigErrorCases(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			r := strings.NewReader(tt.config)
+
 			_, err := config.ParseConfig(r)
 			if err == nil {
 				t.Errorf("expected error for %s", tt.name)
@@ -420,7 +473,9 @@ func TestConfigEOFAfterKeyAgainstGit(t *testing.T) {
 	cfgPath := filepath.Join(testRepo.Dir(), "config")
 
 	cfgData := []byte("[Core]BAre")
-	if err := os.WriteFile(cfgPath, cfgData, 0o600); err != nil {
+
+	err := os.WriteFile(cfgPath, cfgData, 0o600)
+	if err != nil {
 		t.Fatalf("failed to write config: %v", err)
 	}
 
@@ -430,6 +485,7 @@ func TestConfigEOFAfterKeyAgainstGit(t *testing.T) {
 	if (gitErr == nil) != (furErr == nil) {
 		t.Fatalf("git: %v\nfur: %v", gitErr, furErr)
 	}
+
 	if furErr != nil {
 		return
 	}
@@ -445,7 +501,9 @@ func TestConfigNULValueAgainstGit(t *testing.T) {
 	cfgPath := filepath.Join(testRepo.Dir(), "config")
 
 	cfgData := []byte("[Core]BAre=\x00")
-	if err := os.WriteFile(cfgPath, cfgData, 0o600); err != nil {
+
+	err := os.WriteFile(cfgPath, cfgData, 0o600)
+	if err != nil {
 		t.Fatalf("failed to write config: %v", err)
 	}
 
@@ -455,6 +513,7 @@ func TestConfigNULValueAgainstGit(t *testing.T) {
 	if (gitErr == nil) != (furErr == nil) {
 		t.Fatalf("git: %v\nfur: %v", gitErr, furErr)
 	}
+
 	if furErr != nil {
 		return
 	}
@@ -470,7 +529,9 @@ func TestConfigCarriageReturnSeparatorAgainstGit(t *testing.T) {
 	cfgPath := filepath.Join(testRepo.Dir(), "config")
 
 	cfgData := []byte("[Core \"sub\"]\rBAre")
-	if err := os.WriteFile(cfgPath, cfgData, 0o600); err != nil {
+
+	err := os.WriteFile(cfgPath, cfgData, 0o600)
+	if err != nil {
 		t.Fatalf("failed to write config: %v", err)
 	}
 
@@ -480,6 +541,7 @@ func TestConfigCarriageReturnSeparatorAgainstGit(t *testing.T) {
 	if (gitErr == nil) != (furErr == nil) {
 		t.Fatalf("git: %v\nfur: %v", gitErr, furErr)
 	}
+
 	if furErr != nil {
 		return
 	}
@@ -498,11 +560,13 @@ func FuzzConfig(f *testing.F) {
 	cfgPath := filepath.Join(testRepo.Dir(), "config")
 
 	f.Fuzz(func(t *testing.T, cfgData []byte, gitKey string) {
-		if err := os.WriteFile(cfgPath, cfgData, 0o600); err != nil {
+		err := os.WriteFile(cfgPath, cfgData, 0o600)
+		if err != nil {
 			t.Fatalf("failed to write config: %v", err)
 		}
 
 		gitValue, gitErr := gitConfigGetE(testRepo, gitKey)
+
 		furConfig, furErr := config.ParseConfig(bytes.NewReader(cfgData))
 		if furErr == nil && furConfig == nil {
 			t.Fatalf("ParseConfig returned nil config with nil error")
@@ -513,12 +577,16 @@ func FuzzConfig(f *testing.F) {
 			if furErr == nil {
 				return
 			}
+
 			t.Fatalf("git: %v\nfur: %v", gitErr, furErr)
 		}
+
 		if furErr == nil {
 			parts := strings.SplitN(gitKey, ".", 3)
 			furSection := parts[0]
+
 			var furSubsection, furKey string
+
 			switch len(parts) {
 			case 1:
 			case 2:

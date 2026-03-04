@@ -18,6 +18,7 @@ func TestLooseStoreWriteReaderContentAgainstGit(t *testing.T) {
 
 		content := []byte("written-by-content-reader\n")
 		expectedHex := testRepo.RunInput(t, content, "hash-object", "-t", "blob", "--stdin")
+
 		expectedID, err := objectid.ParseHex(algo, expectedHex)
 		if err != nil {
 			t.Fatalf("ParseHex(expected): %v", err)
@@ -27,6 +28,7 @@ func TestLooseStoreWriteReaderContentAgainstGit(t *testing.T) {
 		if err != nil {
 			t.Fatalf("WriteReaderContent: %v", err)
 		}
+
 		if writtenID != expectedID {
 			t.Fatalf("WriteReaderContent id = %s, want %s", writtenID, expectedID)
 		}
@@ -41,6 +43,7 @@ func TestLooseStoreWriteReaderContentAgainstGit(t *testing.T) {
 		if err != nil {
 			t.Fatalf("WriteReaderContent second: %v", err)
 		}
+
 		if writtenID2 != expectedID {
 			t.Fatalf("WriteReaderContent second id = %s, want %s", writtenID2, expectedID)
 		}
@@ -54,19 +57,23 @@ func TestLooseStoreWriteReaderFullAgainstGit(t *testing.T) {
 		store := openLooseStore(t, testRepo.Dir(), algo)
 
 		body := []byte("full-reader-body\n")
+
 		header, ok := objectheader.Encode(objecttype.TypeBlob, int64(len(body)))
 		if !ok {
 			t.Fatalf("objectheader.Encode failed")
 		}
+
 		raw := make([]byte, len(header)+len(body))
 		copy(raw, header)
 		copy(raw[len(header):], body)
 
 		wantID := algo.Sum(raw)
+
 		gotID, err := store.WriteReaderFull(bytes.NewReader(raw))
 		if err != nil {
 			t.Fatalf("WriteReaderFull: %v", err)
 		}
+
 		if gotID != wantID {
 			t.Fatalf("WriteReaderFull id = %s, want %s", gotID, wantID)
 		}
@@ -86,7 +93,8 @@ func TestLooseStoreReaderValidationErrors(t *testing.T) {
 			testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 			store := openLooseStore(t, testRepo.Dir(), algo)
 
-			if _, err := store.WriteReaderContent(objecttype.TypeBlob, 1, bytes.NewReader([]byte("hello"))); err == nil {
+			_, err := store.WriteReaderContent(objecttype.TypeBlob, 1, bytes.NewReader([]byte("hello")))
+			if err == nil {
 				t.Fatalf("expected error after overflow")
 			}
 		})
@@ -96,7 +104,8 @@ func TestLooseStoreReaderValidationErrors(t *testing.T) {
 			testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 			store := openLooseStore(t, testRepo.Dir(), algo)
 
-			if _, err := store.WriteReaderContent(objecttype.TypeBlob, 5, bytes.NewReader([]byte("x"))); err == nil {
+			_, err := store.WriteReaderContent(objecttype.TypeBlob, 5, bytes.NewReader([]byte("x")))
+			if err == nil {
 				t.Fatalf("expected error for short content")
 			}
 		})
@@ -106,7 +115,8 @@ func TestLooseStoreReaderValidationErrors(t *testing.T) {
 			testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 			store := openLooseStore(t, testRepo.Dir(), algo)
 
-			if _, err := store.WriteReaderFull(bytes.NewReader([]byte("not-a-header"))); err == nil {
+			_, err := store.WriteReaderFull(bytes.NewReader([]byte("not-a-header")))
+			if err == nil {
 				t.Fatalf("expected error for malformed header")
 			}
 		})
@@ -117,7 +127,9 @@ func TestLooseStoreReaderValidationErrors(t *testing.T) {
 			store := openLooseStore(t, testRepo.Dir(), algo)
 
 			raw := []byte("blob 1\x00hello")
-			if _, err := store.WriteReaderFull(bytes.NewReader(raw)); err == nil {
+
+			_, err := store.WriteReaderFull(bytes.NewReader(raw))
+			if err == nil {
 				t.Fatalf("expected error after mismatch")
 			}
 		})

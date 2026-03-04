@@ -31,19 +31,23 @@ func ParseEntryHeader(data []byte) (EntryHeader, error) {
 	}
 
 	shift := uint(4)
+
 	b := first
 	for b&0x80 != 0 {
 		if header.HeaderSize >= len(data) {
 			return zero, fmt.Errorf("format/pack: truncated entry header")
 		}
+
 		b = data[header.HeaderSize]
 		header.HeaderSize++
 		header.Size |= int64(b&0x7f) << shift
 		shift += 7
 	}
+
 	if header.Size < 0 {
 		return zero, fmt.Errorf("format/pack: negative entry size")
 	}
+
 	return header, nil
 }
 
@@ -73,6 +77,7 @@ func ParseEntry(data []byte, hashSize int) (Entry, error) {
 	if err != nil {
 		return zero, err
 	}
+
 	entry := Entry{
 		Type:       header.Type,
 		Size:       header.Size,
@@ -86,10 +91,12 @@ func ParseEntry(data []byte, hashSize int) (Entry, error) {
 		if hashSize <= 0 {
 			return zero, fmt.Errorf("format/pack: invalid hash size %d", hashSize)
 		}
+
 		end := entry.DataOffset + hashSize
 		if end > len(data) {
 			return zero, fmt.Errorf("format/pack: truncated ref-delta base id")
 		}
+
 		entry.RefBaseID = data[entry.DataOffset:end]
 		entry.DataOffset = end
 	case objecttype.TypeOfsDelta:
@@ -97,6 +104,7 @@ func ParseEntry(data []byte, hashSize int) (Entry, error) {
 		if err != nil {
 			return zero, err
 		}
+
 		entry.OfsBaseDistance = dist
 		entry.DataOffset += consumed
 	case objecttype.TypeInvalid, objecttype.TypeFuture:
@@ -108,5 +116,6 @@ func ParseEntry(data []byte, hashSize int) (Entry, error) {
 	if entry.DataOffset > len(data) {
 		return zero, fmt.Errorf("format/pack: entry data offset out of bounds")
 	}
+
 	return entry, nil
 }

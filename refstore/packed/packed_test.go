@@ -16,30 +16,39 @@ import (
 
 func openPackedRefStoreFromRepo(t *testing.T, repoPath string, algo objectid.Algorithm) *packed.Store {
 	t.Helper()
+
 	root, err := os.OpenRoot(repoPath)
 	if err != nil {
 		t.Fatalf("OpenRoot(repo): %v", err)
 	}
+
 	defer func() { _ = root.Close() }()
 
 	store, err := packed.New(root, algo)
 	if err != nil {
 		t.Fatalf("packed.New: %v", err)
 	}
+
 	return store
 }
 
 func openPackedRefStoreFromContent(t *testing.T, content string, algo objectid.Algorithm) (*packed.Store, error) {
 	t.Helper()
+
 	dir := t.TempDir()
-	if err := os.WriteFile(dir+"/packed-refs", []byte(content), 0o644); err != nil {
+
+	err := os.WriteFile(dir+"/packed-refs", []byte(content), 0o644)
+	if err != nil {
 		t.Fatalf("WriteFile(packed-refs): %v", err)
 	}
+
 	root, err := os.OpenRoot(dir)
 	if err != nil {
 		t.Fatalf("OpenRoot(temp): %v", err)
 	}
+
 	defer func() { _ = root.Close() }()
+
 	return packed.New(root, algo)
 }
 
@@ -58,10 +67,12 @@ func TestPackedResolveAndPeeled(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Resolve(main): %v", err)
 		}
+
 		mainDet, ok := resolvedMain.(ref.Detached)
 		if !ok {
 			t.Fatalf("Resolve(main) type = %T, want ref.Detached", resolvedMain)
 		}
+
 		if mainDet.ID != commitID {
 			t.Fatalf("Resolve(main) id = %s, want %s", mainDet.ID, commitID)
 		}
@@ -70,16 +81,20 @@ func TestPackedResolveAndPeeled(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Resolve(tag): %v", err)
 		}
+
 		tagDet, ok := resolvedTag.(ref.Detached)
 		if !ok {
 			t.Fatalf("Resolve(tag) type = %T, want ref.Detached", resolvedTag)
 		}
+
 		if tagDet.ID != tagID {
 			t.Fatalf("Resolve(tag) id = %s, want %s", tagDet.ID, tagID)
 		}
+
 		if tagDet.Peeled == nil {
 			t.Fatalf("Resolve(tag) peeled = nil, want commit")
 		}
+
 		if *tagDet.Peeled != commitID {
 			t.Fatalf("Resolve(tag) peeled = %s, want %s", *tagDet.Peeled, commitID)
 		}
@@ -88,11 +103,13 @@ func TestPackedResolveAndPeeled(t *testing.T) {
 		if err != nil {
 			t.Fatalf("ResolveFully(tag): %v", err)
 		}
+
 		if fullTag.ID != tagDet.ID {
 			t.Fatalf("ResolveFully(tag) id = %s, want %s", fullTag.ID, tagDet.ID)
 		}
 
-		if _, err := store.Resolve("refs/heads/does-not-exist"); !errors.Is(err, refstore.ErrReferenceNotFound) {
+		_, err = store.Resolve("refs/heads/does-not-exist")
+		if !errors.Is(err, refstore.ErrReferenceNotFound) {
 			t.Fatalf("Resolve(not-found) error = %v", err)
 		}
 	})
@@ -114,11 +131,14 @@ func TestPackedListAndShorten(t *testing.T) {
 		if err != nil {
 			t.Fatalf("List(all): %v", err)
 		}
+
 		allNames := make([]string, 0, len(all))
 		for _, entry := range all {
 			allNames = append(allNames, entry.Name())
 		}
+
 		slices.Sort(allNames)
+
 		wantAll := []string{"refs/heads/main", "refs/remotes/origin/main", "refs/tags/main"}
 		if !slices.Equal(allNames, wantAll) {
 			t.Fatalf("List(all) names = %v, want %v", allNames, wantAll)
@@ -128,6 +148,7 @@ func TestPackedListAndShorten(t *testing.T) {
 		if err != nil {
 			t.Fatalf("List(pattern): %v", err)
 		}
+
 		if len(filtered) != 1 || filtered[0].Name() != "refs/heads/main" {
 			t.Fatalf("List(refs/heads/*) = %v, want refs/heads/main only", filtered)
 		}
@@ -136,11 +157,13 @@ func TestPackedListAndShorten(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Shorten(main): %v", err)
 		}
+
 		if short != "heads/main" {
 			t.Fatalf("Shorten(main) = %q, want %q", short, "heads/main")
 		}
 
-		if _, err := store.Shorten("refs/heads/does-not-exist"); !errors.Is(err, refstore.ErrReferenceNotFound) {
+		_, err = store.Shorten("refs/heads/does-not-exist")
+		if !errors.Is(err, refstore.ErrReferenceNotFound) {
 			t.Fatalf("Shorten(not-found) error = %v", err)
 		}
 	})
@@ -195,10 +218,13 @@ func TestPackedListPatternMatrix(t *testing.T) {
 				if err != nil {
 					t.Fatalf("List(%q): %v", tt.pattern, err)
 				}
+
 				gotNames := refNames(got)
 				slices.Sort(gotNames)
+
 				wantNames := append([]string(nil), tt.want...)
 				slices.Sort(wantNames)
+
 				if !slices.Equal(gotNames, wantNames) {
 					t.Fatalf("List(%q) names = %v, want %v", tt.pattern, gotNames, wantNames)
 				}
@@ -231,7 +257,8 @@ func TestPackedParseErrors(t *testing.T) {
 
 		for _, tt := range cases {
 			t.Run(tt.name, func(t *testing.T) {
-				if _, err := openPackedRefStoreFromContent(t, tt.data, algo); err == nil {
+				_, err := openPackedRefStoreFromContent(t, tt.data, algo)
+				if err == nil {
 					t.Fatalf("packed.New expected parse error")
 				}
 			})
@@ -242,16 +269,21 @@ func TestPackedParseErrors(t *testing.T) {
 func TestPackedNewValidation(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
+
 	root, err := os.OpenRoot(dir)
 	if err != nil {
 		t.Fatalf("OpenRoot(temp): %v", err)
 	}
+
 	defer func() { _ = root.Close() }()
 
-	if _, err := packed.New(root, objectid.AlgorithmUnknown); !errors.Is(err, objectid.ErrInvalidAlgorithm) {
+	_, err = packed.New(root, objectid.AlgorithmUnknown)
+	if !errors.Is(err, objectid.ErrInvalidAlgorithm) {
 		t.Fatalf("packed.New invalid algorithm error = %v", err)
 	}
-	if _, err := packed.New(root, objectid.AlgorithmSHA256); !errors.Is(err, os.ErrNotExist) {
+
+	_, err = packed.New(root, objectid.AlgorithmSHA256)
+	if !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("packed.New missing packed-refs error = %v", err)
 	}
 }
@@ -261,6 +293,7 @@ func refNames(refs []ref.Ref) []string {
 	for _, entry := range refs {
 		names = append(names, entry.Name())
 	}
+
 	return names
 }
 

@@ -24,6 +24,7 @@ func New(root *os.Root, algo objectid.Algorithm) (*Store, error) {
 	if algo.Size() == 0 {
 		return nil, objectid.ErrInvalidAlgorithm
 	}
+
 	return &Store{
 		root: root,
 		algo: algo,

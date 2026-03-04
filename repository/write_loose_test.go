@@ -25,15 +25,18 @@ func TestWriteLooseBytesContent(t *testing.T) {
 		if err != nil {
 			t.Fatalf("os.OpenRoot: %v", err)
 		}
+
 		defer func() { _ = root.Close() }()
 
 		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}
+
 		defer func() { _ = repo.Close() }()
 
 		content := []byte("write-loose-bytes-content\n")
+
 		gotID, err := repo.WriteLooseBytesContent(objecttype.TypeBlob, content)
 		if err != nil {
 			t.Fatalf("WriteLooseBytesContent: %v", err)
@@ -48,9 +51,11 @@ func TestWriteLooseBytesContent(t *testing.T) {
 		if err != nil {
 			t.Fatalf("ReadStoredBytesContent: %v", err)
 		}
+
 		if ty != objecttype.TypeBlob {
 			t.Fatalf("ReadStoredBytesContent type = %v, want %v", ty, objecttype.TypeBlob)
 		}
+
 		if !bytes.Equal(gotContent, content) {
 			t.Fatalf("ReadStoredBytesContent content mismatch")
 		}
@@ -71,15 +76,18 @@ func TestWriteLooseReaderContent(t *testing.T) {
 		if err != nil {
 			t.Fatalf("os.OpenRoot: %v", err)
 		}
+
 		defer func() { _ = root.Close() }()
 
 		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}
+
 		defer func() { _ = repo.Close() }()
 
 		content := []byte("write-loose-reader-content\n")
+
 		gotID, err := repo.WriteLooseReaderContent(objecttype.TypeBlob, int64(len(content)), bytes.NewReader(content))
 		if err != nil {
 			t.Fatalf("WriteLooseReaderContent: %v", err)
@@ -107,12 +115,14 @@ func TestWriteLooseFull(t *testing.T) {
 		if err != nil {
 			t.Fatalf("os.OpenRoot: %v", err)
 		}
+
 		defer func() { _ = root.Close() }()
 
 		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}
+
 		defer func() { _ = repo.Close() }()
 
 		raw, err := repo.ReadStoredBytesFull(commitID)
@@ -124,6 +134,7 @@ func TestWriteLooseFull(t *testing.T) {
 		if err != nil {
 			t.Fatalf("WriteLooseBytesFull: %v", err)
 		}
+
 		if idFromBytes != commitID {
 			t.Fatalf("WriteLooseBytesFull id = %s, want %s", idFromBytes, commitID)
 		}
@@ -132,6 +143,7 @@ func TestWriteLooseFull(t *testing.T) {
 		if err != nil {
 			t.Fatalf("WriteLooseReaderFull: %v", err)
 		}
+
 		if idFromReader != commitID {
 			t.Fatalf("WriteLooseReaderFull id = %s, want %s", idFromReader, commitID)
 		}

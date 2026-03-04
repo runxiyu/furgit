@@ -21,6 +21,7 @@ type RepoOptions struct {
 // NewRepo creates a temporary repository initialized with the requested options.
 func NewRepo(tb testing.TB, opts RepoOptions) *TestRepo {
 	tb.Helper()
+
 	algo := opts.ObjectFormat
 	if algo.Size() == 0 {
 		tb.Fatalf("invalid algorithm: %v", algo)
@@ -47,10 +48,13 @@ func NewRepo(tb testing.TB, opts RepoOptions) *TestRepo {
 	if opts.Bare {
 		args = append(args, "--bare")
 	}
+
 	if opts.RefFormat != "" {
 		args = append(args, "--ref-format="+opts.RefFormat)
 	}
+
 	args = append(args, dir)
 	testRepo.runBytes(tb, nil, "", args...)
+
 	return testRepo
 }

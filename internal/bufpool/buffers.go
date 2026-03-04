@@ -62,9 +62,11 @@ var bufferPools = func() []sync.Pool {
 		capCopy := classCap
 		pools[i].New = func() any {
 			buf := make([]byte, 0, capCopy)
+
 			return &buf
 		}
 	}
+
 	return pools
 }()
 
@@ -80,9 +82,11 @@ func Borrow(capHint int) Buffer {
 	if capHint < DefaultBufferCap {
 		capHint = DefaultBufferCap
 	}
+
 	classIdx, classCap, pooled := classFor(capHint)
 	if !pooled {
 		newBuf := make([]byte, 0, capHint)
+
 		return Buffer{buf: newBuf, pool: unpooled}
 	}
 	//nolint:forcetypeassert
@@ -90,7 +94,9 @@ func Borrow(capHint int) Buffer {
 	if cap(*buf) < classCap {
 		*buf = make([]byte, 0, classCap)
 	}
+
 	slice := (*buf)[:0]
+
 	return Buffer{buf: slice, pool: poolIndex(classIdx)} //#nosec G115
 }
 
@@ -110,6 +116,7 @@ func (buf *Buffer) Resize(n int) {
 	if n < 0 {
 		n = 0
 	}
+
 	buf.ensureCapacity(n)
 	buf.buf = buf.buf[:n]
 }
@@ -122,6 +129,7 @@ func (buf *Buffer) Append(src []byte) {
 	if len(src) == 0 {
 		return
 	}
+
 	start := len(buf.buf)
 	buf.ensureCapacity(start + len(src))
 	buf.buf = buf.buf[:start+len(src)]
@@ -144,6 +152,7 @@ func (buf *Buffer) Release() {
 	if buf.buf == nil {
 		return
 	}
+
 	buf.returnToPool()
 	buf.buf = nil
 	buf.pool = unpooled
@@ -157,20 +166,26 @@ func (buf *Buffer) ensureCapacity(needed int) {
 	if cap(buf.buf) >= needed {
 		return
 	}
+
 	classIdx, classCap, pooled := classFor(needed)
+
 	var newBuf []byte
+
 	if pooled {
 		//nolint:forcetypeassert
 		raw := bufferPools[classIdx].Get().(*[]byte)
 		if cap(*raw) < classCap {
 			*raw = make([]byte, 0, classCap)
 		}
+
 		newBuf = (*raw)[:len(buf.buf)]
 	} else {
 		newBuf = make([]byte, len(buf.buf), classCap)
 	}
+
 	copy(newBuf, buf.buf)
 	buf.returnToPool()
+
 	buf.buf = newBuf
 	if pooled {
 		buf.pool = poolIndex(classIdx) //#nosec G115
@@ -185,6 +200,7 @@ func classFor(size int) (idx, classCap int, ok bool) {
 			return i, class, true
 		}
 	}
+
 	return -1, size, false
 }
 
@@ -192,6 +208,7 @@ func (buf *Buffer) returnToPool() {
 	if buf.pool == unpooled {
 		return
 	}
+
 	tmp := buf.buf[:0]
 	bufferPools[int(buf.pool)].Put(&tmp)
 }

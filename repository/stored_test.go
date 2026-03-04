@@ -28,21 +28,25 @@ func TestReadStoredTyped(t *testing.T) {
 		if err != nil {
 			t.Fatalf("os.OpenRoot: %v", err)
 		}
+
 		defer func() { _ = root.Close() }()
 
 		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}
+
 		defer func() { _ = repo.Close() }()
 
 		blob, err := repo.ReadStoredBlob(blobID)
 		if err != nil {
 			t.Fatalf("ReadStoredBlob: %v", err)
 		}
+
 		if blob.ID() != blobID {
 			t.Fatalf("blob ID = %s, want %s", blob.ID(), blobID)
 		}
+
 		if string(blob.Blob().Data) != "commit-body\n" {
 			t.Fatalf("blob body = %q, want %q", blob.Blob().Data, "commit-body\n")
 		}
@@ -51,9 +55,11 @@ func TestReadStoredTyped(t *testing.T) {
 		if err != nil {
 			t.Fatalf("ReadStoredTree: %v", err)
 		}
+
 		if tree.ID() != treeID {
 			t.Fatalf("tree ID = %s, want %s", tree.ID(), treeID)
 		}
+
 		if len(tree.Tree().Entries) != 1 {
 			t.Fatalf("tree entries = %d, want 1", len(tree.Tree().Entries))
 		}
@@ -62,9 +68,11 @@ func TestReadStoredTyped(t *testing.T) {
 		if err != nil {
 			t.Fatalf("ReadStoredCommit: %v", err)
 		}
+
 		if commit.ID() != commitID {
 			t.Fatalf("commit ID = %s, want %s", commit.ID(), commitID)
 		}
+
 		if commit.Commit().Tree != treeID {
 			t.Fatalf("commit tree = %s, want %s", commit.Commit().Tree, treeID)
 		}
@@ -89,12 +97,14 @@ func TestResolveTreeEntry(t *testing.T) {
 		if err != nil {
 			t.Fatalf("os.OpenRoot: %v", err)
 		}
+
 		defer func() { _ = root.Close() }()
 
 		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}
+
 		defer func() { _ = repo.Close() }()
 
 		rootTree, err := repo.ReadStoredTree(rootTreeID)
@@ -106,9 +116,11 @@ func TestResolveTreeEntry(t *testing.T) {
 		if err != nil {
 			t.Fatalf("ResolveTreeEntry: %v", err)
 		}
+
 		if entry.Mode != object.FileModeRegular {
 			t.Fatalf("ResolveTreeEntry mode = %o, want %o", entry.Mode, object.FileModeRegular)
 		}
+
 		if entry.ID != blobID {
 			t.Fatalf("ResolveTreeEntry id = %s, want %s", entry.ID, blobID)
 		}
@@ -133,12 +145,14 @@ func TestResolveTreeEntryErrors(t *testing.T) {
 			if err != nil {
 				t.Fatalf("os.OpenRoot: %v", err)
 			}
+
 			defer func() { _ = root.Close() }()
 
 			repo, err := repository.Open(root)
 			if err != nil {
 				t.Fatalf("repository.Open: %v", err)
 			}
+
 			defer func() { _ = repo.Close() }()
 
 			rootTree, err := repo.ReadStoredTree(rootTreeID)
@@ -166,12 +180,14 @@ func TestResolveTreeEntryErrors(t *testing.T) {
 			if err != nil {
 				t.Fatalf("os.OpenRoot: %v", err)
 			}
+
 			defer func() { _ = root.Close() }()
 
 			repo, err := repository.Open(root)
 			if err != nil {
 				t.Fatalf("repository.Open: %v", err)
 			}
+
 			defer func() { _ = repo.Close() }()
 
 			rootTree, err := repo.ReadStoredTree(rootTreeID)
@@ -208,18 +224,21 @@ func TestResolveTreeEntryDeepPath(t *testing.T) {
 			currentTree = repoHarness.Mktree(t, fmt.Sprintf("040000 tree %s\t%s\n", currentTree, name))
 			parts = append([][]byte{[]byte(name)}, parts...)
 		}
+
 		parts = append(parts, []byte("leaf.txt"))
 
 		root, err := os.OpenRoot(repoHarness.Dir())
 		if err != nil {
 			t.Fatalf("os.OpenRoot: %v", err)
 		}
+
 		defer func() { _ = root.Close() }()
 
 		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}
+
 		defer func() { _ = repo.Close() }()
 
 		rootTree, err := repo.ReadStoredTree(currentTree)
@@ -231,9 +250,11 @@ func TestResolveTreeEntryDeepPath(t *testing.T) {
 		if err != nil {
 			t.Fatalf("ResolveTreeEntry(deep): %v", err)
 		}
+
 		if entry.Mode != object.FileModeRegular {
 			t.Fatalf("ResolveTreeEntry(deep) mode = %o, want %o", entry.Mode, object.FileModeRegular)
 		}
+
 		if entry.ID != leafBlobID {
 			t.Fatalf("ResolveTreeEntry(deep) id = %s, want %s", entry.ID, leafBlobID)
 		}
@@ -270,12 +291,14 @@ func TestReadStoredTreeMixedModes(t *testing.T) {
 		if err != nil {
 			t.Fatalf("os.OpenRoot: %v", err)
 		}
+
 		defer func() { _ = root.Close() }()
 
 		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}
+
 		defer func() { _ = repo.Close() }()
 
 		rootTree, err := repo.ReadStoredTree(rootTreeID)

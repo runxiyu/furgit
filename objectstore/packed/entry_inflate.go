@@ -14,6 +14,7 @@ func zlibReaderAt(pack *packFile, offset int) (io.ReadCloser, error) {
 	if offset < 0 || offset > len(pack.data) {
 		return nil, fmt.Errorf("objectstore/packed: pack %q zlib offset out of bounds", pack.name)
 	}
+
 	return zlib.NewReader(bytes.NewReader(pack.data[offset:]))
 }
 
@@ -23,6 +24,7 @@ func inflateAt(pack *packFile, offset int, expectedSize int64) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	defer func() { _ = reader.Close() }()
 
 	if expectedSize >= 0 {
@@ -35,9 +37,12 @@ func inflateAt(pack *packFile, offset int, expectedSize int64) ([]byte, error) {
 		}
 
 		body := make([]byte, int(expectedSize))
-		if _, err := io.ReadFull(reader, body); err != nil {
+
+		_, err := io.ReadFull(reader, body)
+		if err != nil {
 			return nil, err
 		}
+
 		return body, nil
 	}
 
@@ -45,5 +50,6 @@ func inflateAt(pack *packFile, offset int, expectedSize int64) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return body, nil
 }

@@ -25,16 +25,19 @@ func New(root *os.Root, algo objectid.Algorithm) (*Store, error) {
 	if algo.Size() == 0 {
 		return nil, objectid.ErrInvalidAlgorithm
 	}
+
 	packedRefs, err := root.Open("packed-refs")
 	if err != nil {
 		return nil, fmt.Errorf("refstore/packed: open packed-refs: %w", err)
 	}
+
 	defer func() { _ = packedRefs.Close() }()
 
 	byName, ordered, err := parsePackedRefs(packedRefs, algo)
 	if err != nil {
 		return nil, err
 	}
+
 	return &Store{
 		byName:  byName,
 		ordered: ordered,
@@ -47,6 +50,7 @@ func (store *Store) Resolve(name string) (ref.Ref, error) {
 	if !ok {
 		return nil, refstore.ErrReferenceNotFound
 	}
+
 	return detached, nil
 }
 
@@ -58,6 +62,7 @@ func (store *Store) ResolveFully(name string) (ref.Detached, error) {
 	if !ok {
 		return ref.Detached{}, refstore.ErrReferenceNotFound
 	}
+
 	return detached, nil
 }
 
@@ -68,7 +73,8 @@ func (store *Store) ResolveFully(name string) (ref.Detached, error) {
 func (store *Store) List(pattern string) ([]ref.Ref, error) {
 	matchAll := pattern == ""
 	if !matchAll {
-		if _, err := path.Match(pattern, "refs/heads/main"); err != nil {
+		_, err := path.Match(pattern, "refs/heads/main")
+		if err != nil {
 			return nil, err
 		}
 	}
@@ -80,12 +86,15 @@ func (store *Store) List(pattern string) ([]ref.Ref, error) {
 			if err != nil {
 				return nil, err
 			}
+
 			if !matched {
 				continue
 			}
 		}
+
 		refs = append(refs, entry)
 	}
+
 	return refs, nil
 }
 
@@ -100,6 +109,7 @@ func (store *Store) Shorten(name string) (string, error) {
 	for _, entry := range store.ordered {
 		names = append(names, entry.Name())
 	}
+
 	return refstore.ShortenName(name, names), nil
 }
 

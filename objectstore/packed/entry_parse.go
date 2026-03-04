@@ -34,6 +34,7 @@ func parseEntryMeta(pack *packFile, algo objectid.Algorithm, offset uint64) (ent
 	if err != nil {
 		return zero, fmt.Errorf("objectstore/packed: pack %q offset conversion: %w", pack.name, err)
 	}
+
 	entry, err := packfmt.ParseEntry(pack.data[pos:], algo.Size())
 	if err != nil {
 		return zero, fmt.Errorf("objectstore/packed: pack %q: %w", pack.name, err)
@@ -50,11 +51,13 @@ func parseEntryMeta(pack *packFile, algo objectid.Algorithm, offset uint64) (ent
 		if err != nil {
 			return zero, fmt.Errorf("objectstore/packed: pack %q invalid ref-delta base id: %w", pack.name, err)
 		}
+
 		meta.baseRefID = baseID
 	case objecttype.TypeOfsDelta:
 		if offset <= entry.OfsBaseDistance {
 			return zero, fmt.Errorf("objectstore/packed: pack %q has invalid ofs-delta base", pack.name)
 		}
+
 		meta.baseOfs = offset - entry.OfsBaseDistance
 	case objecttype.TypeCommit, objecttype.TypeTree, objecttype.TypeBlob, objecttype.TypeTag:
 		// Base object types do not have delta base metadata.
@@ -63,5 +66,6 @@ func parseEntryMeta(pack *packFile, algo objectid.Algorithm, offset uint64) (ent
 	default:
 		return zero, fmt.Errorf("objectstore/packed: pack %q has unsupported entry type %d", pack.name, meta.ty)
 	}
+
 	return meta, nil
 }

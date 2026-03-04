@@ -14,10 +14,12 @@ func (store *Store) deltaResolveContent(start location) (objecttype.Type, []byte
 	if err != nil {
 		return objecttype.TypeInvalid, nil, err
 	}
+
 	pack, meta, err := store.entryMetaAt(start)
 	if err != nil {
 		return objecttype.TypeInvalid, nil, err
 	}
+
 	declaredSize := meta.size
 	if !packfmt.IsBaseObjectType(meta.ty) {
 		declaredSize, err = deltaDeclaredSizeAt(pack, meta.dataOffset)
@@ -25,6 +27,7 @@ func (store *Store) deltaResolveContent(start location) (objecttype.Type, []byte
 			return objecttype.TypeInvalid, nil, err
 		}
 	}
+
 	return store.deltaResolveChain(chain, declaredSize)
 }
 
@@ -37,18 +40,22 @@ func (store *Store) deltaResolveChain(chain deltaChain, declaredSize int64) (obj
 
 	for i := nextDelta; i >= 0; i-- {
 		node := chain.deltas[i]
+
 		pack, err := store.openPack(node.loc.packName)
 		if err != nil {
 			return objecttype.TypeInvalid, nil, err
 		}
+
 		delta, err := inflateAt(pack, node.dataOffset, -1)
 		if err != nil {
 			return objecttype.TypeInvalid, nil, err
 		}
+
 		out, err = deltaapply.Apply(out, delta)
 		if err != nil {
 			return objecttype.TypeInvalid, nil, err
 		}
+
 		store.cacheMu.Lock()
 		store.deltaCache.add(
 			deltaBaseKey{packName: node.loc.packName, offset: node.loc.offset},
@@ -65,6 +72,7 @@ func (store *Store) deltaResolveChain(chain deltaChain, declaredSize int64) (obj
 			declaredSize,
 		)
 	}
+
 	if ty != chain.baseType {
 		return objecttype.TypeInvalid, nil, fmt.Errorf(
 			"objectstore/packed: resolved content type mismatch: got %d want %d",
@@ -72,6 +80,7 @@ func (store *Store) deltaResolveChain(chain deltaChain, declaredSize int64) (obj
 			chain.baseType,
 		)
 	}
+
 	return ty, out, nil
 }
 
@@ -85,6 +94,7 @@ func (store *Store) deltaResolveChainStart(chain deltaChain) (objecttype.Type, [
 			deltaBaseKey{packName: node.loc.packName, offset: node.loc.offset},
 		)
 		store.cacheMu.RUnlock()
+
 		if ok {
 			return ty, out, i - 1, nil
 		}
@@ -95,6 +105,7 @@ func (store *Store) deltaResolveChainStart(chain deltaChain) (objecttype.Type, [
 		deltaBaseKey{packName: chain.baseLoc.packName, offset: chain.baseLoc.offset},
 	)
 	store.cacheMu.RUnlock()
+
 	if ok {
 		return ty, out, len(chain.deltas) - 1, nil
 	}
@@ -103,9 +114,11 @@ func (store *Store) deltaResolveChainStart(chain deltaChain) (objecttype.Type, [
 	if err != nil {
 		return objecttype.TypeInvalid, nil, 0, err
 	}
+
 	if !packfmt.IsBaseObjectType(meta.ty) {
 		return objecttype.TypeInvalid, nil, 0, fmt.Errorf("objectstore/packed: delta chain base is not a base object")
 	}
+
 	base, err := inflateAt(pack, meta.dataOffset, meta.size)
 	if err != nil {
 		return objecttype.TypeInvalid, nil, 0, err

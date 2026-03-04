@@ -11,6 +11,7 @@ func Append(dst []byte, ty objecttype.Type, size int64) ([]byte, bool) {
 	if size < 0 {
 		return nil, false
 	}
+
 	tyName, ok := objecttype.Name(ty)
 	if !ok {
 		return nil, false
@@ -23,5 +24,6 @@ func Append(dst []byte, ty objecttype.Type, size int64) ([]byte, bool) {
 	out = append(out, ' ')
 	out = append(out, sizeStr...)
 	out = append(out, 0)
+
 	return out, true
 }

@@ -18,12 +18,15 @@ func (blob *Blob) SerializeWithHeader() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	header, ok := objectheader.Encode(objecttype.TypeBlob, int64(len(body)))
 	if !ok {
 		return nil, errors.New("object: blob: failed to encode object header")
 	}
+
 	raw := make([]byte, len(header)+len(body))
 	copy(raw, header)
 	copy(raw[len(header):], body)
+
 	return raw, nil
 }

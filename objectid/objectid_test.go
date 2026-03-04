@@ -48,13 +48,16 @@ func TestParseHexRoundtrip(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			id, err := objectid.ParseHex(tt.algo, tt.hex)
 			if err != nil {
 				t.Fatalf("ParseHex failed: %v", err)
 			}
+
 			if got := id.String(); got != tt.hex {
 				t.Fatalf("String() = %q, want %q", got, tt.hex)
 			}
+
 			if got := id.Size(); got != tt.algo.Size() {
 				t.Fatalf("Size() = %d, want %d", got, tt.algo.Size())
 			}
@@ -68,6 +71,7 @@ func TestParseHexRoundtrip(t *testing.T) {
 			if err != nil {
 				t.Fatalf("FromBytes failed: %v", err)
 			}
+
 			if id2.String() != tt.hex {
 				t.Fatalf("FromBytes roundtrip = %q, want %q", id2.String(), tt.hex)
 			}
@@ -92,7 +96,9 @@ func TestParseHexErrors(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			if _, err := objectid.ParseHex(tt.algo, tt.hex); err == nil {
+
+			_, err := objectid.ParseHex(tt.algo, tt.hex)
+			if err == nil {
 				t.Fatalf("expected ParseHex error")
 			}
 		})
@@ -102,10 +108,13 @@ func TestParseHexErrors(t *testing.T) {
 func TestFromBytesErrors(t *testing.T) {
 	t.Parallel()
 
-	if _, err := objectid.FromBytes(objectid.AlgorithmUnknown, []byte{1, 2}); err == nil {
+	_, err := objectid.FromBytes(objectid.AlgorithmUnknown, []byte{1, 2})
+	if err == nil {
 		t.Fatalf("expected FromBytes unknown algo error")
 	}
-	if _, err := objectid.FromBytes(objectid.AlgorithmSHA1, []byte{1, 2}); err == nil {
+
+	_, err = objectid.FromBytes(objectid.AlgorithmSHA1, []byte{1, 2})
+	if err == nil {
 		t.Fatalf("expected FromBytes wrong size error")
 	}
 }
@@ -119,10 +128,12 @@ func TestBytesReturnsCopy(t *testing.T) {
 	}
 
 	b1 := id.Bytes()
+
 	b2 := id.Bytes()
 	if !bytes.Equal(b1, b2) {
 		t.Fatalf("Bytes mismatch")
 	}
+
 	b1[0] ^= 0xff
 	if bytes.Equal(b1, b2) {
 		t.Fatalf("Bytes should return independent copies")
@@ -141,12 +152,14 @@ func TestRawBytesAliasesStorage(t *testing.T) {
 	if len(b) != id.Size() {
 		t.Fatalf("RawBytes len = %d, want %d", len(b), id.Size())
 	}
+
 	if cap(b) != len(b) {
 		t.Fatalf("RawBytes cap = %d, want %d", cap(b), len(b))
 	}
 
 	orig := id.String()
 	b[0] ^= 0xff
+
 	if id.String() == orig {
 		t.Fatalf("RawBytes should alias object ID storage")
 	}

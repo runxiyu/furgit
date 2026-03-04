@@ -16,7 +16,9 @@ func (store *Store) objectPath(id objectid.ObjectID) (string, error) {
 	if id.Algorithm() != store.algo {
 		return "", fmt.Errorf("objectstore/loose: object id algorithm mismatch: got %s want %s", id.Algorithm(), store.algo)
 	}
+
 	hex := id.String()
+
 	return filepath.Join(hex[:2], hex[2:]), nil
 }
 
@@ -27,12 +29,15 @@ func (store *Store) openObject(id objectid.ObjectID) (*os.File, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	file, err := store.root.Open(relPath)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
 			return nil, objectstore.ErrObjectNotFound
 		}
+
 		return nil, err
 	}
+
 	return file, nil
 }

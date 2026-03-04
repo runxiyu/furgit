@@ -11,5 +11,6 @@ func (testRepo *TestRepo) MakeCommit(tb testing.TB, message string) (objectid.Ob
 	tb.Helper()
 	blobID, treeID := testRepo.MakeSingleFileTree(tb, "file.txt", []byte("commit-body\n"))
 	commitID := testRepo.CommitTree(tb, treeID, message)
+
 	return blobID, treeID, commitID
 }

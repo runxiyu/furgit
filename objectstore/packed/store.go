@@ -60,6 +60,7 @@ func New(root *os.Root, algo objectid.Algorithm) (*Store, error) {
 	if algo.Size() == 0 {
 		return nil, objectid.ErrInvalidAlgorithm
 	}
+
 	return &Store{
 		root:                root,
 		algo:                algo,
@@ -76,8 +77,10 @@ func (store *Store) Close() error {
 	store.stateMu.Lock()
 	if store.closed {
 		store.stateMu.Unlock()
+
 		return nil
 	}
+
 	store.closed = true
 	root := store.root
 	packs := store.packs
@@ -87,23 +90,30 @@ func (store *Store) Close() error {
 	store.idxMu.RUnlock()
 
 	var closeErr error
+
 	for _, pack := range packs {
-		if err := pack.close(); err != nil && closeErr == nil {
+		err := pack.close()
+		if err != nil && closeErr == nil {
 			closeErr = err
 		}
 	}
+
 	for _, index := range indexes {
-		if err := index.close(); err != nil && closeErr == nil {
+		err := index.close()
+		if err != nil && closeErr == nil {
 			closeErr = err
 		}
 	}
+
 	store.cacheMu.Lock()
 	store.deltaCache.clear()
 	store.cacheMu.Unlock()
 
-	if err := root.Close(); err != nil && closeErr == nil {
+	err := root.Close()
+	if err != nil && closeErr == nil {
 		closeErr = err
 	}
+
 	return closeErr
 }
 
@@ -113,7 +123,9 @@ func (store *Store) lookup(id objectid.ObjectID) (location, error) {
 	if id.Algorithm() != store.algo {
 		return zero, errors.New("objectstore/packed: object id algorithm mismatch")
 	}
-	if err := store.ensureCandidates(); err != nil {
+
+	err := store.ensureCandidates()
+	if err != nil {
 		return zero, err
 	}
 
@@ -122,81 +134,111 @@ func (store *Store) lookup(id objectid.ObjectID) (location, error) {
 		candidate, ok := store.candidateForPack(nextPackName)
 		if !ok {
 			nextPackName = store.firstCandidatePackName()
+
 			continue
 		}
+
 		nextPackName = store.nextCandidatePackName(candidate.packName)
+
 		index, err := store.openIndex(candidate)
 		if err != nil {
 			return zero, err
 		}
+
 		offset, ok, err := index.lookup(id)
 		if err != nil {
 			return zero, err
 		}
+
 		if ok {
 			store.touchCandidate(candidate.packName)
+
 			return location{packName: index.packName, offset: offset}, nil
 		}
 	}
+
 	return zero, objectstore.ErrObjectNotFound
 }
 
 // openPack returns one opened and validated pack handle.
 func (store *Store) openPack(name string) (*packFile, error) {
 	store.stateMu.RLock()
-	if pack, ok := store.packs[name]; ok {
+
+	pack, ok := store.packs[name]
+	if ok {
 		store.stateMu.RUnlock()
+
 		return pack, nil
 	}
+
 	store.stateMu.RUnlock()
 
 	file, err := store.root.Open(name)
 	if err != nil {
 		return nil, err
 	}
+
 	info, err := file.Stat()
 	if err != nil {
 		_ = file.Close()
+
 		return nil, err
 	}
-	pack, err := openPackFile(name, file, info.Size())
+
+	pack, err = openPackFile(name, file, info.Size())
 	if err != nil {
 		_ = file.Close()
+
 		return nil, err
 	}
-	if err := store.verifyPackMatchesIndexes(pack); err != nil {
+
+	err = store.verifyPackMatchesIndexes(pack)
+	if err != nil {
 		_ = pack.close()
+
 		return nil, err
 	}
 
 	store.stateMu.Lock()
-	if existing, ok := store.packs[name]; ok {
+
+	existing, ok := store.packs[name]
+	if ok {
 		store.stateMu.Unlock()
+
 		_ = pack.close()
+
 		return existing, nil
 	}
+
 	store.packs[name] = pack
 	store.stateMu.Unlock()
+
 	return pack, nil
 }
 
 // verifyPackMatchesIndexes checks that one opened pack's trailer hash matches
 // every loaded index that references the same pack name.
 func (store *Store) verifyPackMatchesIndexes(pack *packFile) error {
-	if err := store.ensureCandidates(); err != nil {
+	err := store.ensureCandidates()
+	if err != nil {
 		return err
 	}
+
 	candidate, ok := store.candidateForPack(pack.name)
 	if !ok {
 		return fmt.Errorf("objectstore/packed: missing index for pack %q", pack.name)
 	}
+
 	index, err := store.openIndex(candidate)
 	if err != nil {
 		return err
 	}
-	if err := verifyMappedPackMatchesMappedIdx(pack.data, index.data, store.algo); err != nil {
+
+	err = verifyMappedPackMatchesMappedIdx(pack.data, index.data, store.algo)
+	if err != nil {
 		return fmt.Errorf("objectstore/packed: pack %q does not match idx %q: %w", pack.name, index.idxName, err)
 	}
+
 	return nil
 }
 
@@ -206,9 +248,11 @@ func (store *Store) entryMetaAt(loc location) (*packFile, entryMeta, error) {
 	if err != nil {
 		return nil, entryMeta{}, err
 	}
+
 	meta, err := parseEntryMeta(pack, store.algo, loc.offset)
 	if err != nil {
 		return nil, entryMeta{}, err
 	}
+
 	return pack, meta, nil
 }

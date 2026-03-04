@@ -29,6 +29,7 @@ func (reader *objectReader) Read(dst []byte) (int, error) {
 func (reader *objectReader) Close() error {
 	errZlib := reader.zr.Close()
 	errFile := reader.file.Close()
+
 	return errors.Join(errZlib, errFile)
 }
 
@@ -39,11 +40,14 @@ func (store *Store) openInflated(id objectid.ObjectID) (*os.File, io.ReadCloser,
 	if err != nil {
 		return nil, nil, err
 	}
+
 	zr, err := zlib.NewReader(file)
 	if err != nil {
 		_ = file.Close()
+
 		return nil, nil, err
 	}
+
 	return file, zr, nil
 }
 
@@ -56,10 +60,12 @@ func (store *Store) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) 
 	}
 
 	br := bufio.NewReader(zr)
+
 	header, _, size, err := readHeader(br)
 	if err != nil {
 		_ = zr.Close()
 		_ = file.Close()
+
 		return nil, err
 	}
 
@@ -82,10 +88,12 @@ func (store *Store) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, in
 	}
 
 	br := bufio.NewReader(zr)
+
 	_, ty, size, err := readHeader(br)
 	if err != nil {
 		_ = zr.Close()
 		_ = file.Close()
+
 		return objecttype.TypeInvalid, 0, nil, err
 	}
 

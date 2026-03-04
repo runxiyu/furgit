@@ -17,10 +17,12 @@ func TestBlobParseFromGit(t *testing.T) {
 		blobID := testRepo.HashObject(t, "blob", body)
 
 		rawBody := testRepo.CatFile(t, "blob", blobID)
+
 		blob, err := object.ParseBlob(rawBody)
 		if err != nil {
 			t.Fatalf("ParseBlob: %v", err)
 		}
+
 		if !bytes.Equal(blob.Data, body) {
 			t.Fatalf("blob body mismatch")
 		}

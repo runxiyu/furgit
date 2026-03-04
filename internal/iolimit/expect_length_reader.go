@@ -39,13 +39,16 @@ func (reader *expectLengthReader) Read(dst []byte) (int, error) {
 
 	if reader.remaining == 0 {
 		var probe [1]byte
+
 		n, err := reader.src.Read(probe[:])
 		if n > 0 {
 			return 0, ErrExpectedLengthExceeded
 		}
+
 		if err == nil {
 			return 0, nil
 		}
+
 		return 0, err
 	}
 
@@ -66,9 +69,11 @@ func (reader *expectLengthReader) Read(dst []byte) (int, error) {
 		if reader.remaining > 0 {
 			return n, io.ErrUnexpectedEOF
 		}
+
 		if n > 0 {
 			return n, nil
 		}
+
 		return 0, io.EOF
 	}
 

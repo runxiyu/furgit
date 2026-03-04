@@ -39,9 +39,11 @@ func New[K comparable, V any](maxWeight int64, weightFn WeightFunc[K, V], onEvic
 	if maxWeight < 0 {
 		panic("lru: negative max weight")
 	}
+
 	if weightFn == nil {
 		panic("lru: nil weight function")
 	}
+
 	return &Cache[K, V]{
 		maxWeight: maxWeight,
 		weightFn:  weightFn,
@@ -61,6 +63,7 @@ func (cache *Cache[K, V]) Add(key K, value V) bool {
 	if w < 0 {
 		panic("lru: negative entry weight")
 	}
+
 	if w > cache.maxWeight {
 		return false
 	}
@@ -79,6 +82,7 @@ func (cache *Cache[K, V]) Add(key K, value V) bool {
 	cache.weight += w
 
 	cache.evictOverBudget()
+
 	return true
 }
 
@@ -87,8 +91,10 @@ func (cache *Cache[K, V]) Get(key K) (V, bool) {
 	elem, ok := cache.items[key]
 	if !ok {
 		var zero V
+
 		return zero, false
 	}
+
 	cache.lru.MoveToBack(elem)
 	//nolint:forcetypeassert
 	return elem.Value.(*entry[K, V]).value, true
@@ -99,6 +105,7 @@ func (cache *Cache[K, V]) Peek(key K) (V, bool) {
 	elem, ok := cache.items[key]
 	if !ok {
 		var zero V
+
 		return zero, false
 	}
 	//nolint:forcetypeassert
@@ -110,9 +117,12 @@ func (cache *Cache[K, V]) Remove(key K) (V, bool) {
 	elem, ok := cache.items[key]
 	if !ok {
 		var zero V
+
 		return zero, false
 	}
+
 	ent := cache.removeElem(elem)
+
 	return ent.value, true
 }
 
@@ -148,6 +158,7 @@ func (cache *Cache[K, V]) SetMaxWeight(maxWeight int64) {
 	if maxWeight < 0 {
 		panic("lru: negative max weight")
 	}
+
 	cache.maxWeight = maxWeight
 	cache.evictOverBudget()
 }
@@ -158,6 +169,7 @@ func (cache *Cache[K, V]) evictOverBudget() {
 		if elem == nil {
 			return
 		}
+
 		cache.removeElem(elem)
 	}
 }
@@ -167,9 +179,11 @@ func (cache *Cache[K, V]) removeElem(elem *list.Element) *entry[K, V] {
 	ent := elem.Value.(*entry[K, V])
 	cache.lru.Remove(elem)
 	delete(cache.items, ent.key)
+
 	cache.weight -= ent.weight
 	if cache.onEvict != nil {
 		cache.onEvict(ent.key, ent.value)
 	}
+
 	return ent
 }

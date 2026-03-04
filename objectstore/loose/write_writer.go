@@ -76,23 +76,28 @@ func (writer *streamWriter) Write(src []byte) (int, error) {
 	if writer.finalized {
 		return 0, errors.New("objectstore/loose: write after finalize")
 	}
+
 	if writer.closed {
 		return 0, errors.New("objectstore/loose: write after close")
 	}
 
 	if writer.fullMode {
-		if err := writer.acceptFull(src); err != nil {
+		err := writer.acceptFull(src)
+		if err != nil {
 			return 0, err
 		}
 	} else {
-		if err := writer.acceptContent(int64(len(src))); err != nil {
+		err := writer.acceptContent(int64(len(src)))
+		if err != nil {
 			return 0, err
 		}
 	}
 
-	if err := writer.writeRawChunk(src); err != nil {
+	err := writer.writeRawChunk(src)
+	if err != nil {
 		return 0, err
 	}
+
 	return len(src), nil
 }
 
@@ -102,12 +107,14 @@ func (writer *streamWriter) Close() error {
 	if writer.closed {
 		return nil
 	}
+
 	writer.closed = true
 
 	errZlib := writer.zw.Close()
 	errSync := writer.file.Sync()
 	errFile := writer.file.Close()
 	writer.file = nil
+
 	return errors.Join(errZlib, errSync, errFile)
 }
 
@@ -118,84 +125,107 @@ func (writer *streamWriter) finalize() (objectid.ObjectID, error) {
 	if writer.finalized {
 		return writer.finalID, writer.finalErr
 	}
+
 	writer.finalized = true
 
 	var zero objectid.ObjectID
 
 	if !writer.closed {
-		if err := writer.Close(); err != nil {
+		err := writer.Close()
+		if err != nil {
 			writer.finalErr = err
+
 			return zero, err
 		}
 	}
 
 	if writer.fullMode && !writer.headerDone {
 		writer.finalErr = errors.New("objectstore/loose: missing full object header")
+
 		return zero, writer.finalErr
 	}
+
 	if writer.expectedContentLeft != 0 {
 		writer.finalErr = errors.New("objectstore/loose: object content shorter than declared size")
+
 		return zero, writer.finalErr
 	}
 
 	idBytes := writer.hash.Sum(nil)
+
 	id, err := objectid.FromBytes(writer.store.algo, idBytes)
 	if err != nil {
 		writer.finalErr = err
+
 		return zero, err
 	}
 
 	relPath, err := writer.store.objectPath(id)
 	if err != nil {
 		writer.finalErr = err
+
 		return zero, err
 	}
 
 	dir := filepath.Dir(relPath)
-	if err := writer.store.root.MkdirAll(dir, 0o755); err != nil {
+
+	err = writer.store.root.MkdirAll(dir, 0o755)
+	if err != nil {
 		writer.finalErr = err
+
 		return zero, err
 	}
 
 	cleanup := true
+
 	defer func() {
 		if cleanup {
 			_ = writer.store.root.Remove(writer.tmpRelPath)
 		}
 	}()
 
-	if err := writer.store.root.Link(writer.tmpRelPath, relPath); err != nil {
+	err = writer.store.root.Link(writer.tmpRelPath, relPath)
+	if err != nil {
 		if errors.Is(err, fs.ErrExist) {
 			writer.finalID = id
 			cleanup = false
 			_ = writer.store.root.Remove(writer.tmpRelPath)
+
 			return id, nil
 		}
+
 		writer.finalErr = err
+
 		return zero, err
 	}
 
 	writer.finalID = id
 	cleanup = false
+
 	return id, nil
 }
 
 // acceptFull validates and accounts raw full-object input.
 func (writer *streamWriter) acceptFull(src []byte) error {
 	if !writer.headerDone {
-		if nul := bytes.IndexByte(src, 0); nul >= 0 {
+		nul := bytes.IndexByte(src, 0)
+		if nul >= 0 {
 			headerChunkLen := nul + 1
 			writer.headerBuf = append(writer.headerBuf, src[:headerChunkLen]...)
+
 			_, size, _, ok := objectheader.Parse(writer.headerBuf)
 			if !ok {
 				return errors.New("objectstore/loose: malformed object header")
 			}
+
 			writer.headerDone = true
 			writer.expectedContentLeft = size
+
 			return writer.acceptContent(int64(len(src) - headerChunkLen))
 		}
 
 		writer.headerBuf = append(writer.headerBuf, src...)
+
 		return nil
 	}
 
@@ -207,18 +237,24 @@ func (writer *streamWriter) acceptContent(n int64) error {
 	if n > writer.expectedContentLeft {
 		return errors.New("objectstore/loose: object content exceeds declared size")
 	}
+
 	writer.expectedContentLeft -= n
+
 	return nil
 }
 
 // writeRawChunk forwards raw bytes to the hash and deflate pipeline.
 func (writer *streamWriter) writeRawChunk(src []byte) error {
-	if _, err := writer.hash.Write(src); err != nil {
+	_, err := writer.hash.Write(src)
+	if err != nil {
 		return err
 	}
-	if _, err := writer.zw.Write(src); err != nil {
+
+	_, err = writer.zw.Write(src)
+	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -227,13 +263,16 @@ func (writer *streamWriter) writeRawChunk(src []byte) error {
 func (store *Store) createTempObjectFile(dir string) (string, *os.File, error) {
 	for range 16 {
 		relPath := filepath.Join(dir, tempObjectFilePrefix+rand.Text())
+
 		file, err := store.root.OpenFile(relPath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o644)
 		if err == nil {
 			return relPath, file, nil
 		}
+
 		if errors.Is(err, fs.ErrExist) {
 			continue
 		}
+
 		return "", nil, err
 	}
 

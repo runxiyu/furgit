@@ -17,5 +17,6 @@ type Tag struct {
 // ObjectType returns TypeTag.
 func (tag *Tag) ObjectType() objecttype.Type {
 	_ = tag
+
 	return objecttype.TypeTag
 }

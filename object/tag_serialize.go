@@ -22,6 +22,7 @@ func (tag *Tag) SerializeWithoutHeader() ([]byte, error) {
 	if !ok {
 		return nil, fmt.Errorf("object: tag: invalid target type %d", tag.TargetType)
 	}
+
 	buf.WriteString("type ")
 	buf.WriteString(tyName)
 	buf.WriteByte('\n')
@@ -35,6 +36,7 @@ func (tag *Tag) SerializeWithoutHeader() ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		buf.WriteString("tagger ")
 		buf.Write(taggerBytes)
 		buf.WriteByte('\n')
@@ -42,6 +44,7 @@ func (tag *Tag) SerializeWithoutHeader() ([]byte, error) {
 
 	buf.WriteByte('\n')
 	buf.Write(tag.Message)
+
 	return buf.Bytes(), nil
 }
 
@@ -51,12 +54,15 @@ func (tag *Tag) SerializeWithHeader() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	header, ok := objectheader.Encode(objecttype.TypeTag, int64(len(body)))
 	if !ok {
 		return nil, errors.New("object: tag: failed to encode object header")
 	}
+
 	raw := make([]byte, len(header)+len(body))
 	copy(raw, header)
 	copy(raw[len(header):], body)
+
 	return raw, nil
 }

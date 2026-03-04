@@ -15,6 +15,7 @@ func buildGitMktreeInput(entries []object.TreeEntry) string {
 	for _, e := range entries {
 		fmt.Fprintf(&b, "%o %s %s\t%s\n", e.Mode, mktreeTypeFromMode(e.Mode), e.ID.String(), e.Name)
 	}
+
 	return b.String()
 }
 
@@ -35,14 +36,17 @@ func gitLsTreeNames(out []byte) [][]byte {
 	if len(out) == 0 {
 		return nil
 	}
+
 	parts := bytes.Split(out, []byte{0})
 	if len(parts) > 0 && len(parts[len(parts)-1]) == 0 {
 		parts = parts[:len(parts)-1]
 	}
+
 	names := make([][]byte, 0, len(parts))
 	for _, name := range parts {
 		names = append(names, append([]byte(nil), name...))
 	}
+
 	return names
 }
 

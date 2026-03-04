@@ -24,24 +24,30 @@ func parsePackedRefs(r io.Reader, algo objectid.Algorithm) (map[string]ref.Detac
 		if err != nil && err != io.EOF {
 			return nil, nil, err
 		}
+
 		if line == "" && err == io.EOF {
 			break
 		}
+
 		lineNum++
 
 		line = strings.TrimSuffix(line, "\n")
 		line = strings.TrimSuffix(line, "\r")
+
 		line = strings.TrimSpace(line)
 		if line == "" {
 			if err == io.EOF {
 				break
 			}
+
 			continue
 		}
+
 		if strings.HasPrefix(line, "#") {
 			if err == io.EOF {
 				break
 			}
+
 			continue
 		}
 
@@ -49,19 +55,24 @@ func parsePackedRefs(r io.Reader, algo objectid.Algorithm) (map[string]ref.Detac
 			if prev < 0 {
 				return nil, nil, fmt.Errorf("refstore/packed: line %d: peeled line without preceding ref", lineNum)
 			}
+
 			peeledHex := strings.TrimSpace(strings.TrimPrefix(line, "^"))
+
 			peeled, parseErr := objectid.ParseHex(algo, peeledHex)
 			if parseErr != nil {
 				return nil, nil, fmt.Errorf("refstore/packed: line %d: invalid peeled oid: %w", lineNum, parseErr)
 			}
+
 			peeledCopy := peeled
 			cur := ordered[prev]
 			cur.Peeled = &peeledCopy
 			ordered[prev] = cur
 			byName[cur.Name()] = cur
+
 			if err == io.EOF {
 				break
 			}
+
 			continue
 		}
 
@@ -79,6 +90,7 @@ func parsePackedRefs(r io.Reader, algo objectid.Algorithm) (map[string]ref.Detac
 		if name == "" {
 			return nil, nil, fmt.Errorf("refstore/packed: line %d: empty ref name", lineNum)
 		}
+
 		if _, exists := byName[name]; exists {
 			return nil, nil, fmt.Errorf("refstore/packed: line %d: duplicate ref %q", lineNum, name)
 		}

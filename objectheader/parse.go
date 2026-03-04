@@ -21,6 +21,7 @@ func Parse(data []byte) (objecttype.Type, int64, int, bool) {
 	if nulRel < 0 {
 		return objecttype.TypeInvalid, 0, 0, false
 	}
+
 	nul := space + 1 + nulRel
 
 	ty, ok := objecttype.ParseName(string(data[:space]))
@@ -32,6 +33,7 @@ func Parse(data []byte) (objecttype.Type, int64, int, bool) {
 	if len(sizeBytes) == 0 {
 		return objecttype.TypeInvalid, 0, 0, false
 	}
+
 	size, err := strconv.ParseInt(string(sizeBytes), 10, 64)
 	if err != nil || size < 0 {
 		return objecttype.TypeInvalid, 0, 0, false

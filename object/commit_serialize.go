@@ -16,7 +16,9 @@ func (commit *Commit) SerializeWithoutHeader() ([]byte, error) {
 	if commit.Tree.Size() == 0 {
 		return nil, errors.New("object: commit: missing tree id")
 	}
+
 	fmt.Fprintf(&buf, "tree %s\n", commit.Tree.String())
+
 	for _, parent := range commit.Parents {
 		fmt.Fprintf(&buf, "parent %s\n", parent.String())
 	}
@@ -25,6 +27,7 @@ func (commit *Commit) SerializeWithoutHeader() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	buf.WriteString("author ")
 	buf.Write(authorBytes)
 	buf.WriteByte('\n')
@@ -33,6 +36,7 @@ func (commit *Commit) SerializeWithoutHeader() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	buf.WriteString("committer ")
 	buf.Write(committerBytes)
 	buf.WriteByte('\n')
@@ -42,10 +46,12 @@ func (commit *Commit) SerializeWithoutHeader() ([]byte, error) {
 		buf.WriteString(commit.ChangeID)
 		buf.WriteByte('\n')
 	}
+
 	for _, h := range commit.ExtraHeaders {
 		if h.Key == "" {
 			return nil, errors.New("object: commit: extra header has empty key")
 		}
+
 		buf.WriteString(h.Key)
 		buf.WriteByte(' ')
 		buf.Write(h.Value)
@@ -54,6 +60,7 @@ func (commit *Commit) SerializeWithoutHeader() ([]byte, error) {
 
 	buf.WriteByte('\n')
 	buf.Write(commit.Message)
+
 	return buf.Bytes(), nil
 }
 
@@ -63,12 +70,15 @@ func (commit *Commit) SerializeWithHeader() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	header, ok := objectheader.Encode(objecttype.TypeCommit, int64(len(body)))
 	if !ok {
 		return nil, errors.New("object: commit: failed to encode object header")
 	}
+
 	raw := make([]byte, len(header)+len(body))
 	copy(raw, header)
 	copy(raw[len(header):], body)
+
 	return raw, nil
 }

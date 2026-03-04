@@ -21,10 +21,13 @@ func traverseTreeIter(repo *repository.Repository, root objectid.ObjectID) (int,
 		id := frame.id
 
 		if !frame.isTree {
-			if _, err := repo.ReadStoredSize(id); err != nil {
+			_, err := repo.ReadStoredSize(id)
+			if err != nil {
 				return 0, err
 			}
+
 			total++
+
 			continue
 		}
 
@@ -32,12 +35,15 @@ func traverseTreeIter(repo *repository.Repository, root objectid.ObjectID) (int,
 		if err != nil {
 			return 0, err
 		}
+
 		total++
+
 		for i := len(tree.Tree().Entries) - 1; i >= 0; i-- {
 			entry := tree.Tree().Entries[i]
 			if entry.Mode == object.FileModeGitlink {
 				continue
 			}
+
 			stack = append(stack, treeWalkFrame{
 				id:     entry.ID,
 				isTree: entry.Mode == object.FileModeDir,
@@ -56,15 +62,19 @@ func traverseReachableIter(repo *repository.Repository, root objectid.ObjectID) 
 	for len(stack) > 0 {
 		id := stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
-		if _, ok := visited[id]; ok {
+
+		_, ok := visited[id]
+		if ok {
 			continue
 		}
+
 		visited[id] = struct{}{}
 
 		stored, err := repo.ReadStored(id)
 		if err != nil {
 			return 0, err
 		}
+
 		total++
 
 		switch obj := stored.Object().(type) {
@@ -77,6 +87,7 @@ func traverseReachableIter(repo *repository.Repository, root objectid.ObjectID) 
 				if entry.Mode == object.FileModeGitlink {
 					continue
 				}
+
 				stack = append(stack, entry.ID)
 			}
 		case *object.Tag:

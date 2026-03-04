@@ -29,12 +29,14 @@ func TestOpenFilesRefFormat(t *testing.T) {
 		if err != nil {
 			t.Fatalf("os.OpenRoot: %v", err)
 		}
+
 		defer func() { _ = root.Close() }()
 
 		repo, err := repository.Open(root)
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}
+
 		defer func() { _ = repo.Close() }()
 
 		if repo.Algorithm() != algo {
@@ -45,9 +47,11 @@ func TestOpenFilesRefFormat(t *testing.T) {
 		if err != nil {
 			t.Fatalf("ReadHeader(commit): %v", err)
 		}
+
 		if headerType != objecttype.TypeCommit {
 			t.Fatalf("ReadHeader(commit) type = %v, want %v", headerType, objecttype.TypeCommit)
 		}
+
 		if headerSize <= 0 {
 			t.Fatalf("ReadHeader(commit) size = %d, want > 0", headerSize)
 		}
@@ -56,10 +60,12 @@ func TestOpenFilesRefFormat(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Resolve(refs/heads/main): %v", err)
 		}
+
 		detached, ok := resolved.(ref.Detached)
 		if !ok {
 			t.Fatalf("Resolve(refs/heads/main) type = %T, want ref.Detached", resolved)
 		}
+
 		if detached.ID != commitID {
 			t.Fatalf("Resolve(refs/heads/main) id = %s, want %s", detached.ID, commitID)
 		}
@@ -68,6 +74,7 @@ func TestOpenFilesRefFormat(t *testing.T) {
 		if err != nil {
 			t.Fatalf("ResolveFully(HEAD): %v", err)
 		}
+
 		if head.ID != commitID {
 			t.Fatalf("ResolveFully(HEAD) id = %s, want %s", head.ID, commitID)
 		}
@@ -97,6 +104,7 @@ func TestOpenReftableRefFormat(t *testing.T) {
 
 func newRepoForRefs(t *testing.T, algo objectid.Algorithm, refFormat string) *testgit.TestRepo {
 	t.Helper()
+
 	return testgit.NewRepo(t, testgit.RepoOptions{
 		ObjectFormat: algo,
 		Bare:         true,
@@ -109,6 +117,7 @@ func writeMainAndHead(t *testing.T, repoHarness *testgit.TestRepo) objectid.Obje
 	_, _, commitID := repoHarness.MakeCommit(t, "refs")
 	repoHarness.UpdateRef(t, "refs/heads/main", commitID)
 	repoHarness.SymbolicRef(t, "HEAD", "refs/heads/main")
+
 	return commitID
 }
 
@@ -119,18 +128,21 @@ func assertResolveFully(t *testing.T, repoHarness *testgit.TestRepo, name string
 	if err != nil {
 		t.Fatalf("os.OpenRoot: %v", err)
 	}
+
 	defer func() { _ = root.Close() }()
 
 	repo, err := repository.Open(root)
 	if err != nil {
 		t.Fatalf("repository.Open: %v", err)
 	}
+
 	defer func() { _ = repo.Close() }()
 
 	resolved, err := repo.Refs().ResolveFully(name)
 	if err != nil {
 		t.Fatalf("ResolveFully(%s): %v", name, err)
 	}
+
 	if resolved.ID != want {
 		t.Fatalf("ResolveFully(%s) id = %s, want %s", name, resolved.ID, want)
 	}

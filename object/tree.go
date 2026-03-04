@@ -35,6 +35,7 @@ type Tree struct {
 // ObjectType returns TypeTree.
 func (tree *Tree) ObjectType() objecttype.Type {
 	_ = tree
+
 	return objecttype.TypeTree
 }
 
@@ -43,9 +44,11 @@ func (tree *Tree) Entry(name []byte) *TreeEntry {
 	if len(tree.Entries) == 0 {
 		return nil
 	}
+
 	if e := tree.entry(name, true); e != nil {
 		return e
 	}
+
 	return tree.entry(name, false)
 }
 
@@ -54,6 +57,7 @@ func (tree *Tree) InsertEntry(newEntry TreeEntry) error {
 	if tree.entry(newEntry.Name, true) != nil || tree.entry(newEntry.Name, false) != nil {
 		return fmt.Errorf("object: tree: entry %q already exists", newEntry.Name)
 	}
+
 	newIsTree := newEntry.Mode == FileModeDir
 	insertAt := sort.Search(len(tree.Entries), func(i int) bool {
 		return TreeEntryNameCompare(tree.Entries[i].Name, tree.Entries[i].Mode, newEntry.Name, newIsTree) >= 0
@@ -61,6 +65,7 @@ func (tree *Tree) InsertEntry(newEntry TreeEntry) error {
 	tree.Entries = append(tree.Entries, TreeEntry{})
 	copy(tree.Entries[insertAt+1:], tree.Entries[insertAt:])
 	tree.Entries[insertAt] = newEntry
+
 	return nil
 }
 
@@ -69,13 +74,16 @@ func (tree *Tree) RemoveEntry(name []byte) error {
 	if len(tree.Entries) == 0 {
 		return fmt.Errorf("object: tree: entry %q not found", name)
 	}
+
 	for i := range tree.Entries {
 		if bytes.Equal(tree.Entries[i].Name, name) {
 			copy(tree.Entries[i:], tree.Entries[i+1:])
 			tree.Entries = tree.Entries[:len(tree.Entries)-1]
+
 			return nil
 		}
 	}
+
 	return fmt.Errorf("object: tree: entry %q not found", name)
 }
 
@@ -84,19 +92,23 @@ func (tree *Tree) entry(name []byte, searchIsTree bool) *TreeEntry {
 	for low <= high {
 		mid := low + (high-low)/2
 		entry := &tree.Entries[mid]
+
 		cmp := TreeEntryNameCompare(entry.Name, entry.Mode, name, searchIsTree)
 		if cmp == 0 {
 			if bytes.Equal(entry.Name, name) {
 				return entry
 			}
+
 			return nil
 		}
+
 		if cmp < 0 {
 			low = mid + 1
 		} else {
 			high = mid - 1
 		}
 	}
+
 	return nil
 }
 
@@ -108,6 +120,7 @@ func TreeEntryNameCompare(entryName []byte, entryMode FileMode, searchName []byt
 	if isEntryTree {
 		entryLen++
 	}
+
 	searchLen := len(searchName)
 	if searchIsTree {
 		searchLen++
@@ -122,14 +135,17 @@ func TreeEntryNameCompare(entryName []byte, entryMode FileMode, searchName []byt
 		} else {
 			ec = '/'
 		}
+
 		if i < len(searchName) {
 			sc = searchName[i]
 		} else {
 			sc = '/'
 		}
+
 		if ec < sc {
 			return -1
 		}
+
 		if ec > sc {
 			return 1
 		}
@@ -138,8 +154,10 @@ func TreeEntryNameCompare(entryName []byte, entryMode FileMode, searchName []byt
 	if entryLen < searchLen {
 		return -1
 	}
+
 	if entryLen > searchLen {
 		return 1
 	}
+
 	return 0
 }

@@ -14,6 +14,7 @@ func (store *Store) ReadSize(id objectid.ObjectID) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return store.resolveSizeAt(loc)
 }
 
@@ -23,9 +24,11 @@ func (store *Store) resolveSizeAt(start location) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	if packfmt.IsBaseObjectType(meta.ty) {
 		return meta.size, nil
 	}
+
 	switch meta.ty {
 	case objecttype.TypeRefDelta, objecttype.TypeOfsDelta:
 		return deltaDeclaredSizeAt(pack, meta.dataOffset)

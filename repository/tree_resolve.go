@@ -16,11 +16,13 @@ func (repo *Repository) ResolveTreeEntry(tree *objectstored.StoredTree, parts []
 	if tree == nil {
 		return object.TreeEntry{}, errors.New("repository: nil root tree")
 	}
+
 	if len(parts) == 0 {
 		return object.TreeEntry{}, errors.New("repository: empty tree path")
 	}
 
 	current := tree
+
 	for i, part := range parts {
 		if len(part) == 0 {
 			return object.TreeEntry{}, errors.New("repository: empty tree path segment")
@@ -30,9 +32,11 @@ func (repo *Repository) ResolveTreeEntry(tree *objectstored.StoredTree, parts []
 		if entry == nil {
 			return object.TreeEntry{}, fmt.Errorf("repository: tree entry %q not found", part)
 		}
+
 		if i == len(parts)-1 {
 			return *entry, nil
 		}
+
 		if entry.Mode != object.FileModeDir {
 			return object.TreeEntry{}, fmt.Errorf("repository: path segment %q is not a tree", part)
 		}
@@ -41,6 +45,7 @@ func (repo *Repository) ResolveTreeEntry(tree *objectstored.StoredTree, parts []
 		if err != nil {
 			return object.TreeEntry{}, err
 		}
+
 		current = next
 	}
 

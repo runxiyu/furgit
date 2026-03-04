@@ -42,6 +42,7 @@ func New(root *os.Root, algo objectid.Algorithm) (*Store, error) {
 	if algo.Size() == 0 {
 		return nil, objectid.ErrInvalidAlgorithm
 	}
+
 	return &Store{root: root, algo: algo}, nil
 }
 
@@ -50,25 +51,33 @@ func (store *Store) Close() error {
 	store.stateMu.Lock()
 	if store.closed {
 		store.stateMu.Unlock()
+
 		return nil
 	}
+
 	store.closed = true
 	root := store.root
 	tables := store.tables
 	store.stateMu.Unlock()
 
 	var closeErr error
+
 	for _, table := range tables {
 		if table == nil {
 			continue
 		}
-		if err := table.close(); err != nil && closeErr == nil {
+
+		err := table.close()
+		if err != nil && closeErr == nil {
 			closeErr = err
 		}
 	}
-	if err := root.Close(); err != nil && closeErr == nil {
+
+	err := root.Close()
+	if err != nil && closeErr == nil {
 		closeErr = err
 	}
+
 	return closeErr
 }
 
@@ -78,23 +87,29 @@ func (store *Store) Resolve(name string) (ref.Ref, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	for i := len(tables) - 1; i >= 0; i-- {
 		rec, found, err := tables[i].resolveRecord(name)
 		if err != nil {
 			return nil, err
 		}
+
 		if !found {
 			continue
 		}
+
 		if rec.deleted {
 			return nil, refstore.ErrReferenceNotFound
 		}
+
 		resolved, err := rec.toRef(name)
 		if err != nil {
 			return nil, err
 		}
+
 		return resolved, nil
 	}
+
 	return nil, refstore.ErrReferenceNotFound
 }
 
@@ -104,16 +119,21 @@ func (store *Store) Resolve(name string) (ref.Ref, error) {
 // annotated tag objects.
 func (store *Store) ResolveFully(name string) (ref.Detached, error) {
 	seen := map[string]struct{}{}
+
 	cur := name
 	for {
-		if _, exists := seen[cur]; exists {
+		_, exists := seen[cur]
+		if exists {
 			return ref.Detached{}, errors.New("refstore/reftable: symbolic reference cycle")
 		}
+
 		seen[cur] = struct{}{}
+
 		resolved, err := store.Resolve(cur)
 		if err != nil {
 			return ref.Detached{}, err
 		}
+
 		switch resolved := resolved.(type) {
 		case ref.Detached:
 			return resolved, nil
@@ -121,6 +141,7 @@ func (store *Store) ResolveFully(name string) (ref.Detached, error) {
 			if resolved.Target == "" {
 				return ref.Detached{}, errors.New("refstore/reftable: symbolic reference has empty target")
 			}
+
 			cur = resolved.Target
 		default:
 			return ref.Detached{}, errors.New("refstore/reftable: unsupported reference type")
@@ -137,32 +158,41 @@ func (store *Store) List(pattern string) ([]ref.Ref, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	visible := make(map[string]ref.Ref)
 	masked := make(map[string]struct{})
 
 	for i := len(tables) - 1; i >= 0; i-- {
-		if err := tables[i].forEachRecord(func(name string, rec recordValue) error {
-			if _, done := masked[name]; done {
+		err := tables[i].forEachRecord(func(name string, rec recordValue) error {
+			_, done := masked[name]
+			if done {
 				return nil
 			}
+
 			masked[name] = struct{}{}
+
 			if rec.deleted {
 				return nil
 			}
+
 			resolved, err := rec.toRef(name)
 			if err != nil {
 				return err
 			}
+
 			visible[name] = resolved
+
 			return nil
-		}); err != nil {
+		})
+		if err != nil {
 			return nil, err
 		}
 	}
 
 	matchAll := pattern == ""
 	if !matchAll {
-		if _, err := pathMatch(pattern, "refs/heads/main"); err != nil {
+		_, err := pathMatch(pattern, "refs/heads/main")
+		if err != nil {
 			return nil, err
 		}
 	}
@@ -171,6 +201,7 @@ func (store *Store) List(pattern string) ([]ref.Ref, error) {
 	for name := range visible {
 		names = append(names, name)
 	}
+
 	sort.Strings(names)
 
 	out := make([]ref.Ref, 0, len(names))
@@ -180,12 +211,15 @@ func (store *Store) List(pattern string) ([]ref.Ref, error) {
 			if err != nil {
 				return nil, err
 			}
+
 			if !ok {
 				continue
 			}
 		}
+
 		out = append(out, visible[name])
 	}
+
 	return out, nil
 }
 
@@ -195,21 +229,27 @@ func (store *Store) Shorten(name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	names := make([]string, 0, len(refs))
 	found := false
+
 	for _, entry := range refs {
 		if entry == nil {
 			continue
 		}
+
 		full := entry.Name()
+
 		names = append(names, full)
 		if full == name {
 			found = true
 		}
 	}
+
 	if !found {
 		return "", refstore.ErrReferenceNotFound
 	}
+
 	return refstore.ShortenName(name, names), nil
 }
 
@@ -225,9 +265,11 @@ func (store *Store) ensureTables() ([]*tableFile, error) {
 
 	store.stateMu.RLock()
 	defer store.stateMu.RUnlock()
+
 	if store.closed {
 		return nil, errors.New("refstore/reftable: store is closed")
 	}
+
 	return store.tables, store.loadErr
 }
 
@@ -238,18 +280,23 @@ func (store *Store) loadTables() ([]*tableFile, error) {
 		if errors.Is(err, os.ErrNotExist) {
 			return nil, nil
 		}
+
 		return nil, err
 	}
+
 	lines := strings.Split(string(listRaw), "\n")
+
 	names := make([]string, 0, len(lines))
 	for _, line := range lines {
 		line = strings.TrimSuffix(line, "\r")
 		if line == "" {
 			continue
 		}
+
 		if strings.Contains(line, "/") {
 			return nil, errors.New("refstore/reftable: invalid table name")
 		}
+
 		names = append(names, line)
 	}
 
@@ -260,9 +307,12 @@ func (store *Store) loadTables() ([]*tableFile, error) {
 			for _, opened := range out {
 				_ = opened.close()
 			}
+
 			return nil, err
 		}
+
 		out = append(out, table)
 	}
+
 	return out, nil
 }

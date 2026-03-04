@@ -11,6 +11,7 @@ import (
 // SerializeWithoutHeader renders the raw tree body bytes.
 func (tree *Tree) SerializeWithoutHeader() ([]byte, error) {
 	var bodyLen int
+
 	for _, entry := range tree.Entries {
 		mode := strconv.FormatUint(uint64(entry.Mode), 8)
 		bodyLen += len(mode) + 1 + len(entry.Name) + 1 + entry.ID.Size()
@@ -18,6 +19,7 @@ func (tree *Tree) SerializeWithoutHeader() ([]byte, error) {
 
 	body := make([]byte, bodyLen)
 	pos := 0
+
 	for _, entry := range tree.Entries {
 		mode := strconv.FormatUint(uint64(entry.Mode), 8)
 		pos += copy(body[pos:], mode)
@@ -39,12 +41,15 @@ func (tree *Tree) SerializeWithHeader() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	header, ok := objectheader.Encode(objecttype.TypeTree, int64(len(body)))
 	if !ok {
 		return nil, errors.New("object: tree: failed to encode object header")
 	}
+
 	raw := make([]byte, len(header)+len(body))
 	copy(raw, header)
 	copy(raw[len(header):], body)
+
 	return raw, nil
 }

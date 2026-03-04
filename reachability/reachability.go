@@ -26,10 +26,12 @@ func (r *Reachability) IsAncestor(ancestor, descendant objectid.ObjectID) (bool,
 	if err != nil {
 		return false, err
 	}
+
 	descendantCommit, err := r.peelRootToDomain(descendant, DomainCommits)
 	if err != nil {
 		return false, err
 	}
+
 	if ancestorCommit == descendantCommit {
 		return true, nil
 	}
@@ -40,9 +42,12 @@ func (r *Reachability) IsAncestor(ancestor, descendant objectid.ObjectID) (bool,
 			return true, nil
 		}
 	}
-	if err := walk.Err(); err != nil {
+
+	err = walk.Err()
+	if err != nil {
 		return false, err
 	}
+
 	return false, nil
 }
 
@@ -53,6 +58,7 @@ func (r *Reachability) CheckConnected(domain Domain, haves, wants map[objectid.O
 	walk := r.Walk(domain, haves, wants)
 	for range walk.Seq() {
 	}
+
 	return walk.Err()
 }
 
@@ -64,8 +70,11 @@ func (r *Reachability) Walk(domain Domain, haves, wants map[objectid.ObjectID]st
 		haves:        haves,
 		wants:        wants,
 	}
-	if err := validateDomain(domain); err != nil {
+
+	err := validateDomain(domain)
+	if err != nil {
 		walk.err = err
 	}
+
 	return walk
 }

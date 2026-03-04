@@ -28,15 +28,19 @@ func (chain *Chain) Resolve(name string) (ref.Ref, error) {
 		if backend == nil {
 			continue
 		}
+
 		resolved, err := backend.Resolve(name)
 		if err == nil {
 			return resolved, nil
 		}
+
 		if errors.Is(err, refstore.ErrReferenceNotFound) {
 			continue
 		}
+
 		return nil, fmt.Errorf("refstore: backend %d resolve: %w", i, err)
 	}
+
 	return nil, refstore.ErrReferenceNotFound
 }
 
@@ -46,11 +50,13 @@ func (chain *Chain) Resolve(name string) (ref.Ref, error) {
 // references to cross backends in the chain.
 func (chain *Chain) ResolveFully(name string) (ref.Detached, error) {
 	cur := name
+
 	seen := map[string]struct{}{}
 	for {
 		if _, ok := seen[cur]; ok {
 			return ref.Detached{}, fmt.Errorf("refstore: symbolic reference cycle at %q", cur)
 		}
+
 		seen[cur] = struct{}{}
 
 		resolved, err := chain.Resolve(cur)
@@ -65,6 +71,7 @@ func (chain *Chain) ResolveFully(name string) (ref.Detached, error) {
 			if resolved.Target == "" {
 				return ref.Detached{}, fmt.Errorf("refstore: symbolic reference %q has empty target", resolved.Name())
 			}
+
 			cur = resolved.Target
 		default:
 			return ref.Detached{}, fmt.Errorf("refstore: unsupported reference type %T", resolved)
@@ -77,25 +84,31 @@ func (chain *Chain) ResolveFully(name string) (ref.Detached, error) {
 // First-seen wins, so earlier backends have precedence.
 func (chain *Chain) List(pattern string) ([]ref.Ref, error) {
 	var refs []ref.Ref
+
 	seen := map[string]struct{}{}
 
 	for i, backend := range chain.backends {
 		if backend == nil {
 			continue
 		}
+
 		listed, err := backend.List(pattern)
 		if err != nil {
 			return nil, fmt.Errorf("refstore: backend %d list: %w", i, err)
 		}
+
 		for _, entry := range listed {
 			if entry == nil {
 				continue
 			}
+
 			name := entry.Name()
 			if _, ok := seen[name]; ok {
 				continue
 			}
+
 			seen[name] = struct{}{}
+
 			refs = append(refs, entry)
 		}
 	}
@@ -109,34 +122,44 @@ func (chain *Chain) Shorten(name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	names := make([]string, 0, len(refs))
 	found := false
+
 	for _, entry := range refs {
 		if entry == nil {
 			continue
 		}
+
 		full := entry.Name()
+
 		names = append(names, full)
 		if full == name {
 			found = true
 		}
 	}
+
 	if !found {
 		return "", refstore.ErrReferenceNotFound
 	}
+
 	return refstore.ShortenName(name, names), nil
 }
 
 // Close closes all backends and joins close errors.
 func (chain *Chain) Close() error {
 	var errs []error
+
 	for _, backend := range chain.backends {
 		if backend == nil {
 			continue
 		}
-		if err := backend.Close(); err != nil {
+
+		err := backend.Close()
+		if err != nil {
 			errs = append(errs, err)
 		}
 	}
+
 	return errors.Join(errs...)
 }

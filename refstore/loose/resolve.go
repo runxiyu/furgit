@@ -16,10 +16,12 @@ func (store *Store) Resolve(name string) (ref.Ref, error) {
 	if name == "" {
 		return nil, refstore.ErrReferenceNotFound
 	}
+
 	resolved, err := store.resolveOne(name)
 	if err != nil {
 		return nil, err
 	}
+
 	return resolved, nil
 }
 
@@ -30,17 +32,20 @@ func (store *Store) ResolveFully(name string) (ref.Detached, error) {
 	}
 
 	cur := name
+
 	seen := make(map[string]struct{})
 	for {
 		if _, ok := seen[cur]; ok {
 			return ref.Detached{}, fmt.Errorf("refstore/loose: symbolic reference cycle at %q", cur)
 		}
+
 		seen[cur] = struct{}{}
 
 		resolved, err := store.resolveOne(cur)
 		if err != nil {
 			return ref.Detached{}, err
 		}
+
 		switch resolved := resolved.(type) {
 		case ref.Detached:
 			return resolved, nil
@@ -49,6 +54,7 @@ func (store *Store) ResolveFully(name string) (ref.Detached, error) {
 			if target == "" {
 				return ref.Detached{}, fmt.Errorf("refstore/loose: symbolic reference %q has empty target", resolved.Name())
 			}
+
 			cur = target
 		default:
 			return ref.Detached{}, fmt.Errorf("refstore/loose: unsupported reference type %T", resolved)
@@ -63,23 +69,28 @@ func (store *Store) resolveOne(name string) (ref.Ref, error) {
 		if errors.Is(err, os.ErrNotExist) {
 			return nil, refstore.ErrReferenceNotFound
 		}
+
 		return nil, err
 	}
+
 	line := strings.TrimSpace(string(data))
 	if strings.HasPrefix(line, "ref: ") {
 		target := strings.TrimSpace(line[len("ref: "):])
 		if target == "" {
 			return nil, fmt.Errorf("refstore/loose: symbolic reference %q has empty target", name)
 		}
+
 		return ref.Symbolic{
 			RefName: name,
 			Target:  target,
 		}, nil
 	}
+
 	id, err := objectid.ParseHex(store.algo, line)
 	if err != nil {
 		return nil, fmt.Errorf("refstore/loose: invalid detached reference %q: %w", name, err)
 	}
+
 	return ref.Detached{
 		RefName: name,
 		ID:      id,

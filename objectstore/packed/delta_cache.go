@@ -41,6 +41,7 @@ func (cache *deltaCache) get(key deltaBaseKey) (objecttype.Type, []byte, bool) {
 	if !ok {
 		return objecttype.TypeInvalid, nil, false
 	}
+
 	return value.ty, append([]byte(nil), value.content...), true
 }
 
