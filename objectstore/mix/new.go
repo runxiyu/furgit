@@ -1,0 +1,40 @@
+package mix
+
+import "codeberg.org/lindenii/furgit/objectstore"
+
+// New creates a Mix from backends.
+func New(backends ...objectstore.Store) *Mix {
+	nodeByStore := make(map[objectstore.Store]*backendNode, len(backends))
+
+	var (
+		head *backendNode
+		tail *backendNode
+	)
+
+	for _, backend := range backends {
+		if backend == nil {
+			continue
+		}
+
+		node := &backendNode{
+			backend: backend,
+			prev:    tail,
+		}
+		if tail != nil {
+			tail.next = node
+		}
+
+		if head == nil {
+			head = node
+		}
+
+		tail = node
+		nodeByStore[backend] = node
+	}
+
+	return &Mix{
+		backendHead:        head,
+		backendTail:        tail,
+		backendNodeByStore: nodeByStore,
+	}
+}
