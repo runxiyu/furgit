@@ -105,6 +105,19 @@ Furgit is a low-level Git library in Go.
 * [#lindenii](https://web.libera.chat/#lindenii)
   on [Libera.Chat](https://libera.chat)
 
+## History and lineage
+
+* I wrote Lindenii Forge
+* I wrote [hare-git](https://codeberg.org/lindenii/hare-git)
+* I wanted a faster Git library for
+  [Lindenii Villosa](https://codeberg.org/lindenii/villosa)
+  the next generation of Lindenii Forge
+* I translated hare-git and put it into `internal/common/git` in Villosa
+* I extracted it out into a general-purpose library, which is what we
+  have now
+* I was thinking of names and I accidentally typed "git" as "fur" (i.e., left
+  shifted one key on my QWERTY keyboard), so, "Furgit"
+
 ## Reporting bugs
 
 All problem/bug reports should include a reproduction recipe in form
