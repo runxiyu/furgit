@@ -30,7 +30,7 @@ linters:
     gosec:
       excludes:
         - G301         # UNIX permissions
-        - G306
+        - G306         # UNIX permissions
     revive:
       rules:
         - name: error-strings
