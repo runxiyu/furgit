@@ -467,88 +467,94 @@ func TestConfigErrorCases(t *testing.T) {
 	}
 }
 
-func TestConfigEOFAfterKeyAgainstGit(t *testing.T) {
+func TestConfigEOFAfterKeyAgainstGit(t *testing.T) { //nolint:dupl
 	t.Parallel()
-	testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: objectid.AlgorithmSHA1, Bare: true})
-	cfgPath := filepath.Join(testRepo.Dir(), "config")
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+		cfgPath := filepath.Join(testRepo.Dir(), "config")
 
-	cfgData := []byte("[Core]BAre")
+		cfgData := []byte("[Core]BAre")
 
-	err := os.WriteFile(cfgPath, cfgData, 0o600)
-	if err != nil {
-		t.Fatalf("failed to write config: %v", err)
-	}
+		err := os.WriteFile(cfgPath, cfgData, 0o600)
+		if err != nil {
+			t.Fatalf("failed to write config: %v", err)
+		}
 
-	gitValue, gitErr := gitConfigGetE(testRepo, "Core.BAre")
-	furConfig, furErr := config.ParseConfig(bytes.NewReader(cfgData))
+		gitValue, gitErr := gitConfigGetE(testRepo, "Core.BAre")
+		furConfig, furErr := config.ParseConfig(bytes.NewReader(cfgData))
 
-	if (gitErr == nil) != (furErr == nil) {
-		t.Fatalf("git: %v\nfur: %v", gitErr, furErr)
-	}
+		if (gitErr == nil) != (furErr == nil) {
+			t.Fatalf("git: %v\nfur: %v", gitErr, furErr)
+		}
 
-	if furErr != nil {
-		return
-	}
+		if furErr != nil {
+			return
+		}
 
-	if got := lookupValue(furConfig, "Core", "", "BAre"); got != gitValue {
-		t.Fatalf("git: %q\nfur: %q", gitValue, got)
-	}
+		if got := lookupValue(furConfig, "Core", "", "BAre"); got != gitValue {
+			t.Fatalf("git: %q\nfur: %q", gitValue, got)
+		}
+	})
 }
 
-func TestConfigNULValueAgainstGit(t *testing.T) {
+func TestConfigNULValueAgainstGit(t *testing.T) { //nolint:dupl
 	t.Parallel()
-	testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: objectid.AlgorithmSHA1, Bare: true})
-	cfgPath := filepath.Join(testRepo.Dir(), "config")
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+		cfgPath := filepath.Join(testRepo.Dir(), "config")
 
-	cfgData := []byte("[Core]BAre=\x00")
+		cfgData := []byte("[Core]BAre=\x00")
 
-	err := os.WriteFile(cfgPath, cfgData, 0o600)
-	if err != nil {
-		t.Fatalf("failed to write config: %v", err)
-	}
+		err := os.WriteFile(cfgPath, cfgData, 0o600)
+		if err != nil {
+			t.Fatalf("failed to write config: %v", err)
+		}
 
-	gitValue, gitErr := gitConfigGetE(testRepo, "Core.BAre")
-	furConfig, furErr := config.ParseConfig(bytes.NewReader(cfgData))
+		gitValue, gitErr := gitConfigGetE(testRepo, "Core.BAre")
+		furConfig, furErr := config.ParseConfig(bytes.NewReader(cfgData))
 
-	if (gitErr == nil) != (furErr == nil) {
-		t.Fatalf("git: %v\nfur: %v", gitErr, furErr)
-	}
+		if (gitErr == nil) != (furErr == nil) {
+			t.Fatalf("git: %v\nfur: %v", gitErr, furErr)
+		}
 
-	if furErr != nil {
-		return
-	}
+		if furErr != nil {
+			return
+		}
 
-	if got := lookupValue(furConfig, "Core", "", "BAre"); got != gitValue {
-		t.Fatalf("git: %q\nfur: %q", gitValue, got)
-	}
+		if got := lookupValue(furConfig, "Core", "", "BAre"); got != gitValue {
+			t.Fatalf("git: %q\nfur: %q", gitValue, got)
+		}
+	})
 }
 
-func TestConfigCarriageReturnSeparatorAgainstGit(t *testing.T) {
+func TestConfigCarriageReturnSeparatorAgainstGit(t *testing.T) { //nolint:dupl
 	t.Parallel()
-	testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: objectid.AlgorithmSHA1, Bare: true})
-	cfgPath := filepath.Join(testRepo.Dir(), "config")
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+		cfgPath := filepath.Join(testRepo.Dir(), "config")
 
-	cfgData := []byte("[Core \"sub\"]\rBAre")
+		cfgData := []byte("[Core \"sub\"]\rBAre")
 
-	err := os.WriteFile(cfgPath, cfgData, 0o600)
-	if err != nil {
-		t.Fatalf("failed to write config: %v", err)
-	}
+		err := os.WriteFile(cfgPath, cfgData, 0o600)
+		if err != nil {
+			t.Fatalf("failed to write config: %v", err)
+		}
 
-	gitValue, gitErr := gitConfigGetE(testRepo, "Core.sub.BAre")
-	furConfig, furErr := config.ParseConfig(bytes.NewReader(cfgData))
+		gitValue, gitErr := gitConfigGetE(testRepo, "Core.sub.BAre")
+		furConfig, furErr := config.ParseConfig(bytes.NewReader(cfgData))
 
-	if (gitErr == nil) != (furErr == nil) {
-		t.Fatalf("git: %v\nfur: %v", gitErr, furErr)
-	}
+		if (gitErr == nil) != (furErr == nil) {
+			t.Fatalf("git: %v\nfur: %v", gitErr, furErr)
+		}
 
-	if furErr != nil {
-		return
-	}
+		if furErr != nil {
+			return
+		}
 
-	if got := lookupValue(furConfig, "Core", "sub", "BAre"); got != gitValue {
-		t.Fatalf("git: %q\nfur: %q", gitValue, got)
-	}
+		if got := lookupValue(furConfig, "Core", "sub", "BAre"); got != gitValue {
+			t.Fatalf("git: %q\nfur: %q", gitValue, got)
+		}
+	})
 }
 
 func FuzzConfig(f *testing.F) {
@@ -556,54 +562,72 @@ func FuzzConfig(f *testing.F) {
 	f.Add([]byte("[core]\nbare = true\n[core/invalid]"), "core.bare")
 	f.Add([]byte("[core \"sub\"]\nbare = true"), "core.sub.bare")
 
-	testRepo := testgit.NewRepo(f, testgit.RepoOptions{ObjectFormat: objectid.AlgorithmSHA1, Bare: true})
-	cfgPath := filepath.Join(testRepo.Dir(), "config")
+	type fuzzRepoState struct {
+		repo    *testgit.TestRepo
+		cfgPath string
+	}
+
+	repos := make(map[objectid.Algorithm]fuzzRepoState, len(objectid.SupportedAlgorithms()))
+	for _, algo := range objectid.SupportedAlgorithms() {
+		testRepo := testgit.NewRepo(f, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+		repos[algo] = fuzzRepoState{
+			repo:    testRepo,
+			cfgPath: filepath.Join(testRepo.Dir(), "config"),
+		}
+	}
 
 	f.Fuzz(func(t *testing.T, cfgData []byte, gitKey string) {
-		err := os.WriteFile(cfgPath, cfgData, 0o600)
-		if err != nil {
-			t.Fatalf("failed to write config: %v", err)
-		}
+		for _, algo := range objectid.SupportedAlgorithms() {
+			state, ok := repos[algo]
+			if !ok {
+				t.Fatalf("missing fuzz repo state for %v", algo)
+			}
 
-		gitValue, gitErr := gitConfigGetE(testRepo, gitKey)
+			err := os.WriteFile(state.cfgPath, cfgData, 0o600)
+			if err != nil {
+				t.Fatalf("failed to write config: %v", err)
+			}
 
-		furConfig, furErr := config.ParseConfig(bytes.NewReader(cfgData))
-		if furErr == nil && furConfig == nil {
-			t.Fatalf("ParseConfig returned nil config with nil error")
-		}
+			gitValue, gitErr := gitConfigGetE(state.repo, gitKey)
 
-		sameErr := (gitErr == nil) == (furErr == nil)
-		if !sameErr {
+			furConfig, furErr := config.ParseConfig(bytes.NewReader(cfgData))
+			if furErr == nil && furConfig == nil {
+				t.Fatalf("ParseConfig returned nil config with nil error")
+			}
+
+			sameErr := (gitErr == nil) == (furErr == nil)
+			if !sameErr {
+				if furErr == nil {
+					return
+				}
+
+				t.Fatalf("git: %v\nfur: %v", gitErr, furErr)
+			}
+
 			if furErr == nil {
-				return
-			}
+				parts := strings.SplitN(gitKey, ".", 3)
+				furSection := parts[0]
 
-			t.Fatalf("git: %v\nfur: %v", gitErr, furErr)
-		}
+				var furSubsection, furKey string
 
-		if furErr == nil {
-			parts := strings.SplitN(gitKey, ".", 3)
-			furSection := parts[0]
+				switch len(parts) {
+				case 1:
+				case 2:
+					furKey = parts[1]
+				case 3:
+					furSubsection = parts[1]
+					furKey = parts[2]
+				default:
+					t.Fatalf("unexpected split(%q): %v", gitKey, parts)
+				}
 
-			var furSubsection, furKey string
-
-			switch len(parts) {
-			case 1:
-			case 2:
-				furKey = parts[1]
-			case 3:
-				furSubsection = parts[1]
-				furKey = parts[2]
-			default:
-				t.Fatalf("unexpected split(%q): %v", gitKey, parts)
-			}
-
-			furValue := lookupValue(furConfig, furSection, furSubsection, furKey)
-			if gitValue != furValue {
-				t.Fatalf(
-					"key: %v (%v.%v.%v)\ngit: %q\nfur: %q",
-					gitKey, furSection, furSubsection, furKey, gitValue, furValue,
-				)
+				furValue := lookupValue(furConfig, furSection, furSubsection, furKey)
+				if gitValue != furValue {
+					t.Fatalf(
+						"key: %v (%v.%v.%v)\ngit: %q\nfur: %q",
+						gitKey, furSection, furSubsection, furKey, gitValue, furValue,
+					)
+				}
 			}
 		}
 	})
