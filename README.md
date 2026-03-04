@@ -14,6 +14,54 @@ Furgit is a somewhat fast Git library in Go.
 
 Currently undergoing a massive redesign; see the `legacy` branch too.
 
+## Roadmap
+
+**Done**
+
+* Parsing configs
+* Object ID and hash algorithms
+* Object type enums
+* Object representation types
+* Object header parsing
+* Parsing objects
+* Serializing objects
+* Diffing lines
+* Diffing trees
+* Object storer interface
+* Reading loose objects
+* Applying deltas
+* `.idx` lookup
+* Reading packed objects
+* Object storer chain and mixer
+* Ref types
+* Ref storer interface
+* Reading loose refs
+* Reading packed refs
+* Ref storer chain
+* Reachability iterators
+* Repository abstractions
+* Adler-32 optimizations
+* ZLIB pooling
+
+**Planned**
+
+* Streaming `.pack`/`.idx` hash verifier
+* `.idx` and `.rev` writing
+* Pack ingestion
+* Un-thinning thin packs
+* Quarantine areas
+* V0/V1 protocol (e.g., `sideband-64k`, `pktline`, etc.)
+* Receiving/fetching
+* Writing configs
+* Delta base selection, e.g., islands
+* Compressing deltas
+* Writing packfiles
+* Commit graph
+* Reachability bitmaps
+* Thin packs
+* DEFLATE optimizations
+* Aggressive buffer pooling
+
 ## Repos and mirrors
 
 * [Codeberg](https://codeberg.org/lindenii/furgit) (with the canonical issue tracker)
