@@ -136,13 +136,13 @@ func (z *Writer) Write(p []byte) (n int, err error) {
 	n, err = z.compressor.Write(p)
 	if err != nil {
 		z.err = err
-		return
+		return n, err
 	}
 	if _, err = z.digest.Write(p); err != nil {
 		z.err = err
 		return 0, z.err
 	}
-	return
+	return n, err
 }
 
 // Flush flushes the Writer to its underlying [io.Writer].

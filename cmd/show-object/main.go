@@ -27,7 +27,7 @@ func main() {
 	}
 }
 
-func run(repoPath *string, name *string) error {
+func run(repoPath, name *string) error {
 	root, err := os.OpenRoot(*repoPath)
 	if err != nil {
 		return fmt.Errorf("open repo root: %w", err)

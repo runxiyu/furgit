@@ -14,9 +14,7 @@ import (
 // Size of an Adler-32 checksum in bytes.
 const Size = 4
 
-var (
-	hasAVX2 = cpu.X86.HasAVX2
-)
+var hasAVX2 = cpu.X86.HasAVX2
 
 // digest represents the partial evaluation of a checksum.
 // The low 16 bits are s1, the high 16 bits are s2.

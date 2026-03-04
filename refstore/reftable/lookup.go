@@ -225,7 +225,7 @@ func lookupChildPosInIndexBlock(block blockView, key string) (int, bool, error) 
 }
 
 // lookupRecordInRefBlock searches one ref block and may short-circuit by sort order.
-func lookupRecordInRefBlock(table *tableFile, block blockView, key string) (found bool, done bool, rec recordValue, err error) {
+func lookupRecordInRefBlock(table *tableFile, block blockView, key string) (found, done bool, rec recordValue, err error) {
 	off, recordsEnd, restarts, err := parseBlockLayout(block)
 	if err != nil {
 		return false, false, recordValue{}, err
@@ -301,7 +301,7 @@ func forEachRecordInRefBlock(table *tableFile, block blockView, fn func(name str
 }
 
 // parseBlockLayout parses common record/restart regions for ref and index blocks.
-func parseBlockLayout(block blockView) (recordsStart int, recordsEnd int, restarts []int, err error) {
+func parseBlockLayout(block blockView) (recordsStart, recordsEnd int, restarts []int, err error) {
 	if len(block.payload) < 6 {
 		return 0, 0, nil, fmt.Errorf("short block")
 	}

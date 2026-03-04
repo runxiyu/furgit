@@ -179,7 +179,7 @@ func (buf *Buffer) ensureCapacity(needed int) {
 	}
 }
 
-func classFor(size int) (idx int, classCap int, ok bool) {
+func classFor(size int) (idx, classCap int, ok bool) {
 	for i, class := range sizeClasses {
 		if size <= class {
 			return i, class, true

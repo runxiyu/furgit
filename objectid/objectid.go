@@ -64,8 +64,10 @@ var algorithmTable = [...]algorithmDetails{
 	},
 }
 
-var algorithmByName = map[string]Algorithm{}
-var supportedAlgorithms []Algorithm
+var (
+	algorithmByName     = map[string]Algorithm{}
+	supportedAlgorithms []Algorithm
+)
 
 func init() {
 	for algo := Algorithm(0); int(algo) < len(algorithmTable); algo++ {
