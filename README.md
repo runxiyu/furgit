@@ -68,6 +68,11 @@ Furgit is a low-level Git library in Go.
 * Repacking
 * Multi-pack indexes
 * Compression agility
+* Working trees
+* Index
+* Merge
+* Checkout
+* Rebase
 
 ## Benchmarks
 
