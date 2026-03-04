@@ -282,10 +282,12 @@ func TestPackedNewValidation(t *testing.T) {
 		t.Fatalf("packed.New invalid algorithm error = %v", err)
 	}
 
-	_, err = packed.New(root, objectid.AlgorithmSHA256)
-	if !errors.Is(err, os.ErrNotExist) {
-		t.Fatalf("packed.New missing packed-refs error = %v", err)
-	}
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		_, err = packed.New(root, algo)
+		if !errors.Is(err, os.ErrNotExist) {
+			t.Fatalf("packed.New missing packed-refs error = %v", err)
+		}
+	})
 }
 
 func refNames(refs []ref.Ref) []string {
