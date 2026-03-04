@@ -34,14 +34,11 @@ and to read that data back:
 package zlib
 
 import (
-	"bufio"
 	"encoding/binary"
 	"errors"
 	"hash"
 	"io"
 	"sync"
-
-	"codeberg.org/lindenii/furgit/internal/adler32"
 
 	"github.com/klauspost/compress/flate"
 )
@@ -161,77 +158,6 @@ func (z *reader) Close() error {
 	}
 
 	readerPool.Put(z)
-
-	return nil
-}
-
-func (z *reader) Reset(r io.Reader, dict []byte) error {
-	*z = reader{decompressor: z.decompressor}
-	if fr, ok := r.(flate.Reader); ok {
-		z.r = fr
-	} else {
-		z.r = bufio.NewReader(r)
-	}
-
-	// Read the header (RFC 1950 section 2.2.).
-	_, z.err = io.ReadFull(z.r, z.scratch[0:2])
-	if z.err != nil {
-		if errors.Is(z.err, io.EOF) {
-			z.err = io.ErrUnexpectedEOF
-		}
-
-		return z.err
-	}
-
-	h := binary.BigEndian.Uint16(z.scratch[:2])
-	if (z.scratch[0]&0x0f != zlibDeflate) || (z.scratch[0]>>4 > zlibMaxWindow) || (h%31 != 0) {
-		z.err = ErrHeader
-
-		return z.err
-	}
-
-	haveDict := z.scratch[1]&0x20 != 0
-	if haveDict {
-		_, z.err = io.ReadFull(z.r, z.scratch[0:4])
-		if z.err != nil {
-			if errors.Is(z.err, io.EOF) {
-				z.err = io.ErrUnexpectedEOF
-			}
-
-			return z.err
-		}
-
-		checksum := binary.BigEndian.Uint32(z.scratch[:4])
-		if checksum != adler32.Checksum(dict) {
-			z.err = ErrDictionary
-
-			return z.err
-		}
-	}
-
-	if z.decompressor != nil {
-		resetter, ok := z.decompressor.(flate.Resetter)
-		if !ok {
-			panic("zlib: pooled decompressor does not implement flate.Resetter")
-		}
-
-		z.err = resetter.Reset(z.r, dict)
-		if z.err != nil {
-			return z.err
-		}
-
-		z.digest = adler32.New()
-
-		return nil
-	}
-
-	if haveDict {
-		z.decompressor = flate.NewReaderDict(z.r, dict)
-	} else {
-		z.decompressor = flate.NewReader(z.r)
-	}
-
-	z.digest = adler32.New()
 
 	return nil
 }
