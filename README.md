@@ -76,12 +76,11 @@ Furgit is a low-level Git library in Go.
 
 ## Benchmarks
 
-See [gitbench](https://git.sr.ht/~runxiyu/gitbench).
-
-`legacy` branch furgit was slightly faster due to aggressive buffer reuse and a
-custom ZLIB implementation. These optimizations will be re-added.
-
-Alpine edge, i5-10210U, `performance` governor, `linux.git`.
+* See [gitbench](https://git.sr.ht/~runxiyu/gitbench).
+* `legacy` branch furgit is slightly faster due to buffer reuse and custom
+  ZLIB. These will be re-added.
+* Alpine edge, i5-10210U, `performance` governor, `linux.git`.
+* go-git expects significant speed-ups after [mmap](https://pkg.go.dev/github.com/go-git/go-git/v6/storage/filesystem/mmap)
 
 ### Traversing all trees in `HEAD` and fetching each file size
 
