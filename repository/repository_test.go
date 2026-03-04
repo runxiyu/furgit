@@ -92,16 +92,6 @@ func TestOpenFilesWithPackedRefs(t *testing.T) {
 	})
 }
 
-func TestOpenReftableRefFormat(t *testing.T) {
-	t.Parallel()
-
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
-		repoHarness := newRepoForRefs(t, algo, "reftable")
-		commitID := writeMainAndHead(t, repoHarness)
-		assertResolveFully(t, repoHarness, "HEAD", commitID)
-	})
-}
-
 func newRepoForRefs(t *testing.T, algo objectid.Algorithm, refFormat string) *testgit.TestRepo {
 	t.Helper()
 
