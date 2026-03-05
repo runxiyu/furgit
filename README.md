@@ -122,6 +122,9 @@ Mainly tests the packfile object reader.
   have now
 * I was thinking of names and I accidentally typed "git" as "fur" (i.e., left
   shifted one key on my QWERTY keyboard), so, "Furgit"
+* Some architectual elements inspired by [upstream Git](https://git-scm.com),
+  OpenBSD's [Game of Trees](https://gameoftrees.org), and
+  [9front Git](https://git.9front.org/plan9front/9front/HEAD/sys/src/cmd/git/f.html).
 
 ## Reporting bugs
 
