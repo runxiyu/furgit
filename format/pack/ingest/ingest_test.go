@@ -3,8 +3,6 @@ package ingest_test
 import (
 	"bytes"
 	"errors"
-	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,26 +14,79 @@ import (
 	"codeberg.org/lindenii/furgit/repository"
 )
 
-// thinBaseDistances enumerates candidate main-history distances for thin-pack
-// probing.
-var thinBaseDistances = [...]int{16, 24, 32, 48, 64, 96, 128, 160, 192, 224, 256, 320}
+func fixtureAlgorithmDir(algo objectid.Algorithm) string {
+	switch algo {
+	case objectid.AlgorithmSHA1:
+		return "sha1"
+	case objectid.AlgorithmSHA256:
+		return "sha256"
+	default:
+		return ""
+	}
+}
 
-// pickThinBase selects one main-history base where git emits a truly thin pack
-// for `head ^base`.
-func pickThinBase(t *testing.T, sender *testgit.TestRepo, head objectid.ObjectID) objectid.ObjectID {
+// fixturePath returns one fixture file path for the selected algorithm.
+func fixturePath(t *testing.T, algo objectid.Algorithm, name string) string {
 	t.Helper()
 
-	for _, distance := range thinBaseDistances {
-		base := sender.RevParse(t, fmt.Sprintf("refs/heads/main~%d", distance))
-		revs := []string{head.String(), "^" + base.String()}
-		if sender.PackObjectsIsThin(t, revs) {
-			return base
-		}
+	dir := fixtureAlgorithmDir(algo)
+	if dir == "" {
+		t.Fatalf("unsupported fixture algorithm: %v", algo)
 	}
 
-	t.Fatalf("failed to find thin base for head %s", head.String())
+	return filepath.Join("testdata", "fixtures", dir, name)
+}
 
-	return objectid.ObjectID{}
+// fixtureBytes reads one fixture file fully.
+func fixtureBytes(t *testing.T, algo objectid.Algorithm, name string) []byte {
+	t.Helper()
+
+	path := fixturePath(t, algo, name)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read fixture %q: %v", path, err)
+	}
+
+	return data
+}
+
+// fixtureMetadata parses key=value metadata for one algorithm fixture set.
+func fixtureMetadata(t *testing.T, algo objectid.Algorithm) map[string]string {
+	t.Helper()
+
+	data := fixtureBytes(t, algo, "METADATA.txt")
+	out := make(map[string]string)
+	for line := range strings.SplitSeq(strings.TrimSpace(string(data)), "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		key, value, ok := strings.Cut(line, "=")
+		if !ok {
+			t.Fatalf("invalid fixture metadata line %q", line)
+		}
+		out[strings.TrimSpace(key)] = strings.TrimSpace(value)
+	}
+
+	return out
+}
+
+// fixtureOID returns one fixture metadata object ID value.
+func fixtureOID(t *testing.T, algo objectid.Algorithm, key string) objectid.ObjectID {
+	t.Helper()
+
+	meta := fixtureMetadata(t, algo)
+	hex, ok := meta[key]
+	if !ok {
+		t.Fatalf("missing fixture metadata key %q", key)
+	}
+
+	id, err := objectid.ParseHex(algo, hex)
+	if err != nil {
+		t.Fatalf("parse fixture metadata oid %q: %v", hex, err)
+	}
+
+	return id
 }
 
 // verifyReindexOracle regenerates idx/rev with upstream git index-pack and
@@ -77,17 +128,8 @@ func TestIngestNonThinPackWritesPackIdxRev(t *testing.T) {
 	t.Parallel()
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
-		sender := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
-		sender.MakeManyObjectsHistory(t)
-		head := sender.RevParse(t, "refs/heads/main")
-
-		reader := sender.PackObjectsReader(t, []string{head.String()}, false)
-		defer func() {
-			err := reader.Close()
-			if err != nil {
-				t.Fatalf("close pack reader: %v", err)
-			}
-		}()
+		head := fixtureOID(t, algo, "head")
+		packBytes := fixtureBytes(t, algo, "nonthin.pack")
 
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		packRoot, err := os.OpenRoot(filepath.Join(receiver.Dir(), "objects", "pack"))
@@ -101,7 +143,7 @@ func TestIngestNonThinPackWritesPackIdxRev(t *testing.T) {
 			}
 		}()
 
-		result, err := ingest.Ingest(reader, packRoot, algo, false, true, nil)
+		result, err := ingest.Ingest(bytes.NewReader(packBytes), packRoot, algo, false, true, nil)
 		if err != nil {
 			t.Fatalf("Ingest: %v", err)
 		}
@@ -132,19 +174,7 @@ func TestIngestNonThinPackWritesPackIdxRev(t *testing.T) {
 		verifyReindexOracle(t, receiver, packPath, idxPath, revPath)
 
 		receiver.UpdateRef(t, "refs/heads/main", head)
-		wantRaw := sender.Run(t, "rev-list", "--objects", "refs/heads/main")
-		for line := range strings.SplitSeq(strings.TrimSpace(wantRaw), "\n") {
-			line = strings.TrimSpace(line)
-			if line == "" {
-				continue
-			}
-
-			fields := strings.Fields(line)
-			if len(fields) == 0 {
-				continue
-			}
-			_ = receiver.Run(t, "cat-file", "-e", fields[0])
-		}
+		_ = receiver.Run(t, "fsck", "--full", "--strict", "--no-progress", "--no-dangling")
 	})
 }
 
@@ -152,19 +182,7 @@ func TestIngestThinPackWithoutFixReturnsUnresolved(t *testing.T) {
 	t.Parallel()
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
-		sender := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
-		sender.MakeManyObjectsHistory(t)
-		sender.Repack(t, "-a", "-d", "-f", "--window=128", "--depth=128")
-
-		head := sender.RevParse(t, "refs/heads/main")
-		base := pickThinBase(t, sender, head)
-		reader := sender.PackObjectsReader(t, []string{head.String(), "^" + base.String()}, true)
-		defer func() {
-			err := reader.Close()
-			if err != nil {
-				t.Fatalf("close pack reader: %v", err)
-			}
-		}()
+		thinPack := fixtureBytes(t, algo, "thin.pack")
 
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		packDir := filepath.Join(receiver.Dir(), "objects", "pack")
@@ -179,7 +197,7 @@ func TestIngestThinPackWithoutFixReturnsUnresolved(t *testing.T) {
 			}
 		}()
 
-		_, err = ingest.Ingest(reader, packRoot, algo, false, true, nil)
+		_, err = ingest.Ingest(bytes.NewReader(thinPack), packRoot, algo, false, true, nil)
 		if err == nil {
 			t.Fatal("Ingest error = nil, want error")
 		}
@@ -203,12 +221,9 @@ func TestIngestThinPackWithFixThin(t *testing.T) {
 	t.Parallel()
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
-		sender := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
-		sender.MakeManyObjectsHistory(t)
-		sender.Repack(t, "-a", "-d", "-f", "--window=128", "--depth=128")
-
-		head := sender.RevParse(t, "refs/heads/main")
-		base := pickThinBase(t, sender, head)
+		head := fixtureOID(t, algo, "head")
+		basePack := fixtureBytes(t, algo, "base.pack")
+		thinPack := fixtureBytes(t, algo, "thin.pack")
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 
 		packRoot, err := os.OpenRoot(filepath.Join(receiver.Dir(), "objects", "pack"))
@@ -222,15 +237,9 @@ func TestIngestThinPackWithFixThin(t *testing.T) {
 			}
 		}()
 
-		baseReader := sender.PackObjectsReader(t, []string{base.String()}, false)
-		_, err = ingest.Ingest(baseReader, packRoot, algo, false, false, nil)
+		_, err = ingest.Ingest(bytes.NewReader(basePack), packRoot, algo, false, false, nil)
 		if err != nil {
-			_ = baseReader.Close()
 			t.Fatalf("ingest base pack: %v", err)
-		}
-		err = baseReader.Close()
-		if err != nil {
-			t.Fatalf("close base reader: %v", err)
 		}
 
 		receiverRoot, err := os.OpenRoot(receiver.Dir())
@@ -255,15 +264,9 @@ func TestIngestThinPackWithFixThin(t *testing.T) {
 			}
 		}()
 
-		thinReader := sender.PackObjectsReader(t, []string{head.String(), "^" + base.String()}, true)
-		result, err := ingest.Ingest(thinReader, packRoot, algo, true, true, receiverRepo.Objects())
+		result, err := ingest.Ingest(bytes.NewReader(thinPack), packRoot, algo, true, true, receiverRepo.Objects())
 		if err != nil {
-			_ = thinReader.Close()
 			t.Fatalf("Ingest(thin): %v", err)
-		}
-		err = thinReader.Close()
-		if err != nil {
-			t.Fatalf("close thin reader: %v", err)
 		}
 		if !result.ThinFixed {
 			t.Fatal("ThinFixed = false, want true")
@@ -283,20 +286,7 @@ func TestIngestPackTrailerMismatch(t *testing.T) {
 	t.Parallel()
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
-		sender := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
-		sender.MakeManyObjectsHistory(t)
-		head := sender.RevParse(t, "refs/heads/main")
-
-		stream := sender.PackObjectsReader(t, []string{head.String()}, false)
-		packBytes, err := io.ReadAll(stream)
-		if err != nil {
-			_ = stream.Close()
-			t.Fatalf("read pack stream: %v", err)
-		}
-		err = stream.Close()
-		if err != nil {
-			t.Fatalf("close stream: %v", err)
-		}
+		packBytes := fixtureBytes(t, algo, "nonthin.pack")
 		if len(packBytes) == 0 {
 			t.Fatal("empty pack stream")
 		}
