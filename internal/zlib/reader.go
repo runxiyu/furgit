@@ -121,7 +121,7 @@ func NewReaderDict(r io.Reader, dict []byte) (*Reader, error) {
 		panic("zlib: pool returned unexpected type")
 	}
 
-	err := z.Reset(r, dict)
+	err := z.reset(r, dict)
 	if err != nil {
 		return nil, err
 	}
@@ -188,6 +188,7 @@ func (z *Reader) InputConsumed() uint64 {
 // Close does not close the wrapped [io.Reader] originally passed to [NewReader].
 // In order for the ZLIB checksum to be verified, the reader must be
 // fully consumed until the [io.EOF].
+// Close returns the instance to a global pool; you MUST NOT keep references after Close.
 func (z *Reader) Close() error {
 	if z.err != nil && !errors.Is(z.err, io.EOF) {
 		return z.err

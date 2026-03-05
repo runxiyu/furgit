@@ -15,8 +15,8 @@ import (
 	"github.com/klauspost/compress/flate"
 )
 
-// Reset resets receiver to read a new zlib stream.
-func (z *Reader) Reset(r io.Reader, dict []byte) error {
+// reset resets receiver to read a new zlib stream.
+func (z *Reader) reset(r io.Reader, dict []byte) error {
 	*z = Reader{decompressor: z.decompressor}
 	var input flate.Reader
 	if fr, ok := r.(flate.Reader); ok {
