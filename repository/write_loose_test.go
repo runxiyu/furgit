@@ -47,7 +47,7 @@ func TestWriteLooseBytesContent(t *testing.T) {
 			t.Fatalf("WriteLooseBytesContent id = %s, want %s", gotID, wantID)
 		}
 
-		ty, gotContent, err := repo.ReadStoredBytesContent(gotID)
+		ty, gotContent, err := repo.Objects().ReadBytesContent(gotID)
 		if err != nil {
 			t.Fatalf("ReadStoredBytesContent: %v", err)
 		}
@@ -125,7 +125,7 @@ func TestWriteLooseFull(t *testing.T) {
 
 		defer func() { _ = repo.Close() }()
 
-		raw, err := repo.ReadStoredBytesFull(commitID)
+		raw, err := repo.Objects().ReadBytesFull(commitID)
 		if err != nil {
 			t.Fatalf("ReadStoredBytesFull: %v", err)
 		}

@@ -21,7 +21,7 @@ func traverseTreeIter(repo *repository.Repository, root objectid.ObjectID) (int,
 		id := frame.id
 
 		if !frame.isTree {
-			_, err := repo.ReadStoredSize(id)
+			_, err := repo.Objects().ReadSize(id)
 			if err != nil {
 				return 0, err
 			}
