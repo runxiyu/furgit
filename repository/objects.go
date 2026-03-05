@@ -62,3 +62,8 @@ func openObjectStore(root *os.Root, algo objectid.Algorithm) (objectstore.Store,
 
 	return objectsChain, objectsLooseForWritingOnly, nil
 }
+
+// Objects returns the configured object store.
+func (repo *Repository) Objects() objectstore.Store {
+	return repo.objects
+}

@@ -45,3 +45,8 @@ func openRefStore(root *os.Root, algo objectid.Algorithm) (out refstore.Store, e
 
 	return refchain.New(backends...), nil
 }
+
+// Refs returns the configured ref store.
+func (repo *Repository) Refs() refstore.Store {
+	return repo.refs
+}

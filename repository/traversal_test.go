@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
+	"codeberg.org/lindenii/furgit/object"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/repository"
 )
@@ -130,4 +131,51 @@ func walkRepositoryFromHead(t *testing.T, repoPath string) {
 	if objectsRead <= 0 {
 		t.Fatalf("no objects were enumerated from HEAD (%s)", fmt.Sprintf("%q", repoPath))
 	}
+}
+
+func traverseReachableIter(repo *repository.Repository, root objectid.ObjectID) (int, error) {
+	stack := []objectid.ObjectID{root}
+	visited := make(map[objectid.ObjectID]struct{})
+	total := 0
+
+	for len(stack) > 0 {
+		id := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		_, ok := visited[id]
+		if ok {
+			continue
+		}
+
+		visited[id] = struct{}{}
+
+		stored, err := repo.ReadStored(id)
+		if err != nil {
+			return 0, err
+		}
+
+		total++
+
+		switch obj := stored.Object().(type) {
+		case *object.Commit:
+			stack = append(stack, obj.Tree)
+			stack = append(stack, obj.Parents...)
+		case *object.Tree:
+			for i := len(obj.Entries) - 1; i >= 0; i-- {
+				entry := obj.Entries[i]
+				if entry.Mode == object.FileModeGitlink {
+					continue
+				}
+
+				stack = append(stack, entry.ID)
+			}
+		case *object.Tag:
+			stack = append(stack, obj.Target)
+		case *object.Blob:
+		default:
+			// Unknown parsed object variants are treated as leaves.
+		}
+	}
+
+	return total, nil
 }
