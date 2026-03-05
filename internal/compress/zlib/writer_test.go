@@ -32,7 +32,12 @@ func testFileLevelDict(t *testing.T, fn string, level int, d string) {
 
 		return
 	}
-	defer golden.Close()
+	defer func() {
+		err := golden.Close()
+		if err != nil {
+			t.Fatalf("%s (level=%d, dict=%q): close golden: %v", fn, level, d, err)
+		}
+	}()
 
 	b0, err0 := io.ReadAll(golden)
 	if err0 != nil {
@@ -53,10 +58,20 @@ func testLevelDict(t *testing.T, fn string, b0 []byte, level int, d string) {
 
 	// Push data through a pipe that compresses at the write end, and decompresses at the read end.
 	piper, pipew := io.Pipe()
-	defer piper.Close()
+	defer func() {
+		err := piper.Close()
+		if err != nil {
+			t.Fatalf("%s (level=%d, dict=%q): close piper: %v", fn, level, d, err)
+		}
+	}()
 
 	go func() {
-		defer pipew.Close()
+		defer func() {
+			err := pipew.Close()
+			if err != nil {
+				t.Errorf("%s (level=%d, dict=%q): close pipew: %v", fn, level, d, err)
+			}
+		}()
 
 		zlibw, err := NewWriterLevelDict(pipew, level, dict)
 		if err != nil {
@@ -64,7 +79,12 @@ func testLevelDict(t *testing.T, fn string, b0 []byte, level int, d string) {
 
 			return
 		}
-		defer zlibw.Close()
+		defer func() {
+			err := zlibw.Close()
+			if err != nil {
+				t.Errorf("%s (level=%d, dict=%q): close zlibw: %v", fn, level, d, err)
+			}
+		}()
 
 		_, err = zlibw.Write(b0)
 		if err != nil {
@@ -80,7 +100,12 @@ func testLevelDict(t *testing.T, fn string, b0 []byte, level int, d string) {
 
 		return
 	}
-	defer zlibr.Close()
+	defer func() {
+		err := zlibr.Close()
+		if err != nil {
+			t.Fatalf("%s (level=%d, dict=%q): close zlibr: %v", fn, level, d, err)
+		}
+	}()
 
 	// Compare the decompressed data.
 	b1, err1 := io.ReadAll(zlibr)
@@ -173,8 +198,19 @@ func TestWriterDictIsUsed(t *testing.T) {
 		return
 	}
 
-	compressor.Write(input)
-	compressor.Close()
+	_, err = compressor.Write(input)
+	if err != nil {
+		t.Errorf("error in compressor.Write: %s", err)
+
+		return
+	}
+
+	err = compressor.Close()
+	if err != nil {
+		t.Errorf("error in compressor.Close: %s", err)
+
+		return
+	}
 
 	const expectedMaxSize = 25
 
