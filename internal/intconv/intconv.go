@@ -33,6 +33,33 @@ func IntToUint64(v int) (uint64, error) {
 	return uint64(v), nil
 }
 
+// IntToUint32 converts v to uint32, returning an error if it overflows.
+func IntToUint32(v int) (uint32, error) {
+	if v < 0 || v > math.MaxUint32 {
+		return 0, fmt.Errorf("intconv: int %d overflows uint32", v)
+	}
+
+	return uint32(v), nil
+}
+
+// Uint64ToInt64 converts v to int64, returning an error if it overflows.
+func Uint64ToInt64(v uint64) (int64, error) {
+	if v > math.MaxInt64 {
+		return 0, fmt.Errorf("intconv: uint64 %d overflows int64", v)
+	}
+
+	return int64(v), nil
+}
+
+// Int64ToUint64 converts v to uint64, returning an error if v is negative.
+func Int64ToUint64(v int64) (uint64, error) {
+	if v < 0 {
+		return 0, fmt.Errorf("intconv: int64 %d is negative", v)
+	}
+
+	return uint64(v), nil
+}
+
 // Int64ToInt32 converts v to int32, returning an error if it overflows.
 func Int64ToInt32(v int64) (int32, error) {
 	if v < math.MinInt32 || v > math.MaxInt32 {

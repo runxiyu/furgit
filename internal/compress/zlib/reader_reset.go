@@ -12,6 +12,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/internal/adler32"
 	"codeberg.org/lindenii/furgit/internal/compress/flate"
+	"codeberg.org/lindenii/furgit/internal/intconv"
 )
 
 // reset resets receiver to read a new zlib stream.
@@ -29,7 +30,14 @@ func (z *Reader) reset(r io.Reader, dict []byte) error {
 
 	// Read the header (RFC 1950 section 2.2.).
 	readN, err := io.ReadFull(z.r, z.scratch[0:2])
-	z.headerRead += uint64(readN)
+	readNUint64, convErr := intconv.IntToUint64(readN)
+	if convErr != nil {
+		z.err = convErr
+
+		return z.err
+	}
+
+	z.headerRead += readNUint64
 
 	z.err = err
 	if z.err != nil {
@@ -51,7 +59,14 @@ func (z *Reader) reset(r io.Reader, dict []byte) error {
 	if haveDict {
 		readN, z.err = io.ReadFull(z.r, z.scratch[0:4])
 
-		z.headerRead += uint64(readN)
+		readNUint64, err := intconv.IntToUint64(readN)
+		if err != nil {
+			z.err = err
+
+			return z.err
+		}
+
+		z.headerRead += readNUint64
 		if z.err != nil {
 			if errors.Is(z.err, io.EOF) {
 				z.err = io.ErrUnexpectedEOF

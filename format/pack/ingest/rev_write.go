@@ -3,6 +3,8 @@ package ingest
 import (
 	"encoding/binary"
 	"slices"
+
+	"codeberg.org/lindenii/furgit/internal/intconv"
 )
 
 const (
@@ -53,9 +55,14 @@ func writeRev(state *ingestState) error {
 	}
 
 	for _, recordIdx := range packOrder {
-		binary.BigEndian.PutUint32(scratch[:4], uint32(recordToIdxPos[recordIdx]))
+		recordPos, err := intconv.IntToUint32(recordToIdxPos[recordIdx])
+		if err != nil {
+			return err
+		}
 
-		err := writeAndHash(state.revFile, hashImpl, scratch[:4])
+		binary.BigEndian.PutUint32(scratch[:4], recordPos)
+
+		err = writeAndHash(state.revFile, hashImpl, scratch[:4])
 		if err != nil {
 			return err
 		}

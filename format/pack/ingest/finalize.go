@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/fs"
 	"strings"
+
+	"codeberg.org/lindenii/furgit/internal/intconv"
 )
 
 // finalizeArtifacts links temporary files to final names and returns Result.
@@ -35,12 +37,17 @@ func finalizeArtifacts(state *ingestState) (Result, error) {
 		}
 	}
 
+	objectCount, err := intconv.IntToUint32(len(state.records))
+	if err != nil {
+		return Result{}, err
+	}
+
 	return Result{
 		PackName:    packFinal,
 		IdxName:     idxFinal,
 		RevName:     revFinal,
 		PackHash:    state.packHash,
-		ObjectCount: uint32(len(state.records)),
+		ObjectCount: objectCount,
 		ThinFixed:   state.thinFixed,
 	}, nil
 }

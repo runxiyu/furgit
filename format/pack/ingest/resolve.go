@@ -10,6 +10,7 @@ import (
 	deltaapply "codeberg.org/lindenii/furgit/format/delta/apply"
 	packfmt "codeberg.org/lindenii/furgit/format/pack"
 	"codeberg.org/lindenii/furgit/internal/compress/zlib"
+	"codeberg.org/lindenii/furgit/internal/intconv"
 	"codeberg.org/lindenii/furgit/objectheader"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
@@ -237,7 +238,17 @@ func inflateRecordPayload(state *ingestState, idx int) ([]byte, error) {
 
 	compressedOffset := record.offset + uint64(record.headerLen)
 	compressedLen := record.packedLen - uint64(record.headerLen)
-	section := io.NewSectionReader(state.packFile, int64(compressedOffset), int64(compressedLen))
+	compressedOffsetInt64, err := intconv.Uint64ToInt64(compressedOffset)
+	if err != nil {
+		return nil, err
+	}
+
+	compressedLenInt64, err := intconv.Uint64ToInt64(compressedLen)
+	if err != nil {
+		return nil, err
+	}
+
+	section := io.NewSectionReader(state.packFile, compressedOffsetInt64, compressedLenInt64)
 
 	reader, err := zlib.NewReader(section)
 	if err != nil {

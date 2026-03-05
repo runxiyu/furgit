@@ -7,6 +7,8 @@ import (
 	"hash"
 	"io"
 	"slices"
+
+	"codeberg.org/lindenii/furgit/internal/intconv"
 )
 
 const (
@@ -87,7 +89,12 @@ func writeIdx(state *ingestState) error {
 	for _, recordIdx := range order {
 		offset := state.records[recordIdx].offset
 		if offset >= 0x80000000 {
-			word := 0x80000000 | uint32(len(largeOffsets))
+			largeOffsetIdx, err := intconv.IntToUint32(len(largeOffsets))
+			if err != nil {
+				return err
+			}
+
+			word := 0x80000000 | largeOffsetIdx
 			largeOffsets = append(largeOffsets, offset)
 
 			binary.BigEndian.PutUint32(scratch[:4], word)

@@ -8,6 +8,7 @@ import (
 	deltaapply "codeberg.org/lindenii/furgit/format/delta/apply"
 	packfmt "codeberg.org/lindenii/furgit/format/pack"
 	"codeberg.org/lindenii/furgit/internal/compress/zlib"
+	"codeberg.org/lindenii/furgit/internal/intconv"
 	"codeberg.org/lindenii/furgit/objectheader"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
@@ -215,7 +216,13 @@ func parseEntryPrefix(state *ingestState, startOffset uint64) (objectRecord, err
 		}
 
 		record.baseObject = baseID
-		headerLen += uint32(len(baseRaw))
+
+		baseRawLen, err := intconv.IntToUint32(len(baseRaw))
+		if err != nil {
+			return record, err
+		}
+
+		headerLen += baseRawLen
 	case objecttype.TypeOfsDelta:
 		dist, consumed, err := readOfsDistanceFromStream(state.stream)
 		if err != nil {
@@ -227,7 +234,13 @@ func parseEntryPrefix(state *ingestState, startOffset uint64) (objectRecord, err
 		}
 
 		record.baseOffset = startOffset - dist
-		headerLen += uint32(consumed)
+
+		consumedUint32, err := intconv.IntToUint32(consumed)
+		if err != nil {
+			return record, err
+		}
+
+		headerLen += consumedUint32
 	case objecttype.TypeInvalid, objecttype.TypeFuture:
 		return record, &ErrMalformedPackEntry{Offset: startOffset, Reason: fmt.Sprintf("unsupported object type %d", record.packedType)}
 	default:

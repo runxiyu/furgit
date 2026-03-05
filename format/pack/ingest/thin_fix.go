@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"codeberg.org/lindenii/furgit/internal/compress/zlib"
+	"codeberg.org/lindenii/furgit/internal/intconv"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
@@ -45,7 +46,12 @@ func maybeFixThin(state *ingestState) error {
 		return err
 	}
 
-	state.stream.consumed = uint64(newEnd)
+	consumed, err := intconv.Int64ToUint64(newEnd)
+	if err != nil {
+		return err
+	}
+
+	state.stream.consumed = consumed
 
 	baseIDs := unresolvedThinBaseIDs(state)
 	for _, id := range baseIDs {
@@ -76,12 +82,18 @@ func appendBaseObject(state *ingestState, id objectid.ObjectID, realType objectt
 
 	header := encodePackEntryHeader(realType, int64(len(content)))
 
-	_, err := state.packFile.WriteAt(header, int64(start))
+	startInt64, err := intconv.Uint64ToInt64(start)
 	if err != nil {
 		return 0, err
 	}
 
-	section := &fileSectionWriter{file: state.packFile, off: int64(start) + int64(len(header))}
+	_, err = state.packFile.WriteAt(header, startInt64)
+	if err != nil {
+		return 0, err
+	}
+
+	headerLenInt64 := int64(len(header))
+	section := &fileSectionWriter{file: state.packFile, off: startInt64 + headerLenInt64}
 	crc := crc32.NewIEEE()
 	_, _ = crc.Write(header)
 	counting := &countingWriter{dst: section}
@@ -98,19 +110,34 @@ func appendBaseObject(state *ingestState, id objectid.ObjectID, realType objectt
 		return 0, err
 	}
 
-	packedLen := uint64(len(header)) + uint64(counting.n)
+	headerLenUint64, err := intconv.IntToUint64(len(header))
+	if err != nil {
+		return 0, err
+	}
+
+	countingNUint64, err := intconv.IntToUint64(counting.n)
+	if err != nil {
+		return 0, err
+	}
+
+	packedLen := headerLenUint64 + countingNUint64
 	end := start + packedLen
 	state.stream.consumed = end
 
+	headerLenUint32, err := intconv.IntToUint32(len(header))
+	if err != nil {
+		return 0, err
+	}
+
 	record := objectRecord{
 		offset:       start,
-		headerLen:    uint32(len(header)),
+		headerLen:    headerLenUint32,
 		packedLen:    packedLen,
 		crc32:        crc.Sum32(),
 		packedType:   realType,
 		realType:     realType,
 		declaredSize: int64(len(content)),
-		dataOffset:   start + uint64(len(header)),
+		dataOffset:   start + headerLenUint64,
 		objectID:     id,
 		resolved:     true,
 	}
@@ -160,9 +187,14 @@ func (writer *countingWriter) Write(src []byte) (int, error) {
 // rewritePackHeaderAndTrailer rewrites object count and trailer hash using ReadAt/WriteAt.
 func rewritePackHeaderAndTrailer(state *ingestState) error {
 	var countRaw [4]byte
-	binary.BigEndian.PutUint32(countRaw[:], uint32(len(state.records)))
+	recordCountUint32, err := intconv.IntToUint32(len(state.records))
+	if err != nil {
+		return err
+	}
 
-	_, err := state.packFile.WriteAt(countRaw[:], 8)
+	binary.BigEndian.PutUint32(countRaw[:], recordCountUint32)
+
+	_, err = state.packFile.WriteAt(countRaw[:], 8)
 	if err != nil {
 		return err
 	}
@@ -217,8 +249,15 @@ func rewritePackHeaderAndTrailer(state *ingestState) error {
 	}
 
 	state.packHash = packHash
-	state.objectCountHeader = uint32(len(state.records))
-	state.stream.consumed = uint64(endWithoutTrailer + int64(len(sum)))
+	state.objectCountHeader = recordCountUint32
+
+	sumLenInt64 := int64(len(sum))
+	newConsumed, err := intconv.Int64ToUint64(endWithoutTrailer + sumLenInt64)
+	if err != nil {
+		return err
+	}
+
+	state.stream.consumed = newConsumed
 
 	return nil
 }
@@ -228,7 +267,11 @@ func encodePackEntryHeader(ty objecttype.Type, size int64) []byte {
 	var out [16]byte
 
 	n := 0
-	s := uint64(size)
+	s, err := intconv.Int64ToUint64(size)
+	if err != nil {
+		panic(err)
+	}
+
 	c := byte((uint8(ty) << 4) | byte(s&0x0f))
 
 	s >>= 4

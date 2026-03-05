@@ -41,6 +41,7 @@ import (
 	"sync"
 
 	"codeberg.org/lindenii/furgit/internal/compress/flate"
+	"codeberg.org/lindenii/furgit/internal/intconv"
 )
 
 const (
@@ -131,7 +132,14 @@ func (z *Reader) Read(p []byte) (int, error) {
 
 	// Finished file; check checksum.
 	readN, err := io.ReadFull(z.r, z.scratch[0:4])
-	z.trailerRead += uint64(readN)
+	readNUint64, convErr := intconv.IntToUint64(readN)
+	if convErr != nil {
+		z.err = convErr
+
+		return n, z.err
+	}
+
+	z.trailerRead += readNUint64
 
 	if err != nil {
 		if errors.Is(err, io.EOF) {
@@ -160,7 +168,12 @@ func (z *Reader) Read(p []byte) (int, error) {
 func (z *Reader) InputConsumed() uint64 {
 	out := z.headerRead + z.trailerRead
 	if z.progress != nil {
-		out += uint64(z.progress.InputConsumed())
+		progressIn, err := intconv.Int64ToUint64(z.progress.InputConsumed())
+		if err != nil {
+			panic(err)
+		}
+
+		out += progressIn
 	}
 
 	return out
