@@ -181,7 +181,8 @@ func (e *fastEncL3) Encode(dst *tokens, src []byte) {
 				nextHash := hashLen(load6432(src, i), tableBits, hashBytes)
 				e.table[nextHash] = tableEntryPrev{
 					Prev: e.table[nextHash].Cur,
-					Cur:  tableEntry{offset: e.cur + i}}
+					Cur:  tableEntry{offset: e.cur + i},
+				}
 			}
 			// We could immediately start working at s now, but to improve
 			// compression we first update the hash table at s-2 to s.

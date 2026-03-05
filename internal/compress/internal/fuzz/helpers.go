@@ -165,7 +165,7 @@ func unmarshalCorpusFile(b []byte) ([][]byte, error) {
 	if len(lines) < 2 {
 		return nil, fmt.Errorf("must include version and at least one value")
 	}
-	var vals = make([][]byte, 0, len(lines)-1)
+	vals := make([][]byte, 0, len(lines)-1)
 	for _, line := range lines[1:] {
 		line = bytes.TrimSpace(line)
 		if len(line) == 0 {

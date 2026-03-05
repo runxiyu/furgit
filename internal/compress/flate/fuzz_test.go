@@ -14,11 +14,13 @@ import (
 )
 
 // Fuzzing tweaks:
-var fuzzStartF = flag.Int("start", HuffmanOnly, "Start fuzzing at this level")
-var fuzzEndF = flag.Int("end", BestCompression, "End fuzzing at this level (inclusive)")
-var fuzzMaxF = flag.Int("max", 1<<20, "Maximum input size")
-var fuzzSLF = flag.Bool("sl", true, "Include stateless encodes")
-var fuzzWindow = flag.Bool("windows", true, "Include windowed encodes")
+var (
+	fuzzStartF = flag.Int("start", HuffmanOnly, "Start fuzzing at this level")
+	fuzzEndF   = flag.Int("end", BestCompression, "End fuzzing at this level (inclusive)")
+	fuzzMaxF   = flag.Int("max", 1<<20, "Maximum input size")
+	fuzzSLF    = flag.Bool("sl", true, "Include stateless encodes")
+	fuzzWindow = flag.Bool("windows", true, "Include windowed encodes")
+)
 
 func TestMain(m *testing.M) {
 	flag.Parse()
@@ -118,7 +120,7 @@ func FuzzEncoding(f *testing.F) {
 				t.Error(err)
 			}
 			if !bytes.Equal(data, data2) {
-				//fmt.Printf("want:%x\ngot: %x\n", data1, data2)
+				// fmt.Printf("want:%x\ngot: %x\n", data1, data2)
 				t.Error(msg + "not equal")
 			}
 		}

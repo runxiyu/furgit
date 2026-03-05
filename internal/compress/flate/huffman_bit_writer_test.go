@@ -62,7 +62,7 @@ func testBlockHuff(t *testing.T, in, out string) {
 		if *update {
 			if in != out {
 				t.Logf("Updating %q", out)
-				if err := os.WriteFile(out, got, 0666); err != nil {
+				if err := os.WriteFile(out, got, 0o666); err != nil {
 					t.Error(err)
 				}
 				return
@@ -72,7 +72,7 @@ func testBlockHuff(t *testing.T, in, out string) {
 		}
 
 		t.Errorf("%q != %q (see %q)", in, out, in+".got")
-		if err := os.WriteFile(in+".got", got, 0666); err != nil {
+		if err := os.WriteFile(in+".got", got, 0o666); err != nil {
 			t.Error(err)
 		}
 		return
@@ -87,7 +87,7 @@ func testBlockHuff(t *testing.T, in, out string) {
 	got = buf.Bytes()
 	if !bytes.Equal(got, want) {
 		t.Errorf("after reset %q != %q (see %q)", in, out, in+".reset.got")
-		if err := os.WriteFile(in+".reset.got", got, 0666); err != nil {
+		if err := os.WriteFile(in+".reset.got", got, 0o666); err != nil {
 			t.Error(err)
 		}
 		return
@@ -245,7 +245,7 @@ func testBlock(t *testing.T, test huffTest, ttype string) {
 		got := buf.Bytes()
 		if !bytes.Equal(got, want) {
 			t.Errorf("writeBlock did not yield expected result for file %q with input. See %q", test.want, test.want+gotSuffix)
-			if err := os.WriteFile(test.want+gotSuffix, got, 0666); err != nil {
+			if err := os.WriteFile(test.want+gotSuffix, got, 0o666); err != nil {
 				t.Error(err)
 			}
 		}
@@ -259,7 +259,7 @@ func testBlock(t *testing.T, test huffTest, ttype string) {
 		got = buf.Bytes()
 		if !bytes.Equal(got, want) {
 			t.Errorf("reset: writeBlock did not yield expected result for file %q with input. See %q", test.want, test.want+".reset"+gotSuffix)
-			if err := os.WriteFile(test.want+".reset"+gotSuffix, got, 0666); err != nil {
+			if err := os.WriteFile(test.want+".reset"+gotSuffix, got, 0o666); err != nil {
 				t.Error(err)
 			}
 			return
@@ -280,7 +280,7 @@ func testBlock(t *testing.T, test huffTest, ttype string) {
 	got := buf.Bytes()
 	if !bytes.Equal(got, wantNI) {
 		t.Errorf("writeBlock did not yield expected result for file %q with input. See %q", test.wantNoInput, test.wantNoInput+gotSuffix)
-		if err := os.WriteFile(test.wantNoInput+gotSuffix, got, 0666); err != nil {
+		if err := os.WriteFile(test.wantNoInput+gotSuffix, got, 0o666); err != nil {
 			t.Error(err)
 		}
 	} else if got[0]&1 == 1 {
@@ -298,7 +298,7 @@ func testBlock(t *testing.T, test huffTest, ttype string) {
 	got = buf.Bytes()
 	if !bytes.Equal(got, wantNI) {
 		t.Errorf("reset: writeBlock did not yield expected result for file %q without input. See %q", test.wantNoInput, test.wantNoInput+".reset"+gotSuffix)
-		if err := os.WriteFile(test.wantNoInput+".reset"+gotSuffix, got, 0666); err != nil {
+		if err := os.WriteFile(test.wantNoInput+".reset"+gotSuffix, got, 0o666); err != nil {
 			t.Error(err)
 		}
 		return

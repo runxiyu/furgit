@@ -44,8 +44,10 @@ var bitMask32 = [32]uint32{
 } // up to 32 bits
 
 // Initialize the fixedHuffmanDecoder only once upon first use.
-var fixedOnce sync.Once
-var fixedHuffmanDecoder huffmanDecoder
+var (
+	fixedOnce           sync.Once
+	fixedHuffmanDecoder huffmanDecoder
+)
 
 // A CorruptInputError reports the presence of corrupt input at a given offset.
 type CorruptInputError = flate.CorruptInputError

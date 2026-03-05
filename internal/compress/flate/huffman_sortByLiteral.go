@@ -41,6 +41,7 @@ func quickSort(data []literalNode, a, b, maxDepth int) {
 		insertionSort(data, a, b)
 	}
 }
+
 func heapSort(data []literalNode, a, b int) {
 	first := a
 	lo := 0
@@ -77,6 +78,7 @@ func siftDown(data []literalNode, lo, hi, first int) {
 		root = child
 	}
 }
+
 func doPivot(data []literalNode, lo, hi int) (midlo, midhi int) {
 	m := int(uint(lo+hi) >> 1) // Written like this to avoid integer overflow.
 	if hi-lo > 40 {

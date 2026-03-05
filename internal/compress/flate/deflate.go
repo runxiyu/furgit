@@ -132,7 +132,7 @@ func (d *compressor) fillDeflate(b []byte) int {
 	s := d.state
 	if s.index >= 2*windowSize-(minMatchLength+maxMatchLength) {
 		// shift the window by windowSize
-		//copy(d.window[:], d.window[windowSize:2*windowSize])
+		// copy(d.window[:], d.window[windowSize:2*windowSize])
 		*(*[windowSize]byte)(d.window) = *(*[windowSize]byte)(d.window[windowSize:])
 		s.index -= windowSize
 		d.windowEnd -= windowSize
@@ -176,7 +176,7 @@ func (d *compressor) writeBlock(tok *tokens, index int, eof bool) error {
 			window = d.window[d.blockStart:index]
 		}
 		d.blockStart = index
-		//d.w.writeBlock(tok, eof, window)
+		// d.w.writeBlock(tok, eof, window)
 		d.w.writeBlockDynamic(tok, eof, window, d.sync)
 		return d.w.err
 	}
@@ -325,7 +325,7 @@ func (d *compressor) findMatch(pos int, prevHead int, lookahead int) (length, of
 				// Calculate gain. Estimate
 				newGain := d.h.bitLengthRaw(wPos[:n]) - int(offsetExtraBits[offsetCode(uint32(pos-i))]) - baseCost - int(lengthExtraBits[lengthCodes[(n-3)&255]])
 
-				//fmt.Println("gain:", newGain, "prev:", cGain, "raw:", d.h.bitLengthRaw(wPos[:n]), "this-len:", n, "prev-len:", length)
+				// fmt.Println("gain:", newGain, "prev:", cGain, "raw:", d.h.bitLengthRaw(wPos[:n]), "this-len:", n, "prev-len:", length)
 				if newGain > cGain {
 					length = n
 					offset = pos - i

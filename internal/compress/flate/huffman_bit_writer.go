@@ -70,7 +70,7 @@ var offsetExtraBits = [32]int8{
 var offsetCombined = [32]uint32{}
 
 func init() {
-	var offsetBase = [32]uint32{
+	offsetBase := [32]uint32{
 		/* normal deflate */
 		0x000000, 0x000001, 0x000002, 0x000003, 0x000004,
 		0x000006, 0x000008, 0x00000c, 0x000010, 0x000018,
@@ -475,7 +475,7 @@ func (w *huffmanBitWriter) writeDynamicHeader(numLiterals int, numOffsets int, n
 
 	i := 0
 	for {
-		var codeWord = uint32(w.codegen[i])
+		codeWord := uint32(w.codegen[i])
 		i++
 		if codeWord == badCode {
 			break
@@ -572,9 +572,9 @@ func (w *huffmanBitWriter) writeBlock(tokens *tokens, eof bool, input []byte) {
 
 	// Figure out smallest code.
 	// Fixed Huffman baseline.
-	var literalEncoding = fixedLiteralEncoding
-	var offsetEncoding = fixedOffsetEncoding
-	var size = math.MaxInt32
+	literalEncoding := fixedLiteralEncoding
+	offsetEncoding := fixedOffsetEncoding
+	size := math.MaxInt32
 	if tokens.n < maxPredefinedTokens {
 		size = w.fixedSize(extraBits)
 	}
@@ -782,9 +782,9 @@ func (w *huffmanBitWriter) fillTokens() {
 // and offsetEncoding.
 // The number of literal and offset tokens is returned.
 func (w *huffmanBitWriter) indexTokens(t *tokens, alwaysEOB bool) (numLiterals, numOffsets int) {
-	//copy(w.literalFreq[:], t.litHist[:])
+	// copy(w.literalFreq[:], t.litHist[:])
 	*(*[256]uint16)(w.literalFreq[:]) = t.litHist
-	//copy(w.literalFreq[256:], t.extraHist[:])
+	// copy(w.literalFreq[256:], t.extraHist[:])
 	*(*[32]uint16)(w.literalFreq[256:]) = t.extraHist
 	w.offsetFreq = t.offHist
 
@@ -847,7 +847,7 @@ func (w *huffmanBitWriter) writeTokens(tokens []token, leCodes, oeCodes []hcode)
 
 	for _, t := range tokens {
 		if t < 256 {
-			//w.writeCode(lits[t.literal()])
+			// w.writeCode(lits[t.literal()])
 			c := lits[t]
 			bits |= c.code64() << (nbits & 63)
 			nbits += c.len()
@@ -896,7 +896,7 @@ func (w *huffmanBitWriter) writeTokens(tokens []token, leCodes, oeCodes []hcode)
 
 		if lengthCode >= lengthExtraBitsMinCode {
 			extraLengthBits := lengthExtraBits[lengthCode]
-			//w.writeBits(extraLength, extraLengthBits)
+			// w.writeBits(extraLength, extraLengthBits)
 			extraLength := int32(length - lengthBase[lengthCode])
 			bits |= uint64(extraLength) << (nbits & 63)
 			nbits += extraLengthBits
@@ -943,7 +943,7 @@ func (w *huffmanBitWriter) writeTokens(tokens []token, leCodes, oeCodes []hcode)
 
 		if offsetCode >= offsetExtraBitsMinCode {
 			offsetComb := offsetCombined[offsetCode]
-			//w.writeBits(extraOffset, extraOffsetBits)
+			// w.writeBits(extraOffset, extraOffsetBits)
 			bits |= uint64((offset-(offsetComb>>8))&matchOffsetOnlyMask) << (nbits & 63)
 			nbits += uint8(offsetComb)
 			if nbits >= 48 {

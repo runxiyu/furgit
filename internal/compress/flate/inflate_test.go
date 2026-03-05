@@ -190,7 +190,6 @@ func TestInflate(t *testing.T) {
 		}
 		t.Fatal(test.err, err)
 	}
-
 }
 
 // Tests ported from zlib/test/infcover.c

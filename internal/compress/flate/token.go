@@ -320,7 +320,7 @@ func (t *tokens) Slice() []token {
 
 // VarInt returns the tokens as varint encoded bytes.
 func (t *tokens) VarInt() []byte {
-	var b = make([]byte, binary.MaxVarintLen32*int(t.n))
+	b := make([]byte, binary.MaxVarintLen32*int(t.n))
 	var off int
 	for _, v := range t.tokens[:t.n] {
 		off += binary.PutUvarint(b[off:], uint64(v))
@@ -331,7 +331,7 @@ func (t *tokens) VarInt() []byte {
 // FromVarInt restores t to the varint encoded tokens provided.
 // Any data in t is removed.
 func (t *tokens) FromVarInt(b []byte) error {
-	var buf = bytes.NewReader(b)
+	buf := bytes.NewReader(b)
 	var toks []token
 	for {
 		r, err := binary.ReadUvarint(buf)

@@ -405,7 +405,7 @@ func TestDeterministicLM2(t *testing.T) { testDeterministic(-2, t) }
 
 func testDeterministic(i int, t *testing.T) {
 	// Test so much we cross a good number of block boundaries.
-	var length = maxStoreBlockSize*30 + 500
+	length := maxStoreBlockSize*30 + 500
 	if testing.Short() {
 		length /= 10
 	}

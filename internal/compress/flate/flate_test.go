@@ -21,9 +21,11 @@ import (
 
 // The following test should not panic.
 func TestIssue5915(t *testing.T) {
-	bits := []int{4, 0, 0, 6, 4, 3, 2, 3, 3, 4, 4, 5, 0, 0, 0, 0, 5, 5, 6,
+	bits := []int{
+		4, 0, 0, 6, 4, 3, 2, 3, 3, 4, 4, 5, 0, 0, 0, 0, 5, 5, 6,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 8, 6, 0, 11, 0, 8, 0, 6, 6, 10, 8}
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 8, 6, 0, 11, 0, 8, 0, 6, 6, 10, 8,
+	}
 	var h huffmanDecoder
 	if h.init(bits) {
 		t.Fatalf("Given sequence of bits is bad, and should not succeed.")
@@ -32,8 +34,10 @@ func TestIssue5915(t *testing.T) {
 
 // The following test should not panic.
 func TestIssue5962(t *testing.T) {
-	bits := []int{4, 0, 0, 6, 4, 3, 2, 3, 3, 4, 4, 5, 0, 0, 0, 0,
-		5, 5, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11}
+	bits := []int{
+		4, 0, 0, 6, 4, 3, 2, 3, 3, 4, 4, 5, 0, 0, 0, 0,
+		5, 5, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11,
+	}
 	var h huffmanDecoder
 	if h.init(bits) {
 		t.Fatalf("Given sequence of bits is bad, and should not succeed.")
@@ -164,7 +168,7 @@ func TestRegressions(t *testing.T) {
 					t.Error(err)
 				}
 				if !bytes.Equal(data1, data2) {
-					//fmt.Printf("want:%x\ngot: %x\n", data1, data2)
+					// fmt.Printf("want:%x\ngot: %x\n", data1, data2)
 					t.Error("not equal")
 				}
 			})
