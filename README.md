@@ -45,13 +45,13 @@ Furgit is a low-level Git library in Go.
 * Repository abstractions
 * Adler-32 optimizations
 * ZLIB pooling
-
-## Planned
-
 * Streaming `.pack`/`.idx` hash verifier
 * `.idx` and `.rev` writing
 * Pack ingestion
 * Un-thinning thin packs
+
+## Planned
+
 * Quarantine areas
 * V0/V1 protocol (e.g., `sideband-64k`, `pktline`, etc.)
 * Receiving/fetching
