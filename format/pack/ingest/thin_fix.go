@@ -37,7 +37,7 @@ func maybeFixThin(state *ingestState) error {
 	if err := state.packFile.Truncate(newEnd); err != nil {
 		return err
 	}
-	state.stream.offset = uint64(newEnd)
+	state.stream.consumed = uint64(newEnd)
 
 	baseIDs := unresolvedThinBaseIDs(state)
 	for _, id := range baseIDs {
@@ -60,7 +60,7 @@ func maybeFixThin(state *ingestState) error {
 
 // appendBaseObject appends one base object as a new packed non-delta entry.
 func appendBaseObject(state *ingestState, id objectid.ObjectID, realType objecttype.Type, content []byte) (int, error) {
-	start := state.stream.offset
+	start := state.stream.consumed
 	header := encodePackEntryHeader(realType, int64(len(content)))
 	if _, err := state.packFile.WriteAt(header, int64(start)); err != nil {
 		return 0, err
@@ -80,7 +80,7 @@ func appendBaseObject(state *ingestState, id objectid.ObjectID, realType objectt
 
 	packedLen := uint64(len(header)) + uint64(counting.n)
 	end := start + packedLen
-	state.stream.offset = end
+	state.stream.consumed = end
 
 	record := objectRecord{
 		offset:       start,
@@ -186,7 +186,7 @@ func rewritePackHeaderAndTrailer(state *ingestState) error {
 	}
 	state.packHash = packHash
 	state.objectCountHeader = uint32(len(state.records))
-	state.stream.offset = uint64(endWithoutTrailer + int64(len(sum)))
+	state.stream.consumed = uint64(endWithoutTrailer + int64(len(sum)))
 
 	return nil
 }

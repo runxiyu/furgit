@@ -28,7 +28,7 @@ type ingestState struct {
 	revFile     *os.File
 	revTmpName  string
 
-	stream *streamCopier
+	stream *streamScanner
 
 	records             []objectRecord
 	ofsDeltas           []ofsDeltaRef

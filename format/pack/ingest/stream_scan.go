@@ -20,10 +20,11 @@ func streamPackAndScan(state *ingestState) error {
 		return err
 	}
 
-	state.stream = newStreamCopier(
+	state.stream = newStreamScanner(
 		state.src,
 		state.packFile,
-		newTrailerVerifier(hashImpl, state.algo.Size()),
+		hashImpl,
+		state.algo.Size(),
 	)
 
 	if err := readAndValidatePackHeader(state); err != nil {
@@ -35,19 +36,27 @@ func streamPackAndScan(state *ingestState) error {
 	state.refDeltas = make([]refDeltaRef, 0, state.objectCountHeader)
 
 	for range state.objectCountHeader {
-		nextOffset, err := scanOneEntry(state, state.stream.offset)
+		nextOffset, err := scanOneEntry(state, state.stream.consumed)
 		if err != nil {
 			return err
 		}
 
-		if nextOffset != state.stream.offset {
+		if nextOffset != state.stream.consumed {
 			return fmt.Errorf("format/pack/ingest: internal stream offset mismatch")
 		}
 	}
 
-	if err := finalizeStreamPackHash(state); err != nil {
+	if err := state.stream.finishAndFlushTrailer(); err != nil {
 		return err
 	}
+	if len(state.stream.packTrailer) != state.algo.Size() {
+		return fmt.Errorf("format/pack/ingest: invalid trailer size")
+	}
+	packHash, err := objectid.FromBytes(state.algo, state.stream.packTrailer)
+	if err != nil {
+		return err
+	}
+	state.packHash = packHash
 
 	return state.stream.flush()
 }
@@ -98,10 +107,10 @@ func scanOneEntry(state *ingestState, startOffset uint64) (uint64, error) {
 	}
 
 	endOffset := startOffset + uint64(record.headerLen) + consumedInput
-	if endOffset > state.stream.offset {
+	if endOffset > state.stream.consumed {
 		return 0, &ErrMalformedPackEntry{
 			Offset: startOffset,
-			Reason: fmt.Sprintf("entry end offset overflow got %d > stream %d", endOffset, state.stream.offset),
+			Reason: fmt.Sprintf("entry end offset overflow got %d > stream %d", endOffset, state.stream.consumed),
 		}
 	}
 
@@ -283,36 +292,6 @@ func readOfsDistanceFromStream(reader io.ByteReader) (uint64, int, error) {
 }
 
 // finalizeStreamPackHash consumes trailer bytes and verifies stream integrity.
-func finalizeStreamPackHash(state *ingestState) error {
-	// We have already consumed object entries. Drain exactly the hash trailer.
-	trailer := make([]byte, state.algo.Size())
-	if err := state.stream.readFull(trailer); err != nil {
-		return &ErrPackTrailerMismatch{}
-	}
-
-	// Ensure no trailing garbage.
-	var probe [1]byte
-	n, err := state.stream.Read(probe[:])
-	if n > 0 || err == nil {
-		return fmt.Errorf("format/pack/ingest: pack has trailing garbage")
-	}
-	if err != io.EOF {
-		return err
-	}
-
-	if err := state.stream.verifier.verify(); err != nil {
-		return err
-	}
-
-	packHash, err := objectid.FromBytes(state.algo, trailer)
-	if err != nil {
-		return err
-	}
-	state.packHash = packHash
-
-	return nil
-}
-
 // readDeltaHeaderSizes reads source and destination sizes from one delta payload.
 func readDeltaHeaderSizes(payload []byte) (int, int, error) {
 	reader := &byteSliceReader{data: payload}
