@@ -42,6 +42,7 @@ func fixtureBytes(t *testing.T, algo objectid.Algorithm, name string) []byte {
 	t.Helper()
 
 	path := fixturePath(t, algo, name)
+
 	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("read fixture %q: %v", path, err)
@@ -55,16 +56,19 @@ func fixtureMetadata(t *testing.T, algo objectid.Algorithm) map[string]string {
 	t.Helper()
 
 	data := fixtureBytes(t, algo, "METADATA.txt")
+
 	out := make(map[string]string)
 	for line := range strings.SplitSeq(strings.TrimSpace(string(data)), "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" {
 			continue
 		}
+
 		key, value, ok := strings.Cut(line, "=")
 		if !ok {
 			t.Fatalf("invalid fixture metadata line %q", line)
 		}
+
 		out[strings.TrimSpace(key)] = strings.TrimSpace(value)
 	}
 
@@ -76,6 +80,7 @@ func fixtureOID(t *testing.T, algo objectid.Algorithm, key string) objectid.Obje
 	t.Helper()
 
 	meta := fixtureMetadata(t, algo)
+
 	hex, ok := meta[key]
 	if !ok {
 		t.Fatalf("missing fixture metadata key %q", key)
@@ -103,10 +108,12 @@ func verifyReindexOracle(t *testing.T, repo *testgit.TestRepo, packPath, idxPath
 	if err != nil {
 		t.Fatalf("read idx: %v", err)
 	}
+
 	wantIdx, err := os.ReadFile(oracleIdxPath)
 	if err != nil {
 		t.Fatalf("read oracle idx: %v", err)
 	}
+
 	if !bytes.Equal(gotIdx, wantIdx) {
 		t.Fatal("idx bytes differ from git index-pack output")
 	}
@@ -115,10 +122,12 @@ func verifyReindexOracle(t *testing.T, repo *testgit.TestRepo, packPath, idxPath
 	if err != nil {
 		t.Fatalf("read rev: %v", err)
 	}
+
 	wantRev, err := os.ReadFile(oracleRevPath)
 	if err != nil {
 		t.Fatalf("read oracle rev: %v", err)
 	}
+
 	if !bytes.Equal(gotRev, wantRev) {
 		t.Fatal("rev bytes differ from git index-pack output")
 	}
@@ -132,10 +141,12 @@ func TestIngestNonThinPackWritesPackIdxRev(t *testing.T) {
 		packBytes := fixtureBytes(t, algo, "nonthin.pack")
 
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+
 		packRoot, err := os.OpenRoot(filepath.Join(receiver.Dir(), "objects", "pack"))
 		if err != nil {
 			t.Fatalf("open pack root: %v", err)
 		}
+
 		defer func() {
 			err = packRoot.Close()
 			if err != nil {
@@ -147,9 +158,11 @@ func TestIngestNonThinPackWritesPackIdxRev(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Ingest: %v", err)
 		}
+
 		if result.ThinFixed {
 			t.Fatalf("ThinFixed = true, want false")
 		}
+
 		if result.RevName == "" {
 			t.Fatal("RevName is empty")
 		}
@@ -158,10 +171,12 @@ func TestIngestNonThinPackWritesPackIdxRev(t *testing.T) {
 		if err != nil {
 			t.Fatalf("stat pack: %v", err)
 		}
+
 		_, err = packRoot.Stat(result.IdxName)
 		if err != nil {
 			t.Fatalf("stat idx: %v", err)
 		}
+
 		_, err = packRoot.Stat(result.RevName)
 		if err != nil {
 			t.Fatalf("stat rev: %v", err)
@@ -186,10 +201,12 @@ func TestIngestThinPackWithoutFixReturnsUnresolved(t *testing.T) {
 
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		packDir := filepath.Join(receiver.Dir(), "objects", "pack")
+
 		packRoot, err := os.OpenRoot(packDir)
 		if err != nil {
 			t.Fatalf("open pack root: %v", err)
 		}
+
 		defer func() {
 			err = packRoot.Close()
 			if err != nil {
@@ -211,6 +228,7 @@ func TestIngestThinPackWithoutFixReturnsUnresolved(t *testing.T) {
 		if err != nil {
 			t.Fatalf("glob pack files: %v", err)
 		}
+
 		if len(matches) != 0 {
 			t.Fatalf("found finalized pack files after failure: %v", matches)
 		}
@@ -230,6 +248,7 @@ func TestIngestThinPackWithFixThin(t *testing.T) {
 		if err != nil {
 			t.Fatalf("open pack root: %v", err)
 		}
+
 		defer func() {
 			err = packRoot.Close()
 			if err != nil {
@@ -246,6 +265,7 @@ func TestIngestThinPackWithFixThin(t *testing.T) {
 		if err != nil {
 			t.Fatalf("open receiver root: %v", err)
 		}
+
 		defer func() {
 			err = receiverRoot.Close()
 			if err != nil {
@@ -257,6 +277,7 @@ func TestIngestThinPackWithFixThin(t *testing.T) {
 		if err != nil {
 			t.Fatalf("repository.Open(receiver): %v", err)
 		}
+
 		defer func() {
 			err = receiverRepo.Close()
 			if err != nil {
@@ -268,6 +289,7 @@ func TestIngestThinPackWithFixThin(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Ingest(thin): %v", err)
 		}
+
 		if !result.ThinFixed {
 			t.Fatal("ThinFixed = false, want true")
 		}
@@ -295,10 +317,12 @@ func TestIngestPackTrailerMismatch(t *testing.T) {
 
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		packDir := filepath.Join(receiver.Dir(), "objects", "pack")
+
 		packRoot, err := os.OpenRoot(packDir)
 		if err != nil {
 			t.Fatalf("open pack root: %v", err)
 		}
+
 		defer func() {
 			err = packRoot.Close()
 			if err != nil {
@@ -320,6 +344,7 @@ func TestIngestPackTrailerMismatch(t *testing.T) {
 		if err != nil {
 			t.Fatalf("glob pack files: %v", err)
 		}
+
 		if len(matches) != 0 {
 			t.Fatalf("found finalized pack files after failure: %v", matches)
 		}

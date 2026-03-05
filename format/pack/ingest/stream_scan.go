@@ -49,13 +49,16 @@ func streamPackAndScan(state *ingestState) error {
 	if err := state.stream.finishAndFlushTrailer(); err != nil {
 		return err
 	}
+
 	if len(state.stream.packTrailer) != state.algo.Size() {
 		return fmt.Errorf("format/pack/ingest: invalid trailer size")
 	}
+
 	packHash, err := objectid.FromBytes(state.algo, state.stream.packTrailer)
 	if err != nil {
 		return err
 	}
+
 	state.packHash = packHash
 
 	return state.stream.flush()
@@ -115,6 +118,7 @@ func scanOneEntry(state *ingestState, startOffset uint64) (uint64, error) {
 	}
 
 	record.packedLen = endOffset - startOffset
+
 	record.dataOffset = startOffset + uint64(record.headerLen)
 	if record.packedLen < uint64(record.headerLen) {
 		return 0, &ErrMalformedPackEntry{Offset: startOffset, Reason: "negative payload span"}
@@ -124,6 +128,7 @@ func scanOneEntry(state *ingestState, startOffset uint64) (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	record.crc32 = crc
 
 	if packfmt.IsBaseObjectType(record.packedType) {
@@ -134,6 +139,7 @@ func scanOneEntry(state *ingestState, startOffset uint64) (uint64, error) {
 
 	recordIdx := len(state.records)
 	state.records = append(state.records, record)
+
 	state.offsetToRecord[record.offset] = recordIdx
 	if record.resolved {
 		state.objectToRecord[record.objectID] = recordIdx
@@ -158,6 +164,7 @@ func scanOneEntry(state *ingestState, startOffset uint64) (uint64, error) {
 // parseEntryPrefix parses one entry prefix from stream.
 func parseEntryPrefix(state *ingestState, startOffset uint64) (objectRecord, error) {
 	var record objectRecord
+
 	record.offset = startOffset
 
 	first, err := state.stream.ReadByte()
@@ -176,13 +183,16 @@ func parseEntryPrefix(state *ingestState, startOffset uint64) (objectRecord, err
 		if err != nil {
 			return record, &ErrMalformedPackEntry{Offset: startOffset, Reason: fmt.Sprintf("read size continuation: %v", err)}
 		}
+
 		headerLen++
 		size |= int64(b&0x7f) << shift
 		shift += 7
 	}
+
 	if size < 0 {
 		return record, &ErrMalformedPackEntry{Offset: startOffset, Reason: "negative declared size"}
 	}
+
 	record.declaredSize = size
 
 	switch record.packedType {
@@ -192,10 +202,12 @@ func parseEntryPrefix(state *ingestState, startOffset uint64) (objectRecord, err
 		if err := state.stream.readFull(baseRaw); err != nil {
 			return record, &ErrMalformedPackEntry{Offset: startOffset, Reason: fmt.Sprintf("read ref base: %v", err)}
 		}
+
 		baseID, err := objectid.FromBytes(state.algo, baseRaw)
 		if err != nil {
 			return record, &ErrMalformedPackEntry{Offset: startOffset, Reason: fmt.Sprintf("parse ref base: %v", err)}
 		}
+
 		record.baseObject = baseID
 		headerLen += uint32(len(baseRaw))
 	case objecttype.TypeOfsDelta:
@@ -203,9 +215,11 @@ func parseEntryPrefix(state *ingestState, startOffset uint64) (objectRecord, err
 		if err != nil {
 			return record, &ErrMalformedPackEntry{Offset: startOffset, Reason: err.Error()}
 		}
+
 		if startOffset <= dist {
 			return record, &ErrMalformedPackEntry{Offset: startOffset, Reason: "ofs base offset out of bounds"}
 		}
+
 		record.baseOffset = startOffset - dist
 		headerLen += uint32(consumed)
 	case objecttype.TypeInvalid, objecttype.TypeFuture:
@@ -223,13 +237,16 @@ func parseEntryPrefix(state *ingestState, startOffset uint64) (objectRecord, err
 // (inflatedLength, consumedInput, oidForBaseEntry).
 func drainEntryPayload(state *ingestState, record objectRecord) (int64, uint64, objectid.ObjectID, error) {
 	var zero objectid.ObjectID
+
 	reader, err := zlib.NewReader(state.stream)
 	if err != nil {
 		return 0, 0, zero, &ErrMalformedPackEntry{Offset: record.offset, Reason: fmt.Sprintf("open zlib stream: %v", err)}
 	}
+
 	defer func() { _ = reader.Close() }()
 
 	var total int64
+
 	if packfmt.IsBaseObjectType(record.packedType) {
 		header, ok := objectheader.Encode(record.packedType, record.declaredSize)
 		if !ok {
@@ -240,12 +257,14 @@ func drainEntryPayload(state *ingestState, record objectRecord) (int64, uint64, 
 		if err != nil {
 			return 0, 0, zero, err
 		}
+
 		_, _ = hashImpl.Write(header)
 
 		n, err := io.Copy(hashImpl, reader)
 		if err != nil {
 			return 0, 0, zero, &ErrMalformedPackEntry{Offset: record.offset, Reason: fmt.Sprintf("inflate base object: %v", err)}
 		}
+
 		total = n
 
 		oid, err := objectid.FromBytes(state.algo, hashImpl.Sum(nil))
@@ -261,6 +280,7 @@ func drainEntryPayload(state *ingestState, record objectRecord) (int64, uint64, 
 		if err != nil {
 			return 0, 0, zero, &ErrMalformedPackEntry{Offset: record.offset, Reason: fmt.Sprintf("inflate delta payload: %v", err)}
 		}
+
 		total = n
 
 		return total, reader.InputConsumed(), zero, nil
@@ -278,12 +298,14 @@ func readOfsDistanceFromStream(reader io.ByteReader) (uint64, int, error) {
 
 	dist := uint64(first & 0x7f)
 	consumed := 1
+
 	b := first
 	for b&0x80 != 0 {
 		b, err = reader.ReadByte()
 		if err != nil {
 			return 0, 0, fmt.Errorf("read ofs distance continuation: %w", err)
 		}
+
 		consumed++
 		dist = ((dist + 1) << 7) + uint64(b&0x7f)
 	}

@@ -48,6 +48,7 @@ func (testRepo *TestRepo) PackObjectsIsThin(tb testing.TB, revs []string) bool {
 	if err != nil {
 		_ = indexCmd.Process.Kill()
 		_ = indexCmd.Wait()
+
 		tb.Fatalf("git %v start failed: %v", packArgs, err)
 	}
 
@@ -65,6 +66,7 @@ func (testRepo *TestRepo) PackObjectsIsThin(tb testing.TB, revs []string) bool {
 	if strings.Contains(stderr, "unresolved") && strings.Contains(stderr, "delta") {
 		return true
 	}
+
 	if strings.Contains(stderr, "missing") && strings.Contains(stderr, "base") {
 		return true
 	}

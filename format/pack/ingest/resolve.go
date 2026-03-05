@@ -27,6 +27,7 @@ func resolveAll(state *ingestState) error {
 		}
 
 		visiting := make(map[int]struct{})
+
 		ty, content, err := resolveRecord(state, idx, visiting)
 		if err != nil {
 			if errors.Is(err, errExternalThinBase) {
@@ -62,6 +63,7 @@ func resolveRecord(state *ingestState, idx int, visiting map[int]struct{}) (obje
 	if _, ok := visiting[idx]; ok {
 		return objecttype.TypeInvalid, nil, &ErrDeltaCycle{Offset: state.records[idx].offset}
 	}
+
 	visiting[idx] = struct{}{}
 	defer delete(visiting, idx)
 
@@ -75,6 +77,7 @@ func resolveRecord(state *ingestState, idx int, visiting map[int]struct{}) (obje
 		if err != nil {
 			return objecttype.TypeInvalid, nil, err
 		}
+
 		if record.resolved {
 			state.baseCache.add(idx, record.realType, content)
 
@@ -85,6 +88,7 @@ func resolveRecord(state *ingestState, idx int, visiting map[int]struct{}) (obje
 		if err != nil {
 			return objecttype.TypeInvalid, nil, err
 		}
+
 		record.objectID = id
 		record.realType = ty
 		record.resolved = true
@@ -108,6 +112,7 @@ func resolveRecord(state *ingestState, idx int, visiting map[int]struct{}) (obje
 				Reason: "missing ofs-delta base entry",
 			}
 		}
+
 		baseType, baseContent, err = resolveRecord(state, baseIdx, visiting)
 		if err != nil {
 			return objecttype.TypeInvalid, nil, err
@@ -138,6 +143,7 @@ func resolveRecord(state *ingestState, idx int, visiting map[int]struct{}) (obje
 	if err != nil {
 		return objecttype.TypeInvalid, nil, err
 	}
+
 	record.objectID = id
 	record.realType = ty
 	record.resolved = true
@@ -158,6 +164,7 @@ func readBaseRecordContent(state *ingestState, idx int) (objecttype.Type, []byte
 	if err != nil {
 		return objecttype.TypeInvalid, nil, err
 	}
+
 	if int64(len(content)) != record.declaredSize {
 		return objecttype.TypeInvalid, nil, &ErrMalformedPackEntry{
 			Offset: record.offset,
@@ -179,12 +186,14 @@ func applyDeltaRecord(state *ingestState, idx int, baseType objecttype.Type, bas
 	if err != nil {
 		return objecttype.TypeInvalid, nil, err
 	}
+
 	if int64(len(deltaPayload)) != record.declaredSize {
 		return objecttype.TypeInvalid, nil, &ErrMalformedPackEntry{
 			Offset: record.offset,
 			Reason: fmt.Sprintf("delta payload size mismatch got %d want %d", len(deltaPayload), record.declaredSize),
 		}
 	}
+
 	srcSize, dstSize, err := readDeltaHeaderSizes(deltaPayload)
 	if err != nil {
 		return objecttype.TypeInvalid, nil, &ErrMalformedPackEntry{
@@ -192,6 +201,7 @@ func applyDeltaRecord(state *ingestState, idx int, baseType objecttype.Type, bas
 			Reason: fmt.Sprintf("read delta header: %v", err),
 		}
 	}
+
 	if srcSize != len(baseContent) {
 		return objecttype.TypeInvalid, nil, &ErrMalformedPackEntry{
 			Offset: record.offset,
@@ -206,6 +216,7 @@ func applyDeltaRecord(state *ingestState, idx int, baseType objecttype.Type, bas
 			Reason: fmt.Sprintf("apply delta: %v", err),
 		}
 	}
+
 	if len(content) != dstSize {
 		return objecttype.TypeInvalid, nil, &ErrMalformedPackEntry{
 			Offset: record.offset,
@@ -222,6 +233,7 @@ func inflateRecordPayload(state *ingestState, idx int) ([]byte, error) {
 	if record.packedLen < uint64(record.headerLen) {
 		return nil, &ErrMalformedPackEntry{Offset: record.offset, Reason: "entry packed span underflow"}
 	}
+
 	compressedOffset := record.offset + uint64(record.headerLen)
 	compressedLen := record.packedLen - uint64(record.headerLen)
 	section := io.NewSectionReader(state.packFile, int64(compressedOffset), int64(compressedLen))
@@ -230,6 +242,7 @@ func inflateRecordPayload(state *ingestState, idx int) ([]byte, error) {
 	if err != nil {
 		return nil, &ErrMalformedPackEntry{Offset: record.offset, Reason: fmt.Sprintf("open payload zlib: %v", err)}
 	}
+
 	defer func() { _ = reader.Close() }()
 
 	out, err := io.ReadAll(reader)
@@ -251,6 +264,7 @@ func hashCanonicalObject(algo objectid.Algorithm, ty objecttype.Type, content []
 	if err != nil {
 		return objectid.ObjectID{}, err
 	}
+
 	_, _ = hashImpl.Write(header)
 	_, _ = hashImpl.Write(content)
 
@@ -260,11 +274,13 @@ func hashCanonicalObject(algo objectid.Algorithm, ty objecttype.Type, content []
 // unresolvedThinBaseIDs returns sorted unique unresolved ref base IDs.
 func unresolvedThinBaseIDs(state *ingestState) []objectid.ObjectID {
 	seen := make(map[objectid.ObjectID]struct{})
+
 	for _, idx := range state.unresolvedRefDeltas {
 		record := state.records[idx]
 		if record.packedType != objecttype.TypeRefDelta {
 			continue
 		}
+
 		seen[record.baseObject] = struct{}{}
 	}
 
@@ -272,6 +288,7 @@ func unresolvedThinBaseIDs(state *ingestState) []objectid.ObjectID {
 	for id := range seen {
 		out = append(out, id)
 	}
+
 	slices.SortFunc(out, func(a, b objectid.ObjectID) int {
 		return bytes.Compare(a.RawBytes(), b.RawBytes())
 	})

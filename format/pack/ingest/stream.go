@@ -54,6 +54,7 @@ func (scanner *streamScanner) fill(min int) error {
 	if min <= 0 {
 		return nil
 	}
+
 	if min > len(scanner.buf) {
 		return fmt.Errorf("format/pack/ingest: fill(%d) exceeds scanner buffer", min)
 	}
@@ -67,6 +68,7 @@ func (scanner *streamScanner) fill(min int) error {
 		if readN > 0 {
 			scanner.n += readN
 		}
+
 		if err != nil {
 			if err == io.EOF && scanner.n-scanner.off >= min {
 				return nil
@@ -74,6 +76,7 @@ func (scanner *streamScanner) fill(min int) error {
 
 			return err
 		}
+
 		if readN == 0 {
 			return io.ErrNoProgress
 		}
@@ -87,6 +90,7 @@ func (scanner *streamScanner) use(n int) error {
 	if n < 0 || n > scanner.n-scanner.off {
 		return fmt.Errorf("format/pack/ingest: invalid consume length %d", n)
 	}
+
 	if n == 0 {
 		return nil
 	}
@@ -97,6 +101,7 @@ func (scanner *streamScanner) use(n int) error {
 			return err
 		}
 	}
+
 	if scanner.inEntryCRC {
 		scanner.entryCRC = crc32.Update(scanner.entryCRC, crc32.IEEETable, chunk)
 	}
@@ -132,7 +137,9 @@ func (scanner *streamScanner) Read(dst []byte) (int, error) {
 	if n > unread {
 		n = unread
 	}
+
 	copy(dst, scanner.buf[scanner.off:scanner.off+n])
+
 	if err := scanner.use(n); err != nil {
 		return 0, err
 	}
@@ -179,17 +186,21 @@ func (scanner *streamScanner) finishAndFlushTrailer() error {
 	}
 
 	trailer := make([]byte, scanner.hashSize)
+
 	scanner.hashEnabled = false
 	if err := scanner.readFull(trailer); err != nil {
 		return &ErrPackTrailerMismatch{}
 	}
+
 	scanner.packTrailer = append(scanner.packTrailer[:0], trailer...)
 
 	var probe [1]byte
+
 	n, err := scanner.Read(probe[:])
 	if n > 0 || err == nil {
 		return fmt.Errorf("format/pack/ingest: pack has trailing garbage")
 	}
+
 	if err != io.EOF {
 		return err
 	}
@@ -213,6 +224,7 @@ func (scanner *streamScanner) endEntryCRC() (uint32, error) {
 	if !scanner.inEntryCRC {
 		return 0, fmt.Errorf("format/pack/ingest: entry CRC not started")
 	}
+
 	crc := scanner.entryCRC
 	scanner.entryCRC = 0
 	scanner.inEntryCRC = false
@@ -233,9 +245,11 @@ func (scanner *streamScanner) flushConsumedPrefix() error {
 		if err != nil {
 			return &ErrDestinationWrite{Op: fmt.Sprintf("write pack: %v", err)}
 		}
+
 		if n == 0 {
 			return &ErrDestinationWrite{Op: "write pack: short write"}
 		}
+
 		written += n
 	}
 

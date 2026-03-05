@@ -17,26 +17,32 @@ func maybeFixThin(state *ingestState) error {
 	if len(state.unresolvedRefDeltas) == 0 {
 		return nil
 	}
+
 	if !state.fixThin {
 		return &ErrThinPackUnresolved{Count: len(state.unresolvedRefDeltas)}
 	}
+
 	if state.base == nil {
 		return &ErrThinPackUnresolved{Count: len(state.unresolvedRefDeltas)}
 	}
 
 	hashSize := int64(state.algo.Size())
+
 	info, err := state.packFile.Stat()
 	if err != nil {
 		return err
 	}
+
 	size := info.Size()
 	if size < hashSize {
 		return fmt.Errorf("format/pack/ingest: pack too short to trim trailer")
 	}
+
 	newEnd := size - hashSize
 	if err := state.packFile.Truncate(newEnd); err != nil {
 		return err
 	}
+
 	state.stream.consumed = uint64(newEnd)
 
 	baseIDs := unresolvedThinBaseIDs(state)
@@ -45,9 +51,11 @@ func maybeFixThin(state *ingestState) error {
 		if err != nil {
 			continue
 		}
+
 		if _, err := appendBaseObject(state, id, ty, content); err != nil {
 			return err
 		}
+
 		state.thinFixed = true
 	}
 
@@ -61,6 +69,7 @@ func maybeFixThin(state *ingestState) error {
 // appendBaseObject appends one base object as a new packed non-delta entry.
 func appendBaseObject(state *ingestState, id objectid.ObjectID, realType objecttype.Type, content []byte) (int, error) {
 	start := state.stream.consumed
+
 	header := encodePackEntryHeader(realType, int64(len(content)))
 	if _, err := state.packFile.WriteAt(header, int64(start)); err != nil {
 		return 0, err
@@ -70,10 +79,12 @@ func appendBaseObject(state *ingestState, id objectid.ObjectID, realType objectt
 	crc := crc32.NewIEEE()
 	_, _ = crc.Write(header)
 	counting := &countingWriter{dst: section}
+
 	zw := zlib.NewWriter(io.MultiWriter(counting, crc))
 	if _, err := zw.Write(content); err != nil {
 		return 0, err
 	}
+
 	if err := zw.Close(); err != nil {
 		return 0, err
 	}
@@ -116,6 +127,7 @@ func (writer *fileSectionWriter) Write(src []byte) (int, error) {
 	if len(src) == 0 {
 		return 0, nil
 	}
+
 	n, err := writer.file.WriteAt(src, writer.off+writer.pos)
 	writer.pos += int64(n)
 
@@ -140,6 +152,7 @@ func (writer *countingWriter) Write(src []byte) (int, error) {
 func rewritePackHeaderAndTrailer(state *ingestState) error {
 	var countRaw [4]byte
 	binary.BigEndian.PutUint32(countRaw[:], uint32(len(state.records)))
+
 	if _, err := state.packFile.WriteAt(countRaw[:], 8); err != nil {
 		return err
 	}
@@ -148,29 +161,35 @@ func rewritePackHeaderAndTrailer(state *ingestState) error {
 	if err != nil {
 		return err
 	}
+
 	endWithoutTrailer := info.Size()
 
 	hashImpl, err := state.algo.New()
 	if err != nil {
 		return err
 	}
+
 	var (
 		buf [128 << 10]byte
 		pos int64
 	)
 	for pos < endWithoutTrailer {
 		want := int64(len(buf))
+
 		remaining := endWithoutTrailer - pos
 		if remaining < want {
 			want = remaining
 		}
+
 		n, err := state.packFile.ReadAt(buf[:want], pos)
 		if err != nil && err != io.EOF {
 			return err
 		}
+
 		if n == 0 {
 			return io.ErrUnexpectedEOF
 		}
+
 		_, _ = hashImpl.Write(buf[:n])
 		pos += int64(n)
 	}
@@ -184,6 +203,7 @@ func rewritePackHeaderAndTrailer(state *ingestState) error {
 	if err != nil {
 		return err
 	}
+
 	state.packHash = packHash
 	state.objectCountHeader = uint32(len(state.records))
 	state.stream.consumed = uint64(endWithoutTrailer + int64(len(sum)))
@@ -194,9 +214,11 @@ func rewritePackHeaderAndTrailer(state *ingestState) error {
 // encodePackEntryHeader encodes one non-delta packed entry header.
 func encodePackEntryHeader(ty objecttype.Type, size int64) []byte {
 	var out [16]byte
+
 	n := 0
 	s := uint64(size)
 	c := byte((uint8(ty) << 4) | byte(s&0x0f))
+
 	s >>= 4
 	for s != 0 {
 		out[n] = c | 0x80
@@ -204,6 +226,7 @@ func encodePackEntryHeader(ty objecttype.Type, size int64) []byte {
 		c = byte(s & 0x7f)
 		s >>= 7
 	}
+
 	out[n] = c
 	n++
 

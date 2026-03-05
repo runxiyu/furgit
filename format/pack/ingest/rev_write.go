@@ -19,10 +19,12 @@ func writeRev(state *ingestState) error {
 	}
 
 	idxOrder := buildIdxOrder(state)
+
 	recordToIdxPos := make([]int, len(state.records))
 	for pos, recordIdx := range idxOrder {
 		recordToIdxPos[recordIdx] = pos
 	}
+
 	packOrder := buildPackOrder(state)
 
 	hashImpl, err := state.algo.New()
@@ -32,20 +34,26 @@ func writeRev(state *ingestState) error {
 
 	var scratch [8]byte
 	binary.BigEndian.PutUint32(scratch[:4], revMagic)
+
 	if err := writeAndHash(state.revFile, hashImpl, scratch[:4]); err != nil {
 		return err
 	}
+
 	binary.BigEndian.PutUint32(scratch[:4], revVersion)
+
 	if err := writeAndHash(state.revFile, hashImpl, scratch[:4]); err != nil {
 		return err
 	}
+
 	binary.BigEndian.PutUint32(scratch[:4], hashID(state.algo))
+
 	if err := writeAndHash(state.revFile, hashImpl, scratch[:4]); err != nil {
 		return err
 	}
 
 	for _, recordIdx := range packOrder {
 		binary.BigEndian.PutUint32(scratch[:4], uint32(recordToIdxPos[recordIdx]))
+
 		if err := writeAndHash(state.revFile, hashImpl, scratch[:4]); err != nil {
 			return err
 		}
@@ -54,6 +62,7 @@ func writeRev(state *ingestState) error {
 	if err := writeAndHash(state.revFile, hashImpl, state.packHash.Bytes()); err != nil {
 		return err
 	}
+
 	revHash := hashImpl.Sum(nil)
 	if _, err := state.revFile.Write(revHash); err != nil {
 		return err
@@ -68,8 +77,10 @@ func buildPackOrder(state *ingestState) []int {
 	for idx := range state.records {
 		out = append(out, idx)
 	}
+
 	slices.SortFunc(out, func(a, b int) int {
 		offA := state.records[a].offset
+
 		offB := state.records[b].offset
 		switch {
 		case offA < offB:

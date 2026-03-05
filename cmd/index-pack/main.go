@@ -39,17 +39,20 @@ func run(repoPath, destinationPath, objectFormat string, fixThin, writeRev bool)
 		base objectstore.Store
 		repo *repository.Repository
 	)
+
 	if repoPath != "" {
 		repoRoot, err := os.OpenRoot(repoPath)
 		if err != nil {
 			return fmt.Errorf("open repo root: %w", err)
 		}
+
 		defer func() { _ = repoRoot.Close() }()
 
 		repo, err = repository.Open(repoRoot)
 		if err != nil {
 			return fmt.Errorf("open repository: %w", err)
 		}
+
 		defer func() { _ = repo.Close() }()
 	}
 
@@ -62,9 +65,11 @@ func run(repoPath, destinationPath, objectFormat string, fixThin, writeRev bool)
 		if repo == nil {
 			return fmt.Errorf("fix-thin requires -r <repo>")
 		}
+
 		if repo.Algorithm() != algo {
 			return fmt.Errorf("algorithm mismatch: repo=%s flag=%s", repo.Algorithm(), algo)
 		}
+
 		base = repo.Objects()
 	}
 
@@ -77,6 +82,7 @@ func run(repoPath, destinationPath, objectFormat string, fixThin, writeRev bool)
 	if err != nil {
 		return fmt.Errorf("open destination root: %w", err)
 	}
+
 	defer func() { _ = destinationRoot.Close() }()
 
 	result, err := ingest.Ingest(os.Stdin, destinationRoot, algo, fixThin, writeRev, base)

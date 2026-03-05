@@ -132,6 +132,7 @@ func (z *Reader) Read(p []byte) (int, error) {
 	// Finished file; check checksum.
 	readN, err := io.ReadFull(z.r, z.scratch[0:4])
 	z.trailerRead += uint64(readN)
+
 	if err != nil {
 		if errors.Is(err, io.EOF) {
 			err = io.ErrUnexpectedEOF

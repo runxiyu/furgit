@@ -17,6 +17,7 @@ const (
 // writeIdx writes idx v2 for resolved records.
 func writeIdx(state *ingestState) error {
 	order := buildIdxOrder(state)
+
 	hashImpl, err := state.algo.New()
 	if err != nil {
 		return err
@@ -26,6 +27,7 @@ func writeIdx(state *ingestState) error {
 		if _, err := state.idxFile.Write(src); err != nil {
 			return err
 		}
+
 		if _, err := hashImpl.Write(src); err != nil {
 			return err
 		}
@@ -36,19 +38,23 @@ func writeIdx(state *ingestState) error {
 	var scratch [8]byte
 	binary.BigEndian.PutUint32(scratch[:4], idxMagicV2)
 	binary.BigEndian.PutUint32(scratch[4:8], idxVersionV2)
+
 	if err := write(scratch[:8]); err != nil {
 		return err
 	}
 
 	var fanout [256]uint32
+
 	for _, recordIdx := range order {
 		idRaw := state.records[recordIdx].objectID.Bytes()
 		fanout[idRaw[0]]++
 	}
+
 	var cumulative uint32
 	for i := range fanout {
 		cumulative += fanout[i]
 		binary.BigEndian.PutUint32(scratch[:4], cumulative)
+
 		if err := write(scratch[:4]); err != nil {
 			return err
 		}
@@ -63,27 +69,33 @@ func writeIdx(state *ingestState) error {
 
 	for _, recordIdx := range order {
 		binary.BigEndian.PutUint32(scratch[:4], state.records[recordIdx].crc32)
+
 		if err := write(scratch[:4]); err != nil {
 			return err
 		}
 	}
 
 	largeOffsets := make([]uint64, 0)
+
 	for _, recordIdx := range order {
 		offset := state.records[recordIdx].offset
 		if offset >= 0x80000000 {
 			word := 0x80000000 | uint32(len(largeOffsets))
 			largeOffsets = append(largeOffsets, offset)
+
 			binary.BigEndian.PutUint32(scratch[:4], word)
 		} else {
 			binary.BigEndian.PutUint32(scratch[:4], uint32(offset))
 		}
+
 		if err := write(scratch[:4]); err != nil {
 			return err
 		}
 	}
+
 	for _, off := range largeOffsets {
 		binary.BigEndian.PutUint64(scratch[:8], off)
+
 		if err := write(scratch[:8]); err != nil {
 			return err
 		}
@@ -107,6 +119,7 @@ func buildIdxOrder(state *ingestState) []int {
 	for idx := range state.records {
 		out = append(out, idx)
 	}
+
 	slices.SortFunc(out, func(a, b int) int {
 		return bytes.Compare(state.records[a].objectID.Bytes(), state.records[b].objectID.Bytes())
 	})
@@ -130,6 +143,7 @@ func writeAndHash(dst io.Writer, hashImpl hash.Hash, src []byte) error {
 	if _, err := dst.Write(src); err != nil {
 		return err
 	}
+
 	if _, err := hashImpl.Write(src); err != nil {
 		return err
 	}

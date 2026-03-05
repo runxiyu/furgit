@@ -12,6 +12,7 @@ func finalizeArtifacts(state *ingestState) (Result, error) {
 	base := "pack-" + state.packHash.String()
 	packFinal := base + ".pack"
 	idxFinal := base + ".idx"
+
 	revFinal := ""
 	if state.writeRev {
 		revFinal = base + ".rev"
@@ -20,9 +21,11 @@ func finalizeArtifacts(state *ingestState) (Result, error) {
 	if err := linkTempToFinal(state, state.packTmpName, packFinal); err != nil {
 		return Result{}, err
 	}
+
 	if err := linkTempToFinal(state, state.idxTmpName, idxFinal); err != nil {
 		return Result{}, err
 	}
+
 	if state.writeRev {
 		if err := linkTempToFinal(state, state.revTmpName, revFinal); err != nil {
 			return Result{}, err
@@ -44,9 +47,11 @@ func rollbackTemporaryArtifacts(state *ingestState) {
 	if state.packTmpName != "" {
 		_ = state.destination.Remove(state.packTmpName)
 	}
+
 	if state.idxTmpName != "" {
 		_ = state.destination.Remove(state.idxTmpName)
 	}
+
 	if state.revTmpName != "" {
 		_ = state.destination.Remove(state.revTmpName)
 	}
@@ -57,6 +62,7 @@ func linkTempToFinal(state *ingestState, tmp, final string) error {
 	if tmp == "" || final == "" {
 		return fmt.Errorf("format/pack/ingest: invalid finalize names tmp=%q final=%q", tmp, final)
 	}
+
 	if strings.Contains(final, "/") {
 		return fmt.Errorf("format/pack/ingest: final name must be leaf: %q", final)
 	}
@@ -67,6 +73,7 @@ func linkTempToFinal(state *ingestState, tmp, final string) error {
 
 		return nil
 	}
+
 	if errors.Is(err, fs.ErrExist) {
 		_ = state.destination.Remove(tmp)
 

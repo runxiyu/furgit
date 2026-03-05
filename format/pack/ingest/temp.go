@@ -24,6 +24,7 @@ func openTemporaryArtifacts(state *ingestState) error {
 	}
 
 	revName := ""
+
 	var revFile *os.File
 	if state.writeRev {
 		revName, revFile, err = createTempFile(state.destination, "tmp_rev_")
@@ -54,18 +55,23 @@ func closeTemporaryArtifacts(state *ingestState) error {
 		if err := state.packFile.Close(); err != nil && out == nil {
 			out = err
 		}
+
 		state.packFile = nil
 	}
+
 	if state.idxFile != nil {
 		if err := state.idxFile.Close(); err != nil && out == nil {
 			out = err
 		}
+
 		state.idxFile = nil
 	}
+
 	if state.revFile != nil {
 		if err := state.revFile.Close(); err != nil && out == nil {
 			out = err
 		}
+
 		state.revFile = nil
 	}
 
@@ -76,10 +82,12 @@ func closeTemporaryArtifacts(state *ingestState) error {
 func createTempFile(root *os.Root, prefix string) (string, *os.File, error) {
 	for range 32 {
 		name := prefix + rand.Text()
+
 		file, err := root.OpenFile(name, os.O_CREATE|os.O_EXCL|os.O_RDWR, 0o644)
 		if err == nil {
 			return name, file, nil
 		}
+
 		if errors.Is(err, fs.ErrExist) {
 			continue
 		}
