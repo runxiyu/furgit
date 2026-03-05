@@ -127,7 +127,7 @@ func scanOneEntry(state *ingestState, startOffset uint64) (uint64, error) {
 	state.records = append(state.records, record)
 	state.offsetToRecord[record.offset] = recordIdx
 	if record.resolved {
-		state.objectToRecord[record.objectID.String()] = recordIdx
+		state.objectToRecord[record.objectID] = recordIdx
 	}
 
 	switch record.packedType {

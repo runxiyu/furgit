@@ -35,7 +35,7 @@ type ingestState struct {
 	refDeltas           []refDeltaRef
 	unresolvedRefDeltas []int
 	offsetToRecord      map[uint64]int
-	objectToRecord      map[string]int
+	objectToRecord      map[objectid.ObjectID]int
 
 	baseCache *deltaBaseCache
 	packHash  objectid.ObjectID
@@ -65,7 +65,7 @@ func newIngestState(
 		writeRev:       writeRev,
 		base:           base,
 		offsetToRecord: make(map[uint64]int),
-		objectToRecord: make(map[string]int),
+		objectToRecord: make(map[objectid.ObjectID]int),
 		baseCache:      newDeltaBaseCache(defaultDeltaBaseCacheMaxBytes),
 	}, nil
 }

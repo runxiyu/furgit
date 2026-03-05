@@ -1,6 +1,7 @@
 package ingest
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -45,7 +46,7 @@ func resolveAll(state *ingestState) error {
 		record.realType = ty
 		record.objectID = id
 		record.resolved = true
-		state.objectToRecord[id.String()] = idx
+		state.objectToRecord[id] = idx
 		state.baseCache.add(idx, ty, content)
 	}
 
@@ -87,7 +88,7 @@ func resolveRecord(state *ingestState, idx int, visiting map[int]struct{}) (obje
 		record.objectID = id
 		record.realType = ty
 		record.resolved = true
-		state.objectToRecord[id.String()] = idx
+		state.objectToRecord[id] = idx
 		state.baseCache.add(idx, ty, content)
 
 		return ty, content, nil
@@ -112,7 +113,7 @@ func resolveRecord(state *ingestState, idx int, visiting map[int]struct{}) (obje
 			return objecttype.TypeInvalid, nil, err
 		}
 	case objecttype.TypeRefDelta:
-		baseIdx, ok := state.objectToRecord[record.baseObject.String()]
+		baseIdx, ok := state.objectToRecord[record.baseObject]
 		if ok {
 			baseType, baseContent, err = resolveRecord(state, baseIdx, visiting)
 			if err != nil {
@@ -140,7 +141,7 @@ func resolveRecord(state *ingestState, idx int, visiting map[int]struct{}) (obje
 	record.objectID = id
 	record.realType = ty
 	record.resolved = true
-	state.objectToRecord[id.String()] = idx
+	state.objectToRecord[id] = idx
 	state.baseCache.add(idx, ty, content)
 
 	return ty, content, nil
@@ -258,21 +259,21 @@ func hashCanonicalObject(algo objectid.Algorithm, ty objecttype.Type, content []
 
 // unresolvedThinBaseIDs returns sorted unique unresolved ref base IDs.
 func unresolvedThinBaseIDs(state *ingestState) []objectid.ObjectID {
-	seen := make(map[string]objectid.ObjectID)
+	seen := make(map[objectid.ObjectID]struct{})
 	for _, idx := range state.unresolvedRefDeltas {
 		record := state.records[idx]
 		if record.packedType != objecttype.TypeRefDelta {
 			continue
 		}
-		seen[record.baseObject.String()] = record.baseObject
+		seen[record.baseObject] = struct{}{}
 	}
 
 	out := make([]objectid.ObjectID, 0, len(seen))
-	for _, id := range seen {
+	for id := range seen {
 		out = append(out, id)
 	}
 	slices.SortFunc(out, func(a, b objectid.ObjectID) int {
-		return slices.Compare(a.Bytes(), b.Bytes())
+		return bytes.Compare(a.RawBytes(), b.RawBytes())
 	})
 
 	return out

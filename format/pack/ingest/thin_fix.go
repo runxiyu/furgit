@@ -98,7 +98,7 @@ func appendBaseObject(state *ingestState, id objectid.ObjectID, realType objectt
 	recordIdx := len(state.records)
 	state.records = append(state.records, record)
 	state.offsetToRecord[start] = recordIdx
-	state.objectToRecord[id.String()] = recordIdx
+	state.objectToRecord[id] = recordIdx
 	state.baseCache.add(recordIdx, realType, content)
 
 	return recordIdx, nil
