@@ -32,6 +32,7 @@ func resolveAll(state *ingestState) error {
 		if err != nil {
 			if errors.Is(err, errExternalThinBase) {
 				state.unresolvedRefDeltas = append(state.unresolvedRefDeltas, idx)
+
 				continue
 			}
 

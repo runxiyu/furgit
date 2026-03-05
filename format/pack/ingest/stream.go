@@ -2,6 +2,7 @@ package ingest
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"hash"
 	"hash/crc32"
@@ -60,7 +61,8 @@ func (scanner *streamScanner) fill(min int) error {
 	}
 
 	for scanner.n-scanner.off < min {
-		if err := scanner.flushConsumedPrefix(); err != nil {
+		err := scanner.flushConsumedPrefix()
+		if err != nil {
 			return err
 		}
 
@@ -70,7 +72,7 @@ func (scanner *streamScanner) fill(min int) error {
 		}
 
 		if err != nil {
-			if err == io.EOF && scanner.n-scanner.off >= min {
+			if errors.Is(err, io.EOF) && scanner.n-scanner.off >= min {
 				return nil
 			}
 
@@ -97,7 +99,8 @@ func (scanner *streamScanner) use(n int) error {
 
 	chunk := scanner.buf[scanner.off : scanner.off+n]
 	if scanner.hashEnabled {
-		if _, err := scanner.hash.Write(chunk); err != nil {
+		_, err := scanner.hash.Write(chunk)
+		if err != nil {
 			return err
 		}
 	}
@@ -119,8 +122,9 @@ func (scanner *streamScanner) Read(dst []byte) (int, error) {
 	}
 
 	if scanner.n-scanner.off == 0 {
-		if err := scanner.fill(1); err != nil {
-			if err == io.EOF {
+		err := scanner.fill(1)
+		if err != nil {
+			if errors.Is(err, io.EOF) {
 				return 0, io.EOF
 			}
 
@@ -140,7 +144,8 @@ func (scanner *streamScanner) Read(dst []byte) (int, error) {
 
 	copy(dst, scanner.buf[scanner.off:scanner.off+n])
 
-	if err := scanner.use(n); err != nil {
+	err := scanner.use(n)
+	if err != nil {
 		return 0, err
 	}
 
@@ -150,13 +155,16 @@ func (scanner *streamScanner) Read(dst []byte) (int, error) {
 // ReadByte implements io.ByteReader without allocation.
 func (scanner *streamScanner) ReadByte() (byte, error) {
 	if scanner.n-scanner.off == 0 {
-		if err := scanner.fill(1); err != nil {
+		err := scanner.fill(1)
+		if err != nil {
 			return 0, err
 		}
 	}
 
 	b := scanner.buf[scanner.off]
-	if err := scanner.use(1); err != nil {
+
+	err := scanner.use(1)
+	if err != nil {
 		return 0, err
 	}
 
@@ -188,7 +196,9 @@ func (scanner *streamScanner) finishAndFlushTrailer() error {
 	trailer := make([]byte, scanner.hashSize)
 
 	scanner.hashEnabled = false
-	if err := scanner.readFull(trailer); err != nil {
+
+	err := scanner.readFull(trailer)
+	if err != nil {
 		return &ErrPackTrailerMismatch{}
 	}
 
@@ -201,7 +211,7 @@ func (scanner *streamScanner) finishAndFlushTrailer() error {
 		return fmt.Errorf("format/pack/ingest: pack has trailing garbage")
 	}
 
-	if err != io.EOF {
+	if !errors.Is(err, io.EOF) {
 		return err
 	}
 

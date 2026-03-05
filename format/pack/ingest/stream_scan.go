@@ -27,7 +27,8 @@ func streamPackAndScan(state *ingestState) error {
 		state.algo.Size(),
 	)
 
-	if err := readAndValidatePackHeader(state); err != nil {
+	err = readAndValidatePackHeader(state)
+	if err != nil {
 		return err
 	}
 
@@ -46,7 +47,8 @@ func streamPackAndScan(state *ingestState) error {
 		}
 	}
 
-	if err := state.stream.finishAndFlushTrailer(); err != nil {
+	err = state.stream.finishAndFlushTrailer()
+	if err != nil {
 		return err
 	}
 
@@ -67,7 +69,9 @@ func streamPackAndScan(state *ingestState) error {
 // readAndValidatePackHeader reads and validates PACK header from the stream.
 func readAndValidatePackHeader(state *ingestState) error {
 	var hdr [12]byte
-	if err := state.stream.readFull(hdr[:]); err != nil {
+
+	err := state.stream.readFull(hdr[:])
+	if err != nil {
 		return &ErrInvalidPackHeader{Reason: fmt.Sprintf("read header: %v", err)}
 	}
 
@@ -199,7 +203,9 @@ func parseEntryPrefix(state *ingestState, startOffset uint64) (objectRecord, err
 	case objecttype.TypeCommit, objecttype.TypeTree, objecttype.TypeBlob, objecttype.TypeTag:
 	case objecttype.TypeRefDelta:
 		baseRaw := make([]byte, state.algo.Size())
-		if err := state.stream.readFull(baseRaw); err != nil {
+
+		err := state.stream.readFull(baseRaw)
+		if err != nil {
 			return record, &ErrMalformedPackEntry{Offset: startOffset, Reason: fmt.Sprintf("read ref base: %v", err)}
 		}
 

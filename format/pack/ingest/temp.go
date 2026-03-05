@@ -51,8 +51,10 @@ func openTemporaryArtifacts(state *ingestState) error {
 // closeTemporaryArtifacts closes all temporary artifact file descriptors.
 func closeTemporaryArtifacts(state *ingestState) error {
 	var out error
+
 	if state.packFile != nil {
-		if err := state.packFile.Close(); err != nil && out == nil {
+		err := state.packFile.Close()
+		if err != nil && out == nil {
 			out = err
 		}
 
@@ -60,7 +62,8 @@ func closeTemporaryArtifacts(state *ingestState) error {
 	}
 
 	if state.idxFile != nil {
-		if err := state.idxFile.Close(); err != nil && out == nil {
+		err := state.idxFile.Close()
+		if err != nil && out == nil {
 			out = err
 		}
 
@@ -68,7 +71,8 @@ func closeTemporaryArtifacts(state *ingestState) error {
 	}
 
 	if state.revFile != nil {
-		if err := state.revFile.Close(); err != nil && out == nil {
+		err := state.revFile.Close()
+		if err != nil && out == nil {
 			out = err
 		}
 

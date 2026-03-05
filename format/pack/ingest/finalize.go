@@ -18,16 +18,19 @@ func finalizeArtifacts(state *ingestState) (Result, error) {
 		revFinal = base + ".rev"
 	}
 
-	if err := linkTempToFinal(state, state.packTmpName, packFinal); err != nil {
+	err := linkTempToFinal(state, state.packTmpName, packFinal)
+	if err != nil {
 		return Result{}, err
 	}
 
-	if err := linkTempToFinal(state, state.idxTmpName, idxFinal); err != nil {
+	err = linkTempToFinal(state, state.idxTmpName, idxFinal)
+	if err != nil {
 		return Result{}, err
 	}
 
 	if state.writeRev {
-		if err := linkTempToFinal(state, state.revTmpName, revFinal); err != nil {
+		err := linkTempToFinal(state, state.revTmpName, revFinal)
+		if err != nil {
 			return Result{}, err
 		}
 	}

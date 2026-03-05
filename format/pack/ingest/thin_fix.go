@@ -39,7 +39,9 @@ func maybeFixThin(state *ingestState) error {
 	}
 
 	newEnd := size - hashSize
-	if err := state.packFile.Truncate(newEnd); err != nil {
+
+	err = state.packFile.Truncate(newEnd)
+	if err != nil {
 		return err
 	}
 
@@ -52,14 +54,16 @@ func maybeFixThin(state *ingestState) error {
 			continue
 		}
 
-		if _, err := appendBaseObject(state, id, ty, content); err != nil {
+		_, err = appendBaseObject(state, id, ty, content)
+		if err != nil {
 			return err
 		}
 
 		state.thinFixed = true
 	}
 
-	if err := rewritePackHeaderAndTrailer(state); err != nil {
+	err = rewritePackHeaderAndTrailer(state)
+	if err != nil {
 		return err
 	}
 
@@ -71,7 +75,9 @@ func appendBaseObject(state *ingestState, id objectid.ObjectID, realType objectt
 	start := state.stream.consumed
 
 	header := encodePackEntryHeader(realType, int64(len(content)))
-	if _, err := state.packFile.WriteAt(header, int64(start)); err != nil {
+
+	_, err := state.packFile.WriteAt(header, int64(start))
+	if err != nil {
 		return 0, err
 	}
 
@@ -81,11 +87,14 @@ func appendBaseObject(state *ingestState, id objectid.ObjectID, realType objectt
 	counting := &countingWriter{dst: section}
 
 	zw := zlib.NewWriter(io.MultiWriter(counting, crc))
-	if _, err := zw.Write(content); err != nil {
+
+	_, err = zw.Write(content)
+	if err != nil {
 		return 0, err
 	}
 
-	if err := zw.Close(); err != nil {
+	err = zw.Close()
+	if err != nil {
 		return 0, err
 	}
 
@@ -153,7 +162,8 @@ func rewritePackHeaderAndTrailer(state *ingestState) error {
 	var countRaw [4]byte
 	binary.BigEndian.PutUint32(countRaw[:], uint32(len(state.records)))
 
-	if _, err := state.packFile.WriteAt(countRaw[:], 8); err != nil {
+	_, err := state.packFile.WriteAt(countRaw[:], 8)
+	if err != nil {
 		return err
 	}
 
@@ -195,7 +205,9 @@ func rewritePackHeaderAndTrailer(state *ingestState) error {
 	}
 
 	sum := hashImpl.Sum(nil)
-	if _, err := state.packFile.WriteAt(sum, endWithoutTrailer); err != nil {
+
+	_, err = state.packFile.WriteAt(sum, endWithoutTrailer)
+	if err != nil {
 		return err
 	}
 

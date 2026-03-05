@@ -7,8 +7,8 @@ import (
 	"io"
 	"os"
 
-	"codeberg.org/lindenii/furgit/internal/iolimit"
 	"codeberg.org/lindenii/furgit/internal/compress/zlib"
+	"codeberg.org/lindenii/furgit/internal/iolimit"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
 )

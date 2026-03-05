@@ -24,11 +24,13 @@ func writeIdx(state *ingestState) error {
 	}
 
 	write := func(src []byte) error {
-		if _, err := state.idxFile.Write(src); err != nil {
+		_, err := state.idxFile.Write(src)
+		if err != nil {
 			return err
 		}
 
-		if _, err := hashImpl.Write(src); err != nil {
+		_, err = hashImpl.Write(src)
+		if err != nil {
 			return err
 		}
 
@@ -39,7 +41,8 @@ func writeIdx(state *ingestState) error {
 	binary.BigEndian.PutUint32(scratch[:4], idxMagicV2)
 	binary.BigEndian.PutUint32(scratch[4:8], idxVersionV2)
 
-	if err := write(scratch[:8]); err != nil {
+	err = write(scratch[:8])
+	if err != nil {
 		return err
 	}
 
@@ -55,14 +58,17 @@ func writeIdx(state *ingestState) error {
 		cumulative += fanout[i]
 		binary.BigEndian.PutUint32(scratch[:4], cumulative)
 
-		if err := write(scratch[:4]); err != nil {
+		err := write(scratch[:4])
+		if err != nil {
 			return err
 		}
 	}
 
 	for _, recordIdx := range order {
 		idRaw := state.records[recordIdx].objectID.Bytes()
-		if err := write(idRaw); err != nil {
+
+		err := write(idRaw)
+		if err != nil {
 			return err
 		}
 	}
@@ -70,7 +76,8 @@ func writeIdx(state *ingestState) error {
 	for _, recordIdx := range order {
 		binary.BigEndian.PutUint32(scratch[:4], state.records[recordIdx].crc32)
 
-		if err := write(scratch[:4]); err != nil {
+		err := write(scratch[:4])
+		if err != nil {
 			return err
 		}
 	}
@@ -88,7 +95,8 @@ func writeIdx(state *ingestState) error {
 			binary.BigEndian.PutUint32(scratch[:4], uint32(offset))
 		}
 
-		if err := write(scratch[:4]); err != nil {
+		err := write(scratch[:4])
+		if err != nil {
 			return err
 		}
 	}
@@ -96,17 +104,21 @@ func writeIdx(state *ingestState) error {
 	for _, off := range largeOffsets {
 		binary.BigEndian.PutUint64(scratch[:8], off)
 
-		if err := write(scratch[:8]); err != nil {
+		err := write(scratch[:8])
+		if err != nil {
 			return err
 		}
 	}
 
-	if err := write(state.packHash.Bytes()); err != nil {
+	err = write(state.packHash.Bytes())
+	if err != nil {
 		return err
 	}
 
 	idxHash := hashImpl.Sum(nil)
-	if _, err := state.idxFile.Write(idxHash); err != nil {
+
+	_, err = state.idxFile.Write(idxHash)
+	if err != nil {
 		return err
 	}
 
@@ -140,11 +152,13 @@ func verifyResolvedRecords(state *ingestState) error {
 
 // writeAndHash writes src to dst and updates hash.
 func writeAndHash(dst io.Writer, hashImpl hash.Hash, src []byte) error {
-	if _, err := dst.Write(src); err != nil {
+	_, err := dst.Write(src)
+	if err != nil {
 		return err
 	}
 
-	if _, err := hashImpl.Write(src); err != nil {
+	_, err = hashImpl.Write(src)
+	if err != nil {
 		return err
 	}
 

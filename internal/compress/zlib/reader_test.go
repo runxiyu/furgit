@@ -182,11 +182,13 @@ func TestDecompressor(t *testing.T) {
 		}
 
 		// Check for sticky errors.
-		if n, err := zr.Read([]byte{0}); n != 0 || !errors.Is(err, io.EOF) {
+		n1, err := zr.Read([]byte{0})
+		if n1 != 0 || !errors.Is(err, io.EOF) {
 			t.Errorf("%s: Read() = (%d, %v), want (0, io.EOF)", tt.desc, n, err)
 		}
 
-		if err := zr.Close(); err != nil {
+		err = zr.Close()
+		if err != nil {
 			t.Errorf("%s: Close() = %v, want nil", tt.desc, err)
 		}
 	}
