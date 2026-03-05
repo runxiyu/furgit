@@ -129,6 +129,16 @@ func resolveRecord(state *ingestState, idx int, visiting map[int]struct{}) (obje
 		} else {
 			return objecttype.TypeInvalid, nil, errExternalThinBase
 		}
+	case objecttype.TypeInvalid,
+		objecttype.TypeCommit,
+		objecttype.TypeTree,
+		objecttype.TypeBlob,
+		objecttype.TypeTag,
+		objecttype.TypeFuture:
+		return objecttype.TypeInvalid, nil, &ErrMalformedPackEntry{
+			Offset: record.offset,
+			Reason: "unsupported delta type",
+		}
 	default:
 		return objecttype.TypeInvalid, nil, &ErrMalformedPackEntry{
 			Offset: record.offset,

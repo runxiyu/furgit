@@ -15,7 +15,7 @@ import (
 )
 
 func fixtureAlgorithmDir(algo objectid.Algorithm) string {
-	switch algo {
+	switch algo { //nolint:exhaustive
 	case objectid.AlgorithmSHA1:
 		return "sha1"
 	case objectid.AlgorithmSHA256:

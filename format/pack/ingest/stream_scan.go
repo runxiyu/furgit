@@ -161,6 +161,13 @@ func scanOneEntry(state *ingestState, startOffset uint64) (uint64, error) {
 			baseObject: record.baseObject,
 			recordIdx:  recordIdx,
 		})
+	case objecttype.TypeInvalid,
+		objecttype.TypeCommit,
+		objecttype.TypeTree,
+		objecttype.TypeBlob,
+		objecttype.TypeTag,
+		objecttype.TypeFuture:
+	default:
 	}
 
 	return endOffset, nil
