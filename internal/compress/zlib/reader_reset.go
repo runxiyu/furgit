@@ -25,11 +25,12 @@ func (z *Reader) reset(r io.Reader, dict []byte) error {
 		input = bufio.NewReader(r)
 	}
 
-	z.counter = &countingFlateReader{inner: input}
-	z.r = z.counter
+	z.r = input
 
 	// Read the header (RFC 1950 section 2.2.).
-	_, z.err = io.ReadFull(z.r, z.scratch[0:2])
+	readN, err := io.ReadFull(z.r, z.scratch[0:2])
+	z.headerRead += uint64(readN)
+	z.err = err
 	if z.err != nil {
 		if errors.Is(z.err, io.EOF) {
 			z.err = io.ErrUnexpectedEOF
@@ -47,7 +48,8 @@ func (z *Reader) reset(r io.Reader, dict []byte) error {
 
 	haveDict := z.scratch[1]&0x20 != 0
 	if haveDict {
-		_, z.err = io.ReadFull(z.r, z.scratch[0:4])
+		readN, z.err = io.ReadFull(z.r, z.scratch[0:4])
+		z.headerRead += uint64(readN)
 		if z.err != nil {
 			if errors.Is(z.err, io.EOF) {
 				z.err = io.ErrUnexpectedEOF
@@ -74,6 +76,11 @@ func (z *Reader) reset(r io.Reader, dict []byte) error {
 		if z.err != nil {
 			return z.err
 		}
+		progress, ok := z.decompressor.(flate.InputProgress)
+		if !ok {
+			panic("zlib: pooled decompressor does not implement flate.InputProgress")
+		}
+		z.progress = progress
 
 		z.digest = adler32.New()
 
@@ -85,6 +92,11 @@ func (z *Reader) reset(r io.Reader, dict []byte) error {
 	} else {
 		z.decompressor = flate.NewReader(z.r)
 	}
+	progress, ok := z.decompressor.(flate.InputProgress)
+	if !ok {
+		panic("zlib: decompressor does not implement flate.InputProgress")
+	}
+	z.progress = progress
 
 	z.digest = adler32.New()
 

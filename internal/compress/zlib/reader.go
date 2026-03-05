@@ -71,34 +71,12 @@ var readerPool = sync.Pool{
 type Reader struct {
 	r            flate.Reader
 	decompressor io.ReadCloser
+	progress     flate.InputProgress
 	digest       hash.Hash32
-	counter      *countingFlateReader
+	headerRead   uint64
+	trailerRead  uint64
 	err          error
 	scratch      [4]byte
-}
-
-// countingFlateReader wraps flate input and tracks consumed bytes.
-type countingFlateReader struct {
-	inner flate.Reader
-	read  uint64
-}
-
-// Read implements io.Reader.
-func (reader *countingFlateReader) Read(dst []byte) (int, error) {
-	n, err := reader.inner.Read(dst)
-	reader.read += uint64(n)
-
-	return n, err
-}
-
-// ReadByte implements io.ByteReader.
-func (reader *countingFlateReader) ReadByte() (byte, error) {
-	b, err := reader.inner.ReadByte()
-	if err == nil {
-		reader.read++
-	}
-
-	return b, err
 }
 
 // NewReader creates a new ReadCloser.
@@ -152,7 +130,8 @@ func (z *Reader) Read(p []byte) (int, error) {
 	}
 
 	// Finished file; check checksum.
-	_, err = io.ReadFull(z.r, z.scratch[0:4])
+	readN, err := io.ReadFull(z.r, z.scratch[0:4])
+	z.trailerRead += uint64(readN)
 	if err != nil {
 		if errors.Is(err, io.EOF) {
 			err = io.ErrUnexpectedEOF
@@ -178,11 +157,12 @@ func (z *Reader) Read(p []byte) (int, error) {
 // This count includes the zlib header, deflate payload, and zlib checksum
 // trailer bytes read by the reader.
 func (z *Reader) InputConsumed() uint64 {
-	if z.counter == nil {
-		return 0
+	out := z.headerRead + z.trailerRead
+	if z.progress != nil {
+		out += uint64(z.progress.InputConsumed())
 	}
 
-	return z.counter.read
+	return out
 }
 
 // Close does not close the wrapped [io.Reader] originally passed to [NewReader].
