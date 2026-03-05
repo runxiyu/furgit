@@ -275,7 +275,7 @@ func encodePackEntryHeader(ty objecttype.Type, size int64) []byte {
 		panic(err)
 	}
 
-	c := byte((uint8(ty) << 4) | byte(s&0x0f))
+	c := (uint8(ty) << 4) | byte(s&0x0f)
 
 	s >>= 4
 	for s != 0 {

@@ -57,7 +57,7 @@ func (z *Reader) reset(r io.Reader, dict []byte) error {
 	}
 
 	haveDict := z.scratch[1]&0x20 != 0
-	if haveDict {
+	if haveDict { //nolint:nestif
 		readN, z.err = io.ReadFull(z.r, z.scratch[0:4])
 
 		readNUint64, err := intconv.IntToUint64(readN)

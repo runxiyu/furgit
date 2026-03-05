@@ -25,6 +25,8 @@ var data = []string{
 // Tests that compressing and then decompressing the given file at the given compression level and dictionary
 // yields equivalent bytes to the original file.
 func testFileLevelDict(t *testing.T, fn string, level int, d string) {
+	t.Helper()
+
 	// Read the file, as golden output.
 	golden, err := os.Open(fn)
 	if err != nil {
@@ -51,6 +53,8 @@ func testFileLevelDict(t *testing.T, fn string, level int, d string) {
 }
 
 func testLevelDict(t *testing.T, fn string, b0 []byte, level int, d string) {
+	t.Helper()
+
 	// Make dictionary, if given.
 	var dict []byte
 	if d != "" {
@@ -135,6 +139,8 @@ func testLevelDict(t *testing.T, fn string, b0 []byte, level int, d string) {
 }
 
 func TestWriter(t *testing.T) {
+	t.Parallel()
+
 	for i, s := range data {
 		b := []byte(s)
 		tag := fmt.Sprintf("#%d", i)
@@ -149,6 +155,8 @@ func TestWriter(t *testing.T) {
 }
 
 func TestWriterBig(t *testing.T) {
+	t.Parallel()
+
 	for i, fn := range filenames {
 		testFileLevelDict(t, fn, DefaultCompression, "")
 		testFileLevelDict(t, fn, NoCompression, "")
@@ -169,6 +177,8 @@ func TestWriterBig(t *testing.T) {
 }
 
 func TestWriterDict(t *testing.T) {
+	t.Parallel()
+
 	const dictionary = "0123456789."
 	for i, fn := range filenames {
 		testFileLevelDict(t, fn, DefaultCompression, dictionary)
@@ -190,6 +200,8 @@ func TestWriterDict(t *testing.T) {
 }
 
 func TestWriterDictIsUsed(t *testing.T) {
+	t.Parallel()
+
 	var (
 		input = []byte("Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
 		buf   bytes.Buffer

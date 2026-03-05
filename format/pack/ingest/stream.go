@@ -50,6 +50,62 @@ func newStreamScanner(src io.Reader, dstFile *os.File, hash hash.Hash, hashSize 
 	}
 }
 
+// Read implements io.Reader.
+func (scanner *streamScanner) Read(dst []byte) (int, error) {
+	if len(dst) == 0 {
+		return 0, nil
+	}
+
+	if scanner.n-scanner.off == 0 {
+		err := scanner.fill(1)
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return 0, io.EOF
+			}
+
+			return 0, err
+		}
+	}
+
+	unread := scanner.n - scanner.off
+	if unread == 0 {
+		return 0, io.EOF
+	}
+
+	n := len(dst)
+	if n > unread {
+		n = unread
+	}
+
+	copy(dst, scanner.buf[scanner.off:scanner.off+n])
+
+	err := scanner.use(n)
+	if err != nil {
+		return 0, err
+	}
+
+	return n, nil
+}
+
+// ReadByte implements io.ByteReader without allocation.
+func (scanner *streamScanner) ReadByte() (byte, error) {
+	if scanner.n-scanner.off == 0 {
+		err := scanner.fill(1)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	b := scanner.buf[scanner.off]
+
+	err := scanner.use(1)
+	if err != nil {
+		return 0, err
+	}
+
+	return b, nil
+}
+
 // fill ensures at least min unread bytes are available in receiver's buffer.
 func (scanner *streamScanner) fill(min int) error {
 	if min <= 0 {
@@ -113,62 +169,6 @@ func (scanner *streamScanner) use(n int) error {
 	scanner.consumed += uint64(n)
 
 	return nil
-}
-
-// Read implements io.Reader.
-func (scanner *streamScanner) Read(dst []byte) (int, error) {
-	if len(dst) == 0 {
-		return 0, nil
-	}
-
-	if scanner.n-scanner.off == 0 {
-		err := scanner.fill(1)
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				return 0, io.EOF
-			}
-
-			return 0, err
-		}
-	}
-
-	unread := scanner.n - scanner.off
-	if unread == 0 {
-		return 0, io.EOF
-	}
-
-	n := len(dst)
-	if n > unread {
-		n = unread
-	}
-
-	copy(dst, scanner.buf[scanner.off:scanner.off+n])
-
-	err := scanner.use(n)
-	if err != nil {
-		return 0, err
-	}
-
-	return n, nil
-}
-
-// ReadByte implements io.ByteReader without allocation.
-func (scanner *streamScanner) ReadByte() (byte, error) {
-	if scanner.n-scanner.off == 0 {
-		err := scanner.fill(1)
-		if err != nil {
-			return 0, err
-		}
-	}
-
-	b := scanner.buf[scanner.off]
-
-	err := scanner.use(1)
-	if err != nil {
-		return 0, err
-	}
-
-	return b, nil
 }
 
 // readFull reads exactly len(dst) bytes through receiver.
