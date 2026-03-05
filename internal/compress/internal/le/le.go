@@ -1,3 +1,4 @@
+// Package le provides fast little endian integer routines.
 package le
 
 type Indexer interface {
