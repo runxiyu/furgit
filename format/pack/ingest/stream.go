@@ -107,16 +107,16 @@ func (scanner *streamScanner) ReadByte() (byte, error) {
 }
 
 // fill ensures at least min unread bytes are available in receiver's buffer.
-func (scanner *streamScanner) fill(min int) error {
-	if min <= 0 {
+func (scanner *streamScanner) fill(minLen int) error {
+	if minLen <= 0 {
 		return nil
 	}
 
-	if min > len(scanner.buf) {
-		return fmt.Errorf("format/pack/ingest: fill(%d) exceeds scanner buffer", min)
+	if minLen > len(scanner.buf) {
+		return fmt.Errorf("format/pack/ingest: fill(%d) exceeds scanner buffer", minLen)
 	}
 
-	for scanner.n-scanner.off < min {
+	for scanner.n-scanner.off < minLen {
 		err := scanner.flushConsumedPrefix()
 		if err != nil {
 			return err
@@ -128,7 +128,7 @@ func (scanner *streamScanner) fill(min int) error {
 		}
 
 		if err != nil {
-			if errors.Is(err, io.EOF) && scanner.n-scanner.off >= min {
+			if errors.Is(err, io.EOF) && scanner.n-scanner.off >= minLen {
 				return nil
 			}
 
