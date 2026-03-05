@@ -2,6 +2,10 @@ version: "2"
 
 linters:
   default: all
+  exclusions:
+    paths:
+      - internal/compress/flate
+      - internal/compress/internal
   disable:
     - depguard         # not sensible for us
     - dupword          # extremely normal in tests and a pretty unnecessary linter
@@ -39,3 +43,4 @@ linters:
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
+
