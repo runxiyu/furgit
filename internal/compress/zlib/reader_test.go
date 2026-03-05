@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package zlib
+package zlib_test
 
 import (
 	"bytes"
 	"errors"
 	"io"
 	"testing"
+
+	"codeberg.org/lindenii/furgit/internal/compress/zlib"
 )
 
 type zlibTest struct {
@@ -71,21 +73,21 @@ var zlibTests = []zlibTest{
 		"",
 		[]byte{0x88, 0x98, 0x03, 0x00, 0x00, 0x00, 0x00, 0x01},
 		nil,
-		ErrHeader,
+		zlib.ErrHeader,
 	},
 	{
 		"bad header (FCHECK)",
 		"",
 		[]byte{0x78, 0x9f, 0x03, 0x00, 0x00, 0x00, 0x00, 0x01},
 		nil,
-		ErrHeader,
+		zlib.ErrHeader,
 	},
 	{
 		"bad checksum",
 		"",
 		[]byte{0x78, 0x9c, 0x03, 0x00, 0x00, 0x00, 0x00, 0xff},
 		nil,
-		ErrChecksum,
+		zlib.ErrChecksum,
 	},
 	{
 		"not enough data",
@@ -128,7 +130,7 @@ var zlibTests = []zlibTest{
 		[]byte{
 			0x48, 0x65, 0x6c, 0x6c,
 		},
-		ErrDictionary,
+		zlib.ErrDictionary,
 	},
 	{
 		"truncated zlib stream amid raw-block",
@@ -157,7 +159,7 @@ func TestDecompressor(t *testing.T) {
 	for _, tt := range zlibTests {
 		in := bytes.NewReader(tt.compressed)
 
-		zr, err := NewReaderDict(in, tt.dict)
+		zr, err := zlib.NewReaderDict(in, tt.dict)
 		if err != nil {
 			if !errors.Is(err, tt.err) {
 				t.Errorf("%s: NewReader: %s", tt.desc, err)

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package zlib
+package zlib_test
 
 import (
 	"bytes"
@@ -10,6 +10,8 @@ import (
 	"io"
 	"os"
 	"testing"
+
+	"codeberg.org/lindenii/furgit/internal/compress/zlib"
 )
 
 var filenames = []string{
@@ -79,7 +81,7 @@ func testLevelDict(t *testing.T, fn string, b0 []byte, level int, d string) {
 			}
 		}()
 
-		zlibw, err := NewWriterLevelDict(pipew, level, dict)
+		zlibw, err := zlib.NewWriterLevelDict(pipew, level, dict)
 		if err != nil {
 			t.Errorf("%s (level=%d, dict=%q): %v", fn, level, d, err)
 
@@ -101,7 +103,7 @@ func testLevelDict(t *testing.T, fn string, b0 []byte, level int, d string) {
 		}
 	}()
 
-	zlibr, err := NewReaderDict(piper, dict)
+	zlibr, err := zlib.NewReaderDict(piper, dict)
 	if err != nil {
 		t.Errorf("%s (level=%d, dict=%q): %v", fn, level, d, err)
 
@@ -144,11 +146,11 @@ func TestWriter(t *testing.T) {
 	for i, s := range data {
 		b := []byte(s)
 		tag := fmt.Sprintf("#%d", i)
-		testLevelDict(t, tag, b, DefaultCompression, "")
-		testLevelDict(t, tag, b, NoCompression, "")
-		testLevelDict(t, tag, b, HuffmanOnly, "")
+		testLevelDict(t, tag, b, zlib.DefaultCompression, "")
+		testLevelDict(t, tag, b, zlib.NoCompression, "")
+		testLevelDict(t, tag, b, zlib.HuffmanOnly, "")
 
-		for level := BestSpeed; level <= BestCompression; level++ {
+		for level := zlib.BestSpeed; level <= zlib.BestCompression; level++ {
 			testLevelDict(t, tag, b, level, "")
 		}
 	}
@@ -158,11 +160,11 @@ func TestWriterBig(t *testing.T) {
 	t.Parallel()
 
 	for i, fn := range filenames {
-		testFileLevelDict(t, fn, DefaultCompression, "")
-		testFileLevelDict(t, fn, NoCompression, "")
-		testFileLevelDict(t, fn, HuffmanOnly, "")
+		testFileLevelDict(t, fn, zlib.DefaultCompression, "")
+		testFileLevelDict(t, fn, zlib.NoCompression, "")
+		testFileLevelDict(t, fn, zlib.HuffmanOnly, "")
 
-		for level := BestSpeed; level <= BestCompression; level++ {
+		for level := zlib.BestSpeed; level <= zlib.BestCompression; level++ {
 			testFileLevelDict(t, fn, level, "")
 
 			if level >= 1 && testing.Short() {
@@ -181,11 +183,11 @@ func TestWriterDict(t *testing.T) {
 
 	const dictionary = "0123456789."
 	for i, fn := range filenames {
-		testFileLevelDict(t, fn, DefaultCompression, dictionary)
-		testFileLevelDict(t, fn, NoCompression, dictionary)
-		testFileLevelDict(t, fn, HuffmanOnly, dictionary)
+		testFileLevelDict(t, fn, zlib.DefaultCompression, dictionary)
+		testFileLevelDict(t, fn, zlib.NoCompression, dictionary)
+		testFileLevelDict(t, fn, zlib.HuffmanOnly, dictionary)
 
-		for level := BestSpeed; level <= BestCompression; level++ {
+		for level := zlib.BestSpeed; level <= zlib.BestCompression; level++ {
 			testFileLevelDict(t, fn, level, dictionary)
 
 			if level >= 1 && testing.Short() {
@@ -207,7 +209,7 @@ func TestWriterDictIsUsed(t *testing.T) {
 		buf   bytes.Buffer
 	)
 
-	compressor, err := NewWriterLevelDict(&buf, BestCompression, input)
+	compressor, err := zlib.NewWriterLevelDict(&buf, zlib.BestCompression, input)
 	if err != nil {
 		t.Errorf("error in NewWriterLevelDict: %s", err)
 
