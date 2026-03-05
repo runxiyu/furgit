@@ -1,4 +1,4 @@
-// Package loose provides a loose ref backend (refs/... as a directory tree).
+// Package loose provides a loose ref backend.
 package loose
 
 import (
