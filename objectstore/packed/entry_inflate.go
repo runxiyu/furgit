@@ -6,7 +6,7 @@ import (
 	"io"
 	"math"
 
-	"codeberg.org/lindenii/furgit/internal/zlib"
+	"codeberg.org/lindenii/furgit/internal/compress/zlib"
 )
 
 // zlibReaderAt opens a zlib reader starting at data offset within pack.

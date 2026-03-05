@@ -8,8 +8,7 @@ import (
 	"encoding/binary"
 
 	"codeberg.org/lindenii/furgit/internal/adler32"
-
-	"github.com/klauspost/compress/flate"
+	"codeberg.org/lindenii/furgit/internal/compress/flate"
 )
 
 // writeHeader writes the ZLIB header.

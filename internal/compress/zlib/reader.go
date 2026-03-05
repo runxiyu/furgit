@@ -40,7 +40,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/klauspost/compress/flate"
+	"codeberg.org/lindenii/furgit/internal/compress/flate"
 )
 
 const (

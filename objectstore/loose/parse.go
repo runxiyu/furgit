@@ -6,7 +6,7 @@ import (
 	"io"
 	"os"
 
-	"codeberg.org/lindenii/furgit/internal/zlib"
+	"codeberg.org/lindenii/furgit/internal/compress/zlib"
 	"codeberg.org/lindenii/furgit/objectheader"
 	"codeberg.org/lindenii/furgit/objecttype"
 )

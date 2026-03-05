@@ -11,7 +11,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/klauspost/compress/flate"
+	"codeberg.org/lindenii/furgit/internal/compress/flate"
 )
 
 // These constants are copied from the [flate] package, so that code that imports

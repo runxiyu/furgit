@@ -11,19 +11,20 @@ import (
 	"io"
 
 	"codeberg.org/lindenii/furgit/internal/adler32"
-
-	"github.com/klauspost/compress/flate"
+	"codeberg.org/lindenii/furgit/internal/compress/flate"
 )
 
 // reset resets receiver to read a new zlib stream.
 func (z *Reader) reset(r io.Reader, dict []byte) error {
 	*z = Reader{decompressor: z.decompressor}
+
 	var input flate.Reader
 	if fr, ok := r.(flate.Reader); ok {
 		input = fr
 	} else {
 		input = bufio.NewReader(r)
 	}
+
 	z.counter = &countingFlateReader{inner: input}
 	z.r = z.counter
 
