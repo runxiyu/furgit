@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/compress/zlib"
@@ -24,29 +25,35 @@ var data = []string{
 	"test a reasonable sized string that can be compressed",
 }
 
+func testdataRoot(t *testing.T) *os.Root {
+	t.Helper()
+
+	root, err := os.OpenRoot("../testdata")
+	if err != nil {
+		t.Fatalf("open testdata root: %v", err)
+	}
+
+	return root
+}
+
 // Tests that compressing and then decompressing the given file at the given compression level and dictionary
 // yields equivalent bytes to the original file.
 func testFileLevelDict(t *testing.T, fn string, level int, d string) {
 	t.Helper()
 
-	// Read the file, as golden output.
-	golden, err := os.Open(fn)
-	if err != nil {
-		t.Errorf("%s (level=%d, dict=%q): %v", fn, level, d, err)
-
-		return
-	}
+	root := testdataRoot(t)
 
 	defer func() {
-		err := golden.Close()
+		err := root.Close()
 		if err != nil {
-			t.Fatalf("%s (level=%d, dict=%q): close golden: %v", fn, level, d, err)
+			t.Fatalf("%s (level=%d, dict=%q): close testdata root: %v", fn, level, d, err)
 		}
 	}()
 
-	b0, err0 := io.ReadAll(golden)
-	if err0 != nil {
-		t.Errorf("%s (level=%d, dict=%q): %v", fn, level, d, err0)
+	// Read the file, as golden output.
+	b0, err := root.ReadFile(filepath.Base(fn))
+	if err != nil {
+		t.Errorf("%s (level=%d, dict=%q): %v", fn, level, d, err)
 
 		return
 	}

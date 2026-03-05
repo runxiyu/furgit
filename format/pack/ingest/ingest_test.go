@@ -42,10 +42,24 @@ func fixtureBytes(t *testing.T, algo objectid.Algorithm, name string) []byte {
 	t.Helper()
 
 	path := fixturePath(t, algo, name)
+	dir := filepath.Dir(path)
+	base := filepath.Base(path)
 
-	data, err := os.ReadFile(path)
+	root, err := os.OpenRoot(dir)
 	if err != nil {
-		t.Fatalf("read fixture %q: %v", path, err)
+		t.Fatalf("open fixture root %q: %v", dir, err)
+	}
+
+	defer func() {
+		err := root.Close()
+		if err != nil {
+			t.Fatalf("close fixture root %q: %v", dir, err)
+		}
+	}()
+
+	data, err := root.ReadFile(base)
+	if err != nil {
+		t.Fatalf("read fixture %q: %v", base, err)
 	}
 
 	return data
@@ -104,12 +118,36 @@ func verifyReindexOracle(t *testing.T, repo *testgit.TestRepo, packPath, idxPath
 	_ = repo.Run(t, "index-pack", "--rev-index", "-o", oracleIdxPath, packPath)
 	oracleRevPath := strings.TrimSuffix(oracleIdxPath, ".idx") + ".rev"
 
-	gotIdx, err := os.ReadFile(idxPath)
+	idxRoot, err := os.OpenRoot(filepath.Dir(idxPath))
+	if err != nil {
+		t.Fatalf("open idx root: %v", err)
+	}
+
+	defer func() {
+		err := idxRoot.Close()
+		if err != nil {
+			t.Fatalf("close idx root: %v", err)
+		}
+	}()
+
+	gotIdx, err := idxRoot.ReadFile(filepath.Base(idxPath))
 	if err != nil {
 		t.Fatalf("read idx: %v", err)
 	}
 
-	wantIdx, err := os.ReadFile(oracleIdxPath)
+	oracleRoot, err := os.OpenRoot(oracleDir)
+	if err != nil {
+		t.Fatalf("open oracle root: %v", err)
+	}
+
+	defer func() {
+		err := oracleRoot.Close()
+		if err != nil {
+			t.Fatalf("close oracle root: %v", err)
+		}
+	}()
+
+	wantIdx, err := oracleRoot.ReadFile(filepath.Base(oracleIdxPath))
 	if err != nil {
 		t.Fatalf("read oracle idx: %v", err)
 	}
@@ -118,12 +156,12 @@ func verifyReindexOracle(t *testing.T, repo *testgit.TestRepo, packPath, idxPath
 		t.Fatal("idx bytes differ from git index-pack output")
 	}
 
-	gotRev, err := os.ReadFile(revPath)
+	gotRev, err := idxRoot.ReadFile(filepath.Base(revPath))
 	if err != nil {
 		t.Fatalf("read rev: %v", err)
 	}
 
-	wantRev, err := os.ReadFile(oracleRevPath)
+	wantRev, err := oracleRoot.ReadFile(filepath.Base(oracleRevPath))
 	if err != nil {
 		t.Fatalf("read oracle rev: %v", err)
 	}
