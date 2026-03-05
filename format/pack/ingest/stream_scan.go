@@ -45,7 +45,11 @@ func streamPackAndScan(state *ingestState) error {
 		}
 	}
 
-	return finalizeStreamPackHash(state)
+	if err := finalizeStreamPackHash(state); err != nil {
+		return err
+	}
+
+	return state.stream.flush()
 }
 
 // readAndValidatePackHeader reads and validates PACK header from the stream.

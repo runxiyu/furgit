@@ -13,7 +13,7 @@ import (
 // trailer verification state.
 type streamCopier struct {
 	reader   *bufio.Reader
-	packFile *os.File
+	writer   *bufio.Writer
 	verifier *trailerVerifier
 	offset   uint64
 	entryCRC hash.Hash32
@@ -23,7 +23,7 @@ type streamCopier struct {
 func newStreamCopier(src io.Reader, packFile *os.File, verifier *trailerVerifier) *streamCopier {
 	return &streamCopier{
 		reader:   bufio.NewReaderSize(src, 64<<10),
-		packFile: packFile,
+		writer:   bufio.NewWriterSize(packFile, 256<<10),
 		verifier: verifier,
 	}
 }
@@ -66,9 +66,12 @@ func (stream *streamCopier) readFull(dst []byte) error {
 
 // writeChunk mirrors src bytes to destination artifacts and accounting.
 func (stream *streamCopier) writeChunk(src []byte) error {
-	_, err := stream.packFile.WriteAt(src, int64(stream.offset))
+	n, err := stream.writer.Write(src)
 	if err != nil {
 		return &ErrDestinationWrite{Op: fmt.Sprintf("write pack: %v", err)}
+	}
+	if n != len(src) {
+		return &ErrDestinationWrite{Op: "write pack: short write"}
 	}
 
 	if stream.entryCRC != nil {
@@ -76,6 +79,16 @@ func (stream *streamCopier) writeChunk(src []byte) error {
 	}
 	stream.verifier.write(src)
 	stream.offset += uint64(len(src))
+
+	return nil
+}
+
+// flush flushes buffered pack output bytes to the destination file.
+func (stream *streamCopier) flush() error {
+	err := stream.writer.Flush()
+	if err != nil {
+		return &ErrDestinationWrite{Op: fmt.Sprintf("flush pack: %v", err)}
+	}
 
 	return nil
 }
