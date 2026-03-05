@@ -56,18 +56,18 @@ Furgit is a low-level Git library in Go.
 * V0/V1 protocol (e.g., `sideband-64k`, `pktline`, etc.)
 * Receiving/fetching
 * Writing configs
+* Commit graph
+* Multi-pack indexes
+* Reachability bitmaps
 * Delta base selection, e.g., islands
 * Compressing deltas
 * Writing packfiles
-* Commit graph
-* Reachability bitmaps
 * Thin packs
 * DEFLATE optimizations
 * Aggressive buffer pooling
 * Ref tables
 * Large object promisors
 * Repacking
-* Multi-pack indexes
 * Compression agility
 * Working trees
 * Index
