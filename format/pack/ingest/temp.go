@@ -14,24 +14,35 @@ func openTemporaryArtifacts(state *ingestState) error {
 	if err != nil {
 		return err
 	}
-	state.packTmpName = packName
-	state.packFile = packFile
 
 	idxName, idxFile, err := createTempFile(state.destination, "tmp_idx_")
 	if err != nil {
+		_ = packFile.Close()
+		_ = state.destination.Remove(packName)
+
 		return err
 	}
-	state.idxTmpName = idxName
-	state.idxFile = idxFile
 
+	revName := ""
+	var revFile *os.File
 	if state.writeRev {
-		revName, revFile, err := createTempFile(state.destination, "tmp_rev_")
+		revName, revFile, err = createTempFile(state.destination, "tmp_rev_")
 		if err != nil {
+			_ = idxFile.Close()
+			_ = state.destination.Remove(idxName)
+			_ = packFile.Close()
+			_ = state.destination.Remove(packName)
+
 			return err
 		}
-		state.revTmpName = revName
-		state.revFile = revFile
 	}
+
+	state.packTmpName = packName
+	state.packFile = packFile
+	state.idxTmpName = idxName
+	state.idxFile = idxFile
+	state.revTmpName = revName
+	state.revFile = revFile
 
 	return nil
 }
