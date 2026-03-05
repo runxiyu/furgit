@@ -19,17 +19,19 @@ const (
 )
 
 type algorithmDetails struct {
-	name string
-	size int
-	sum  func([]byte) ObjectID
-	new  func() hash.Hash
+	name       string
+	size       int
+	packHashID uint32
+	sum        func([]byte) ObjectID
+	new        func() hash.Hash
 }
 
 var algorithmTable = [...]algorithmDetails{
 	AlgorithmUnknown: {},
 	AlgorithmSHA1: {
-		name: "sha1",
-		size: sha1.Size,
+		name:       "sha1",
+		size:       sha1.Size,
+		packHashID: 1,
 		sum: func(data []byte) ObjectID {
 			sum := sha1.Sum(data) //#nosec G401
 
@@ -42,8 +44,9 @@ var algorithmTable = [...]algorithmDetails{
 		new: sha1.New,
 	},
 	AlgorithmSHA256: {
-		name: "sha256",
-		size: sha256.Size,
+		name:       "sha256",
+		size:       sha256.Size,
+		packHashID: 2,
 		sum: func(data []byte) ObjectID {
 			sum := sha256.Sum256(data)
 
@@ -105,6 +108,13 @@ func (algo Algorithm) String() string {
 // HexLen returns the encoded hexadecimal length.
 func (algo Algorithm) HexLen() int {
 	return algo.Size() * 2
+}
+
+// PackHashID returns the Git pack/rev hash-id encoding for this algorithm.
+//
+// Unknown algorithms return 0.
+func (algo Algorithm) PackHashID() uint32 {
+	return algo.info().packHashID
 }
 
 // Sum computes an object ID from raw data using the selected algorithm.

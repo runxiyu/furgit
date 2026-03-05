@@ -3,8 +3,6 @@ package ingest
 import (
 	"encoding/binary"
 	"slices"
-
-	"codeberg.org/lindenii/furgit/objectid"
 )
 
 const (
@@ -47,7 +45,7 @@ func writeRev(state *ingestState) error {
 		return err
 	}
 
-	binary.BigEndian.PutUint32(scratch[:4], hashID(state.algo))
+	binary.BigEndian.PutUint32(scratch[:4], state.algo.PackHashID())
 
 	err = writeAndHash(state.revFile, hashImpl, scratch[:4])
 	if err != nil {
@@ -100,16 +98,4 @@ func buildPackOrder(state *ingestState) []int {
 	})
 
 	return out
-}
-
-// hashID converts object algorithm to pack hash-id encoding.
-func hashID(algo objectid.Algorithm) uint32 {
-	switch algo {
-	case objectid.AlgorithmSHA1:
-		return 1
-	case objectid.AlgorithmSHA256:
-		return 2
-	default:
-		return 0
-	}
 }
