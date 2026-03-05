@@ -15,13 +15,17 @@ import (
 	"github.com/klauspost/compress/flate"
 )
 
-func (z *reader) Reset(r io.Reader, dict []byte) error {
-	*z = reader{decompressor: z.decompressor}
+// Reset resets receiver to read a new zlib stream.
+func (z *Reader) Reset(r io.Reader, dict []byte) error {
+	*z = Reader{decompressor: z.decompressor}
+	var input flate.Reader
 	if fr, ok := r.(flate.Reader); ok {
-		z.r = fr
+		input = fr
 	} else {
-		z.r = bufio.NewReader(r)
+		input = bufio.NewReader(r)
 	}
+	z.counter = &countingFlateReader{inner: input}
+	z.r = z.counter
 
 	// Read the header (RFC 1950 section 2.2.).
 	_, z.err = io.ReadFull(z.r, z.scratch[0:2])
