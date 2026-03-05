@@ -32,6 +32,7 @@ func testFileLevelDict(t *testing.T, fn string, level int, d string) {
 
 		return
 	}
+
 	defer func() {
 		err := golden.Close()
 		if err != nil {
@@ -58,6 +59,7 @@ func testLevelDict(t *testing.T, fn string, b0 []byte, level int, d string) {
 
 	// Push data through a pipe that compresses at the write end, and decompresses at the read end.
 	piper, pipew := io.Pipe()
+
 	defer func() {
 		err := piper.Close()
 		if err != nil {
@@ -79,6 +81,7 @@ func testLevelDict(t *testing.T, fn string, b0 []byte, level int, d string) {
 
 			return
 		}
+
 		defer func() {
 			err := zlibw.Close()
 			if err != nil {
@@ -100,6 +103,7 @@ func testLevelDict(t *testing.T, fn string, b0 []byte, level int, d string) {
 
 		return
 	}
+
 	defer func() {
 		err := zlibr.Close()
 		if err != nil {

@@ -187,6 +187,7 @@ func (writer *countingWriter) Write(src []byte) (int, error) {
 // rewritePackHeaderAndTrailer rewrites object count and trailer hash using ReadAt/WriteAt.
 func rewritePackHeaderAndTrailer(state *ingestState) error {
 	var countRaw [4]byte
+
 	recordCountUint32, err := intconv.IntToUint32(len(state.records))
 	if err != nil {
 		return err
@@ -252,6 +253,7 @@ func rewritePackHeaderAndTrailer(state *ingestState) error {
 	state.objectCountHeader = recordCountUint32
 
 	sumLenInt64 := int64(len(sum))
+
 	newConsumed, err := intconv.Int64ToUint64(endWithoutTrailer + sumLenInt64)
 	if err != nil {
 		return err
@@ -267,6 +269,7 @@ func encodePackEntryHeader(ty objecttype.Type, size int64) []byte {
 	var out [16]byte
 
 	n := 0
+
 	s, err := intconv.Int64ToUint64(size)
 	if err != nil {
 		panic(err)

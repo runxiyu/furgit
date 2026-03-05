@@ -132,6 +132,7 @@ func (z *Reader) Read(p []byte) (int, error) {
 
 	// Finished file; check checksum.
 	readN, err := io.ReadFull(z.r, z.scratch[0:4])
+
 	readNUint64, convErr := intconv.IntToUint64(readN)
 	if convErr != nil {
 		z.err = convErr

@@ -30,6 +30,7 @@ func (z *Reader) reset(r io.Reader, dict []byte) error {
 
 	// Read the header (RFC 1950 section 2.2.).
 	readN, err := io.ReadFull(z.r, z.scratch[0:2])
+
 	readNUint64, convErr := intconv.IntToUint64(readN)
 	if convErr != nil {
 		z.err = convErr

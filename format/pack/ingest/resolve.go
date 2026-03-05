@@ -248,6 +248,7 @@ func inflateRecordPayload(state *ingestState, idx int) ([]byte, error) {
 
 	compressedOffset := record.offset + uint64(record.headerLen)
 	compressedLen := record.packedLen - uint64(record.headerLen)
+
 	compressedOffsetInt64, err := intconv.Uint64ToInt64(compressedOffset)
 	if err != nil {
 		return nil, err

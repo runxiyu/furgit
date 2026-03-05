@@ -95,6 +95,7 @@ func writeIdx(state *ingestState) error {
 			}
 
 			word := 0x80000000 | largeOffsetIdx
+
 			largeOffsets = append(largeOffsets, offset)
 
 			binary.BigEndian.PutUint32(scratch[:4], word)
