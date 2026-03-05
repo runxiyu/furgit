@@ -39,7 +39,7 @@ func BenchmarkTraverseHeadTree(b *testing.B) {
 		_ = repo.Close()
 	})
 
-	head, err := repo.ResolveRefFully("HEAD")
+	head, err := repo.Refs().ResolveFully("HEAD")
 	if err != nil {
 		b.Fatalf("ResolveRefFully(HEAD): %v", err)
 	}

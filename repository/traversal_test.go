@@ -117,7 +117,7 @@ func walkRepositoryFromHead(t *testing.T, repoPath string) {
 
 	defer func() { _ = repo.Close() }()
 
-	head, err := repo.ResolveRefFully("HEAD")
+	head, err := repo.Refs().ResolveFully("HEAD")
 	if err != nil {
 		t.Fatalf("ResolveRefFully(HEAD): %v", err)
 	}
