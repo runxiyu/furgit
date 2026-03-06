@@ -197,7 +197,6 @@ func Example_synchronization() {
 
 	// Start a goroutine to act as the receiver.
 	wg.Go(func() {
-
 		zr := flate.NewReader(rp)
 
 		b := make([]byte, 256)
