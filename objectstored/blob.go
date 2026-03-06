@@ -6,6 +6,9 @@ import (
 )
 
 // StoredBlob is a parsed blob paired with its storage ID.
+//
+// This Blob object is fully materialized in memory.
+// Consider using objectstore/Store.ReadReaderContent.
 type StoredBlob struct {
 	id   objectid.ObjectID
 	blob *object.Blob
