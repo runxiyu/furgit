@@ -1,6 +1,9 @@
 package ingest
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 // ErrInvalidPackHeader reports an invalid or unsupported pack header.
 type ErrInvalidPackHeader struct {
@@ -61,3 +64,5 @@ type ErrDestinationWrite struct {
 func (err *ErrDestinationWrite) Error() string {
 	return fmt.Sprintf("format/pack/ingest: destination write failure: %s", err.Op)
 }
+
+var errExternalThinBase = errors.New("format/pack/ingest: external thin base required")
