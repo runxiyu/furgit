@@ -3,17 +3,16 @@ package reachability_test
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"maps"
-	"os"
-	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
 
+	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/reachability"
-	"codeberg.org/lindenii/furgit/repository"
 )
 
 func TestWalkCommitsMatchesGitRevList(t *testing.T) {
@@ -163,51 +162,6 @@ func TestWalkObjectsMatchesGitRevListObjects(t *testing.T) {
 	})
 }
 
-func TestIsAncestorMatchesGitMergeBase(t *testing.T) {
-	t.Parallel()
-
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
-		testRepo := testgit.NewRepo(t, testgit.RepoOptions{
-			ObjectFormat: algo,
-			Bare:         true,
-			RefFormat:    "files",
-		})
-
-		_, tree1 := testRepo.MakeSingleFileTree(t, "one.txt", []byte("one\n"))
-		c1 := testRepo.CommitTree(t, tree1, "c1")
-
-		_, tree2 := testRepo.MakeSingleFileTree(t, "two.txt", []byte("two\n"))
-		c2 := testRepo.CommitTree(t, tree2, "c2", c1)
-
-		_, tree3 := testRepo.MakeSingleFileTree(t, "three.txt", []byte("three\n"))
-		c3 := testRepo.CommitTree(t, tree3, "c3", c2)
-
-		tag := testRepo.TagAnnotated(t, "tip", c2, "tip")
-
-		r := openReachabilityFromTestRepo(t, testRepo)
-
-		got, err := r.IsAncestor(c1, tag)
-		if err != nil {
-			t.Fatalf("IsAncestor(c1, tag): %v", err)
-		}
-
-		want := gitMergeBaseIsAncestor(t, testRepo, c1, c2)
-		if got != want {
-			t.Fatalf("IsAncestor(c1, tag)=%v, want %v", got, want)
-		}
-
-		got, err = r.IsAncestor(c3, c2)
-		if err != nil {
-			t.Fatalf("IsAncestor(c3, c2): %v", err)
-		}
-
-		want = gitMergeBaseIsAncestor(t, testRepo, c3, c2)
-		if got != want {
-			t.Fatalf("IsAncestor(c3, c2)=%v, want %v", got, want)
-		}
-	})
-}
-
 func TestCheckConnectedMissingObject(t *testing.T) {
 	t.Parallel()
 
@@ -220,14 +174,11 @@ func TestCheckConnectedMissingObject(t *testing.T) {
 
 		_, treeID, commitID := testRepo.MakeCommit(t, "missing")
 
-		err := os.Remove(looseObjectPath(testRepo.Dir(), treeID))
-		if err != nil {
-			t.Fatalf("remove tree object: %v", err)
-		}
+		testRepo.RemoveLooseObject(t, treeID)
 
 		r := openReachabilityFromTestRepo(t, testRepo)
 
-		err = r.CheckConnected(
+		err := r.CheckConnected(
 			reachability.DomainObjects,
 			nil,
 			map[objectid.ObjectID]struct{}{commitID: {}},
@@ -236,7 +187,7 @@ func TestCheckConnectedMissingObject(t *testing.T) {
 			t.Fatal("expected error")
 		}
 
-		var missing *reachability.ObjectMissingError
+		var missing *giterrors.ObjectMissingError
 		if !errors.As(err, &missing) {
 			t.Fatalf("expected ObjectMissingError, got %T (%v)", err, err)
 		}
@@ -267,7 +218,7 @@ func TestWalkOnPackedOnlyRepo(t *testing.T) {
 		testRepo.Repack(t, "-ad")
 		testRepo.Run(t, "prune-packed")
 
-		assertPackedOnly(t, testRepo.Dir())
+		assertPackedOnly(t, testRepo)
 
 		r := openReachabilityFromTestRepo(t, testRepo)
 		walk := r.Walk(
@@ -298,21 +249,7 @@ func TestWalkOnPackedOnlyRepo(t *testing.T) {
 func openReachabilityFromTestRepo(t *testing.T, testRepo *testgit.TestRepo) *reachability.Reachability {
 	t.Helper()
 
-	root, err := os.OpenRoot(testRepo.Dir())
-	if err != nil {
-		t.Fatalf("os.OpenRoot: %v", err)
-	}
-
-	t.Cleanup(func() { _ = root.Close() })
-
-	repo, err := repository.Open(root)
-	if err != nil {
-		t.Fatalf("repository.Open: %v", err)
-	}
-
-	t.Cleanup(func() { _ = repo.Close() })
-
-	return reachability.New(repo.Objects())
+	return reachability.New(testRepo.OpenObjectStore(t))
 }
 
 func oidSetFromSeq(seq func(func(objectid.ObjectID) bool)) map[objectid.ObjectID]struct{} {
@@ -379,14 +316,6 @@ func gitRevListSet(
 	return set
 }
 
-func gitMergeBaseIsAncestor(t *testing.T, testRepo *testgit.TestRepo, a, b objectid.ObjectID) bool {
-	t.Helper()
-	// testgit.Run fatals on non-zero status, so we compare merge-base output.
-	mb := testRepo.Run(t, "merge-base", a.String(), b.String())
-
-	return mb == a.String()
-}
-
 func sortedOIDStrings(set map[objectid.ObjectID]struct{}) []string {
 	out := make([]string, 0, len(set))
 	for id := range set {
@@ -398,18 +327,12 @@ func sortedOIDStrings(set map[objectid.ObjectID]struct{}) []string {
 	return out
 }
 
-func looseObjectPath(repoDir string, id objectid.ObjectID) string {
-	hex := id.String()
-
-	return filepath.Join(repoDir, "objects", hex[:2], hex[2:])
-}
-
-func assertPackedOnly(t *testing.T, repoDir string) {
+func assertPackedOnly(t *testing.T, testRepo *testgit.TestRepo) {
 	t.Helper()
 
-	objectsDir := filepath.Join(repoDir, "objects")
+	objectsRoot := testRepo.OpenObjectsRoot(t)
 
-	entries, err := os.ReadDir(objectsDir)
+	entries, err := fs.ReadDir(objectsRoot.FS(), ".")
 	if err != nil {
 		t.Fatalf("ReadDir(objects): %v", err)
 	}
@@ -421,13 +344,13 @@ func assertPackedOnly(t *testing.T, repoDir string) {
 		}
 
 		if len(name) == 2 && isHexDirName(name) {
-			subEntries, err := os.ReadDir(filepath.Join(objectsDir, name))
+			subEntries, err := fs.ReadDir(objectsRoot.FS(), name)
 			if err != nil {
 				t.Fatalf("ReadDir(objects/%s): %v", name, err)
 			}
 
 			if len(subEntries) != 0 {
-				t.Fatalf("found loose objects in %s", filepath.Join(objectsDir, name))
+				t.Fatalf("found loose objects in objects/%s", name)
 			}
 		}
 	}

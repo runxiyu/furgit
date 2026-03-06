@@ -1,14 +1,12 @@
 package repository_test
 
 import (
-	"os"
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
 	"codeberg.org/lindenii/furgit/ref"
-	"codeberg.org/lindenii/furgit/repository"
 )
 
 func TestOpenFilesRefFormat(t *testing.T) {
@@ -25,19 +23,7 @@ func TestOpenFilesRefFormat(t *testing.T) {
 		repoHarness.UpdateRef(t, "refs/heads/main", commitID)
 		repoHarness.SymbolicRef(t, "HEAD", "refs/heads/main")
 
-		root, err := os.OpenRoot(repoHarness.Dir())
-		if err != nil {
-			t.Fatalf("os.OpenRoot: %v", err)
-		}
-
-		defer func() { _ = root.Close() }()
-
-		repo, err := repository.Open(root)
-		if err != nil {
-			t.Fatalf("repository.Open: %v", err)
-		}
-
-		defer func() { _ = repo.Close() }()
+		repo := repoHarness.OpenRepository(t)
 
 		if repo.Algorithm() != algo {
 			t.Fatalf("Algorithm = %v, want %v", repo.Algorithm(), algo)
@@ -114,19 +100,7 @@ func writeMainAndHead(t *testing.T, repoHarness *testgit.TestRepo) objectid.Obje
 func assertResolveFully(t *testing.T, repoHarness *testgit.TestRepo, name string, want objectid.ObjectID) {
 	t.Helper()
 
-	root, err := os.OpenRoot(repoHarness.Dir())
-	if err != nil {
-		t.Fatalf("os.OpenRoot: %v", err)
-	}
-
-	defer func() { _ = root.Close() }()
-
-	repo, err := repository.Open(root)
-	if err != nil {
-		t.Fatalf("repository.Open: %v", err)
-	}
-
-	defer func() { _ = repo.Close() }()
+	repo := repoHarness.OpenRepository(t)
 
 	resolved, err := repo.Refs().ResolveFully(name)
 	if err != nil {

@@ -14,15 +14,10 @@ import (
 	"codeberg.org/lindenii/furgit/refstore/packed"
 )
 
-func openPackedRefStoreFromRepo(t *testing.T, repoPath string, algo objectid.Algorithm) *packed.Store {
+func openPackedRefStoreFromRepo(t *testing.T, testRepo *testgit.TestRepo, algo objectid.Algorithm) *packed.Store {
 	t.Helper()
 
-	root, err := os.OpenRoot(repoPath)
-	if err != nil {
-		t.Fatalf("OpenRoot(repo): %v", err)
-	}
-
-	defer func() { _ = root.Close() }()
+	root := testRepo.OpenGitRoot(t)
 
 	store, err := packed.New(root, algo)
 	if err != nil {
@@ -37,17 +32,17 @@ func openPackedRefStoreFromContent(t *testing.T, content string, algo objectid.A
 
 	dir := t.TempDir()
 
-	err := os.WriteFile(dir+"/packed-refs", []byte(content), 0o644)
-	if err != nil {
-		t.Fatalf("WriteFile(packed-refs): %v", err)
-	}
-
 	root, err := os.OpenRoot(dir)
 	if err != nil {
 		t.Fatalf("OpenRoot(temp): %v", err)
 	}
 
 	defer func() { _ = root.Close() }()
+
+	err = root.WriteFile("packed-refs", []byte(content), 0o644)
+	if err != nil {
+		t.Fatalf("WriteFile(packed-refs): %v", err)
+	}
 
 	return packed.New(root, algo)
 }
@@ -61,7 +56,7 @@ func TestPackedResolveAndPeeled(t *testing.T) {
 		tagID := testRepo.TagAnnotated(t, "v1.0.0", commitID, "annotated tag")
 		testRepo.PackRefs(t, "--all", "--prune")
 
-		store := openPackedRefStoreFromRepo(t, testRepo.Dir(), algo)
+		store := openPackedRefStoreFromRepo(t, testRepo, algo)
 
 		resolvedMain, err := store.Resolve("refs/heads/main")
 		if err != nil {
@@ -125,7 +120,7 @@ func TestPackedListAndShorten(t *testing.T) {
 		testRepo.UpdateRef(t, "refs/remotes/origin/main", commitID)
 		testRepo.PackRefs(t, "--all", "--prune")
 
-		store := openPackedRefStoreFromRepo(t, testRepo.Dir(), algo)
+		store := openPackedRefStoreFromRepo(t, testRepo, algo)
 
 		all, err := store.List("")
 		if err != nil {
@@ -180,7 +175,7 @@ func TestPackedListPatternMatrix(t *testing.T) {
 		testRepo.UpdateRef(t, "refs/tags/v1", commitID)
 		testRepo.PackRefs(t, "--all", "--prune")
 
-		store := openPackedRefStoreFromRepo(t, testRepo.Dir(), algo)
+		store := openPackedRefStoreFromRepo(t, testRepo, algo)
 
 		tests := []struct {
 			pattern string

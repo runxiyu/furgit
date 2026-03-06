@@ -2,8 +2,6 @@ package trees_test
 
 import (
 	"errors"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"codeberg.org/lindenii/furgit/diff/trees"
@@ -19,37 +17,37 @@ func TestDiffComplexNestedChanges(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		repo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: false})
 
-		writeTestFile(t, filepath.Join(repo.Dir(), "README.md"), "initial readme\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "unchanged.txt"), "leave me as-is\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "dir", "file_a.txt"), "alpha v1\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "dir", "nested", "file_b.txt"), "beta v1\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "dir", "nested", "deeper", "file_c.txt"), "gamma v1\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "dir", "nested", "deeper", "old.txt"), "old branch\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "treeB", "legacy.txt"), "legacy root\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "treeB", "sub", "retired.txt"), "retired\n")
+		writeTestFile(t, repo, "README.md", "initial readme\n")
+		writeTestFile(t, repo, "unchanged.txt", "leave me as-is\n")
+		writeTestFile(t, repo, "dir/file_a.txt", "alpha v1\n")
+		writeTestFile(t, repo, "dir/nested/file_b.txt", "beta v1\n")
+		writeTestFile(t, repo, "dir/nested/deeper/file_c.txt", "gamma v1\n")
+		writeTestFile(t, repo, "dir/nested/deeper/old.txt", "old branch\n")
+		writeTestFile(t, repo, "treeB/legacy.txt", "legacy root\n")
+		writeTestFile(t, repo, "treeB/sub/retired.txt", "retired\n")
 
 		repo.Run(t, "add", ".")
 		baseTreeID := parseID(t, algo, repo.Run(t, "write-tree"))
 
-		writeTestFile(t, filepath.Join(repo.Dir(), "README.md"), "updated readme\n")
+		writeTestFile(t, repo, "README.md", "updated readme\n")
 		repo.Run(t, "rm", "-f", "dir/file_a.txt")
-		writeTestFile(t, filepath.Join(repo.Dir(), "dir", "nested", "file_b.txt"), "beta v2\n")
+		writeTestFile(t, repo, "dir/nested/file_b.txt", "beta v2\n")
 		repo.Run(t, "rm", "-f", "dir/nested/deeper/old.txt")
-		writeTestFile(t, filepath.Join(repo.Dir(), "dir", "nested", "deeper", "new.txt"), "new branch entry\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "dir", "nested", "deeper", "branch", "info.md"), "branch info\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "dir", "nested", "deeper", "branch", "subbranch", "leaf.txt"), "leaf data\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "dir", "nested", "deeper", "branch", "subbranch", "deep", "final.txt"), "final artifact\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "dir", "newchild.txt"), "brand new sibling\n")
+		writeTestFile(t, repo, "dir/nested/deeper/new.txt", "new branch entry\n")
+		writeTestFile(t, repo, "dir/nested/deeper/branch/info.md", "branch info\n")
+		writeTestFile(t, repo, "dir/nested/deeper/branch/subbranch/leaf.txt", "leaf data\n")
+		writeTestFile(t, repo, "dir/nested/deeper/branch/subbranch/deep/final.txt", "final artifact\n")
+		writeTestFile(t, repo, "dir/newchild.txt", "brand new sibling\n")
 		repo.Run(t, "rm", "-r", "-f", "treeB")
-		writeTestFile(t, filepath.Join(repo.Dir(), "features", "alpha", "README.md"), "alpha docs\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "features", "alpha", "beta", "gamma.txt"), "gamma payload\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "modules", "v2", "core", "main.go"), "package core\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "root_addition.txt"), "root level file\n")
+		writeTestFile(t, repo, "features/alpha/README.md", "alpha docs\n")
+		writeTestFile(t, repo, "features/alpha/beta/gamma.txt", "gamma payload\n")
+		writeTestFile(t, repo, "modules/v2/core/main.go", "package core\n")
+		writeTestFile(t, repo, "root_addition.txt", "root level file\n")
 
 		repo.Run(t, "add", ".")
 		updatedTreeID := parseID(t, algo, repo.Run(t, "write-tree"))
 
-		store := openLooseStore(t, filepath.Join(repo.Dir(), ".git", "objects"), algo)
+		store := openLooseStore(t, repo, algo)
 		readTree := makeReadTree(t, store, algo)
 		baseTree := mustReadTree(t, readTree, baseTreeID)
 		updatedTree := mustReadTree(t, readTree, updatedTreeID)
@@ -103,22 +101,22 @@ func TestDiffDirectoryAddDeleteDeep(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		repo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: false})
 
-		writeTestFile(t, filepath.Join(repo.Dir(), "old_dir", "old.txt"), "stale directory\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "old_dir", "sub1", "legacy.txt"), "legacy path\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "old_dir", "sub1", "nested", "end.txt"), "legacy end\n")
+		writeTestFile(t, repo, "old_dir/old.txt", "stale directory\n")
+		writeTestFile(t, repo, "old_dir/sub1/legacy.txt", "legacy path\n")
+		writeTestFile(t, repo, "old_dir/sub1/nested/end.txt", "legacy end\n")
 
 		repo.Run(t, "add", ".")
 		originalTreeID := parseID(t, algo, repo.Run(t, "write-tree"))
 
 		repo.Run(t, "rm", "-r", "-f", "old_dir")
-		writeTestFile(t, filepath.Join(repo.Dir(), "fresh", "alpha", "beta", "new.txt"), "brand new directory\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "fresh", "alpha", "docs", "note.md"), "docs note\n")
-		writeTestFile(t, filepath.Join(repo.Dir(), "fresh", "alpha", "beta", "gamma", "delta.txt"), "delta payload\n")
+		writeTestFile(t, repo, "fresh/alpha/beta/new.txt", "brand new directory\n")
+		writeTestFile(t, repo, "fresh/alpha/docs/note.md", "docs note\n")
+		writeTestFile(t, repo, "fresh/alpha/beta/gamma/delta.txt", "delta payload\n")
 
 		repo.Run(t, "add", ".")
 		nextTreeID := parseID(t, algo, repo.Run(t, "write-tree"))
 
-		store := openLooseStore(t, filepath.Join(repo.Dir(), ".git", "objects"), algo)
+		store := openLooseStore(t, repo, algo)
 		readTree := makeReadTree(t, store, algo)
 		originalTree := mustReadTree(t, readTree, originalTreeID)
 		nextTree := mustReadTree(t, readTree, nextTreeID)
@@ -155,29 +153,16 @@ type diffExpectation struct {
 	newNil bool
 }
 
-func writeTestFile(t *testing.T, path, data string) {
+func writeTestFile(t *testing.T, repo *testgit.TestRepo, path, data string) {
 	t.Helper()
 
-	err := os.MkdirAll(filepath.Dir(path), 0o755)
-	if err != nil {
-		t.Fatalf("create directory for %s: %v", path, err)
-	}
-
-	err = os.WriteFile(path, []byte(data), 0o644)
-	if err != nil {
-		t.Fatalf("write %s: %v", path, err)
-	}
+	repo.WriteFileAll(t, path, []byte(data), 0o755, 0o644)
 }
 
-func openLooseStore(t *testing.T, objectsPath string, algo objectid.Algorithm) *loose.Store {
+func openLooseStore(t *testing.T, repo *testgit.TestRepo, algo objectid.Algorithm) *loose.Store {
 	t.Helper()
 
-	root, err := os.OpenRoot(objectsPath)
-	if err != nil {
-		t.Fatalf("OpenRoot(%q): %v", objectsPath, err)
-	}
-
-	t.Cleanup(func() { _ = root.Close() })
+	root := repo.OpenObjectsRoot(t)
 
 	store, err := loose.New(root, algo)
 	if err != nil {

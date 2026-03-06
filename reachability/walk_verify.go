@@ -1,6 +1,7 @@
 package reachability
 
 import (
+	"codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/object"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
@@ -13,7 +14,7 @@ func (walk *Walk) validateCommitObject(id objectid.ObjectID) error {
 	}
 
 	if ty != objecttype.TypeCommit {
-		return &ObjectTypeError{OID: id, Got: ty, Want: objecttype.TypeCommit}
+		return &errors.ObjectTypeError{OID: id, Got: ty, Want: objecttype.TypeCommit}
 	}
 
 	content, err := walk.readBytesContent(id)

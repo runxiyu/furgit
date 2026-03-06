@@ -3,8 +3,6 @@ package packed_test
 import (
 	"fmt"
 	"io"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -16,17 +14,10 @@ import (
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
-func openPackedStore(t *testing.T, repoPath string, algo objectid.Algorithm) *packed.Store {
+func openPackedStore(t *testing.T, testRepo *testgit.TestRepo, algo objectid.Algorithm) *packed.Store {
 	t.Helper()
 
-	packPath := filepath.Join(repoPath, "objects", "pack")
-
-	root, err := os.OpenRoot(packPath)
-	if err != nil {
-		t.Fatalf("OpenRoot(%q): %v", packPath, err)
-	}
-
-	t.Cleanup(func() { _ = root.Close() })
+	root := testRepo.OpenPackRoot(t)
 
 	store, err := packed.New(root, algo)
 	if err != nil {

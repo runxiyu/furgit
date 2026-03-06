@@ -3,6 +3,7 @@ package ingest_test
 import (
 	"bytes"
 	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,7 +12,6 @@ import (
 	"codeberg.org/lindenii/furgit/format/pack/ingest"
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/repository"
 )
 
 // fixturePath returns one fixture file path for the selected algorithm.
@@ -99,27 +99,17 @@ func fixtureOID(t *testing.T, algo objectid.Algorithm, key string) objectid.Obje
 
 // verifyReindexOracle regenerates idx/rev with upstream git index-pack and
 // compares bytes with files produced by ingest.
-func verifyReindexOracle(t *testing.T, repo *testgit.TestRepo, packPath, idxPath, revPath string) {
+func verifyReindexOracle(t *testing.T, repo *testgit.TestRepo, packName, idxName, revName string) {
 	t.Helper()
 
 	oracleDir := t.TempDir()
 	oracleIdxPath := filepath.Join(oracleDir, "oracle.idx")
-	_ = repo.Run(t, "index-pack", "--rev-index", "-o", oracleIdxPath, packPath)
+	_ = repo.Run(t, "index-pack", "--rev-index", "-o", oracleIdxPath, filepath.Join("objects", "pack", packName))
 	oracleRevPath := strings.TrimSuffix(oracleIdxPath, ".idx") + ".rev"
 
-	idxRoot, err := os.OpenRoot(filepath.Dir(idxPath))
-	if err != nil {
-		t.Fatalf("open idx root: %v", err)
-	}
+	packRoot := repo.OpenPackRoot(t)
 
-	defer func() {
-		err := idxRoot.Close()
-		if err != nil {
-			t.Fatalf("close idx root: %v", err)
-		}
-	}()
-
-	gotIdx, err := idxRoot.ReadFile(filepath.Base(idxPath))
+	gotIdx, err := packRoot.ReadFile(idxName)
 	if err != nil {
 		t.Fatalf("read idx: %v", err)
 	}
@@ -145,7 +135,7 @@ func verifyReindexOracle(t *testing.T, repo *testgit.TestRepo, packPath, idxPath
 		t.Fatal("idx bytes differ from git index-pack output")
 	}
 
-	gotRev, err := idxRoot.ReadFile(filepath.Base(revPath))
+	gotRev, err := packRoot.ReadFile(revName)
 	if err != nil {
 		t.Fatalf("read rev: %v", err)
 	}
@@ -169,17 +159,7 @@ func TestIngestNonThinPackWritesPackIdxRev(t *testing.T) {
 
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 
-		packRoot, err := os.OpenRoot(filepath.Join(receiver.Dir(), "objects", "pack"))
-		if err != nil {
-			t.Fatalf("open pack root: %v", err)
-		}
-
-		defer func() {
-			err = packRoot.Close()
-			if err != nil {
-				t.Fatalf("close pack root: %v", err)
-			}
-		}()
+		packRoot := receiver.OpenPackRoot(t)
 
 		result, err := ingest.Ingest(bytes.NewReader(packBytes), packRoot, algo, false, true, nil)
 		if err != nil {
@@ -209,11 +189,8 @@ func TestIngestNonThinPackWritesPackIdxRev(t *testing.T) {
 			t.Fatalf("stat rev: %v", err)
 		}
 
-		idxPath := filepath.Join(receiver.Dir(), "objects", "pack", result.IdxName)
-		packPath := filepath.Join(receiver.Dir(), "objects", "pack", result.PackName)
-		revPath := filepath.Join(receiver.Dir(), "objects", "pack", result.RevName)
-		_ = receiver.Run(t, "verify-pack", "-v", idxPath)
-		verifyReindexOracle(t, receiver, packPath, idxPath, revPath)
+		_ = receiver.Run(t, "verify-pack", "-v", filepath.Join("objects", "pack", result.IdxName))
+		verifyReindexOracle(t, receiver, result.PackName, result.IdxName, result.RevName)
 
 		receiver.UpdateRef(t, "refs/heads/main", head)
 		_ = receiver.Run(t, "fsck", "--full", "--strict", "--no-progress", "--no-dangling")
@@ -227,21 +204,9 @@ func TestIngestThinPackWithoutFixReturnsUnresolved(t *testing.T) {
 		thinPack := fixtureBytes(t, algo, "thin.pack")
 
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
-		packDir := filepath.Join(receiver.Dir(), "objects", "pack")
+		packRoot := receiver.OpenPackRoot(t)
 
-		packRoot, err := os.OpenRoot(packDir)
-		if err != nil {
-			t.Fatalf("open pack root: %v", err)
-		}
-
-		defer func() {
-			err = packRoot.Close()
-			if err != nil {
-				t.Fatalf("close pack root: %v", err)
-			}
-		}()
-
-		_, err = ingest.Ingest(bytes.NewReader(thinPack), packRoot, algo, false, true, nil)
+		_, err := ingest.Ingest(bytes.NewReader(thinPack), packRoot, algo, false, true, nil)
 		if err == nil {
 			t.Fatal("Ingest error = nil, want error")
 		}
@@ -251,13 +216,15 @@ func TestIngestThinPackWithoutFixReturnsUnresolved(t *testing.T) {
 			t.Fatalf("Ingest error type = %T (%v), want *ThinPackUnresolvedError", err, err)
 		}
 
-		matches, err := filepath.Glob(filepath.Join(packDir, "pack-*.pack"))
+		entries, err := fs.ReadDir(packRoot.FS(), ".")
 		if err != nil {
-			t.Fatalf("glob pack files: %v", err)
+			t.Fatalf("ReadDir(pack): %v", err)
 		}
 
-		if len(matches) != 0 {
-			t.Fatalf("found finalized pack files after failure: %v", matches)
+		for _, entry := range entries {
+			if strings.HasSuffix(entry.Name(), ".pack") {
+				t.Fatalf("found finalized pack file after failure: %v", entry.Name())
+			}
 		}
 	})
 }
@@ -271,46 +238,14 @@ func TestIngestThinPackWithFixThin(t *testing.T) {
 		thinPack := fixtureBytes(t, algo, "thin.pack")
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 
-		packRoot, err := os.OpenRoot(filepath.Join(receiver.Dir(), "objects", "pack"))
-		if err != nil {
-			t.Fatalf("open pack root: %v", err)
-		}
+		packRoot := receiver.OpenPackRoot(t)
 
-		defer func() {
-			err = packRoot.Close()
-			if err != nil {
-				t.Fatalf("close pack root: %v", err)
-			}
-		}()
-
-		_, err = ingest.Ingest(bytes.NewReader(basePack), packRoot, algo, false, false, nil)
+		_, err := ingest.Ingest(bytes.NewReader(basePack), packRoot, algo, false, false, nil)
 		if err != nil {
 			t.Fatalf("ingest base pack: %v", err)
 		}
 
-		receiverRoot, err := os.OpenRoot(receiver.Dir())
-		if err != nil {
-			t.Fatalf("open receiver root: %v", err)
-		}
-
-		defer func() {
-			err = receiverRoot.Close()
-			if err != nil {
-				t.Fatalf("close receiver root: %v", err)
-			}
-		}()
-
-		receiverRepo, err := repository.Open(receiverRoot)
-		if err != nil {
-			t.Fatalf("repository.Open(receiver): %v", err)
-		}
-
-		defer func() {
-			err = receiverRepo.Close()
-			if err != nil {
-				t.Fatalf("close receiver repo: %v", err)
-			}
-		}()
+		receiverRepo := receiver.OpenRepository(t)
 
 		result, err := ingest.Ingest(bytes.NewReader(thinPack), packRoot, algo, true, true, receiverRepo.Objects())
 		if err != nil {
@@ -321,11 +256,8 @@ func TestIngestThinPackWithFixThin(t *testing.T) {
 			t.Fatal("ThinFixed = false, want true")
 		}
 
-		idxPath := filepath.Join(receiver.Dir(), "objects", "pack", result.IdxName)
-		packPath := filepath.Join(receiver.Dir(), "objects", "pack", result.PackName)
-		revPath := filepath.Join(receiver.Dir(), "objects", "pack", result.RevName)
-		_ = receiver.Run(t, "verify-pack", "-v", idxPath)
-		verifyReindexOracle(t, receiver, packPath, idxPath, revPath)
+		_ = receiver.Run(t, "verify-pack", "-v", filepath.Join("objects", "pack", result.IdxName))
+		verifyReindexOracle(t, receiver, result.PackName, result.IdxName, result.RevName)
 		receiver.UpdateRef(t, "refs/heads/main", head)
 		_ = receiver.Run(t, "fsck", "--full", "--strict", "--no-progress", "--no-dangling")
 	})
@@ -343,21 +275,9 @@ func TestIngestPackTrailerMismatch(t *testing.T) {
 		packBytes[len(packBytes)-1] ^= 0xff
 
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
-		packDir := filepath.Join(receiver.Dir(), "objects", "pack")
+		packRoot := receiver.OpenPackRoot(t)
 
-		packRoot, err := os.OpenRoot(packDir)
-		if err != nil {
-			t.Fatalf("open pack root: %v", err)
-		}
-
-		defer func() {
-			err = packRoot.Close()
-			if err != nil {
-				t.Fatalf("close pack root: %v", err)
-			}
-		}()
-
-		_, err = ingest.Ingest(bytes.NewReader(packBytes), packRoot, algo, false, true, nil)
+		_, err := ingest.Ingest(bytes.NewReader(packBytes), packRoot, algo, false, true, nil)
 		if err == nil {
 			t.Fatal("Ingest error = nil, want error")
 		}
@@ -367,13 +287,15 @@ func TestIngestPackTrailerMismatch(t *testing.T) {
 			t.Fatalf("Ingest error type = %T (%v), want *PackTrailerMismatchError", err, err)
 		}
 
-		matches, err := filepath.Glob(filepath.Join(packDir, "pack-*.pack"))
+		entries, err := fs.ReadDir(packRoot.FS(), ".")
 		if err != nil {
-			t.Fatalf("glob pack files: %v", err)
+			t.Fatalf("ReadDir(pack): %v", err)
 		}
 
-		if len(matches) != 0 {
-			t.Fatalf("found finalized pack files after failure: %v", matches)
+		for _, entry := range entries {
+			if strings.HasSuffix(entry.Name(), ".pack") {
+				t.Fatalf("found finalized pack file after failure: %v", entry.Name())
+			}
 		}
 	})
 }

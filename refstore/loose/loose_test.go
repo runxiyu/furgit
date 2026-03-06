@@ -2,8 +2,6 @@ package loose_test
 
 import (
 	"errors"
-	"os"
-	"path/filepath"
 	"slices"
 	"testing"
 
@@ -14,15 +12,10 @@ import (
 	"codeberg.org/lindenii/furgit/refstore/loose"
 )
 
-func openLooseStore(t *testing.T, repoPath string, algo objectid.Algorithm) *loose.Store {
+func openLooseStore(t *testing.T, testRepo *testgit.TestRepo, algo objectid.Algorithm) *loose.Store {
 	t.Helper()
 
-	root, err := os.OpenRoot(repoPath)
-	if err != nil {
-		t.Fatalf("OpenRoot(%q): %v", repoPath, err)
-	}
-
-	t.Cleanup(func() { _ = root.Close() })
+	root := testRepo.OpenGitRoot(t)
 
 	store, err := loose.New(root, algo)
 	if err != nil {
@@ -40,7 +33,7 @@ func TestLooseResolveAndResolveFully(t *testing.T) {
 		testRepo.UpdateRef(t, "refs/heads/main", commitID)
 		testRepo.SymbolicRef(t, "HEAD", "refs/heads/main")
 
-		store := openLooseStore(t, testRepo.Dir(), algo)
+		store := openLooseStore(t, testRepo, algo)
 
 		resolvedHead, err := store.Resolve("HEAD")
 		if err != nil {
@@ -93,7 +86,7 @@ func TestLooseResolveFullyCycle(t *testing.T) {
 		testRepo.SymbolicRef(t, "refs/heads/a", "refs/heads/b")
 		testRepo.SymbolicRef(t, "refs/heads/b", "refs/heads/a")
 
-		store := openLooseStore(t, testRepo.Dir(), algo)
+		store := openLooseStore(t, testRepo, algo)
 
 		_, err := store.ResolveFully("refs/heads/a")
 		if err == nil {
@@ -112,7 +105,7 @@ func TestLooseListPattern(t *testing.T) {
 		testRepo.UpdateRef(t, "refs/tags/v1.0.0", commitID)
 		testRepo.SymbolicRef(t, "HEAD", "refs/heads/main")
 
-		store := openLooseStore(t, testRepo.Dir(), algo)
+		store := openLooseStore(t, testRepo, algo)
 
 		allRefs, err := store.List("")
 		if err != nil {
@@ -161,7 +154,7 @@ func TestLooseListPatternMatrix(t *testing.T) {
 		testRepo.UpdateRef(t, "refs/tags/v1", commitID)
 		testRepo.SymbolicRef(t, "HEAD", "refs/heads/main")
 
-		store := openLooseStore(t, testRepo.Dir(), algo)
+		store := openLooseStore(t, testRepo, algo)
 
 		tests := []struct {
 			pattern string
@@ -223,21 +216,11 @@ func TestLooseMalformedDetachedRef(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 
-		refPath := filepath.Join(testRepo.Dir(), "refs", "heads", "bad")
+		testRepo.WriteFileAll(t, "refs/heads/bad", []byte("not-a-hash\n"), 0o755, 0o644)
 
-		err := os.MkdirAll(filepath.Dir(refPath), 0o755)
-		if err != nil {
-			t.Fatalf("MkdirAll: %v", err)
-		}
+		store := openLooseStore(t, testRepo, algo)
 
-		err = os.WriteFile(refPath, []byte("not-a-hash\n"), 0o644)
-		if err != nil {
-			t.Fatalf("WriteFile: %v", err)
-		}
-
-		store := openLooseStore(t, testRepo.Dir(), algo)
-
-		_, err = store.Resolve("refs/heads/bad")
+		_, err := store.Resolve("refs/heads/bad")
 		if err == nil {
 			t.Fatalf("Resolve(malformed) expected error")
 		}
@@ -253,7 +236,7 @@ func TestLooseShorten(t *testing.T) {
 		testRepo.UpdateRef(t, "refs/tags/main", commitID)
 		testRepo.UpdateRef(t, "refs/remotes/origin/main", commitID)
 
-		store := openLooseStore(t, testRepo.Dir(), algo)
+		store := openLooseStore(t, testRepo, algo)
 
 		shortHead, err := store.Shorten("refs/heads/main")
 		if err != nil {

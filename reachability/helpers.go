@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
 	"codeberg.org/lindenii/furgit/objecttype"
@@ -39,7 +40,7 @@ func (r *Reachability) readHeaderType(id objectid.ObjectID) (objecttype.Type, er
 	ty, _, err := r.store.ReadHeader(id)
 	if err != nil {
 		if errors.Is(err, objectstore.ErrObjectNotFound) {
-			return objecttype.TypeInvalid, &ObjectMissingError{OID: id}
+			return objecttype.TypeInvalid, &giterrors.ObjectMissingError{OID: id}
 		}
 
 		return objecttype.TypeInvalid, err
@@ -61,7 +62,7 @@ func (r *Reachability) readBytesContent(id objectid.ObjectID) ([]byte, error) {
 	_, content, err := r.store.ReadBytesContent(id)
 	if err != nil {
 		if errors.Is(err, objectstore.ErrObjectNotFound) {
-			return nil, &ObjectMissingError{OID: id}
+			return nil, &giterrors.ObjectMissingError{OID: id}
 		}
 
 		return nil, err

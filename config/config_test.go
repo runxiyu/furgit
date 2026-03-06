@@ -3,8 +3,6 @@ package config_test
 import (
 	"bytes"
 	"os"
-	"os/exec"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -16,7 +14,9 @@ import (
 func openConfig(t *testing.T, testRepo *testgit.TestRepo) *os.File {
 	t.Helper()
 
-	cfgFile, err := os.Open(filepath.Join(testRepo.Dir(), "config"))
+	root := testRepo.OpenGitRoot(t)
+
+	cfgFile, err := root.Open("config")
 	if err != nil {
 		t.Fatalf("failed to open config: %v", err)
 	}
@@ -30,14 +30,10 @@ func gitConfigGet(t *testing.T, testRepo *testgit.TestRepo, key string) string {
 	return testRepo.Run(t, "config", "--get", key)
 }
 
-func gitConfigGetE(testRepo *testgit.TestRepo, key string) (string, error) {
-	//nolint:noctx
-	cmd := exec.Command("git", "config", "--get", key) //#nosec G204
-	cmd.Dir = testRepo.Dir()
-	cmd.Env = testRepo.Env()
-	out, err := cmd.CombinedOutput()
+func gitConfigGetE(t *testing.T, testRepo *testgit.TestRepo, key string) (string, error) {
+	t.Helper()
 
-	return strings.TrimSpace(string(out)), err
+	return testRepo.RunE(t, "config", "--get", key)
 }
 
 func lookupValue(cfg *config.Config, section, subsection, key string) string {
@@ -463,20 +459,15 @@ func TestConfigErrorCases(t *testing.T) {
 	}
 }
 
-func TestConfigEOFAfterKeyAgainstGit(t *testing.T) { //nolint:dupl
+func TestConfigEOFAfterKeyAgainstGit(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
-		cfgPath := filepath.Join(testRepo.Dir(), "config")
-
 		cfgData := []byte("[Core]BAre")
 
-		err := os.WriteFile(cfgPath, cfgData, 0o600)
-		if err != nil {
-			t.Fatalf("failed to write config: %v", err)
-		}
+		testRepo.WriteFile(t, "config", cfgData, 0o600)
 
-		gitValue, gitErr := gitConfigGetE(testRepo, "Core.BAre")
+		gitValue, gitErr := gitConfigGetE(t, testRepo, "Core.BAre")
 		furConfig, furErr := config.ParseConfig(bytes.NewReader(cfgData))
 
 		if (gitErr == nil) != (furErr == nil) {
@@ -493,20 +484,15 @@ func TestConfigEOFAfterKeyAgainstGit(t *testing.T) { //nolint:dupl
 	})
 }
 
-func TestConfigNULValueAgainstGit(t *testing.T) { //nolint:dupl
+func TestConfigNULValueAgainstGit(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
-		cfgPath := filepath.Join(testRepo.Dir(), "config")
-
 		cfgData := []byte("[Core]BAre=\x00")
 
-		err := os.WriteFile(cfgPath, cfgData, 0o600)
-		if err != nil {
-			t.Fatalf("failed to write config: %v", err)
-		}
+		testRepo.WriteFile(t, "config", cfgData, 0o600)
 
-		gitValue, gitErr := gitConfigGetE(testRepo, "Core.BAre")
+		gitValue, gitErr := gitConfigGetE(t, testRepo, "Core.BAre")
 		furConfig, furErr := config.ParseConfig(bytes.NewReader(cfgData))
 
 		if (gitErr == nil) != (furErr == nil) {
@@ -523,20 +509,15 @@ func TestConfigNULValueAgainstGit(t *testing.T) { //nolint:dupl
 	})
 }
 
-func TestConfigCarriageReturnSeparatorAgainstGit(t *testing.T) { //nolint:dupl
+func TestConfigCarriageReturnSeparatorAgainstGit(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
-		cfgPath := filepath.Join(testRepo.Dir(), "config")
-
 		cfgData := []byte("[Core \"sub\"]\rBAre")
 
-		err := os.WriteFile(cfgPath, cfgData, 0o600)
-		if err != nil {
-			t.Fatalf("failed to write config: %v", err)
-		}
+		testRepo.WriteFile(t, "config", cfgData, 0o600)
 
-		gitValue, gitErr := gitConfigGetE(testRepo, "Core.sub.BAre")
+		gitValue, gitErr := gitConfigGetE(t, testRepo, "Core.sub.BAre")
 		furConfig, furErr := config.ParseConfig(bytes.NewReader(cfgData))
 
 		if (gitErr == nil) != (furErr == nil) {
@@ -559,16 +540,14 @@ func FuzzConfig(f *testing.F) {
 	f.Add([]byte("[core \"sub\"]\nbare = true"), "core.sub.bare")
 
 	type fuzzRepoState struct {
-		repo    *testgit.TestRepo
-		cfgPath string
+		repo *testgit.TestRepo
 	}
 
 	repos := make(map[objectid.Algorithm]fuzzRepoState, len(objectid.SupportedAlgorithms()))
 	for _, algo := range objectid.SupportedAlgorithms() {
 		testRepo := testgit.NewRepo(f, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		repos[algo] = fuzzRepoState{
-			repo:    testRepo,
-			cfgPath: filepath.Join(testRepo.Dir(), "config"),
+			repo: testRepo,
 		}
 	}
 
@@ -579,12 +558,9 @@ func FuzzConfig(f *testing.F) {
 				t.Fatalf("missing fuzz repo state for %v", algo)
 			}
 
-			err := os.WriteFile(state.cfgPath, cfgData, 0o600)
-			if err != nil {
-				t.Fatalf("failed to write config: %v", err)
-			}
+			state.repo.WriteFile(t, "config", cfgData, 0o600)
 
-			gitValue, gitErr := gitConfigGetE(state.repo, gitKey)
+			gitValue, gitErr := gitConfigGetE(t, state.repo, gitKey)
 
 			furConfig, furErr := config.ParseConfig(bytes.NewReader(cfgData))
 			if furErr == nil && furConfig == nil {

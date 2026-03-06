@@ -4,7 +4,7 @@ import (
 	"codeberg.org/lindenii/furgit/objectid"
 )
 
-// Walk is one single-use iterator-style traversal.
+// Walk is one single-use iterator traversal.
 type Walk struct {
 	reachability *Reachability
 	domain       Domain

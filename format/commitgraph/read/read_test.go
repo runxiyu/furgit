@@ -2,7 +2,6 @@ package read_test
 
 import (
 	"errors"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -174,22 +173,11 @@ func TestBloomUnavailableWithoutChangedPaths(t *testing.T) {
 func openReader(tb testing.TB, testRepo *testgit.TestRepo, mode read.OpenMode) *read.Reader {
 	tb.Helper()
 
-	objectsPath := filepath.Join(testRepo.Dir(), "objects")
-
-	root, err := os.OpenRoot(objectsPath)
-	if err != nil {
-		tb.Fatalf("os.OpenRoot(%q): %v", objectsPath, err)
-	}
+	root := testRepo.OpenObjectsRoot(tb)
 
 	reader, err := read.Open(root, testRepo.Algorithm(), mode)
-
-	closeErr := root.Close()
-	if closeErr != nil {
-		tb.Fatalf("close objects root: %v", closeErr)
-	}
-
 	if err != nil {
-		tb.Fatalf("read.Open(%q): %v", objectsPath, err)
+		tb.Fatalf("read.Open(objects): %v", err)
 	}
 
 	return reader

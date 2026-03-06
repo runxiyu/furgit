@@ -2,14 +2,12 @@ package repository_test
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/object"
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/repository"
 )
 
 func TestReadStoredTyped(t *testing.T) {
@@ -24,19 +22,7 @@ func TestReadStoredTyped(t *testing.T) {
 
 		blobID, treeID, commitID := repoHarness.MakeCommit(t, "stored types")
 
-		root, err := os.OpenRoot(repoHarness.Dir())
-		if err != nil {
-			t.Fatalf("os.OpenRoot: %v", err)
-		}
-
-		defer func() { _ = root.Close() }()
-
-		repo, err := repository.Open(root)
-		if err != nil {
-			t.Fatalf("repository.Open: %v", err)
-		}
-
-		defer func() { _ = repo.Close() }()
+		repo := repoHarness.OpenRepository(t)
 
 		blob, err := repo.ReadStoredBlob(blobID)
 		if err != nil {
@@ -93,19 +79,7 @@ func TestResolveTreeEntry(t *testing.T) {
 		childTreeID := repoHarness.Mktree(t, fmt.Sprintf("100644 blob %s\tleaf.txt\n", blobID))
 		rootTreeID := repoHarness.Mktree(t, fmt.Sprintf("040000 tree %s\tdir\n", childTreeID))
 
-		root, err := os.OpenRoot(repoHarness.Dir())
-		if err != nil {
-			t.Fatalf("os.OpenRoot: %v", err)
-		}
-
-		defer func() { _ = root.Close() }()
-
-		repo, err := repository.Open(root)
-		if err != nil {
-			t.Fatalf("repository.Open: %v", err)
-		}
-
-		defer func() { _ = repo.Close() }()
+		repo := repoHarness.OpenRepository(t)
 
 		rootTree, err := repo.ReadStoredTree(rootTreeID)
 		if err != nil {
@@ -141,19 +115,7 @@ func TestResolveTreeEntryErrors(t *testing.T) {
 			blobID := repoHarness.HashObject(t, "blob", []byte("body\n"))
 			rootTreeID := repoHarness.Mktree(t, fmt.Sprintf("100644 blob %s\tfile.txt\n", blobID))
 
-			root, err := os.OpenRoot(repoHarness.Dir())
-			if err != nil {
-				t.Fatalf("os.OpenRoot: %v", err)
-			}
-
-			defer func() { _ = root.Close() }()
-
-			repo, err := repository.Open(root)
-			if err != nil {
-				t.Fatalf("repository.Open: %v", err)
-			}
-
-			defer func() { _ = repo.Close() }()
+			repo := repoHarness.OpenRepository(t)
 
 			rootTree, err := repo.ReadStoredTree(rootTreeID)
 			if err != nil {
@@ -176,19 +138,7 @@ func TestResolveTreeEntryErrors(t *testing.T) {
 			blobID := repoHarness.HashObject(t, "blob", []byte("body\n"))
 			rootTreeID := repoHarness.Mktree(t, fmt.Sprintf("100644 blob %s\tdir\n", blobID))
 
-			root, err := os.OpenRoot(repoHarness.Dir())
-			if err != nil {
-				t.Fatalf("os.OpenRoot: %v", err)
-			}
-
-			defer func() { _ = root.Close() }()
-
-			repo, err := repository.Open(root)
-			if err != nil {
-				t.Fatalf("repository.Open: %v", err)
-			}
-
-			defer func() { _ = repo.Close() }()
+			repo := repoHarness.OpenRepository(t)
 
 			rootTree, err := repo.ReadStoredTree(rootTreeID)
 			if err != nil {
@@ -227,19 +177,7 @@ func TestResolveTreeEntryDeepPath(t *testing.T) {
 
 		parts = append(parts, []byte("leaf.txt"))
 
-		root, err := os.OpenRoot(repoHarness.Dir())
-		if err != nil {
-			t.Fatalf("os.OpenRoot: %v", err)
-		}
-
-		defer func() { _ = root.Close() }()
-
-		repo, err := repository.Open(root)
-		if err != nil {
-			t.Fatalf("repository.Open: %v", err)
-		}
-
-		defer func() { _ = repo.Close() }()
+		repo := repoHarness.OpenRepository(t)
 
 		rootTree, err := repo.ReadStoredTree(currentTree)
 		if err != nil {
@@ -287,19 +225,7 @@ func TestReadStoredTreeMixedModes(t *testing.T) {
 			),
 		)
 
-		root, err := os.OpenRoot(repoHarness.Dir())
-		if err != nil {
-			t.Fatalf("os.OpenRoot: %v", err)
-		}
-
-		defer func() { _ = root.Close() }()
-
-		repo, err := repository.Open(root)
-		if err != nil {
-			t.Fatalf("repository.Open: %v", err)
-		}
-
-		defer func() { _ = repo.Close() }()
+		repo := repoHarness.OpenRepository(t)
 
 		rootTree, err := repo.ReadStoredTree(rootTreeID)
 		if err != nil {

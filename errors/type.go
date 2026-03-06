@@ -1,4 +1,4 @@
-package reachability
+package errors
 
 import (
 	"fmt"
@@ -7,23 +7,15 @@ import (
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
-// ObjectMissingError indicates that a referenced object is absent from the store.
-type ObjectMissingError struct {
-	OID objectid.ObjectID
-}
-
-func (e *ObjectMissingError) Error() string {
-	return fmt.Sprintf("reachability: missing object %s", e.OID)
-}
-
 // ObjectTypeError indicates that a referenced object has a different type than
-// what traversal expected on that edge.
+// what the operation expected.
 type ObjectTypeError struct {
 	OID  objectid.ObjectID
 	Got  objecttype.Type
 	Want objecttype.Type
 }
 
+// Error implements error.
 func (e *ObjectTypeError) Error() string {
 	gotName, gotOK := objecttype.Name(e.Got)
 	if !gotOK {
@@ -35,5 +27,5 @@ func (e *ObjectTypeError) Error() string {
 		wantName = fmt.Sprintf("type(%d)", e.Want)
 	}
 
-	return fmt.Sprintf("reachability: object %s has type %s, want %s", e.OID, gotName, wantName)
+	return fmt.Sprintf("object %s has type %s, want %s", e.OID, gotName, wantName)
 }

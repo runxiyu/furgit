@@ -4,6 +4,7 @@ package objectid
 import (
 	//#nosec G505
 
+	"bytes"
 	"encoding/hex"
 	"fmt"
 )
@@ -50,6 +51,12 @@ func (id *ObjectID) RawBytes() []byte {
 	size := id.Size()
 
 	return id.data[:size:size]
+}
+
+// Compare lexicographically compares two object IDs by their canonical byte
+// representation.
+func Compare(left, right ObjectID) int {
+	return bytes.Compare(left.RawBytes(), right.RawBytes())
 }
 
 // ParseHex parses an object ID from hex for the specified algorithm.

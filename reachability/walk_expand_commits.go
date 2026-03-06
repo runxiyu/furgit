@@ -3,6 +3,7 @@ package reachability
 import (
 	"fmt"
 
+	"codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/object"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
@@ -63,7 +64,7 @@ func (walk *Walk) expandCommits(item walkItem) ([]walkItem, error) {
 		return []walkItem{{id: tag.Target, want: objecttype.TypeInvalid}}, nil
 	case objecttype.TypeTree, objecttype.TypeBlob, objecttype.TypeInvalid,
 		objecttype.TypeFuture, objecttype.TypeOfsDelta, objecttype.TypeRefDelta:
-		return nil, &ObjectTypeError{OID: item.id, Got: ty, Want: objecttype.TypeCommit}
+		return nil, &errors.ObjectTypeError{OID: item.id, Got: ty, Want: objecttype.TypeCommit}
 	}
 
 	return nil, fmt.Errorf("reachability: unreachable object type %d", ty)

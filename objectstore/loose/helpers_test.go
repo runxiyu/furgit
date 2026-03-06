@@ -2,8 +2,6 @@ package loose_test
 
 import (
 	"io"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
@@ -13,17 +11,10 @@ import (
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
-func openLooseStore(t *testing.T, repoPath string, algo objectid.Algorithm) *loose.Store {
+func openLooseStore(t *testing.T, testRepo *testgit.TestRepo, algo objectid.Algorithm) *loose.Store {
 	t.Helper()
 
-	objectsPath := filepath.Join(repoPath, "objects")
-
-	root, err := os.OpenRoot(objectsPath)
-	if err != nil {
-		t.Fatalf("OpenRoot(%q): %v", objectsPath, err)
-	}
-
-	t.Cleanup(func() { _ = root.Close() })
+	root := testRepo.OpenObjectsRoot(t)
 
 	store, err := loose.New(root, algo)
 	if err != nil {

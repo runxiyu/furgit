@@ -31,7 +31,8 @@ func TestRepositoryDepthFirstEnumerationFromHEAD(t *testing.T) {
 		repoHarness.UpdateRef(t, "refs/heads/main", commit2)
 		repoHarness.SymbolicRef(t, "HEAD", "refs/heads/main")
 
-		walkRepositoryFromHead(t, repoHarness.Dir())
+		root := repoHarness.OpenGitRoot(t)
+		walkRepositoryFromRoot(t, root, "test repo")
 	})
 }
 
@@ -39,38 +40,51 @@ func TestRepositoryDepthFirstEnumerationCurrentWorktree(t *testing.T) {
 	t.Parallel()
 
 	worktreeRoot := filepath.Clean("..")
-	gitPath := filepath.Join(worktreeRoot, ".git")
 
-	info, err := os.Stat(gitPath)
+	worktreeFS, err := os.OpenRoot(worktreeRoot)
 	if err != nil {
-		t.Fatalf("stat %q: %v", gitPath, err)
+		t.Fatalf("os.OpenRoot(%q): %v", worktreeRoot, err)
+	}
+
+	defer func() { _ = worktreeFS.Close() }()
+
+	info, err := worktreeFS.Stat(".git")
+	if err != nil {
+		t.Fatalf("stat %q: %v", filepath.Join(worktreeRoot, ".git"), err)
 	}
 
 	if info.IsDir() {
-		walkRepositoryFromHead(t, gitPath)
+		gitRoot, err := worktreeFS.OpenRoot(".git")
+		if err != nil {
+			t.Fatalf("OpenRoot(.git): %v", err)
+		}
+
+		defer func() { _ = gitRoot.Close() }()
+
+		walkRepositoryFromRoot(t, gitRoot, filepath.Join(worktreeRoot, ".git"))
 
 		return
 	}
 
 	if !info.Mode().IsRegular() {
-		t.Fatalf("%q is neither a directory nor a regular file", gitPath)
+		t.Fatalf("%q is neither a directory nor a regular file", filepath.Join(worktreeRoot, ".git"))
 	}
 
-	content, err := os.ReadFile(gitPath) //#nosec G304
+	content, err := worktreeFS.ReadFile(".git")
 	if err != nil {
-		t.Fatalf("read %q: %v", gitPath, err)
+		t.Fatalf("read %q: %v", filepath.Join(worktreeRoot, ".git"), err)
 	}
 
 	line := strings.TrimSpace(string(content))
 
 	prefix := "gitdir: "
 	if !strings.HasPrefix(line, prefix) {
-		t.Fatalf("%q file does not begin with %q", gitPath, prefix)
+		t.Fatalf("%q file does not begin with %q", filepath.Join(worktreeRoot, ".git"), prefix)
 	}
 
 	gitdirRel := strings.TrimSpace(line[len(prefix):])
 	if gitdirRel == "" {
-		t.Fatalf("%q contains empty gitdir path", gitPath)
+		t.Fatalf("%q contains empty gitdir path", filepath.Join(worktreeRoot, ".git"))
 	}
 
 	gitdirPath := gitdirRel
@@ -78,42 +92,54 @@ func TestRepositoryDepthFirstEnumerationCurrentWorktree(t *testing.T) {
 		gitdirPath = filepath.Join(worktreeRoot, gitdirPath)
 	}
 
-	commondirPath := filepath.Join(gitdirPath, "commondir")
-
-	commondirContent, err := os.ReadFile(commondirPath) //#nosec G304
+	gitRoot, err := os.OpenRoot(gitdirPath)
 	if err != nil {
-		t.Fatalf("read %q: %v", commondirPath, err)
+		t.Fatalf("os.OpenRoot(%q): %v", gitdirPath, err)
+	}
+
+	defer func() { _ = gitRoot.Close() }()
+
+	commondirContent, err := gitRoot.ReadFile("commondir")
+	if err != nil {
+		t.Fatalf("read %q: %v", filepath.Join(gitdirPath, "commondir"), err)
 	}
 
 	repoPath := strings.TrimSpace(string(commondirContent))
 	if repoPath == "" {
-		t.Fatalf("%q contains empty repo path", commondirPath)
+		t.Fatalf("%q contains empty repo path", filepath.Join(gitdirPath, "commondir"))
 	}
 
 	if filepath.IsAbs(repoPath) {
-		walkRepositoryFromHead(t, repoPath)
+		repoRoot, err := os.OpenRoot(repoPath)
+		if err != nil {
+			t.Fatalf("os.OpenRoot(%q): %v", repoPath, err)
+		}
+
+		defer func() { _ = repoRoot.Close() }()
+
+		walkRepositoryFromRoot(t, repoRoot, repoPath)
 
 		return
 	}
 
 	repoPath = filepath.Join(gitdirPath, repoPath)
 
-	walkRepositoryFromHead(t, repoPath)
-}
-
-func walkRepositoryFromHead(t *testing.T, repoPath string) {
-	t.Helper()
-
-	root, err := os.OpenRoot(repoPath)
+	repoRoot, err := os.OpenRoot(repoPath)
 	if err != nil {
 		t.Fatalf("os.OpenRoot(%q): %v", repoPath, err)
 	}
 
-	defer func() { _ = root.Close() }()
+	defer func() { _ = repoRoot.Close() }()
+
+	walkRepositoryFromRoot(t, repoRoot, repoPath)
+}
+
+func walkRepositoryFromRoot(t *testing.T, root *os.Root, label string) {
+	t.Helper()
 
 	repo, err := repository.Open(root)
 	if err != nil {
-		t.Fatalf("repository.Open(root for %q): %v", repoPath, err)
+		t.Fatalf("repository.Open(root for %q): %v", label, err)
 	}
 
 	defer func() { _ = repo.Close() }()
@@ -129,7 +155,7 @@ func walkRepositoryFromHead(t *testing.T, repoPath string) {
 	}
 
 	if objectsRead <= 0 {
-		t.Fatalf("no objects were enumerated from HEAD (%s)", fmt.Sprintf("%q", repoPath))
+		t.Fatalf("no objects were enumerated from HEAD (%s)", fmt.Sprintf("%q", label))
 	}
 }
 

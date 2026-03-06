@@ -14,7 +14,7 @@ func TestLooseStoreWriteReaderContentAgainstGit(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
-		store := openLooseStore(t, testRepo.Dir(), algo)
+		store := openLooseStore(t, testRepo, algo)
 
 		content := []byte("written-by-content-reader\n")
 		expectedHex := testRepo.RunInput(t, content, "hash-object", "-t", "blob", "--stdin")
@@ -54,7 +54,7 @@ func TestLooseStoreWriteReaderFullAgainstGit(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
-		store := openLooseStore(t, testRepo.Dir(), algo)
+		store := openLooseStore(t, testRepo, algo)
 
 		body := []byte("full-reader-body\n")
 
@@ -91,7 +91,7 @@ func TestLooseStoreReaderValidationErrors(t *testing.T) {
 		t.Run("content overflow", func(t *testing.T) {
 			t.Parallel()
 			testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
-			store := openLooseStore(t, testRepo.Dir(), algo)
+			store := openLooseStore(t, testRepo, algo)
 
 			_, err := store.WriteReaderContent(objecttype.TypeBlob, 1, bytes.NewReader([]byte("hello")))
 			if err == nil {
@@ -102,7 +102,7 @@ func TestLooseStoreReaderValidationErrors(t *testing.T) {
 		t.Run("content short", func(t *testing.T) {
 			t.Parallel()
 			testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
-			store := openLooseStore(t, testRepo.Dir(), algo)
+			store := openLooseStore(t, testRepo, algo)
 
 			_, err := store.WriteReaderContent(objecttype.TypeBlob, 5, bytes.NewReader([]byte("x")))
 			if err == nil {
@@ -113,7 +113,7 @@ func TestLooseStoreReaderValidationErrors(t *testing.T) {
 		t.Run("full malformed header", func(t *testing.T) {
 			t.Parallel()
 			testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
-			store := openLooseStore(t, testRepo.Dir(), algo)
+			store := openLooseStore(t, testRepo, algo)
 
 			_, err := store.WriteReaderFull(bytes.NewReader([]byte("not-a-header")))
 			if err == nil {
@@ -124,7 +124,7 @@ func TestLooseStoreReaderValidationErrors(t *testing.T) {
 		t.Run("full size mismatch", func(t *testing.T) {
 			t.Parallel()
 			testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
-			store := openLooseStore(t, testRepo.Dir(), algo)
+			store := openLooseStore(t, testRepo, algo)
 
 			raw := []byte("blob 1\x00hello")
 

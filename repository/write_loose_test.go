@@ -2,13 +2,11 @@ package repository_test
 
 import (
 	"bytes"
-	"os"
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
-	"codeberg.org/lindenii/furgit/repository"
 )
 
 func TestWriteLooseBytesContent(t *testing.T) {
@@ -21,19 +19,7 @@ func TestWriteLooseBytesContent(t *testing.T) {
 			RefFormat:    "files",
 		})
 
-		root, err := os.OpenRoot(repoHarness.Dir())
-		if err != nil {
-			t.Fatalf("os.OpenRoot: %v", err)
-		}
-
-		defer func() { _ = root.Close() }()
-
-		repo, err := repository.Open(root)
-		if err != nil {
-			t.Fatalf("repository.Open: %v", err)
-		}
-
-		defer func() { _ = repo.Close() }()
+		repo := repoHarness.OpenRepository(t)
 
 		content := []byte("write-loose-bytes-content\n")
 
@@ -72,19 +58,7 @@ func TestWriteLooseReaderContent(t *testing.T) {
 			RefFormat:    "files",
 		})
 
-		root, err := os.OpenRoot(repoHarness.Dir())
-		if err != nil {
-			t.Fatalf("os.OpenRoot: %v", err)
-		}
-
-		defer func() { _ = root.Close() }()
-
-		repo, err := repository.Open(root)
-		if err != nil {
-			t.Fatalf("repository.Open: %v", err)
-		}
-
-		defer func() { _ = repo.Close() }()
+		repo := repoHarness.OpenRepository(t)
 
 		content := []byte("write-loose-reader-content\n")
 
@@ -111,19 +85,7 @@ func TestWriteLooseFull(t *testing.T) {
 		})
 		_, _, commitID := repoHarness.MakeCommit(t, "write-loose-full")
 
-		root, err := os.OpenRoot(repoHarness.Dir())
-		if err != nil {
-			t.Fatalf("os.OpenRoot: %v", err)
-		}
-
-		defer func() { _ = root.Close() }()
-
-		repo, err := repository.Open(root)
-		if err != nil {
-			t.Fatalf("repository.Open: %v", err)
-		}
-
-		defer func() { _ = repo.Close() }()
+		repo := repoHarness.OpenRepository(t)
 
 		raw, err := repo.Objects().ReadBytesFull(commitID)
 		if err != nil {

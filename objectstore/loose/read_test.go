@@ -21,7 +21,7 @@ func TestLooseStoreReadAgainstGit(t *testing.T) {
 		_, treeID, commitID := testRepo.MakeCommit(t, "subject\n\nbody")
 		tagID := testRepo.TagAnnotated(t, "v1", commitID, "tag message")
 
-		store := openLooseStore(t, testRepo.Dir(), algo)
+		store := openLooseStore(t, testRepo, algo)
 
 		tests := []struct {
 			name string
@@ -108,7 +108,7 @@ func TestLooseStoreErrors(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
-		store := openLooseStore(t, testRepo.Dir(), algo)
+		store := openLooseStore(t, testRepo, algo)
 
 		notFoundID, err := objectid.ParseHex(algo, strings.Repeat("0", algo.HexLen()))
 		if err != nil {

@@ -4,8 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
+	"io/fs"
 	"strconv"
 	"strings"
 	"testing"
@@ -20,7 +19,7 @@ func TestPackedStoreReadAgainstGit(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo, ids := createPackedFixtureRepo(t, algo)
-		store := openPackedStore(t, testRepo.Dir(), algo)
+		store := openPackedStore(t, testRepo, algo)
 
 		for _, id := range ids {
 			t.Run(id.String(), func(t *testing.T) {
@@ -106,7 +105,7 @@ func TestPackedStoreErrors(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo, _ := createPackedFixtureRepo(t, algo)
-		store := openPackedStore(t, testRepo.Dir(), algo)
+		store := openPackedStore(t, testRepo, algo)
 
 		notFoundID, err := objectid.ParseHex(algo, strings.Repeat("0", algo.HexLen()))
 		if err != nil {
@@ -172,7 +171,7 @@ func TestPackedStoreNewValidation(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo, _ := createPackedFixtureRepo(t, algo)
 
-		store := openPackedStore(t, testRepo.Dir(), algo)
+		store := openPackedStore(t, testRepo, algo)
 
 		err := store.Close()
 		if err != nil {
@@ -190,14 +189,9 @@ func TestPackedStoreInvalidAlgorithm(t *testing.T) {
 	t.Parallel()
 	testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: objectid.AlgorithmSHA1, Bare: true})
 
-	root, err := os.OpenRoot(testRepo.Dir())
-	if err != nil {
-		t.Fatalf("OpenRoot(%q): %v", testRepo.Dir(), err)
-	}
+	root := testRepo.OpenPackRoot(t)
 
-	t.Cleanup(func() { _ = root.Close() })
-
-	_, err = packed.New(root, objectid.AlgorithmUnknown)
+	_, err := packed.New(root, objectid.AlgorithmUnknown)
 	if !errors.Is(err, objectid.ErrInvalidAlgorithm) {
 		t.Fatalf("packed.New invalid algorithm error = %v", err)
 	}
@@ -227,7 +221,7 @@ func TestPackedStoreReadHeaderUsesResolvedObjectSizeForDelta(t *testing.T) {
 		testRepo.Repack(t, "-a", "-d", "-f", "--window=128", "--depth=128")
 
 		deltaID, wantResolvedSize := findDeltaObjectWithResolvedSizeMismatch(t, testRepo, algo)
-		store := openPackedStore(t, testRepo.Dir(), algo)
+		store := openPackedStore(t, testRepo, algo)
 
 		_, gotSize, err := store.ReadHeader(deltaID)
 		if err != nil {
@@ -252,16 +246,28 @@ func TestPackedStoreReadHeaderUsesResolvedObjectSizeForDelta(t *testing.T) {
 func findDeltaObjectWithResolvedSizeMismatch(t *testing.T, testRepo *testgit.TestRepo, algo objectid.Algorithm) (objectid.ObjectID, int64) {
 	t.Helper()
 
-	idxFiles, err := filepath.Glob(filepath.Join(testRepo.Dir(), "objects", "pack", "*.idx"))
+	packRoot := testRepo.OpenPackRoot(t)
+
+	entries, err := fs.ReadDir(packRoot.FS(), ".")
 	if err != nil {
-		t.Fatalf("Glob idx: %v", err)
+		t.Fatalf("ReadDir(pack): %v", err)
 	}
 
-	if len(idxFiles) == 0 {
+	var idxName string
+
+	for _, entry := range entries {
+		if strings.HasSuffix(entry.Name(), ".idx") {
+			idxName = entry.Name()
+
+			break
+		}
+	}
+
+	if idxName == "" {
 		t.Fatalf("no idx files found")
 	}
 
-	verifyOut := testRepo.Run(t, "verify-pack", "-v", idxFiles[0])
+	verifyOut := testRepo.Run(t, "verify-pack", "-v", "objects/pack/"+idxName)
 	for line := range strings.SplitSeq(strings.TrimSpace(verifyOut), "\n") {
 		fields := strings.Fields(line)
 		if len(fields) < 7 {
