@@ -1,0 +1,57 @@
+package reachability
+
+import (
+	"errors"
+
+	"codeberg.org/lindenii/furgit/format/commitgraph"
+	"codeberg.org/lindenii/furgit/objectid"
+	"codeberg.org/lindenii/furgit/objecttype"
+)
+
+func (walk *Walk) expandCommitsFromGraph(id objectid.ObjectID) ([]walkItem, bool, error) {
+	pos, err := walk.reachability.graph.Lookup(id)
+	if err != nil {
+		var notFound *commitgraph.ErrNotFound
+		if errors.As(err, &notFound) {
+			return nil, false, nil
+		}
+
+		return nil, true, err
+	}
+
+	commit, err := walk.reachability.graph.CommitAt(pos)
+	if err != nil {
+		return nil, true, err
+	}
+
+	next := make([]walkItem, 0, 2+len(commit.ExtraParents))
+
+	if commit.Parent1.Valid {
+		parentOID, err := walk.reachability.graph.OIDAt(commit.Parent1.Pos)
+		if err != nil {
+			return nil, true, err
+		}
+
+		next = append(next, walkItem{id: parentOID, want: objecttype.TypeInvalid})
+	}
+
+	if commit.Parent2.Valid {
+		parentOID, err := walk.reachability.graph.OIDAt(commit.Parent2.Pos)
+		if err != nil {
+			return nil, true, err
+		}
+
+		next = append(next, walkItem{id: parentOID, want: objecttype.TypeInvalid})
+	}
+
+	for _, parentPos := range commit.ExtraParents {
+		parentOID, err := walk.reachability.graph.OIDAt(parentPos)
+		if err != nil {
+			return nil, true, err
+		}
+
+		next = append(next, walkItem{id: parentOID, want: objecttype.TypeInvalid})
+	}
+
+	return next, true, nil
+}
