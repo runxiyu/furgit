@@ -16,7 +16,7 @@ func parseEntryPrefix(state *ingestState, startOffset uint64) (objectRecord, err
 
 	first, err := state.stream.ReadByte()
 	if err != nil {
-		return record, &ErrMalformedPackEntry{Offset: startOffset, Reason: fmt.Sprintf("read first header byte: %v", err)}
+		return record, &MalformedPackEntryError{Offset: startOffset, Reason: fmt.Sprintf("read first header byte: %v", err)}
 	}
 
 	record.packedType = objecttype.Type((first >> 4) & 0x07)
@@ -28,7 +28,7 @@ func parseEntryPrefix(state *ingestState, startOffset uint64) (objectRecord, err
 	for b&0x80 != 0 {
 		b, err = state.stream.ReadByte()
 		if err != nil {
-			return record, &ErrMalformedPackEntry{Offset: startOffset, Reason: fmt.Sprintf("read size continuation: %v", err)}
+			return record, &MalformedPackEntryError{Offset: startOffset, Reason: fmt.Sprintf("read size continuation: %v", err)}
 		}
 
 		headerLen++
@@ -37,7 +37,7 @@ func parseEntryPrefix(state *ingestState, startOffset uint64) (objectRecord, err
 	}
 
 	if size < 0 {
-		return record, &ErrMalformedPackEntry{Offset: startOffset, Reason: "negative declared size"}
+		return record, &MalformedPackEntryError{Offset: startOffset, Reason: "negative declared size"}
 	}
 
 	record.declaredSize = size
@@ -49,12 +49,12 @@ func parseEntryPrefix(state *ingestState, startOffset uint64) (objectRecord, err
 
 		err := state.stream.readFull(baseRaw)
 		if err != nil {
-			return record, &ErrMalformedPackEntry{Offset: startOffset, Reason: fmt.Sprintf("read ref base: %v", err)}
+			return record, &MalformedPackEntryError{Offset: startOffset, Reason: fmt.Sprintf("read ref base: %v", err)}
 		}
 
 		baseID, err := objectid.FromBytes(state.algo, baseRaw)
 		if err != nil {
-			return record, &ErrMalformedPackEntry{Offset: startOffset, Reason: fmt.Sprintf("parse ref base: %v", err)}
+			return record, &MalformedPackEntryError{Offset: startOffset, Reason: fmt.Sprintf("parse ref base: %v", err)}
 		}
 
 		record.baseObject = baseID
@@ -68,11 +68,11 @@ func parseEntryPrefix(state *ingestState, startOffset uint64) (objectRecord, err
 	case objecttype.TypeOfsDelta:
 		dist, consumed, err := readOfsDistanceFromStream(state.stream)
 		if err != nil {
-			return record, &ErrMalformedPackEntry{Offset: startOffset, Reason: err.Error()}
+			return record, &MalformedPackEntryError{Offset: startOffset, Reason: err.Error()}
 		}
 
 		if startOffset <= dist {
-			return record, &ErrMalformedPackEntry{Offset: startOffset, Reason: "ofs base offset out of bounds"}
+			return record, &MalformedPackEntryError{Offset: startOffset, Reason: "ofs base offset out of bounds"}
 		}
 
 		record.baseOffset = startOffset - dist
@@ -84,9 +84,9 @@ func parseEntryPrefix(state *ingestState, startOffset uint64) (objectRecord, err
 
 		headerLen += consumedUint32
 	case objecttype.TypeInvalid, objecttype.TypeFuture:
-		return record, &ErrMalformedPackEntry{Offset: startOffset, Reason: fmt.Sprintf("unsupported object type %d", record.packedType)}
+		return record, &MalformedPackEntryError{Offset: startOffset, Reason: fmt.Sprintf("unsupported object type %d", record.packedType)}
 	default:
-		return record, &ErrMalformedPackEntry{Offset: startOffset, Reason: fmt.Sprintf("unsupported object type %d", record.packedType)}
+		return record, &MalformedPackEntryError{Offset: startOffset, Reason: fmt.Sprintf("unsupported object type %d", record.packedType)}
 	}
 
 	record.headerLen = headerLen

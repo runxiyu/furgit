@@ -39,7 +39,7 @@ func ingest(state *ingestState) (out Result, err error) {
 	}
 
 	if len(state.unresolvedRefDeltas) > 0 {
-		return Result{}, &ErrThinPackUnresolved{Count: len(state.unresolvedRefDeltas)}
+		return Result{}, &ThinPackUnresolvedError{Count: len(state.unresolvedRefDeltas)}
 	}
 
 	err = verifyResolvedRecords(state)
@@ -49,7 +49,7 @@ func ingest(state *ingestState) (out Result, err error) {
 
 	err = state.packFile.Sync()
 	if err != nil {
-		return Result{}, &ErrDestinationWrite{Op: fmt.Sprintf("sync pack: %v", err)}
+		return Result{}, &DestinationWriteError{Op: fmt.Sprintf("sync pack: %v", err)}
 	}
 
 	err = writeIdx(state)

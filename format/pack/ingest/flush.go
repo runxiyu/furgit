@@ -18,11 +18,11 @@ func (scanner *streamScanner) flushConsumedPrefix() error {
 	for written < scanner.off {
 		n, err := scanner.dstFile.Write(scanner.buf[written:scanner.off])
 		if err != nil {
-			return &ErrDestinationWrite{Op: fmt.Sprintf("write pack: %v", err)}
+			return &DestinationWriteError{Op: fmt.Sprintf("write pack: %v", err)}
 		}
 
 		if n == 0 {
-			return &ErrDestinationWrite{Op: "write pack: short write"}
+			return &DestinationWriteError{Op: "write pack: short write"}
 		}
 
 		written += n

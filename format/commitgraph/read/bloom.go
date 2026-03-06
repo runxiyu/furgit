@@ -38,7 +38,7 @@ func (reader *Reader) BloomVersion() uint8 {
 
 // BloomFilterAt returns one commit's changed-path Bloom filter.
 //
-// Returns ErrBloomUnavailable when this commit graph has no Bloom data.
+// Returns BloomUnavailableError when this commit graph has no Bloom data.
 func (reader *Reader) BloomFilterAt(pos Position) (*bloom.Filter, error) {
 	layer, err := reader.layerByPosition(pos)
 	if err != nil {
@@ -46,7 +46,7 @@ func (reader *Reader) BloomFilterAt(pos Position) (*bloom.Filter, error) {
 	}
 
 	if layer.chunkBloomIndex == nil || layer.chunkBloomData == nil || layer.bloomSettings == nil {
-		return nil, &ErrBloomUnavailable{Pos: pos}
+		return nil, &BloomUnavailableError{Pos: pos}
 	}
 
 	start, end, err := bloomRange(layer, pos.Index)
@@ -86,7 +86,7 @@ func bloomRange(layer *layer, commitIndex uint32) (int, int, error) {
 	}
 
 	if end < start {
-		return 0, 0, &ErrMalformed{Path: layer.path, Reason: "invalid BIDX range"}
+		return 0, 0, &MalformedError{Path: layer.path, Reason: "invalid BIDX range"}
 	}
 
 	bdatLen := len(layer.chunkBloomData) - bloom.DataHeaderSize
@@ -97,7 +97,7 @@ func bloomRange(layer *layer, commitIndex uint32) (int, int, error) {
 	}
 
 	if end > bdatLenU32 {
-		return 0, 0, &ErrMalformed{Path: layer.path, Reason: "BIDX range out of BDAT bounds"}
+		return 0, 0, &MalformedError{Path: layer.path, Reason: "BIDX range out of BDAT bounds"}
 	}
 
 	startInt, err := intconv.Uint64ToInt(uint64(start))

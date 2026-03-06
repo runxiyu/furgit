@@ -20,7 +20,7 @@ func applyDeltaRecord(state *ingestState, idx int, baseType objecttype.Type, bas
 	}
 
 	if int64(len(deltaPayload)) != record.declaredSize {
-		return objecttype.TypeInvalid, nil, &ErrMalformedPackEntry{
+		return objecttype.TypeInvalid, nil, &MalformedPackEntryError{
 			Offset: record.offset,
 			Reason: fmt.Sprintf("delta payload size mismatch got %d want %d", len(deltaPayload), record.declaredSize),
 		}
@@ -28,14 +28,14 @@ func applyDeltaRecord(state *ingestState, idx int, baseType objecttype.Type, bas
 
 	srcSize, dstSize, err := readDeltaHeaderSizes(deltaPayload)
 	if err != nil {
-		return objecttype.TypeInvalid, nil, &ErrMalformedPackEntry{
+		return objecttype.TypeInvalid, nil, &MalformedPackEntryError{
 			Offset: record.offset,
 			Reason: fmt.Sprintf("read delta header: %v", err),
 		}
 	}
 
 	if srcSize != len(baseContent) {
-		return objecttype.TypeInvalid, nil, &ErrMalformedPackEntry{
+		return objecttype.TypeInvalid, nil, &MalformedPackEntryError{
 			Offset: record.offset,
 			Reason: fmt.Sprintf("delta source size mismatch got %d want %d", srcSize, len(baseContent)),
 		}
@@ -43,14 +43,14 @@ func applyDeltaRecord(state *ingestState, idx int, baseType objecttype.Type, bas
 
 	content, err := deltaapply.Apply(baseContent, deltaPayload)
 	if err != nil {
-		return objecttype.TypeInvalid, nil, &ErrMalformedPackEntry{
+		return objecttype.TypeInvalid, nil, &MalformedPackEntryError{
 			Offset: record.offset,
 			Reason: fmt.Sprintf("apply delta: %v", err),
 		}
 	}
 
 	if len(content) != dstSize {
-		return objecttype.TypeInvalid, nil, &ErrMalformedPackEntry{
+		return objecttype.TypeInvalid, nil, &MalformedPackEntryError{
 			Offset: record.offset,
 			Reason: fmt.Sprintf("delta result size mismatch got %d want %d", len(content), dstSize),
 		}

@@ -3,6 +3,8 @@ package lru
 import "container/list"
 
 // Remove deletes key from the cache.
+//
+//nolint:ireturn
 func (cache *Cache[K, V]) Remove(key K) (V, bool) {
 	elem, ok := cache.items[key]
 	if !ok {

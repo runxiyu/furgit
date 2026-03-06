@@ -34,7 +34,7 @@ func (reader *Reader) readGenerationV2(layer *layer, index uint32, commitTime ui
 	}
 
 	if gdo2Off+8 > len(layer.chunkGenerationOv) {
-		return 0, &ErrMalformed{Path: layer.path, Reason: "GDO2 index out of range"}
+		return 0, &MalformedError{Path: layer.path, Reason: "GDO2 index out of range"}
 	}
 
 	overflow := binary.BigEndian.Uint64(layer.chunkGenerationOv[gdo2Off : gdo2Off+8])

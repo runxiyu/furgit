@@ -8,6 +8,7 @@ type backendNode struct {
 	next    *backendNode
 }
 
+//nolint:ireturn
 func (mix *Mix) firstBackend() objectstore.Store {
 	mix.mu.RLock()
 	defer mix.mu.RUnlock()
@@ -19,6 +20,7 @@ func (mix *Mix) firstBackend() objectstore.Store {
 	return mix.backendHead.backend
 }
 
+//nolint:ireturn
 func (mix *Mix) nextBackend(current objectstore.Store) objectstore.Store {
 	mix.mu.RLock()
 	defer mix.mu.RUnlock()

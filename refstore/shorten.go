@@ -7,6 +7,7 @@ type shortenRule struct {
 	suffix string
 }
 
+//nolint:gochecknoglobals
 var shortenRules = [...]shortenRule{
 	{prefix: "", suffix: ""},
 	{prefix: "refs/", suffix: ""},

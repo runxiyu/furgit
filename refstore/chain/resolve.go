@@ -9,6 +9,8 @@ import (
 )
 
 // Resolve resolves a reference from the first backend that has it.
+//
+//nolint:ireturn
 func (chain *Chain) Resolve(name string) (ref.Ref, error) {
 	for i, backend := range chain.backends {
 		if backend == nil {

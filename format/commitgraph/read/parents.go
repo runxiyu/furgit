@@ -35,7 +35,7 @@ func (reader *Reader) decodeParents(layer *layer, p1, p2 uint32) (ParentRef, Par
 	}
 
 	if len(parents) == 0 {
-		return ParentRef{}, ParentRef{}, nil, &ErrMalformed{Path: layer.path, Reason: "empty EDGE list"}
+		return ParentRef{}, ParentRef{}, nil, &MalformedError{Path: layer.path, Reason: "empty EDGE list"}
 	}
 
 	parent2 := ParentRef{Valid: true, Pos: parents[0]}
@@ -52,7 +52,7 @@ func (reader *Reader) decodeSingleParent(raw uint32) (ParentRef, error) {
 	}
 
 	if raw&commitgraph.ParentExtraMask != 0 {
-		return ParentRef{}, &ErrMalformed{
+		return ParentRef{}, &MalformedError{
 			Path:   "commit-graph",
 			Reason: "unexpected EDGE marker in single-parent slot",
 		}

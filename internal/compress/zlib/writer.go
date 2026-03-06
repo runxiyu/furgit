@@ -37,6 +37,7 @@ type Writer struct {
 	wroteHeader bool
 }
 
+//nolint:gochecknoglobals
 var writerPool = sync.Pool{
 	New: func() any {
 		return new(Writer)

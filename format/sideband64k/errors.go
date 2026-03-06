@@ -1,9 +1,6 @@
 package sideband64k
 
-import (
-	"errors"
-	"fmt"
-)
+import "errors"
 
 var (
 	// ErrTooLarge indicates a payload exceeds configured sideband data limits.
@@ -26,5 +23,5 @@ func (e *ProtocolError) Error() string {
 		return "sideband64k: protocol error"
 	}
 
-	return fmt.Sprintf("sideband64k: protocol error: %s", e.Reason)
+	return "sideband64k: protocol error: " + e.Reason
 }

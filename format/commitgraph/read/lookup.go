@@ -8,7 +8,7 @@ import (
 // Lookup resolves one object ID to one graph position.
 func (reader *Reader) Lookup(oid objectid.ObjectID) (Position, error) {
 	if oid.Algorithm() != reader.algo {
-		return Position{}, &ErrNotFound{OID: oid}
+		return Position{}, &NotFoundError{OID: oid}
 	}
 
 	for layerIdx := len(reader.layers) - 1; layerIdx >= 0; layerIdx-- {
@@ -25,5 +25,5 @@ func (reader *Reader) Lookup(oid objectid.ObjectID) (Position, error) {
 		}
 	}
 
-	return Position{}, &ErrNotFound{OID: oid}
+	return Position{}, &NotFoundError{OID: oid}
 }

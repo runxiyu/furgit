@@ -20,7 +20,7 @@ func readBaseRecordContent(state *ingestState, idx int) (objecttype.Type, []byte
 	}
 
 	if int64(len(content)) != record.declaredSize {
-		return objecttype.TypeInvalid, nil, &ErrMalformedPackEntry{
+		return objecttype.TypeInvalid, nil, &MalformedPackEntryError{
 			Offset: record.offset,
 			Reason: fmt.Sprintf("base content size mismatch got %d want %d", len(content), record.declaredSize),
 		}

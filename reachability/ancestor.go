@@ -57,7 +57,7 @@ func (r *Reachability) isAncestorGraph(ancestor, descendant objectid.ObjectID) (
 
 	ancestorPos, err := r.graph.Lookup(ancestor)
 	if err != nil {
-		var notFound *commitgraphread.ErrNotFound
+		var notFound *commitgraphread.NotFoundError
 		if errors.As(err, &notFound) {
 			return false, false, nil
 		}
@@ -67,7 +67,7 @@ func (r *Reachability) isAncestorGraph(ancestor, descendant objectid.ObjectID) (
 
 	descendantPos, err := r.graph.Lookup(descendant)
 	if err != nil {
-		var notFound *commitgraphread.ErrNotFound
+		var notFound *commitgraphread.NotFoundError
 		if errors.As(err, &notFound) {
 			return false, false, nil
 		}

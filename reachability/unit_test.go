@@ -233,9 +233,9 @@ func TestWalkDomainCommitsRejectsNonCommitRootAfterPeel(t *testing.T) {
 			t.Fatal("expected error")
 		}
 
-		var typeErr *reachability.ErrObjectType
+		var typeErr *reachability.ObjectTypeError
 		if !errors.As(err, &typeErr) {
-			t.Fatalf("expected ErrObjectType, got %T (%v)", err, err)
+			t.Fatalf("expected ObjectTypeError, got %T (%v)", err, err)
 		}
 
 		if typeErr.Got != objecttype.TypeTree || typeErr.Want != objecttype.TypeCommit {
@@ -349,9 +349,9 @@ func TestCheckConnectedReturnsConcreteMissingObject(t *testing.T) {
 			t.Fatal("expected error")
 		}
 
-		var missing *reachability.ErrObjectMissing
+		var missing *reachability.ObjectMissingError
 		if !errors.As(err, &missing) {
-			t.Fatalf("expected ErrObjectMissing, got %T (%v)", err, err)
+			t.Fatalf("expected ObjectMissingError, got %T (%v)", err, err)
 		}
 
 		if missing.OID != missingParent {
@@ -441,9 +441,9 @@ func TestIsAncestorRejectsNonCommitAfterPeel(t *testing.T) {
 			t.Fatal("expected error")
 		}
 
-		var typeErr *reachability.ErrObjectType
+		var typeErr *reachability.ObjectTypeError
 		if !errors.As(err, &typeErr) {
-			t.Fatalf("expected ErrObjectType, got %T (%v)", err, err)
+			t.Fatalf("expected ObjectTypeError, got %T (%v)", err, err)
 		}
 	})
 }

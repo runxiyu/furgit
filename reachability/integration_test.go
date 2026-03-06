@@ -236,9 +236,9 @@ func TestCheckConnectedMissingObject(t *testing.T) {
 			t.Fatal("expected error")
 		}
 
-		var missing *reachability.ErrObjectMissing
+		var missing *reachability.ObjectMissingError
 		if !errors.As(err, &missing) {
-			t.Fatalf("expected ErrObjectMissing, got %T (%v)", err, err)
+			t.Fatalf("expected ObjectMissingError, got %T (%v)", err, err)
 		}
 
 		if missing.OID != treeID {

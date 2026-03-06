@@ -26,7 +26,7 @@ func openLayer(root *os.Root, relPath string, algo objectid.Algorithm) (*layer, 
 	if size < int64(commitgraph.HeaderSize+commitgraph.FanoutSize+algo.Size()) {
 		_ = file.Close()
 
-		return nil, &ErrMalformed{Path: relPath, Reason: "file too short"}
+		return nil, &MalformedError{Path: relPath, Reason: "file too short"}
 	}
 
 	mapLen, err := intconv.Int64ToUint64(size)

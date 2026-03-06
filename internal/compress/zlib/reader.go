@@ -58,6 +58,7 @@ var (
 	ErrHeader = errors.New("zlib: invalid header")
 )
 
+//nolint:gochecknoglobals
 var readerPool = sync.Pool{
 	New: func() any {
 		r := new(Reader)

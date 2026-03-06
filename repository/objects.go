@@ -12,6 +12,7 @@ import (
 	objectpacked "codeberg.org/lindenii/furgit/objectstore/packed"
 )
 
+//nolint:ireturn
 func openObjectStore(root *os.Root, algo objectid.Algorithm) (objectstore.Store, *objectloose.Store, error) {
 	objectsRoot, err := root.OpenRoot("objects")
 	if err != nil {
@@ -64,6 +65,8 @@ func openObjectStore(root *os.Root, algo objectid.Algorithm) (objectstore.Store,
 }
 
 // Objects returns the configured object store.
+//
+//nolint:ireturn
 func (repo *Repository) Objects() objectstore.Store {
 	return repo.objects
 }

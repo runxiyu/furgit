@@ -7,24 +7,24 @@ import (
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
-// ErrObjectMissing indicates that a referenced object is absent from the store.
-type ErrObjectMissing struct {
+// ObjectMissingError indicates that a referenced object is absent from the store.
+type ObjectMissingError struct {
 	OID objectid.ObjectID
 }
 
-func (e *ErrObjectMissing) Error() string {
+func (e *ObjectMissingError) Error() string {
 	return fmt.Sprintf("reachability: missing object %s", e.OID)
 }
 
-// ErrObjectType indicates that a referenced object has a different type than
+// ObjectTypeError indicates that a referenced object has a different type than
 // what traversal expected on that edge.
-type ErrObjectType struct {
+type ObjectTypeError struct {
 	OID  objectid.ObjectID
 	Got  objecttype.Type
 	Want objecttype.Type
 }
 
-func (e *ErrObjectType) Error() string {
+func (e *ObjectTypeError) Error() string {
 	gotName, gotOK := objecttype.Name(e.Got)
 	if !gotOK {
 		gotName = fmt.Sprintf("type(%d)", e.Got)

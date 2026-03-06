@@ -11,19 +11,19 @@ import (
 
 func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 	if len(layer.data) < commitgraph.HeaderSize {
-		return &ErrMalformed{Path: layer.path, Reason: "file too short"}
+		return &MalformedError{Path: layer.path, Reason: "file too short"}
 	}
 
 	header := layer.data[:commitgraph.HeaderSize]
 
 	signature := binary.BigEndian.Uint32(header[:4])
 	if signature != commitgraph.FileSignature {
-		return &ErrMalformed{Path: layer.path, Reason: "invalid signature"}
+		return &MalformedError{Path: layer.path, Reason: "invalid signature"}
 	}
 
 	version := header[4]
 	if version != commitgraph.FileVersion {
-		return &ErrUnsupportedVersion{Version: version}
+		return &UnsupportedVersionError{Version: version}
 	}
 
 	expectedHashVersion, err := intconv.Uint32ToUint8(algo.PackHashID())
@@ -33,7 +33,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 
 	hashVersion := header[5]
 	if hashVersion != expectedHashVersion {
-		return &ErrMalformed{Path: layer.path, Reason: "hash version does not match object format"}
+		return &MalformedError{Path: layer.path, Reason: "hash version does not match object format"}
 	}
 
 	numChunks := int(header[6])
@@ -44,7 +44,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 
 	tocEnd := tocStart + tocLen
 	if tocEnd > len(layer.data) {
-		return &ErrMalformed{Path: layer.path, Reason: "truncated chunk table"}
+		return &MalformedError{Path: layer.path, Reason: "truncated chunk table"}
 	}
 
 	type tocEntry struct {
@@ -65,7 +65,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 	}
 
 	if entries[len(entries)-1].id != 0 {
-		return &ErrMalformed{Path: layer.path, Reason: "missing chunk table terminator"}
+		return &MalformedError{Path: layer.path, Reason: "missing chunk table terminator"}
 	}
 
 	trailerStart := len(layer.data) - algo.Size()
@@ -74,7 +74,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 	for i := range numChunks {
 		entry := entries[i]
 		if entry.id == 0 {
-			return &ErrMalformed{Path: layer.path, Reason: "early chunk table terminator"}
+			return &MalformedError{Path: layer.path, Reason: "early chunk table terminator"}
 		}
 
 		next := entries[i+1]
@@ -90,11 +90,11 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 		}
 
 		if start < tocEnd || end < start || end > trailerStart {
-			return &ErrMalformed{Path: layer.path, Reason: "invalid chunk offsets"}
+			return &MalformedError{Path: layer.path, Reason: "invalid chunk offsets"}
 		}
 
 		if _, exists := chunks[entry.id]; exists {
-			return &ErrMalformed{Path: layer.path, Reason: "duplicate chunk id"}
+			return &MalformedError{Path: layer.path, Reason: "duplicate chunk id"}
 		}
 
 		chunks[entry.id] = layer.data[start:end]
@@ -102,7 +102,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 
 	oidf := chunks[commitgraph.ChunkOIDF]
 	if len(oidf) != commitgraph.FanoutSize {
-		return &ErrMalformed{Path: layer.path, Reason: "invalid OIDF length"}
+		return &MalformedError{Path: layer.path, Reason: "invalid OIDF length"}
 	}
 
 	layer.chunkOIDFanout = oidf
@@ -113,7 +113,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 
 		next := binary.BigEndian.Uint32(oidf[(i+1)*4 : (i+2)*4])
 		if cur > next {
-			return &ErrMalformed{Path: layer.path, Reason: "non-monotonic OIDF fanout"}
+			return &MalformedError{Path: layer.path, Reason: "non-monotonic OIDF fanout"}
 		}
 	}
 
@@ -133,7 +133,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 	}
 
 	if len(oidl) != oidlWantLen {
-		return &ErrMalformed{Path: layer.path, Reason: "invalid OIDL length"}
+		return &MalformedError{Path: layer.path, Reason: "invalid OIDL length"}
 	}
 
 	layer.chunkOIDLookup = oidl
@@ -154,7 +154,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 	}
 
 	if len(cdat) != cdatWantLen {
-		return &ErrMalformed{Path: layer.path, Reason: "invalid CDAT length"}
+		return &MalformedError{Path: layer.path, Reason: "invalid CDAT length"}
 	}
 
 	layer.chunkCommit = cdat
@@ -169,7 +169,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 		}
 
 		if len(gda2) != wantLen {
-			return &ErrMalformed{Path: layer.path, Reason: "invalid GDA2 length"}
+			return &MalformedError{Path: layer.path, Reason: "invalid GDA2 length"}
 		}
 
 		layer.chunkGeneration = gda2
@@ -178,7 +178,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 	gdo2 := chunks[commitgraph.ChunkGDO2]
 	if len(gdo2) != 0 {
 		if len(gdo2)%8 != 0 {
-			return &ErrMalformed{Path: layer.path, Reason: "invalid GDO2 length"}
+			return &MalformedError{Path: layer.path, Reason: "invalid GDO2 length"}
 		}
 
 		layer.chunkGenerationOv = gdo2
@@ -187,7 +187,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 	edge := chunks[commitgraph.ChunkEDGE]
 	if len(edge) != 0 {
 		if len(edge)%4 != 0 {
-			return &ErrMalformed{Path: layer.path, Reason: "invalid EDGE length"}
+			return &MalformedError{Path: layer.path, Reason: "invalid EDGE length"}
 		}
 
 		layer.chunkExtraEdges = edge
@@ -196,7 +196,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 	base := chunks[commitgraph.ChunkBASE]
 	if baseCount == 0 {
 		if len(base) != 0 {
-			return &ErrMalformed{Path: layer.path, Reason: "unexpected BASE chunk"}
+			return &MalformedError{Path: layer.path, Reason: "unexpected BASE chunk"}
 		}
 	} else {
 		wantLen64 := uint64(baseCount) * hashSizeU64
@@ -207,7 +207,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 		}
 
 		if len(base) != wantLen {
-			return &ErrMalformed{Path: layer.path, Reason: "invalid BASE length"}
+			return &MalformedError{Path: layer.path, Reason: "invalid BASE length"}
 		}
 
 		layer.chunkBaseGraphs = base
@@ -220,7 +220,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 	bdat := chunks[commitgraph.ChunkBDAT]
 	if len(bidx) != 0 || len(bdat) != 0 { //nolint:nestif
 		if len(bidx) == 0 || len(bdat) == 0 {
-			return &ErrMalformed{Path: layer.path, Reason: "BIDX/BDAT must both be present"}
+			return &MalformedError{Path: layer.path, Reason: "BIDX/BDAT must both be present"}
 		}
 
 		bidxWantLen64 := uint64(layer.numCommits) * 4
@@ -231,11 +231,11 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 		}
 
 		if len(bidx) != bidxWantLen {
-			return &ErrMalformed{Path: layer.path, Reason: "invalid BIDX length"}
+			return &MalformedError{Path: layer.path, Reason: "invalid BIDX length"}
 		}
 
 		if len(bdat) < bloom.DataHeaderSize {
-			return &ErrMalformed{Path: layer.path, Reason: "invalid BDAT length"}
+			return &MalformedError{Path: layer.path, Reason: "invalid BDAT length"}
 		}
 
 		settings, err := bloom.ParseSettings(bdat)
@@ -250,7 +250,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 
 			cur := binary.BigEndian.Uint32(bidx[off : off+4])
 			if i > 0 && cur < prev {
-				return &ErrMalformed{Path: layer.path, Reason: "non-monotonic BIDX"}
+				return &MalformedError{Path: layer.path, Reason: "non-monotonic BIDX"}
 			}
 
 			bdatDataLen := len(bdat) - bloom.DataHeaderSize
@@ -261,7 +261,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 			}
 
 			if cur > bdatDataLenU32 {
-				return &ErrMalformed{Path: layer.path, Reason: "BIDX offset out of range"}
+				return &MalformedError{Path: layer.path, Reason: "BIDX offset out of range"}
 			}
 
 			prev = cur

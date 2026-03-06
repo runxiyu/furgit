@@ -8,6 +8,7 @@ import (
 
 const benchmarkSize = 64 * 1024
 
+//nolint:gochecknoglobals
 var data = make([]byte, benchmarkSize)
 
 func init() { //nolint:gochecknoinits

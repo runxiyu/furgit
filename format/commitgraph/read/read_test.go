@@ -157,16 +157,16 @@ func TestBloomUnavailableWithoutChangedPaths(t *testing.T) {
 
 		_, err = reader.BloomFilterAt(pos)
 		if err == nil {
-			t.Fatal("BloomFilterAt() error = nil, want ErrBloomUnavailable")
+			t.Fatal("BloomFilterAt() error = nil, want BloomUnavailableError")
 		}
 
-		var unavailable *read.ErrBloomUnavailable
+		var unavailable *read.BloomUnavailableError
 		if !errors.As(err, &unavailable) {
-			t.Fatalf("BloomFilterAt() error type = %T, want *ErrBloomUnavailable", err)
+			t.Fatalf("BloomFilterAt() error type = %T, want *BloomUnavailableError", err)
 		}
 
 		if unavailable.Pos != pos {
-			t.Fatalf("ErrBloomUnavailable.Pos = %+v, want %+v", unavailable.Pos, pos)
+			t.Fatalf("BloomUnavailableError.Pos = %+v, want %+v", unavailable.Pos, pos)
 		}
 	})
 }

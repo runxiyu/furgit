@@ -7,17 +7,12 @@ linters:
       - internal/compress/flate
       - internal/compress/internal
   disable:
-    - depguard         # not sensible for us
     - dupword          # extremely normal in tests and a pretty unnecessary linter
     - goconst          # unnecessary especially for our parsing code; many false positives
-    - mnd              # same as above
-    - lll              # poor standard
-    - ireturn          # not an issue
-    - perfsprint       # silly fmt.Errorf vs errors.New suggestion
+    - mnd              # unnecessary especially for our parsing code; many false positives
+    - lll              # common sense is much better than these sort of rules
     - gosmopolitan     # completely normal to have CJK and such in tests
-    - gochecknoglobals # unlikely to be introduce accidentally and are usually intentional
     - nonamedreturns   # named returns are often good for clarity
-    - errname          # ErrXXX is better than XXXError
     - wsl              # outdated, use wsl_v5 instead
     - varnamelen       # it's rather reasonable to have counters like i, even when it spans quite a bit
     - gocyclo          # cyclomatic metrics aren't that good
@@ -31,6 +26,18 @@ linters:
     - gocognit         # tmp: should consider sometime
 
   settings:
+    perfsprint:
+      errorf: false
+    depguard:
+      rules:
+        Main:
+          list-mode: strict
+          files:
+            - $all
+          allow:
+            - $gostd
+            - codeberg.org/lindenii/furgit
+            - golang.org/x
     gosec:
       excludes:
         - G301         # UNIX permissions

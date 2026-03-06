@@ -14,7 +14,7 @@ func resolveRecord(state *ingestState, idx int, visiting map[int]struct{}) (obje
 	}
 
 	if _, ok := visiting[idx]; ok {
-		return objecttype.TypeInvalid, nil, &ErrDeltaCycle{Offset: state.records[idx].offset}
+		return objecttype.TypeInvalid, nil, &DeltaCycleError{Offset: state.records[idx].offset}
 	}
 
 	visiting[idx] = struct{}{}
@@ -60,7 +60,7 @@ func resolveRecord(state *ingestState, idx int, visiting map[int]struct{}) (obje
 	case objecttype.TypeOfsDelta:
 		baseIdx, ok := state.offsetToRecord[record.baseOffset]
 		if !ok {
-			return objecttype.TypeInvalid, nil, &ErrMalformedPackEntry{
+			return objecttype.TypeInvalid, nil, &MalformedPackEntryError{
 				Offset: record.offset,
 				Reason: "missing ofs-delta base entry",
 			}
@@ -86,12 +86,12 @@ func resolveRecord(state *ingestState, idx int, visiting map[int]struct{}) (obje
 		objecttype.TypeBlob,
 		objecttype.TypeTag,
 		objecttype.TypeFuture:
-		return objecttype.TypeInvalid, nil, &ErrMalformedPackEntry{
+		return objecttype.TypeInvalid, nil, &MalformedPackEntryError{
 			Offset: record.offset,
 			Reason: "unsupported delta type",
 		}
 	default:
-		return objecttype.TypeInvalid, nil, &ErrMalformedPackEntry{
+		return objecttype.TypeInvalid, nil, &MalformedPackEntryError{
 			Offset: record.offset,
 			Reason: "unsupported delta type",
 		}

@@ -15,12 +15,14 @@ import (
 	"codeberg.org/lindenii/furgit/internal/compress/zlib"
 )
 
+//nolint:gochecknoglobals
 var filenames = []string{
 	"../testdata/gettysburg.txt",
 	"../testdata/e.txt",
 	"../testdata/pi.txt",
 }
 
+//nolint:gochecknoglobals
 var data = []string{
 	"test a reasonable sized string that can be compressed",
 }

@@ -26,6 +26,7 @@ type algorithmDetails struct {
 	new        func() hash.Hash
 }
 
+//nolint:gochecknoglobals
 var algorithmTable = [...]algorithmDetails{
 	AlgorithmUnknown: {},
 	AlgorithmSHA1: {
@@ -61,7 +62,9 @@ var algorithmTable = [...]algorithmDetails{
 }
 
 var (
-	algorithmByName     = map[string]Algorithm{}
+	//nolint:gochecknoglobals
+	algorithmByName = map[string]Algorithm{}
+	//nolint:gochecknoglobals
 	supportedAlgorithms []Algorithm
 )
 

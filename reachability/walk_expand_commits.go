@@ -63,7 +63,7 @@ func (walk *Walk) expandCommits(item walkItem) ([]walkItem, error) {
 		return []walkItem{{id: tag.Target, want: objecttype.TypeInvalid}}, nil
 	case objecttype.TypeTree, objecttype.TypeBlob, objecttype.TypeInvalid,
 		objecttype.TypeFuture, objecttype.TypeOfsDelta, objecttype.TypeRefDelta:
-		return nil, &ErrObjectType{OID: item.id, Got: ty, Want: objecttype.TypeCommit}
+		return nil, &ObjectTypeError{OID: item.id, Got: ty, Want: objecttype.TypeCommit}
 	}
 
 	return nil, fmt.Errorf("reachability: unreachable object type %d", ty)

@@ -20,7 +20,7 @@ func (r *Reachability) peelRootToDomain(id objectid.ObjectID, domain Domain) (ob
 
 		if ty != objecttype.TypeTag {
 			if domain == DomainCommits && ty != objecttype.TypeCommit {
-				return objectid.ObjectID{}, &ErrObjectType{OID: id, Got: ty, Want: objecttype.TypeCommit}
+				return objectid.ObjectID{}, &ObjectTypeError{OID: id, Got: ty, Want: objecttype.TypeCommit}
 			}
 
 			return id, nil

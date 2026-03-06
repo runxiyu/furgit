@@ -22,7 +22,7 @@ func scanOneEntry(state *ingestState, startOffset uint64) (uint64, error) {
 	}
 
 	if contentLen != record.declaredSize {
-		return 0, &ErrMalformedPackEntry{
+		return 0, &MalformedPackEntryError{
 			Offset: startOffset,
 			Reason: fmt.Sprintf("inflated size mismatch got %d want %d", contentLen, record.declaredSize),
 		}
@@ -30,7 +30,7 @@ func scanOneEntry(state *ingestState, startOffset uint64) (uint64, error) {
 
 	endOffset := startOffset + uint64(record.headerLen) + consumedInput
 	if endOffset > state.stream.consumed {
-		return 0, &ErrMalformedPackEntry{
+		return 0, &MalformedPackEntryError{
 			Offset: startOffset,
 			Reason: fmt.Sprintf("entry end offset overflow got %d > stream %d", endOffset, state.stream.consumed),
 		}
@@ -40,7 +40,7 @@ func scanOneEntry(state *ingestState, startOffset uint64) (uint64, error) {
 
 	record.dataOffset = startOffset + uint64(record.headerLen)
 	if record.packedLen < uint64(record.headerLen) {
-		return 0, &ErrMalformedPackEntry{Offset: startOffset, Reason: "negative payload span"}
+		return 0, &MalformedPackEntryError{Offset: startOffset, Reason: "negative payload span"}
 	}
 
 	crc, err := state.stream.endEntryCRC()

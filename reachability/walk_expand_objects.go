@@ -14,7 +14,7 @@ func (walk *Walk) expandObjects(item walkItem) ([]walkItem, error) {
 	}
 
 	if item.want != objecttype.TypeInvalid && ty != item.want {
-		return nil, &ErrObjectType{OID: item.id, Got: ty, Want: item.want}
+		return nil, &ObjectTypeError{OID: item.id, Got: ty, Want: item.want}
 	}
 
 	switch ty {
@@ -76,7 +76,7 @@ func (walk *Walk) expandObjects(item walkItem) ([]walkItem, error) {
 
 		return []walkItem{{id: tag.Target, want: tag.TargetType}}, nil
 	case objecttype.TypeInvalid, objecttype.TypeFuture, objecttype.TypeOfsDelta, objecttype.TypeRefDelta:
-		return nil, &ErrObjectType{OID: item.id, Got: ty, Want: item.want}
+		return nil, &ObjectTypeError{OID: item.id, Got: ty, Want: item.want}
 	}
 
 	return nil, fmt.Errorf("reachability: unreachable object type %d", ty)

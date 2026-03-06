@@ -2,6 +2,7 @@ package bufpool
 
 import "sync"
 
+//nolint:gochecknoglobals
 var bufferPools = func() []sync.Pool {
 	pools := make([]sync.Pool, len(sizeClasses))
 	for i, classCap := range sizeClasses {

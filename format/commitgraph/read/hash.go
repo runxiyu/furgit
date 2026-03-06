@@ -16,7 +16,7 @@ func (reader *Reader) HashVersion() uint8 {
 func validateChainBaseHashes(algo objectid.Algorithm, chain []string, idx int, graph *layer) error {
 	if idx == 0 {
 		if len(graph.chunkBaseGraphs) != 0 {
-			return &ErrMalformed{Path: graph.path, Reason: "unexpected BASE chunk in first graph"}
+			return &MalformedError{Path: graph.path, Reason: "unexpected BASE chunk in first graph"}
 		}
 
 		return nil
@@ -26,7 +26,7 @@ func validateChainBaseHashes(algo objectid.Algorithm, chain []string, idx int, g
 
 	expectedLen := idx * hashSize
 	if len(graph.chunkBaseGraphs) != expectedLen {
-		return &ErrMalformed{
+		return &MalformedError{
 			Path:   graph.path,
 			Reason: fmt.Sprintf("BASE chunk length %d does not match expected %d", len(graph.chunkBaseGraphs), expectedLen),
 		}
@@ -42,7 +42,7 @@ func validateChainBaseHashes(algo objectid.Algorithm, chain []string, idx int, g
 		}
 
 		if baseHash.String() != chain[i] {
-			return &ErrMalformed{
+			return &MalformedError{
 				Path:   graph.path,
 				Reason: fmt.Sprintf("BASE chunk mismatch at index %d", i),
 			}
@@ -55,7 +55,7 @@ func validateChainBaseHashes(algo objectid.Algorithm, chain []string, idx int, g
 func verifyTrailerHash(data []byte, algo objectid.Algorithm, path string) error {
 	hashSize := algo.Size()
 	if len(data) < hashSize {
-		return &ErrMalformed{Path: path, Reason: "file too short for trailer"}
+		return &MalformedError{Path: path, Reason: "file too short for trailer"}
 	}
 
 	hashImpl, err := algo.New()
@@ -72,7 +72,7 @@ func verifyTrailerHash(data []byte, algo objectid.Algorithm, path string) error 
 
 	want := data[len(data)-hashSize:]
 	if !bytes.Equal(got, want) {
-		return &ErrMalformed{Path: path, Reason: "trailer hash mismatch"}
+		return &MalformedError{Path: path, Reason: "trailer hash mismatch"}
 	}
 
 	return nil

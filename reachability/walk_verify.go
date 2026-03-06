@@ -13,7 +13,7 @@ func (walk *Walk) validateCommitObject(id objectid.ObjectID) error {
 	}
 
 	if ty != objecttype.TypeCommit {
-		return &ErrObjectType{OID: id, Got: ty, Want: objecttype.TypeCommit}
+		return &ObjectTypeError{OID: id, Got: ty, Want: objecttype.TypeCommit}
 	}
 
 	content, err := walk.readBytesContent(id)

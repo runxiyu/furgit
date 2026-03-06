@@ -1,9 +1,6 @@
 package pktline
 
-import (
-	"errors"
-	"fmt"
-)
+import "errors"
 
 var (
 	// ErrInvalidLength indicates a malformed 4-byte hexadecimal length header.
@@ -30,5 +27,5 @@ func (e *ProtocolError) Error() string {
 		return "pktline: protocol error"
 	}
 
-	return fmt.Sprintf("pktline: protocol error: %s", e.Reason)
+	return "pktline: protocol error: " + e.Reason
 }

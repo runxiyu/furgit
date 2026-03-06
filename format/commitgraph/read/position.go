@@ -31,7 +31,7 @@ func (reader *Reader) globalToPosition(global uint32) (Position, error) {
 		}
 	}
 
-	return Position{}, &ErrMalformed{
+	return Position{}, &MalformedError{
 		Path:   "commit-graph",
 		Reason: fmt.Sprintf("parent global position out of range: %d", global),
 	}

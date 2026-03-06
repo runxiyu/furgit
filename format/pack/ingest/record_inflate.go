@@ -12,7 +12,7 @@ import (
 func inflateRecordPayload(state *ingestState, idx int) ([]byte, error) {
 	record := state.records[idx]
 	if record.packedLen < uint64(record.headerLen) {
-		return nil, &ErrMalformedPackEntry{Offset: record.offset, Reason: "entry packed span underflow"}
+		return nil, &MalformedPackEntryError{Offset: record.offset, Reason: "entry packed span underflow"}
 	}
 
 	compressedOffset := record.offset + uint64(record.headerLen)
@@ -32,14 +32,14 @@ func inflateRecordPayload(state *ingestState, idx int) ([]byte, error) {
 
 	reader, err := zlib.NewReader(section)
 	if err != nil {
-		return nil, &ErrMalformedPackEntry{Offset: record.offset, Reason: fmt.Sprintf("open payload zlib: %v", err)}
+		return nil, &MalformedPackEntryError{Offset: record.offset, Reason: fmt.Sprintf("open payload zlib: %v", err)}
 	}
 
 	defer func() { _ = reader.Close() }()
 
 	out, err := io.ReadAll(reader)
 	if err != nil {
-		return nil, &ErrMalformedPackEntry{Offset: record.offset, Reason: fmt.Sprintf("inflate payload: %v", err)}
+		return nil, &MalformedPackEntryError{Offset: record.offset, Reason: fmt.Sprintf("inflate payload: %v", err)}
 	}
 
 	return out, nil

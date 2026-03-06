@@ -13,11 +13,11 @@ func maybeFixThin(state *ingestState) error {
 	}
 
 	if !state.fixThin {
-		return &ErrThinPackUnresolved{Count: len(state.unresolvedRefDeltas)}
+		return &ThinPackUnresolvedError{Count: len(state.unresolvedRefDeltas)}
 	}
 
 	if state.base == nil {
-		return &ErrThinPackUnresolved{Count: len(state.unresolvedRefDeltas)}
+		return &ThinPackUnresolvedError{Count: len(state.unresolvedRefDeltas)}
 	}
 
 	hashSize := int64(state.algo.Size())

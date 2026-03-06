@@ -39,7 +39,7 @@ func (r *Reachability) readHeaderType(id objectid.ObjectID) (objecttype.Type, er
 	ty, _, err := r.store.ReadHeader(id)
 	if err != nil {
 		if errors.Is(err, objectstore.ErrObjectNotFound) {
-			return objecttype.TypeInvalid, &ErrObjectMissing{OID: id}
+			return objecttype.TypeInvalid, &ObjectMissingError{OID: id}
 		}
 
 		return objecttype.TypeInvalid, err
@@ -61,7 +61,7 @@ func (r *Reachability) readBytesContent(id objectid.ObjectID) ([]byte, error) {
 	_, content, err := r.store.ReadBytesContent(id)
 	if err != nil {
 		if errors.Is(err, objectstore.ErrObjectNotFound) {
-			return nil, &ErrObjectMissing{OID: id}
+			return nil, &ObjectMissingError{OID: id}
 		}
 
 		return nil, err

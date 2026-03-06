@@ -246,9 +246,9 @@ func TestIngestThinPackWithoutFixReturnsUnresolved(t *testing.T) {
 			t.Fatal("Ingest error = nil, want error")
 		}
 
-		var unresolved *ingest.ErrThinPackUnresolved
+		var unresolved *ingest.ThinPackUnresolvedError
 		if !errors.As(err, &unresolved) {
-			t.Fatalf("Ingest error type = %T (%v), want *ErrThinPackUnresolved", err, err)
+			t.Fatalf("Ingest error type = %T (%v), want *ThinPackUnresolvedError", err, err)
 		}
 
 		matches, err := filepath.Glob(filepath.Join(packDir, "pack-*.pack"))
@@ -362,9 +362,9 @@ func TestIngestPackTrailerMismatch(t *testing.T) {
 			t.Fatal("Ingest error = nil, want error")
 		}
 
-		var mismatch *ingest.ErrPackTrailerMismatch
+		var mismatch *ingest.PackTrailerMismatchError
 		if !errors.As(err, &mismatch) {
-			t.Fatalf("Ingest error type = %T (%v), want *ErrPackTrailerMismatch", err, err)
+			t.Fatalf("Ingest error type = %T (%v), want *PackTrailerMismatchError", err, err)
 		}
 
 		matches, err := filepath.Glob(filepath.Join(packDir, "pack-*.pack"))

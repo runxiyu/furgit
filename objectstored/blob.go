@@ -25,6 +25,8 @@ func (stored *StoredBlob) ID() objectid.ObjectID {
 }
 
 // Object returns the parsed blob as the generic object interface.
+//
+//nolint:ireturn
 func (stored *StoredBlob) Object() object.Object {
 	return stored.blob
 }

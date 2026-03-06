@@ -1,5 +1,6 @@
 package bufpool
 
+//nolint:gochecknoglobals
 var sizeClasses = [...]int{
 	DefaultBufferCap,
 	64 << 10,

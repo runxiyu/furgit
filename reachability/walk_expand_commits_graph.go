@@ -11,7 +11,7 @@ import (
 func (walk *Walk) expandCommitsFromGraph(id objectid.ObjectID) ([]walkItem, bool, error) {
 	pos, err := walk.reachability.graph.Lookup(id)
 	if err != nil {
-		var notFound *commitgraphread.ErrNotFound
+		var notFound *commitgraphread.NotFoundError
 		if errors.As(err, &notFound) {
 			return nil, false, nil
 		}

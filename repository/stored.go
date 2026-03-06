@@ -10,6 +10,8 @@ import (
 )
 
 // ReadStored reads, parses, and wraps one object by ID.
+//
+//nolint:ireturn
 func (repo *Repository) ReadStored(id objectid.ObjectID) (objectstored.StoredObject, error) {
 	parsed, err := repo.readParsedObject(id)
 	if err != nil {
@@ -91,6 +93,8 @@ func (repo *Repository) ReadStoredTag(id objectid.ObjectID) (*objectstored.Store
 }
 
 // readParsedObject reads bytes content from storage and parses one object.
+//
+//nolint:ireturn
 func (repo *Repository) readParsedObject(id objectid.ObjectID) (object.Object, error) {
 	ty, content, err := repo.objects.ReadBytesContent(id)
 	if err != nil {

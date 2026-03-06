@@ -6,6 +6,8 @@ import (
 )
 
 // Resolve resolves a packed reference name to a detached ref.
+//
+//nolint:ireturn
 func (store *Store) Resolve(name string) (ref.Ref, error) {
 	detached, ok := store.byName[name]
 	if !ok {

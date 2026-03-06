@@ -20,7 +20,7 @@ func (scanner *streamScanner) finishAndFlushTrailer() error {
 
 	err := scanner.readFull(trailer)
 	if err != nil {
-		return &ErrPackTrailerMismatch{}
+		return &PackTrailerMismatchError{}
 	}
 
 	scanner.packTrailer = append(scanner.packTrailer[:0], trailer...)
@@ -38,7 +38,7 @@ func (scanner *streamScanner) finishAndFlushTrailer() error {
 
 	computed := scanner.hash.Sum(nil)
 	if !bytes.Equal(computed, trailer) {
-		return &ErrPackTrailerMismatch{}
+		return &PackTrailerMismatchError{}
 	}
 
 	return nil

@@ -5,64 +5,64 @@ import (
 	"fmt"
 )
 
-// ErrInvalidPackHeader reports an invalid or unsupported pack header.
-type ErrInvalidPackHeader struct {
+// InvalidPackHeaderError reports an invalid or unsupported pack header.
+type InvalidPackHeaderError struct {
 	Reason string
 }
 
 // Error implements error.
-func (err *ErrInvalidPackHeader) Error() string {
-	return fmt.Sprintf("format/pack/ingest: invalid pack header: %s", err.Reason)
+func (err *InvalidPackHeaderError) Error() string {
+	return "format/pack/ingest: invalid pack header: " + err.Reason
 }
 
-// ErrPackTrailerMismatch reports a mismatch between computed and trailer pack hash.
-type ErrPackTrailerMismatch struct{}
+// PackTrailerMismatchError reports a mismatch between computed and trailer pack hash.
+type PackTrailerMismatchError struct{}
 
 // Error implements error.
-func (err *ErrPackTrailerMismatch) Error() string {
+func (err *PackTrailerMismatchError) Error() string {
 	return "format/pack/ingest: pack trailer hash mismatch"
 }
 
-// ErrThinPackUnresolved reports unresolved REF deltas when fixThin is disabled
+// ThinPackUnresolvedError reports unresolved REF deltas when fixThin is disabled
 // or when required bases cannot be found in base.
-type ErrThinPackUnresolved struct {
+type ThinPackUnresolvedError struct {
 	Count int
 }
 
 // Error implements error.
-func (err *ErrThinPackUnresolved) Error() string {
+func (err *ThinPackUnresolvedError) Error() string {
 	return fmt.Sprintf("format/pack/ingest: unresolved thin deltas: %d", err.Count)
 }
 
-// ErrMalformedPackEntry reports malformed entry encoding at one pack offset.
-type ErrMalformedPackEntry struct {
+// MalformedPackEntryError reports malformed entry encoding at one pack offset.
+type MalformedPackEntryError struct {
 	Offset uint64
 	Reason string
 }
 
 // Error implements error.
-func (err *ErrMalformedPackEntry) Error() string {
+func (err *MalformedPackEntryError) Error() string {
 	return fmt.Sprintf("format/pack/ingest: malformed pack entry at offset %d: %s", err.Offset, err.Reason)
 }
 
-// ErrDeltaCycle reports a detected cycle in delta dependency resolution.
-type ErrDeltaCycle struct {
+// DeltaCycleError reports a detected cycle in delta dependency resolution.
+type DeltaCycleError struct {
 	Offset uint64
 }
 
 // Error implements error.
-func (err *ErrDeltaCycle) Error() string {
+func (err *DeltaCycleError) Error() string {
 	return fmt.Sprintf("format/pack/ingest: delta cycle detected at offset %d", err.Offset)
 }
 
-// ErrDestinationWrite reports destination I/O failures.
-type ErrDestinationWrite struct {
+// DestinationWriteError reports destination I/O failures.
+type DestinationWriteError struct {
 	Op string
 }
 
 // Error implements error.
-func (err *ErrDestinationWrite) Error() string {
-	return fmt.Sprintf("format/pack/ingest: destination write failure: %s", err.Op)
+func (err *DestinationWriteError) Error() string {
+	return "format/pack/ingest: destination write failure: " + err.Op
 }
 
 var errExternalThinBase = errors.New("format/pack/ingest: external thin base required")

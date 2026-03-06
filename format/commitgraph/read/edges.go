@@ -9,7 +9,7 @@ import (
 
 func (reader *Reader) decodeExtraEdgeList(layer *layer, edgeStart uint32) ([]Position, error) {
 	if len(layer.chunkExtraEdges) == 0 {
-		return nil, &ErrMalformed{Path: layer.path, Reason: "missing EDGE chunk"}
+		return nil, &MalformedError{Path: layer.path, Reason: "missing EDGE chunk"}
 	}
 
 	out := make([]Position, 0)
@@ -24,7 +24,7 @@ func (reader *Reader) decodeExtraEdgeList(layer *layer, edgeStart uint32) ([]Pos
 		}
 
 		if off+4 > len(layer.chunkExtraEdges) {
-			return nil, &ErrMalformed{Path: layer.path, Reason: "EDGE index out of range"}
+			return nil, &MalformedError{Path: layer.path, Reason: "EDGE index out of range"}
 		}
 
 		word := binary.BigEndian.Uint32(layer.chunkExtraEdges[off : off+4])

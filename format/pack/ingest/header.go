@@ -13,21 +13,21 @@ func readAndValidatePackHeader(state *ingestState) error {
 
 	err := state.stream.readFull(hdr[:])
 	if err != nil {
-		return &ErrInvalidPackHeader{Reason: fmt.Sprintf("read header: %v", err)}
+		return &InvalidPackHeaderError{Reason: fmt.Sprintf("read header: %v", err)}
 	}
 
 	if binary.BigEndian.Uint32(hdr[:4]) != pack.Signature {
-		return &ErrInvalidPackHeader{Reason: "signature mismatch"}
+		return &InvalidPackHeaderError{Reason: "signature mismatch"}
 	}
 
 	version := binary.BigEndian.Uint32(hdr[4:8])
 	if !pack.VersionSupported(version) {
-		return &ErrInvalidPackHeader{Reason: fmt.Sprintf("unsupported version %d", version)}
+		return &InvalidPackHeaderError{Reason: fmt.Sprintf("unsupported version %d", version)}
 	}
 
 	state.objectCountHeader = binary.BigEndian.Uint32(hdr[8:12])
 	if state.objectCountHeader == 0 {
-		return &ErrInvalidPackHeader{Reason: "zero objects"}
+		return &InvalidPackHeaderError{Reason: "zero objects"}
 	}
 
 	return nil

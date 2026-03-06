@@ -6,53 +6,53 @@ import (
 	"codeberg.org/lindenii/furgit/objectid"
 )
 
-// ErrNotFound reports a missing commit graph entry by object ID.
-type ErrNotFound struct {
+// NotFoundError reports a missing commit graph entry by object ID.
+type NotFoundError struct {
 	OID objectid.ObjectID
 }
 
 // Error implements error.
-func (err *ErrNotFound) Error() string {
+func (err *NotFoundError) Error() string {
 	return fmt.Sprintf("format/commitgraph: object not found: %s", err.OID)
 }
 
-// ErrPositionOutOfRange reports an invalid graph position.
-type ErrPositionOutOfRange struct {
+// PositionOutOfRangeError reports an invalid graph position.
+type PositionOutOfRangeError struct {
 	Pos Position
 }
 
 // Error implements error.
-func (err *ErrPositionOutOfRange) Error() string {
+func (err *PositionOutOfRangeError) Error() string {
 	return fmt.Sprintf("format/commitgraph: position out of range: graph=%d index=%d", err.Pos.Graph, err.Pos.Index)
 }
 
-// ErrMalformed reports malformed commit-graph data.
-type ErrMalformed struct {
+// MalformedError reports malformed commit-graph data.
+type MalformedError struct {
 	Path   string
 	Reason string
 }
 
 // Error implements error.
-func (err *ErrMalformed) Error() string {
+func (err *MalformedError) Error() string {
 	return fmt.Sprintf("format/commitgraph: malformed %q: %s", err.Path, err.Reason)
 }
 
-// ErrUnsupportedVersion reports unsupported commit-graph version.
-type ErrUnsupportedVersion struct {
+// UnsupportedVersionError reports unsupported commit-graph version.
+type UnsupportedVersionError struct {
 	Version uint8
 }
 
 // Error implements error.
-func (err *ErrUnsupportedVersion) Error() string {
+func (err *UnsupportedVersionError) Error() string {
 	return fmt.Sprintf("format/commitgraph: unsupported version %d", err.Version)
 }
 
-// ErrBloomUnavailable reports missing changed-path bloom data at one position.
-type ErrBloomUnavailable struct {
+// BloomUnavailableError reports missing changed-path bloom data at one position.
+type BloomUnavailableError struct {
 	Pos Position
 }
 
 // Error implements error.
-func (err *ErrBloomUnavailable) Error() string {
+func (err *BloomUnavailableError) Error() string {
 	return fmt.Sprintf("format/commitgraph: bloom unavailable at position graph=%d index=%d", err.Pos.Graph, err.Pos.Index)
 }

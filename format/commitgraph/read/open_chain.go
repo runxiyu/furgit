@@ -17,7 +17,7 @@ func openChain(root *os.Root, algo objectid.Algorithm) (*Reader, error) {
 	file, err := root.Open(chainPath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return nil, &ErrMalformed{Path: chainPath, Reason: "missing commit-graph-chain"}
+			return nil, &MalformedError{Path: chainPath, Reason: "missing commit-graph-chain"}
 		}
 
 		return nil, err
@@ -47,7 +47,7 @@ func openChain(root *os.Root, algo objectid.Algorithm) (*Reader, error) {
 	}
 
 	if len(hashes) == 0 {
-		return nil, &ErrMalformed{Path: chainPath, Reason: "empty chain"}
+		return nil, &MalformedError{Path: chainPath, Reason: "empty chain"}
 	}
 
 	layers := make([]layer, 0, len(hashes))
@@ -70,7 +70,7 @@ func openChain(root *os.Root, algo objectid.Algorithm) (*Reader, error) {
 		if len(hashHex) != algo.HexLen() {
 			closeLayers(layers)
 
-			return nil, &ErrMalformed{
+			return nil, &MalformedError{
 				Path:   chainPath,
 				Reason: fmt.Sprintf("invalid graph hash length at line %d", i+1),
 			}
@@ -90,7 +90,7 @@ func openChain(root *os.Root, algo objectid.Algorithm) (*Reader, error) {
 
 			closeLayers(layers)
 
-			return nil, &ErrMalformed{
+			return nil, &MalformedError{
 				Path:   relPath,
 				Reason: fmt.Sprintf("BASE count %d does not match chain depth %d", loaded.baseCount, i),
 			}
@@ -114,7 +114,7 @@ func openChain(root *os.Root, algo objectid.Algorithm) (*Reader, error) {
 
 			closeLayers(layers)
 
-			return nil, &ErrMalformed{Path: relPath, Reason: "total commit count overflow"}
+			return nil, &MalformedError{Path: relPath, Reason: "total commit count overflow"}
 		}
 
 		total = totalNext

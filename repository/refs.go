@@ -12,6 +12,7 @@ import (
 	refpacked "codeberg.org/lindenii/furgit/refstore/packed"
 )
 
+//nolint:ireturn
 func openRefStore(root *os.Root, algo objectid.Algorithm) (out refstore.Store, err error) {
 	looseRoot, err := root.OpenRoot(".")
 	if err != nil {
@@ -47,6 +48,8 @@ func openRefStore(root *os.Root, algo objectid.Algorithm) (out refstore.Store, e
 }
 
 // Refs returns the configured ref store.
+//
+//nolint:ireturn
 func (repo *Repository) Refs() refstore.Store {
 	return repo.refs
 }

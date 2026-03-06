@@ -1,7 +1,6 @@
 package testgit
 
 import (
-	"fmt"
 	"testing"
 
 	"codeberg.org/lindenii/furgit/objectid"
@@ -12,5 +11,5 @@ func (testRepo *TestRepo) TagAnnotated(tb testing.TB, name string, target object
 	tb.Helper()
 	testRepo.Run(tb, "tag", "-a", name, target.String(), "-m", message)
 
-	return testRepo.RevParse(tb, fmt.Sprintf("refs/tags/%s", name))
+	return testRepo.RevParse(tb, "refs/tags/"+name)
 }

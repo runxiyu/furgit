@@ -14,6 +14,7 @@ import (
 // Size of an Adler-32 checksum in bytes.
 const Size = 4
 
+//nolint:gochecknoglobals
 var hasAVX2 = cpu.X86.HasAVX2
 
 // digest represents the partial evaluation of a checksum.
