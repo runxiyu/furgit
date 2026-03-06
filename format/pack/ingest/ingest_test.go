@@ -14,22 +14,11 @@ import (
 	"codeberg.org/lindenii/furgit/repository"
 )
 
-func fixtureAlgorithmDir(algo objectid.Algorithm) string {
-	switch algo { //nolint:exhaustive
-	case objectid.AlgorithmSHA1:
-		return "sha1"
-	case objectid.AlgorithmSHA256:
-		return "sha256"
-	default:
-		return ""
-	}
-}
-
 // fixturePath returns one fixture file path for the selected algorithm.
 func fixturePath(t *testing.T, algo objectid.Algorithm, name string) string {
 	t.Helper()
 
-	dir := fixtureAlgorithmDir(algo)
+	dir := algo.String()
 	if dir == "" {
 		t.Fatalf("unsupported fixture algorithm: %v", algo)
 	}
