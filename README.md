@@ -50,11 +50,13 @@ Furgit is a low-level Git library in Go.
 * Pack ingestion
 * Un-thinning thin packs
 * Commit graph reading
+* `pkt-line`
+* `side-band-64k`
 
 ## Planned
 
 * Quarantine areas
-* V0/V1 protocol (e.g., `sideband-64k`, `pktline`, etc.)
+* V0/V1 protocol
 * Receiving/fetching
 * Multi-pack indexes
 * Reachability bitmaps
