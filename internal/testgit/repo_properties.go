@@ -11,3 +11,8 @@ func (testRepo *TestRepo) Dir() string {
 func (testRepo *TestRepo) Algorithm() objectid.Algorithm {
 	return testRepo.algo
 }
+
+// Env returns a copy of the environment used for git subprocesses.
+func (testRepo *TestRepo) Env() []string {
+	return append([]string(nil), testRepo.env...)
+}

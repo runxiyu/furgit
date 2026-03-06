@@ -1,10 +1,12 @@
 package bloom
 
+import "codeberg.org/lindenii/furgit/internal/intconv"
+
 type key struct {
 	hashes []uint32
 }
 
-func keyvec(path []byte, settings *Settings) ([]key, error) {
+func keyvec(path []byte, filter *Filter) ([]key, error) {
 	if len(path) == 0 {
 		return nil, nil
 	}
@@ -19,7 +21,7 @@ func keyvec(path []byte, settings *Settings) ([]key, error) {
 
 	keys := make([]key, 0, count)
 
-	full, err := keyFill(path, settings)
+	full, err := keyFill(path, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +30,7 @@ func keyvec(path []byte, settings *Settings) ([]key, error) {
 
 	for i := len(path) - 1; i >= 0; i-- {
 		if path[i] == '/' {
-			k, err := keyFill(path[:i], settings)
+			k, err := keyFill(path[:i], filter)
 			if err != nil {
 				return nil, err
 			}
@@ -40,7 +42,7 @@ func keyvec(path []byte, settings *Settings) ([]key, error) {
 	return keys, nil
 }
 
-func keyFill(path []byte, settings *Settings) (key, error) {
+func keyFill(path []byte, filter *Filter) (key, error) {
 	const (
 		seed0 = 0x293ae76f
 		seed1 = 0x7e646e2c
@@ -52,7 +54,8 @@ func keyFill(path []byte, settings *Settings) (key, error) {
 		err error
 	)
 
-	if settings.HashVersion == 2 { //nolint:nestif
+	switch filter.HashVersion {
+	case 2:
 		h0, err = murmur3SeededV2(seed0, path)
 		if err != nil {
 			return key{}, err
@@ -62,7 +65,7 @@ func keyFill(path []byte, settings *Settings) (key, error) {
 		if err != nil {
 			return key{}, err
 		}
-	} else {
+	case 1:
 		h0, err = murmur3SeededV1(seed0, path)
 		if err != nil {
 			return key{}, err
@@ -72,21 +75,29 @@ func keyFill(path []byte, settings *Settings) (key, error) {
 		if err != nil {
 			return key{}, err
 		}
+	default:
+		return key{}, ErrInvalid
 	}
 
-	hashes := make([]uint32, settings.NumHashes)
-	for i := range settings.NumHashes {
-		hashes[i] = h0 + i*h1
+	hashCount, err := intconv.Uint32ToInt(filter.NumHashes)
+	if err != nil {
+		return key{}, ErrInvalid
+	}
+
+	hashes := make([]uint32, hashCount)
+	for i := range hashCount {
+		iU32, err := intconv.IntToUint32(i)
+		if err != nil {
+			return key{}, ErrInvalid
+		}
+
+		hashes[i] = h0 + iU32*h1
 	}
 
 	return key{hashes: hashes}, nil
 }
 
-func filterContainsKey(filter *Filter, key *key, settings *Settings) bool {
-	if filter == nil || key == nil || settings == nil {
-		return false
-	}
-
+func filterContainsKey(filter *Filter, key key) bool {
 	if len(filter.Data) == 0 {
 		return false
 	}

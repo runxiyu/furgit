@@ -1,6 +1,10 @@
 package bloom
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+
+	"codeberg.org/lindenii/furgit/internal/intconv"
+)
 
 // Settings describe the changed-paths Bloom filter parameters stored in
 // commit-graph BDAT chunks.
@@ -25,6 +29,21 @@ func ParseSettings(bdat []byte) (*Settings, error) {
 		NumHashes:      binary.BigEndian.Uint32(bdat[4:8]),
 		BitsPerEntry:   binary.BigEndian.Uint32(bdat[8:12]),
 		MaxChangePaths: DefaultMaxChange,
+	}
+
+	switch settings.HashVersion {
+	case 1, 2:
+	default:
+		return nil, ErrInvalid
+	}
+
+	if settings.NumHashes == 0 {
+		return nil, ErrInvalid
+	}
+
+	_, err := intconv.Uint32ToInt(settings.NumHashes)
+	if err != nil {
+		return nil, ErrInvalid
 	}
 
 	return settings, nil

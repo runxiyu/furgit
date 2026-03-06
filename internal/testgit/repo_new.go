@@ -32,16 +32,7 @@ func NewRepo(tb testing.TB, opts RepoOptions) *TestRepo {
 	testRepo := &TestRepo{
 		dir:  dir,
 		algo: algo,
-		env: append(os.Environ(),
-			"GIT_CONFIG_GLOBAL=/dev/null",
-			"GIT_CONFIG_SYSTEM=/dev/null",
-			"GIT_AUTHOR_NAME=Test Author",
-			"GIT_AUTHOR_EMAIL=test@example.org",
-			"GIT_COMMITTER_NAME=Test Committer",
-			"GIT_COMMITTER_EMAIL=committer@example.org",
-			"GIT_AUTHOR_DATE=1234567890 +0000",
-			"GIT_COMMITTER_DATE=1234567890 +0000",
-		),
+		env:  defaultEnv(),
 	}
 
 	args := []string{"init", "--object-format=" + algo.String()}
@@ -57,4 +48,17 @@ func NewRepo(tb testing.TB, opts RepoOptions) *TestRepo {
 	testRepo.runBytes(tb, nil, "", args...)
 
 	return testRepo
+}
+
+func defaultEnv() []string {
+	return append(os.Environ(),
+		"GIT_CONFIG_GLOBAL=/dev/null",
+		"GIT_CONFIG_SYSTEM=/dev/null",
+		"GIT_AUTHOR_NAME=Test Author",
+		"GIT_AUTHOR_EMAIL=test@example.org",
+		"GIT_COMMITTER_NAME=Test Committer",
+		"GIT_COMMITTER_EMAIL=committer@example.org",
+		"GIT_AUTHOR_DATE=1234567890 +0000",
+		"GIT_COMMITTER_DATE=1234567890 +0000",
+	)
 }

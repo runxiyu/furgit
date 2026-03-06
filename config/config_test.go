@@ -34,11 +34,7 @@ func gitConfigGetE(testRepo *testgit.TestRepo, key string) (string, error) {
 	//nolint:noctx
 	cmd := exec.Command("git", "config", "--get", key) //#nosec G204
 	cmd.Dir = testRepo.Dir()
-
-	cmd.Env = append(os.Environ(),
-		"GIT_CONFIG_GLOBAL=/dev/null",
-		"GIT_CONFIG_SYSTEM=/dev/null",
-	)
+	cmd.Env = testRepo.Env()
 	out, err := cmd.CombinedOutput()
 
 	return strings.TrimSpace(string(out)), err
