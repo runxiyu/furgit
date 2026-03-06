@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+
 	"codeberg.org/lindenii/furgit/format/pktline"
 )
 
@@ -18,4 +19,3 @@ func TestDecoderInvalid0003(t *testing.T) {
 		t.Fatalf("got err %v, want ProtocolError", err)
 	}
 }
-

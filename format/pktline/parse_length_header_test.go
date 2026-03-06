@@ -3,6 +3,7 @@ package pktline_test
 import (
 	"errors"
 	"testing"
+
 	"codeberg.org/lindenii/furgit/format/pktline"
 )
 
@@ -23,4 +24,3 @@ func TestParseLengthHeader(t *testing.T) {
 		t.Fatalf("got err %v, want ErrInvalidLength", err)
 	}
 }
-

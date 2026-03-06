@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"testing"
+
 	"codeberg.org/lindenii/furgit/format/pktline"
 )
 
@@ -83,4 +84,3 @@ func TestEncoderBufferedFlushBehavior(t *testing.T) {
 		t.Fatalf("got %q, want %q", got, want)
 	}
 }
-

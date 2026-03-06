@@ -3,6 +3,7 @@ package pktline_test
 import (
 	"errors"
 	"testing"
+
 	"codeberg.org/lindenii/furgit/format/pktline"
 )
 
@@ -25,4 +26,3 @@ func TestEncodeLengthHeader(t *testing.T) {
 		t.Fatalf("got err %v, want ErrInvalidLength", err)
 	}
 }
-

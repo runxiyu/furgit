@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"testing"
+
 	"codeberg.org/lindenii/furgit/format/pktline"
 )
 
@@ -48,4 +49,3 @@ func TestDecoderResyncAfterOverMaxData(t *testing.T) {
 		t.Fatalf("got frame %#v, want data z", f)
 	}
 }
-

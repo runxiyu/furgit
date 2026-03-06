@@ -5,6 +5,7 @@ import (
 	"io"
 	"strings"
 	"testing"
+
 	"codeberg.org/lindenii/furgit/format/pktline"
 )
 
@@ -18,4 +19,3 @@ func TestDecoderUnexpectedEOF(t *testing.T) {
 		t.Fatalf("got err %v, want io.ErrUnexpectedEOF", err)
 	}
 }
-

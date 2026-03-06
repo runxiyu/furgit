@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"testing"
+
 	"codeberg.org/lindenii/furgit/format/pktline"
 )
 
@@ -22,4 +23,3 @@ func TestAppendDataPreservesDstOnError(t *testing.T) {
 		t.Fatalf("got %q, want %q", string(out), string(orig))
 	}
 }
-

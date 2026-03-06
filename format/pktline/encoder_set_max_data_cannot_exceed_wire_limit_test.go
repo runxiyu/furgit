@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"testing"
+
 	"codeberg.org/lindenii/furgit/format/pktline"
 )
 
@@ -23,4 +24,3 @@ func TestEncoderSetMaxDataCannotExceedWireLimit(t *testing.T) {
 		t.Fatalf("got err %v, want ErrTooLarge", err)
 	}
 }
-

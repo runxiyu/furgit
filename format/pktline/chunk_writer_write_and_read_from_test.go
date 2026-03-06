@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+
 	"codeberg.org/lindenii/furgit/format/pktline"
 )
 
@@ -57,4 +58,3 @@ func TestChunkWriterWriteAndReadFrom(t *testing.T) {
 		t.Fatalf("got %q, want %q", got, want)
 	}
 }
-

@@ -2,6 +2,7 @@ package pktline_test
 
 import (
 	"testing"
+
 	"codeberg.org/lindenii/furgit/format/pktline"
 )
 
@@ -21,4 +22,3 @@ func TestAppendHelpers(t *testing.T) {
 		t.Fatalf("got %q, want %q", got, want)
 	}
 }
-

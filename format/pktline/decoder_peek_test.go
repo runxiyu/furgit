@@ -3,6 +3,7 @@ package pktline_test
 import (
 	"strings"
 	"testing"
+
 	"codeberg.org/lindenii/furgit/format/pktline"
 )
 
@@ -29,4 +30,3 @@ func TestDecoderPeek(t *testing.T) {
 		t.Fatalf("read frame = %#v", f)
 	}
 }
-

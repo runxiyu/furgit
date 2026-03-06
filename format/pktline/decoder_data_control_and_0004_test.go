@@ -3,6 +3,7 @@ package pktline_test
 import (
 	"strings"
 	"testing"
+
 	"codeberg.org/lindenii/furgit/format/pktline"
 )
 
@@ -57,4 +58,3 @@ func TestDecoderDataControlAnd0004(t *testing.T) {
 		t.Fatalf("frame #5 type = %v, want PacketFlush", f.Type)
 	}
 }
-
