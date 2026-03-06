@@ -7,12 +7,6 @@ import (
 	"strings"
 )
 
-// location identifies one object entry in a specific pack file.
-type location struct {
-	packName string
-	offset   uint64
-}
-
 // packCandidate describes one discovered pack/index pair.
 type packCandidate struct {
 	// packName is the .pack basename.

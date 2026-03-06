@@ -12,22 +12,6 @@ import (
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
-// readCloser proxies reads and closes one underlying closer.
-type readCloser struct {
-	reader io.Reader
-	closer io.Closer
-}
-
-// Read proxies reads to the underlying reader.
-func (reader *readCloser) Read(dst []byte) (int, error) {
-	return reader.reader.Read(dst)
-}
-
-// Close closes the underlying closer.
-func (reader *readCloser) Close() error {
-	return reader.closer.Close()
-}
-
 // ReadReaderContent reads an object's type, declared content size, and content stream.
 //
 // The caller must close the returned reader.

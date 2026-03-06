@@ -5,6 +5,8 @@ import (
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
+const defaultDeltaCacheMaxBytes = 32 << 20
+
 // deltaBaseKey identifies one base object by pack location.
 type deltaBaseKey struct {
 	packName string

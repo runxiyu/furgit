@@ -1,31 +1,11 @@
 package packed
 
 import (
-	"bufio"
 	"fmt"
 
-	deltaapply "codeberg.org/lindenii/furgit/format/delta/apply"
 	packfmt "codeberg.org/lindenii/furgit/format/pack"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
-
-// deltaNode describes one delta object in a reconstruction chain.
-type deltaNode struct {
-	// loc identifies the delta object's pack location.
-	loc location
-	// dataOffset points to the start of the delta zlib payload in pack.
-	dataOffset int
-}
-
-// deltaChain describes how to reconstruct one requested object.
-type deltaChain struct {
-	// baseLoc points to the innermost base object.
-	baseLoc location
-	// baseType is the canonical object type resolved from baseLoc.
-	baseType objecttype.Type
-	// deltas contains delta objects from target down toward base.
-	deltas []deltaNode
-}
 
 // deltaBuildChain walks one object's chain and builds a reconstruction chain.
 func (store *Store) deltaBuildChain(start location) (deltaChain, error) {
@@ -83,24 +63,4 @@ func (store *Store) deltaBuildChain(start location) (deltaChain, error) {
 			return deltaChain{}, fmt.Errorf("objectstore/packed: unsupported pack type %d", meta.ty)
 		}
 	}
-}
-
-// deltaDeclaredSizeAt returns the resolved object size declared by one delta
-// stream header at dataOffset.
-func deltaDeclaredSizeAt(pack *packFile, dataOffset int) (int64, error) {
-	reader, err := zlibReaderAt(pack, dataOffset)
-	if err != nil {
-		return 0, err
-	}
-
-	defer func() { _ = reader.Close() }()
-
-	br := bufio.NewReaderSize(reader, 32)
-
-	_, size, err := deltaapply.ReadHeaderSizes(br)
-	if err != nil {
-		return 0, err
-	}
-
-	return int64(size), nil
 }
