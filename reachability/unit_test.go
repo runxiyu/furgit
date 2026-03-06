@@ -164,8 +164,8 @@ func TestWalkDomainCommitsRejectsNonCommitRootAfterPeel(t *testing.T) {
 			t.Fatal("expected error")
 		}
 
-		var typeErr *giterrors.ObjectTypeError
-		if !errors.As(err, &typeErr) {
+		typeErr, ok := errors.AsType[*giterrors.ObjectTypeError](err)
+		if !ok {
 			t.Fatalf("expected ObjectTypeError, got %T (%v)", err, err)
 		}
 
@@ -280,8 +280,8 @@ func TestCheckConnectedReturnsConcreteMissingObject(t *testing.T) {
 			t.Fatal("expected error")
 		}
 
-		var missing *giterrors.ObjectMissingError
-		if !errors.As(err, &missing) {
+		missing, ok := errors.AsType[*giterrors.ObjectMissingError](err)
+		if !ok {
 			t.Fatalf("expected ObjectMissingError, got %T (%v)", err, err)
 		}
 

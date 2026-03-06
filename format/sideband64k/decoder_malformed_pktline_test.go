@@ -15,8 +15,7 @@ func TestDecoderInvalid0003(t *testing.T) {
 	dec := sideband64k.NewDecoder(strings.NewReader("0003"), sideband64k.ReadOptions{})
 	_, err := dec.ReadFrame()
 
-	var pe *pktline.ProtocolError
-	if !errors.As(err, &pe) {
+	if _, ok := errors.AsType[*pktline.ProtocolError](err); !ok {
 		t.Fatalf("got err %v, want pktline.ProtocolError", err)
 	}
 }
@@ -27,8 +26,7 @@ func TestDecoderRejectsOverMaximumLength(t *testing.T) {
 	dec := sideband64k.NewDecoder(strings.NewReader("fffe"), sideband64k.ReadOptions{})
 	_, err := dec.ReadFrame()
 
-	var pe *pktline.ProtocolError
-	if !errors.As(err, &pe) {
+	if _, ok := errors.AsType[*pktline.ProtocolError](err); !ok {
 		t.Fatalf("got err %v, want pktline.ProtocolError", err)
 	}
 }

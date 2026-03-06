@@ -159,8 +159,8 @@ func TestBloomUnavailableWithoutChangedPaths(t *testing.T) {
 			t.Fatal("BloomFilterAt() error = nil, want BloomUnavailableError")
 		}
 
-		var unavailable *read.BloomUnavailableError
-		if !errors.As(err, &unavailable) {
+		unavailable, ok := errors.AsType[*read.BloomUnavailableError](err)
+		if !ok {
 			t.Fatalf("BloomFilterAt() error type = %T, want *BloomUnavailableError", err)
 		}
 

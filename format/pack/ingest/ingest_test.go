@@ -211,8 +211,7 @@ func TestIngestThinPackWithoutFixReturnsUnresolved(t *testing.T) {
 			t.Fatal("Ingest error = nil, want error")
 		}
 
-		var unresolved *ingest.ThinPackUnresolvedError
-		if !errors.As(err, &unresolved) {
+		if _, ok := errors.AsType[*ingest.ThinPackUnresolvedError](err); !ok {
 			t.Fatalf("Ingest error type = %T (%v), want *ThinPackUnresolvedError", err, err)
 		}
 
@@ -282,8 +281,7 @@ func TestIngestPackTrailerMismatch(t *testing.T) {
 			t.Fatal("Ingest error = nil, want error")
 		}
 
-		var mismatch *ingest.PackTrailerMismatchError
-		if !errors.As(err, &mismatch) {
+		if _, ok := errors.AsType[*ingest.PackTrailerMismatchError](err); !ok {
 			t.Fatalf("Ingest error type = %T (%v), want *PackTrailerMismatchError", err, err)
 		}
 

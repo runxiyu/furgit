@@ -14,8 +14,7 @@ func TestDecoderInvalid0003(t *testing.T) {
 	dec := pktline.NewDecoder(strings.NewReader("0003"), pktline.ReadOptions{})
 	_, err := dec.ReadFrame()
 
-	var pe *pktline.ProtocolError
-	if !errors.As(err, &pe) {
+	if _, ok := errors.AsType[*pktline.ProtocolError](err); !ok {
 		t.Fatalf("got err %v, want ProtocolError", err)
 	}
 }

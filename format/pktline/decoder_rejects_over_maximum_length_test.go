@@ -16,8 +16,7 @@ func TestDecoderRejectsOverMaximumLength(t *testing.T) {
 
 	_, err := dec.ReadFrame()
 
-	var pe *pktline.ProtocolError
-	if !errors.As(err, &pe) {
+	if _, ok := errors.AsType[*pktline.ProtocolError](err); !ok {
 		t.Fatalf("got err %v, want ProtocolError", err)
 	}
 }

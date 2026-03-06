@@ -288,8 +288,8 @@ func TestQueryRejectsNonCommitAfterPeel(t *testing.T) {
 			t.Fatal("expected error")
 		}
 
-		var typeErr *giterrors.ObjectTypeError
-		if !errors.As(err, &typeErr) {
+		typeErr, ok := errors.AsType[*giterrors.ObjectTypeError](err)
+		if !ok {
 			t.Fatalf("expected ObjectTypeError, got %T (%v)", err, err)
 		}
 

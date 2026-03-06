@@ -14,8 +14,7 @@ func TestDecoderInvalidEmptyPayload(t *testing.T) {
 	dec := sideband64k.NewDecoder(strings.NewReader("0004"), sideband64k.ReadOptions{})
 	_, err := dec.ReadFrame()
 
-	var pe *sideband64k.ProtocolError
-	if !errors.As(err, &pe) {
+	if _, ok := errors.AsType[*sideband64k.ProtocolError](err); !ok {
 		t.Fatalf("got err %v, want ProtocolError", err)
 	}
 }

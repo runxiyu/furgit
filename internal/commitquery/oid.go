@@ -53,8 +53,7 @@ func (ctx *Context) loadByOID(idx NodeIndex) error {
 	if ctx.graph != nil {
 		pos, err := ctx.graph.Lookup(id)
 		if err != nil {
-			var notFound *commitgraphread.NotFoundError
-			if !stderrors.As(err, &notFound) {
+			if _, ok := stderrors.AsType[*commitgraphread.NotFoundError](err); !ok {
 				return err
 			}
 		} else {

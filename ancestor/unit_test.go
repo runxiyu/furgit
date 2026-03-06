@@ -110,8 +110,7 @@ func TestIsRejectsNonCommitAfterPeel(t *testing.T) {
 			t.Fatal("expected error")
 		}
 
-		var typeErr *giterrors.ObjectTypeError
-		if !errors.As(err, &typeErr) {
+		if _, ok := errors.AsType[*giterrors.ObjectTypeError](err); !ok {
 			t.Fatalf("expected ObjectTypeError, got %T (%v)", err, err)
 		}
 	})
