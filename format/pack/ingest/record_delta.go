@@ -3,6 +3,7 @@ package ingest
 import (
 	"fmt"
 
+	deltaapply "codeberg.org/lindenii/furgit/format/delta/apply"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
