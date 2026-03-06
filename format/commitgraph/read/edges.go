@@ -1,8 +1,9 @@
-package commitgraph
+package read
 
 import (
 	"encoding/binary"
 
+	"codeberg.org/lindenii/furgit/format/commitgraph"
 	"codeberg.org/lindenii/furgit/internal/intconv"
 )
 
@@ -27,7 +28,7 @@ func (reader *Reader) decodeExtraEdgeList(layer *layer, edgeStart uint32) ([]Pos
 		}
 
 		word := binary.BigEndian.Uint32(layer.chunkExtraEdges[off : off+4])
-		parentGlobal := word & parentLastMask
+		parentGlobal := word & commitgraph.ParentLastMask
 
 		parentPos, err := reader.globalToPosition(parentGlobal)
 		if err != nil {
@@ -36,7 +37,7 @@ func (reader *Reader) decodeExtraEdgeList(layer *layer, edgeStart uint32) ([]Pos
 
 		out = append(out, parentPos)
 
-		if word&parentExtraMask != 0 {
+		if word&commitgraph.ParentExtraMask != 0 {
 			break
 		}
 

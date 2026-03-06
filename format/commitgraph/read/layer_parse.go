@@ -1,27 +1,28 @@
-package commitgraph
+package read
 
 import (
 	"encoding/binary"
 
+	"codeberg.org/lindenii/furgit/format/commitgraph"
 	"codeberg.org/lindenii/furgit/format/commitgraph/bloom"
 	"codeberg.org/lindenii/furgit/internal/intconv"
 	"codeberg.org/lindenii/furgit/objectid"
 )
 
 func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
-	if len(layer.data) < headerSize {
+	if len(layer.data) < commitgraph.HeaderSize {
 		return &ErrMalformed{Path: layer.path, Reason: "file too short"}
 	}
 
-	header := layer.data[:headerSize]
+	header := layer.data[:commitgraph.HeaderSize]
 
 	signature := binary.BigEndian.Uint32(header[:4])
-	if signature != fileSignature {
+	if signature != commitgraph.FileSignature {
 		return &ErrMalformed{Path: layer.path, Reason: "invalid signature"}
 	}
 
 	version := header[4]
-	if version != fileVersion {
+	if version != commitgraph.FileVersion {
 		return &ErrUnsupportedVersion{Version: version}
 	}
 
@@ -38,8 +39,8 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 	numChunks := int(header[6])
 	baseCount := uint32(header[7])
 
-	tocLen := (numChunks + 1) * chunkEntrySize
-	tocStart := headerSize
+	tocLen := (numChunks + 1) * commitgraph.ChunkEntrySize
+	tocStart := commitgraph.HeaderSize
 
 	tocEnd := tocStart + tocLen
 	if tocEnd > len(layer.data) {
@@ -53,8 +54,8 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 
 	entries := make([]tocEntry, 0, numChunks+1)
 	for i := range numChunks + 1 {
-		entryOff := tocStart + i*chunkEntrySize
-		entryData := layer.data[entryOff : entryOff+chunkEntrySize]
+		entryOff := tocStart + i*commitgraph.ChunkEntrySize
+		entryData := layer.data[entryOff : entryOff+commitgraph.ChunkEntrySize]
 
 		entry := tocEntry{
 			id:     binary.BigEndian.Uint32(entryData[:4]),
@@ -99,13 +100,13 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 		chunks[entry.id] = layer.data[start:end]
 	}
 
-	oidf := chunks[chunkOIDF]
-	if len(oidf) != fanoutSize {
+	oidf := chunks[commitgraph.ChunkOIDF]
+	if len(oidf) != commitgraph.FanoutSize {
 		return &ErrMalformed{Path: layer.path, Reason: "invalid OIDF length"}
 	}
 
 	layer.chunkOIDFanout = oidf
-	layer.numCommits = binary.BigEndian.Uint32(oidf[fanoutSize-4:])
+	layer.numCommits = binary.BigEndian.Uint32(oidf[commitgraph.FanoutSize-4:])
 
 	for i := range 255 {
 		cur := binary.BigEndian.Uint32(oidf[i*4 : (i+1)*4])
@@ -123,7 +124,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 		return err
 	}
 
-	oidl := chunks[chunkOIDL]
+	oidl := chunks[commitgraph.ChunkOIDL]
 	oidlWantLen64 := uint64(layer.numCommits) * hashSizeU64
 
 	oidlWantLen, err := intconv.Uint64ToInt(oidlWantLen64)
@@ -144,7 +145,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 		return err
 	}
 
-	cdat := chunks[chunkCDAT]
+	cdat := chunks[commitgraph.ChunkCDAT]
 	cdatWantLen64 := uint64(layer.numCommits) * strideU64
 
 	cdatWantLen, err := intconv.Uint64ToInt(cdatWantLen64)
@@ -158,7 +159,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 
 	layer.chunkCommit = cdat
 
-	gda2 := chunks[chunkGDA2]
+	gda2 := chunks[commitgraph.ChunkGDA2]
 	if len(gda2) != 0 {
 		wantLen64 := uint64(layer.numCommits) * 4
 
@@ -174,7 +175,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 		layer.chunkGeneration = gda2
 	}
 
-	gdo2 := chunks[chunkGDO2]
+	gdo2 := chunks[commitgraph.ChunkGDO2]
 	if len(gdo2) != 0 {
 		if len(gdo2)%8 != 0 {
 			return &ErrMalformed{Path: layer.path, Reason: "invalid GDO2 length"}
@@ -183,7 +184,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 		layer.chunkGenerationOv = gdo2
 	}
 
-	edge := chunks[chunkEDGE]
+	edge := chunks[commitgraph.ChunkEDGE]
 	if len(edge) != 0 {
 		if len(edge)%4 != 0 {
 			return &ErrMalformed{Path: layer.path, Reason: "invalid EDGE length"}
@@ -192,7 +193,7 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 		layer.chunkExtraEdges = edge
 	}
 
-	base := chunks[chunkBASE]
+	base := chunks[commitgraph.ChunkBASE]
 	if baseCount == 0 {
 		if len(base) != 0 {
 			return &ErrMalformed{Path: layer.path, Reason: "unexpected BASE chunk"}
@@ -214,9 +215,9 @@ func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx
 
 	layer.baseCount = baseCount
 
-	bidx := chunks[chunkBIDX]
+	bidx := chunks[commitgraph.ChunkBIDX]
 
-	bdat := chunks[chunkBDAT]
+	bdat := chunks[commitgraph.ChunkBDAT]
 	if len(bidx) != 0 || len(bdat) != 0 { //nolint:nestif
 		if len(bidx) == 0 || len(bdat) == 0 {
 			return &ErrMalformed{Path: layer.path, Reason: "BIDX/BDAT must both be present"}

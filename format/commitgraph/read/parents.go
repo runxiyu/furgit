@@ -1,4 +1,6 @@
-package commitgraph
+package read
+
+import "codeberg.org/lindenii/furgit/format/commitgraph"
 
 // ParentRef references one parent position.
 type ParentRef struct {
@@ -12,11 +14,11 @@ func (reader *Reader) decodeParents(layer *layer, p1, p2 uint32) (ParentRef, Par
 		return ParentRef{}, ParentRef{}, nil, err
 	}
 
-	if p2 == parentNone {
+	if p2 == commitgraph.ParentNone {
 		return parent1, ParentRef{}, nil, nil
 	}
 
-	if p2&parentExtraMask == 0 {
+	if p2&commitgraph.ParentExtraMask == 0 {
 		parent2, err := reader.decodeSingleParent(p2)
 		if err != nil {
 			return ParentRef{}, ParentRef{}, nil, err
@@ -25,7 +27,7 @@ func (reader *Reader) decodeParents(layer *layer, p1, p2 uint32) (ParentRef, Par
 		return parent1, parent2, nil, nil
 	}
 
-	edgeStart := p2 & parentLastMask
+	edgeStart := p2 & commitgraph.ParentLastMask
 
 	parents, err := reader.decodeExtraEdgeList(layer, edgeStart)
 	if err != nil {
@@ -45,11 +47,11 @@ func (reader *Reader) decodeParents(layer *layer, p1, p2 uint32) (ParentRef, Par
 }
 
 func (reader *Reader) decodeSingleParent(raw uint32) (ParentRef, error) {
-	if raw == parentNone {
+	if raw == commitgraph.ParentNone {
 		return ParentRef{}, nil
 	}
 
-	if raw&parentExtraMask != 0 {
+	if raw&commitgraph.ParentExtraMask != 0 {
 		return ParentRef{}, &ErrMalformed{
 			Path:   "commit-graph",
 			Reason: "unexpected EDGE marker in single-parent slot",

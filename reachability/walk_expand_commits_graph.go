@@ -3,7 +3,7 @@ package reachability
 import (
 	"errors"
 
-	"codeberg.org/lindenii/furgit/format/commitgraph"
+	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
@@ -11,7 +11,7 @@ import (
 func (walk *Walk) expandCommitsFromGraph(id objectid.ObjectID) ([]walkItem, bool, error) {
 	pos, err := walk.reachability.graph.Lookup(id)
 	if err != nil {
-		var notFound *commitgraph.ErrNotFound
+		var notFound *commitgraphread.ErrNotFound
 		if errors.As(err, &notFound) {
 			return nil, false, nil
 		}

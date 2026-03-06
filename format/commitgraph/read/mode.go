@@ -1,4 +1,4 @@
-package commitgraph
+package read
 
 // OpenMode controls which commit-graph layout Open loads.
 type OpenMode uint8

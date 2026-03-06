@@ -1,4 +1,4 @@
-package commitgraph_test
+package read_test
 
 import (
 	"errors"
@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/format/commitgraph"
 	"codeberg.org/lindenii/furgit/format/commitgraph/bloom"
+	"codeberg.org/lindenii/furgit/format/commitgraph/read"
 	"codeberg.org/lindenii/furgit/internal/intconv"
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/objectid"
@@ -33,7 +33,7 @@ func TestReadSingleMatchesGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := fixtureRepo(t, algo, "single_changed")
 
-		reader := openReader(t, testRepo, commitgraph.OpenSingle)
+		reader := openReader(t, testRepo, read.OpenSingle)
 
 		defer func() { _ = reader.Close() }()
 
@@ -97,7 +97,7 @@ func TestReadChainMatchesGit(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := fixtureRepo(t, algo, "chain_changed")
 
-		reader := openReader(t, testRepo, commitgraph.OpenChain)
+		reader := openReader(t, testRepo, read.OpenChain)
 
 		defer func() { _ = reader.Close() }()
 
@@ -150,7 +150,7 @@ func TestBloomUnavailableWithoutChangedPaths(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := fixtureRepo(t, algo, "single_nochanged")
 
-		reader := openReader(t, testRepo, commitgraph.OpenSingle)
+		reader := openReader(t, testRepo, read.OpenSingle)
 
 		defer func() { _ = reader.Close() }()
 
@@ -166,7 +166,7 @@ func TestBloomUnavailableWithoutChangedPaths(t *testing.T) {
 			t.Fatal("BloomFilterAt() error = nil, want ErrBloomUnavailable")
 		}
 
-		var unavailable *commitgraph.ErrBloomUnavailable
+		var unavailable *read.ErrBloomUnavailable
 		if !errors.As(err, &unavailable) {
 			t.Fatalf("BloomFilterAt() error type = %T, want *ErrBloomUnavailable", err)
 		}
@@ -177,7 +177,7 @@ func TestBloomUnavailableWithoutChangedPaths(t *testing.T) {
 	})
 }
 
-func openReader(tb testing.TB, testRepo *testgit.TestRepo, mode commitgraph.OpenMode) *commitgraph.Reader {
+func openReader(tb testing.TB, testRepo *testgit.TestRepo, mode read.OpenMode) *read.Reader {
 	tb.Helper()
 
 	objectsPath := filepath.Join(testRepo.Dir(), "objects")
@@ -187,7 +187,7 @@ func openReader(tb testing.TB, testRepo *testgit.TestRepo, mode commitgraph.Open
 		tb.Fatalf("os.OpenRoot(%q): %v", objectsPath, err)
 	}
 
-	reader, err := commitgraph.Open(root, testRepo.Algorithm(), mode)
+	reader, err := read.Open(root, testRepo.Algorithm(), mode)
 
 	closeErr := root.Close()
 	if closeErr != nil {
@@ -195,13 +195,13 @@ func openReader(tb testing.TB, testRepo *testgit.TestRepo, mode commitgraph.Open
 	}
 
 	if err != nil {
-		tb.Fatalf("commitgraph.Open(%q): %v", objectsPath, err)
+		tb.Fatalf("read.Open(%q): %v", objectsPath, err)
 	}
 
 	return reader
 }
 
-func verifyCommitAgainstGit(tb testing.TB, testRepo *testgit.TestRepo, reader *commitgraph.Reader, id objectid.ObjectID) {
+func verifyCommitAgainstGit(tb testing.TB, testRepo *testgit.TestRepo, reader *read.Reader, id objectid.ObjectID) {
 	tb.Helper()
 
 	pos, err := reader.Lookup(id)
@@ -265,7 +265,7 @@ func verifyCommitAgainstGit(tb testing.TB, testRepo *testgit.TestRepo, reader *c
 	assertChangedPathsBloomPositive(tb, testRepo, filter, id)
 }
 
-func commitParents(tb testing.TB, reader *commitgraph.Reader, commit commitgraph.Commit) []objectid.ObjectID {
+func commitParents(tb testing.TB, reader *read.Reader, commit read.Commit) []objectid.ObjectID {
 	tb.Helper()
 
 	out := make([]objectid.ObjectID, 0, 2+len(commit.ExtraParents))

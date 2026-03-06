@@ -1,32 +1,32 @@
 package commitgraph
 
 const (
-	fileSignature = 0x43475048 // "CGPH"
-	fileVersion   = 1
+	FileSignature = 0x43475048 // "CGPH"
+	FileVersion   = 1
 )
 
 const (
-	chunkOIDF = 0x4f494446 // "OIDF"
-	chunkOIDL = 0x4f49444c // "OIDL"
-	chunkCDAT = 0x43444154 // "CDAT"
-	chunkGDA2 = 0x47444132 // "GDA2"
-	chunkGDO2 = 0x47444f32 // "GDO2"
-	chunkEDGE = 0x45444745 // "EDGE"
-	chunkBIDX = 0x42494458 // "BIDX"
-	chunkBDAT = 0x42444154 // "BDAT"
-	chunkBASE = 0x42415345 // "BASE"
+	ChunkOIDF = 0x4f494446 // "OIDF"
+	ChunkOIDL = 0x4f49444c // "OIDL"
+	ChunkCDAT = 0x43444154 // "CDAT"
+	ChunkGDA2 = 0x47444132 // "GDA2"
+	ChunkGDO2 = 0x47444f32 // "GDO2"
+	ChunkEDGE = 0x45444745 // "EDGE"
+	ChunkBIDX = 0x42494458 // "BIDX"
+	ChunkBDAT = 0x42444154 // "BDAT"
+	ChunkBASE = 0x42415345 // "BASE"
 )
 
 const (
-	headerSize     = 8
-	chunkEntrySize = 12
-	fanoutSize     = 256 * 4
+	HeaderSize     = 8
+	ChunkEntrySize = 12
+	FanoutSize     = 256 * 4
 )
 
 const (
-	parentNone      = 0x70000000
-	parentExtraMask = 0x80000000
-	parentLastMask  = 0x7fffffff
+	ParentNone      = 0x70000000
+	ParentExtraMask = 0x80000000
+	ParentLastMask  = 0x7fffffff
 
-	generationOverflow = 0x80000000
+	GenerationOverflow = 0x80000000
 )

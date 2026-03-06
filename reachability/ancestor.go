@@ -3,7 +3,7 @@ package reachability
 import (
 	"errors"
 
-	"codeberg.org/lindenii/furgit/format/commitgraph"
+	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	"codeberg.org/lindenii/furgit/objectid"
 )
 
@@ -57,7 +57,7 @@ func (r *Reachability) isAncestorGraph(ancestor, descendant objectid.ObjectID) (
 
 	ancestorPos, err := r.graph.Lookup(ancestor)
 	if err != nil {
-		var notFound *commitgraph.ErrNotFound
+		var notFound *commitgraphread.ErrNotFound
 		if errors.As(err, &notFound) {
 			return false, false, nil
 		}
@@ -67,7 +67,7 @@ func (r *Reachability) isAncestorGraph(ancestor, descendant objectid.ObjectID) (
 
 	descendantPos, err := r.graph.Lookup(descendant)
 	if err != nil {
-		var notFound *commitgraph.ErrNotFound
+		var notFound *commitgraphread.ErrNotFound
 		if errors.As(err, &notFound) {
 			return false, false, nil
 		}
@@ -81,8 +81,8 @@ func (r *Reachability) isAncestorGraph(ancestor, descendant objectid.ObjectID) (
 	}
 
 	ancestorGeneration := ancestorCommit.GenerationV2
-	stack := []commitgraph.Position{descendantPos}
-	visited := make(map[commitgraph.Position]struct{}, 64)
+	stack := []commitgraphread.Position{descendantPos}
+	visited := make(map[commitgraphread.Position]struct{}, 64)
 
 	for len(stack) > 0 {
 		pos := stack[len(stack)-1]

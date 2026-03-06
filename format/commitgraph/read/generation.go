@@ -1,8 +1,9 @@
-package commitgraph
+package read
 
 import (
 	"encoding/binary"
 
+	"codeberg.org/lindenii/furgit/format/commitgraph"
 	"codeberg.org/lindenii/furgit/internal/intconv"
 )
 
@@ -20,11 +21,11 @@ func (reader *Reader) readGenerationV2(layer *layer, index uint32, commitTime ui
 
 	value := binary.BigEndian.Uint32(layer.chunkGeneration[off : off+4])
 
-	if value&generationOverflow == 0 {
+	if value&commitgraph.GenerationOverflow == 0 {
 		return commitTime + uint64(value), nil
 	}
 
-	gdo2Index := value ^ generationOverflow
+	gdo2Index := value ^ commitgraph.GenerationOverflow
 	gdo2Off64 := uint64(gdo2Index) * 8
 
 	gdo2Off, err := intconv.Uint64ToInt(gdo2Off64)

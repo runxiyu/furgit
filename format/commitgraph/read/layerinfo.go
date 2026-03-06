@@ -1,4 +1,4 @@
-package commitgraph
+package read
 
 // LayerInfo describes one loaded commit-graph layer.
 type LayerInfo struct {

@@ -1,4 +1,4 @@
-package commitgraph
+package read
 
 // Close releases all mapped commit-graph files.
 func (reader *Reader) Close() error {

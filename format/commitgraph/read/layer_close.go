@@ -1,4 +1,4 @@
-package commitgraph
+package read
 
 import "syscall"
 

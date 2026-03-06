@@ -1,9 +1,10 @@
-package commitgraph
+package read
 
 import (
 	"os"
 	"syscall"
 
+	"codeberg.org/lindenii/furgit/format/commitgraph"
 	"codeberg.org/lindenii/furgit/internal/intconv"
 	"codeberg.org/lindenii/furgit/objectid"
 )
@@ -22,7 +23,7 @@ func openLayer(root *os.Root, relPath string, algo objectid.Algorithm) (*layer, 
 	}
 
 	size := info.Size()
-	if size < int64(headerSize+fanoutSize+algo.Size()) {
+	if size < int64(commitgraph.HeaderSize+commitgraph.FanoutSize+algo.Size()) {
 		_ = file.Close()
 
 		return nil, &ErrMalformed{Path: relPath, Reason: "file too short"}
