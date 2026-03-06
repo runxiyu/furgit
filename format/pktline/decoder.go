@@ -14,6 +14,8 @@ type ReadOptions struct {
 
 // Decoder reads pkt-line frames from an io.Reader.
 //
+// It is advisable to supply a buffered reader.
+//
 // It preserves frame boundaries and supports one-frame lookahead via PeekFrame.
 type Decoder struct {
 	r       io.Reader
