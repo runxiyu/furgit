@@ -69,10 +69,7 @@ func (scanner *streamScanner) Read(dst []byte) (int, error) {
 		return 0, io.EOF
 	}
 
-	n := len(dst)
-	if n > unread {
-		n = unread
-	}
+	n := min(len(dst), unread)
 
 	copy(dst, scanner.buf[scanner.off:scanner.off+n])
 

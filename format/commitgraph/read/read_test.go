@@ -76,10 +76,7 @@ func TestReadSingleMatchesGit(t *testing.T) {
 			}
 		}
 
-		step := len(allIDs) / 24
-		if step < 1 {
-			step = 1
-		}
+		step := max(len(allIDs)/24, 1)
 
 		for i, id := range allIDs {
 			if i%step != 0 && i != len(allIDs)-1 {
@@ -117,10 +114,7 @@ func TestReadChainMatchesGit(t *testing.T) {
 			t.Fatalf("NumCommits() = %d, want %d", got, len(allIDs))
 		}
 
-		step := len(allIDs) / 20
-		if step < 1 {
-			step = 1
-		}
+		step := max(len(allIDs)/20, 1)
 
 		for i, id := range allIDs {
 			pos, err := reader.Lookup(id)

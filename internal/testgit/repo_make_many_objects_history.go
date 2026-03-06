@@ -74,7 +74,7 @@ func (testRepo *TestRepo) makeManyObjectsTree(tb testing.TB, prefix string, i in
 
 	lines := make([]string, 0, files)
 	for j := range files {
-		body := []byte(fmt.Sprintf("%s-%04d-%02d\n%s\n", prefix, i, j, strings.Repeat("x", 160+(i+j)%96)))
+		body := fmt.Appendf(nil, "%s-%04d-%02d\n%s\n", prefix, i, j, strings.Repeat("x", 160+(i+j)%96))
 		blobID := testRepo.HashObject(tb, "blob", body)
 		lines = append(lines, fmt.Sprintf("100644 blob %s\t%s_%04d_%02d.txt\n", blobID.String(), prefix, i, j))
 	}
