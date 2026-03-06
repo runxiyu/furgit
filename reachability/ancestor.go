@@ -12,12 +12,12 @@ import (
 //
 // Both inputs are peeled through annotated tags before commit traversal.
 func (r *Reachability) IsAncestor(ancestor, descendant objectid.ObjectID) (bool, error) {
-	ancestorCommit, err := r.peelRootToDomain(ancestor, DomainCommits)
+	ancestorCommit, err := r.peelRootToCommit(ancestor)
 	if err != nil {
 		return false, err
 	}
 
-	descendantCommit, err := r.peelRootToDomain(descendant, DomainCommits)
+	descendantCommit, err := r.peelRootToCommit(descendant)
 	if err != nil {
 		return false, err
 	}

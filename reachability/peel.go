@@ -6,12 +6,8 @@ import (
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
-func (r *Reachability) peelRootToDomain(id objectid.ObjectID, domain Domain) (objectid.ObjectID, error) {
-	err := validateDomain(domain)
-	if err != nil {
-		return objectid.ObjectID{}, err
-	}
-
+// peelRootToCommit peels annotated tags transitively until a commit is reached.
+func (r *Reachability) peelRootToCommit(id objectid.ObjectID) (objectid.ObjectID, error) {
 	for {
 		ty, err := r.readHeaderType(id)
 		if err != nil {
@@ -19,7 +15,7 @@ func (r *Reachability) peelRootToDomain(id objectid.ObjectID, domain Domain) (ob
 		}
 
 		if ty != objecttype.TypeTag {
-			if domain == DomainCommits && ty != objecttype.TypeCommit {
+			if ty != objecttype.TypeCommit {
 				return objectid.ObjectID{}, &ObjectTypeError{OID: id, Got: ty, Want: objecttype.TypeCommit}
 			}
 
