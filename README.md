@@ -65,12 +65,12 @@ Some may be a few minutes of work, others may be months.
 * Commit graph bloom filters
 * `pkt-line`
 * `side-band-64k`
+* Merge base
 
 ### Planned
 
 * Verify pack
 * ls-tree
-* Merge base
 * Quarantine areas
 * V0/V1 protocol
 * Protocol capabilities
