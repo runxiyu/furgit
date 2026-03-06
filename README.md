@@ -19,16 +19,24 @@ Furgit is a low-level Git library in Go.
 * Prioritize APIs for forges and other server-side uses first
 * Aim for clear architecture then high performance
 
-## Implemented
+## Features
+
+Succinct ideas of the areas that we lack.
+Some may be a few minutes of work, others may be months.
+
+### Implemented
 
 * Parsing configs
 * Object ID and hash algorithms (SHA-256, SHA-1)
 * Object type enums
-* Object representation types
+* Blobs
+* Trees
+* Commits
+* Annotated tags
 * Object header parsing
 * Parsing objects
 * Serializing objects
-* Diffing lines
+* Diffing lines via Myers
 * Diffing trees
 * Object storer interface
 * Reading loose objects
@@ -36,12 +44,15 @@ Furgit is a low-level Git library in Go.
 * `.idx` lookup
 * Reading packed objects
 * Object storer chain and mixer
-* Ref types
+* Ref types (detached, symbolic)
+* Basic ref resolution
+* Tag ref peeling
 * Ref storer interface
 * Reading loose refs
 * Reading packed refs
 * Ref storer chain
 * Reachability iterators
+* Is-ancestor
 * Repository abstractions
 * Adler-32 optimizations
 * ZLIB pooling
@@ -50,33 +61,135 @@ Furgit is a low-level Git library in Go.
 * Pack ingestion
 * Un-thinning thin packs
 * Commit graph reading
+* Commit graph chain reading
+* Commit graph bloom filters
 * `pkt-line`
 * `side-band-64k`
 
-## Planned
+### Planned
 
+* Verify pack
+* ls-tree
+* Merge base
 * Quarantine areas
 * V0/V1 protocol
+* Protocol capabilities
 * Receiving/fetching
+* Hooks (functions, not files)
+* Digital signatures
+* Patience, histogram diffs
+* Three-way diffs
+* Init
 * Multi-pack indexes
-* Reachability bitmaps
+* Pack bitmaps
+* Multi-pack bitmaps
 * Delta base selection, e.g., islands
 * Compressing deltas
 * Writing packfiles
-* Thin packs
+* Writing thin packs
+* Protocol V2
+* Ref advertisement
+* Signed push
+* Pushing/sending
 * DEFLATE optimizations
 * Aggressive buffer pooling
-* Ref tables
-* Large object promisors
+* Ref namespaces
+* Refname validation/normalization
+* Writing refs
+* Packing refs
+* Reflogs
+* Ref transactions
+* Fsck
+* reftable
+* Alternates
+* Object borrowing
+* Bundles
+* Bundle URI
+* Packfile URI
+* Submodules
+* Archive
+* Pathspec
+* Refspec
+* Revision syntax
+* Revision walking, log
+* Path-limited history
+* Revision walking ordering (e.g., topo, date)
+* grep
+* Word diff
+* Describe
+* Cherry pick
+* Revert
+* Promisors remotes
+* Shallow clones
+* Object filtering
+* Partial clones
 * Repacking
+* Pack maintenance, gc
+* Cruft packs
+* Expiration
 * Compression agility
 * Working trees
+* File modes
+* Working tree conversions (e.g., CRLF)
+* Common dir
+* Worktree management
 * Index
+* ls-files
+* LFS
+* add, rm, mv, clean
+* Index conflicts
+* Split index
+* Untracked cache
+* status
+* FS monitor
+* Other index extensions
+* reset, restore, switch, checkout
+* Pseudorefs
 * Merge
+* More merge strategies (recursive, ort, rename)
+* Conflict resolution
+* Pseudo-merge bitmaps
 * Checkout
+* Sparse checkout
+* Sparse index
+* Git attributes
+* Ignore rules
+* Notes
+* Stash
+* Blame (incl., incremental)
+* Annotate
+* Similarity detection
+* Rename/copy detection
+* Replace refs, grafts
 * Rebase
+* More rebase variants
 * Commit graph writing
+* Config includes
 * Writing configs
+* Rerere
+* Fast import/export
+* Diff apply
+* Patch-id
+* Range-diff
+* Filter branch
+* Mail map
+* format-patch, am
+
+### Not planned
+
+* Any CLI tools whatsoever
+* Clone
+* Anything reasonably considered "porcelain"
+* Credential helper
+* Transports
+* Auth
+* Remote management
+* Bisect
+* Any use of env vars
+* Repository discovery walking
+
+I might make a second project that supports these.
+Furgit will probably not, and will remain sans-IO.
 
 ## Benchmarks
 
