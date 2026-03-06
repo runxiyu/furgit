@@ -49,14 +49,13 @@ Furgit is a low-level Git library in Go.
 * `.idx` and `.rev` writing
 * Pack ingestion
 * Un-thinning thin packs
+* Commit graph reading
 
 ## Planned
 
 * Quarantine areas
 * V0/V1 protocol (e.g., `sideband-64k`, `pktline`, etc.)
 * Receiving/fetching
-* Writing configs
-* Commit graph
 * Multi-pack indexes
 * Reachability bitmaps
 * Delta base selection, e.g., islands
@@ -74,6 +73,8 @@ Furgit is a low-level Git library in Go.
 * Merge
 * Checkout
 * Rebase
+* Commit graph writing
+* Writing configs
 
 ## Benchmarks
 
