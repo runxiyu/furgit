@@ -10,6 +10,18 @@ import (
 	"codeberg.org/lindenii/furgit/internal/intconv"
 )
 
+// ValueKind describes the presence and form of a config value.
+type ValueKind uint8
+
+const (
+	// ValueMissing means the queried key does not exist.
+	ValueMissing ValueKind = iota
+	// ValueValueless means the key exists but has no "= <value>" part.
+	ValueValueless
+	// ValueString means the key exists and has an explicit value (possibly "").
+	ValueString
+)
+
 func isValidSection(s string) bool {
 	if len(s) == 0 {
 		return false
