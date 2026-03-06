@@ -24,12 +24,16 @@ func TestChunkWriterWriteAndReadFrom(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Write: %v", err)
 	}
+
 	if n != 7 {
 		t.Fatalf("Write n=%d, want 7", n)
 	}
-	if err := enc.FlushIO(); err != nil {
+
+	err = enc.FlushIO()
+	if err != nil {
 		t.Fatalf("FlushIO: %v", err)
 	}
+
 	if got, want := out.String(), "0008\x02abc0008\x02def0006\x02g"; got != want {
 		t.Fatalf("got %q, want %q", got, want)
 	}
@@ -40,12 +44,16 @@ func TestChunkWriterWriteAndReadFrom(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadFrom: %v", err)
 	}
+
 	if rn != 4 {
 		t.Fatalf("ReadFrom n=%d, want 4", rn)
 	}
-	if err := enc.FlushIO(); err != nil {
+
+	err = enc.FlushIO()
+	if err != nil {
 		t.Fatalf("FlushIO: %v", err)
 	}
+
 	if got, want := out.String(), "0008\x02wxy0006\x02z"; got != want {
 		t.Fatalf("got %q, want %q", got, want)
 	}

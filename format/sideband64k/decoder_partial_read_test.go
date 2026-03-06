@@ -16,6 +16,7 @@ func TestDecoderHandlesPartialReads(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadFrame #1: %v", err)
 	}
+
 	if f.Type != sideband64k.FrameProgress || string(f.Payload) != "ok" {
 		t.Fatalf("frame #1 = %#v", f)
 	}
@@ -24,6 +25,7 @@ func TestDecoderHandlesPartialReads(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadFrame #2: %v", err)
 	}
+
 	if f.Type != sideband64k.FrameFlush {
 		t.Fatalf("frame #2 = %#v", f)
 	}

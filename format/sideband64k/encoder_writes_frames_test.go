@@ -16,25 +16,38 @@ func TestEncoderWritesFrames(t *testing.T) {
 	bw := bufio.NewWriter(&b)
 	enc := sideband64k.NewEncoder(bw)
 
-	if err := enc.WriteData([]byte("hi")); err != nil {
+	err := enc.WriteData([]byte("hi"))
+	if err != nil {
 		t.Fatalf("WriteData: %v", err)
 	}
-	if err := enc.WriteProgress([]byte("ok")); err != nil {
+
+	err = enc.WriteProgress([]byte("ok"))
+	if err != nil {
 		t.Fatalf("WriteProgress: %v", err)
 	}
-	if err := enc.WriteError([]byte("no")); err != nil {
+
+	err = enc.WriteError([]byte("no"))
+	if err != nil {
 		t.Fatalf("WriteError: %v", err)
 	}
-	if err := enc.WriteFlush(); err != nil {
+
+	err = enc.WriteFlush()
+	if err != nil {
 		t.Fatalf("WriteFlush: %v", err)
 	}
-	if err := enc.WriteDelim(); err != nil {
+
+	err = enc.WriteDelim()
+	if err != nil {
 		t.Fatalf("WriteDelim: %v", err)
 	}
-	if err := enc.WriteResponseEnd(); err != nil {
+
+	err = enc.WriteResponseEnd()
+	if err != nil {
 		t.Fatalf("WriteResponseEnd: %v", err)
 	}
-	if err := enc.FlushIO(); err != nil {
+
+	err = enc.FlushIO()
+	if err != nil {
 		t.Fatalf("FlushIO: %v", err)
 	}
 

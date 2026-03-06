@@ -28,6 +28,7 @@ func NewEncoder(w pktline.WriteFlusher) *Encoder {
 func (e *Encoder) SetMaxData(n int) {
 	if n <= 0 {
 		e.maxData = DataMax
+
 		return
 	}
 

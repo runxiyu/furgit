@@ -26,6 +26,7 @@ func (w *limitWriter) Write(p []byte) (int, error) {
 
 func (w *limitWriter) Flush() error {
 	w.flushes++
+
 	return nil
 }
 
@@ -40,5 +41,6 @@ func (r *byteReader) Read(p []byte) (int, error) {
 
 	p[0] = r.data[0]
 	r.data = r.data[1:]
+
 	return 1, nil
 }

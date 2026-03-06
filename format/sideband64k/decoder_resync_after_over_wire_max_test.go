@@ -31,6 +31,7 @@ func TestDecoderResyncAfterOverWireMax(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadFrame #2: %v", err)
 	}
+
 	if f.Type != sideband64k.FrameData || string(f.Payload) != "z" {
 		t.Fatalf("got frame %#v, want data z", f)
 	}

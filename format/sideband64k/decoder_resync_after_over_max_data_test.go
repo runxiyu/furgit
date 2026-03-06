@@ -17,20 +17,25 @@ func TestDecoderResyncAfterOverMaxData(t *testing.T) {
 	bw := bufio.NewWriter(&b)
 	enc := sideband64k.NewEncoder(bw)
 
-	if err := enc.WriteData([]byte("abcd")); err != nil {
+	err := enc.WriteData([]byte("abcd"))
+	if err != nil {
 		t.Fatalf("WriteData #1: %v", err)
 	}
-	if err := enc.WriteData([]byte("z")); err != nil {
+
+	err = enc.WriteData([]byte("z"))
+	if err != nil {
 		t.Fatalf("WriteData #2: %v", err)
 	}
-	if err := enc.FlushIO(); err != nil {
+
+	err = enc.FlushIO()
+	if err != nil {
 		t.Fatalf("FlushIO: %v", err)
 	}
 
 	dec := sideband64k.NewDecoder(bytes.NewReader(b.Bytes()), sideband64k.ReadOptions{})
 	dec.SetMaxData(1)
 
-	_, err := dec.ReadFrame()
+	_, err = dec.ReadFrame()
 	if !errors.Is(err, sideband64k.ErrTooLarge) {
 		t.Fatalf("got err %v, want ErrTooLarge", err)
 	}
@@ -39,6 +44,7 @@ func TestDecoderResyncAfterOverMaxData(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadFrame #2: %v", err)
 	}
+
 	if f.Type != sideband64k.FrameData || string(f.Payload) != "z" {
 		t.Fatalf("got frame %#v, want data z", f)
 	}

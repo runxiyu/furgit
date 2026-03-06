@@ -35,6 +35,7 @@ func NewDecoder(r io.Reader, opts ReadOptions) *Decoder {
 		opts:    opts,
 	}
 	d.dec.SetMaxData(pktline.LargePacketDataMax)
+
 	return d
 }
 
@@ -44,6 +45,7 @@ func NewDecoder(r io.Reader, opts ReadOptions) *Decoder {
 func (d *Decoder) SetMaxData(n int) {
 	if n <= 0 {
 		d.maxData = DataMax
+
 		return
 	}
 
@@ -54,6 +56,7 @@ func (d *Decoder) SetMaxData(n int) {
 func (d *Decoder) ReadFrame() (Frame, error) {
 	if d.peeked {
 		d.peeked = false
+
 		return cloneFrame(d.peek), d.peekErr
 	}
 

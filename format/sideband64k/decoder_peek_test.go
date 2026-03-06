@@ -16,6 +16,7 @@ func TestDecoderPeek(t *testing.T) {
 	if err != nil {
 		t.Fatalf("PeekFrame: %v", err)
 	}
+
 	if f.Type != sideband64k.FrameData || string(f.Payload) != "x" {
 		t.Fatalf("peek frame = %#v", f)
 	}
@@ -26,6 +27,7 @@ func TestDecoderPeek(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadFrame: %v", err)
 	}
+
 	if f.Type != sideband64k.FrameData || string(f.Payload) != "x" {
 		t.Fatalf("read frame = %#v", f)
 	}
