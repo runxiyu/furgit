@@ -71,6 +71,42 @@ func (r *Reachability) IsAncestor(ancestor, descendant objectid.ObjectID) (bool,
 	return false, nil
 }
 
+// CheckConnected verifies that all objects reachable from wants (under the
+// selected domain) can be fully traversed without missing-object/type/parse
+// errors, excluding subgraphs rooted at haves.
+//
+// Even with commit-graph acceleration available, each visited commit is
+// still validated against the object store.
+func (r *Reachability) CheckConnected(domain Domain, haves, wants map[objectid.ObjectID]struct{}) error {
+	walk := r.Walk(domain, haves, wants)
+
+	walk.strict = true
+	for range walk.Seq() {
+	}
+
+	return walk.Err()
+}
+
+// Walk creates one single-use traversal over the selected domain.
+//
+// In DomainCommits, when a commit-graph reader is attached, parent expansion
+// may use commit-graph metadata for speed.
+func (r *Reachability) Walk(domain Domain, haves, wants map[objectid.ObjectID]struct{}) *Walk {
+	walk := &Walk{
+		reachability: r,
+		domain:       domain,
+		haves:        haves,
+		wants:        wants,
+	}
+
+	err := validateDomain(domain)
+	if err != nil {
+		walk.err = err
+	}
+
+	return walk
+}
+
 func (r *Reachability) isAncestorGraph(ancestor, descendant objectid.ObjectID) (bool, bool, error) {
 	if r.graph == nil {
 		return false, false, nil
@@ -140,39 +176,4 @@ func (r *Reachability) isAncestorGraph(ancestor, descendant objectid.ObjectID) (
 	}
 
 	return false, true, nil
-}
-
-// CheckConnected verifies that all objects reachable from wants (under the
-// selected domain) can be fully traversed without missing-object/type/parse
-// errors, excluding subgraphs rooted at haves.
-//
-// Even with commit-graph acceleration available, each visited commit is
-// still validated against the object store.
-func (r *Reachability) CheckConnected(domain Domain, haves, wants map[objectid.ObjectID]struct{}) error {
-	walk := r.Walk(domain, haves, wants)
-	walk.strict = true
-	for range walk.Seq() {
-	}
-
-	return walk.Err()
-}
-
-// Walk creates one single-use traversal over the selected domain.
-//
-// In DomainCommits, when a commit-graph reader is attached, parent expansion
-// may use commit-graph metadata for speed.
-func (r *Reachability) Walk(domain Domain, haves, wants map[objectid.ObjectID]struct{}) *Walk {
-	walk := &Walk{
-		reachability: r,
-		domain:       domain,
-		haves:        haves,
-		wants:        wants,
-	}
-
-	err := validateDomain(domain)
-	if err != nil {
-		walk.err = err
-	}
-
-	return walk
 }

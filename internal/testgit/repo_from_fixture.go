@@ -18,6 +18,7 @@ func NewRepoFromFixture(tb testing.TB, algo objectid.Algorithm, fixtureDir strin
 
 	dst := tb.TempDir()
 	srcFS := os.DirFS(fixtureDir)
+
 	err := copyFS(dst, srcFS)
 	if err != nil {
 		tb.Fatalf("copy fixture %q: %v", fixtureDir, err)

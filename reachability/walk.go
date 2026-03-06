@@ -111,20 +111,20 @@ func (walk *Walk) expand(item walkItem) ([]walkItem, error) {
 }
 
 func (walk *Walk) expandCommits(item walkItem) ([]walkItem, error) {
-	if walk.reachability.graph != nil {
+	if walk.reachability.graph != nil { //nolint:nestif
 		next, graphUsed, err := walk.expandCommitsFromGraph(item.id)
 		if err != nil {
 			return nil, err
 		}
 
-		if graphUsed {
-			if walk.strict {
-				err := walk.validateCommitObject(item.id)
-				if err != nil {
-					return nil, err
-				}
+		if graphUsed && walk.strict {
+			err = walk.validateCommitObject(item.id)
+			if err != nil {
+				return nil, err
 			}
+		}
 
+		if graphUsed {
 			return next, nil
 		}
 	}
