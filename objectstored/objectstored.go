@@ -22,9 +22,7 @@ func (stored *StoredTag) ID() objectid.ObjectID {
 }
 
 // Object returns the parsed tag as the generic object interface.
-//
-//nolint:ireturn
-func (stored *StoredTag) Object() object.Object {
+func (stored *StoredTag) Object() object.Object { //nolint:ireturn
 	return stored.tag
 }
 

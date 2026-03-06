@@ -12,9 +12,7 @@ import (
 )
 
 // Resolve resolves a loose reference name to symbolic or detached form.
-//
-//nolint:ireturn
-func (store *Store) Resolve(name string) (ref.Ref, error) {
+func (store *Store) Resolve(name string) (ref.Ref, error) { //nolint:ireturn
 	if name == "" {
 		return nil, refstore.ErrReferenceNotFound
 	}
@@ -65,9 +63,7 @@ func (store *Store) ResolveFully(name string) (ref.Detached, error) {
 }
 
 // resolveOne resolves one loose ref file without symbolic recursion.
-//
-//nolint:ireturn
-func (store *Store) resolveOne(name string) (ref.Ref, error) {
+func (store *Store) resolveOne(name string) (ref.Ref, error) { //nolint:ireturn
 	data, err := store.root.ReadFile(name)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
