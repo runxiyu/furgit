@@ -28,3 +28,6 @@ tasks:
   - fmt-check: |
       cd furgit
       test -z "$(gofmt -l .)"
+  - fix-check: |
+      cd furgit
+      test -z "$(go fix -diff ./...)"
