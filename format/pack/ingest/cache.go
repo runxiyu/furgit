@@ -34,20 +34,20 @@ func newDeltaBaseCache(maxBytes int64) *deltaBaseCache {
 	}
 }
 
-// get returns a cloned cache entry for recordIdx.
+// get returns one cache entry for recordIdx.
 func (cache *deltaBaseCache) get(recordIdx int) (objecttype.Type, []byte, bool) {
 	value, ok := cache.lru.Get(deltaBaseCacheKey{recordIdx: recordIdx})
 	if !ok {
 		return objecttype.TypeInvalid, nil, false
 	}
 
-	return value.realType, append([]byte(nil), value.content...), true
+	return value.realType, value.content, true
 }
 
-// add stores a cloned cache entry for recordIdx.
+// add stores one cache entry for recordIdx.
 func (cache *deltaBaseCache) add(recordIdx int, realType objecttype.Type, content []byte) {
 	cache.lru.Add(deltaBaseCacheKey{recordIdx: recordIdx}, deltaBaseCacheValue{
 		realType: realType,
-		content:  append([]byte(nil), content...),
+		content:  content,
 	})
 }
