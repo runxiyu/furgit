@@ -1,5 +1,3 @@
-// Package iolimit provides small internal reader wrappers for length-constrained
-// stream I/O.
 package iolimit
 
 import (
