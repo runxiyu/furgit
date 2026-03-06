@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"iter"
 
+	"codeberg.org/lindenii/furgit/format/commitgraph"
 	"codeberg.org/lindenii/furgit/object"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
@@ -16,6 +17,7 @@ type Walk struct {
 	domain       Domain
 	haves        map[objectid.ObjectID]struct{}
 	wants        map[objectid.ObjectID]struct{}
+	strict       bool
 
 	seqUsed bool
 	err     error
@@ -109,6 +111,24 @@ func (walk *Walk) expand(item walkItem) ([]walkItem, error) {
 }
 
 func (walk *Walk) expandCommits(item walkItem) ([]walkItem, error) {
+	if walk.reachability.graph != nil {
+		next, graphUsed, err := walk.expandCommitsFromGraph(item.id)
+		if err != nil {
+			return nil, err
+		}
+
+		if graphUsed {
+			if walk.strict {
+				err := walk.validateCommitObject(item.id)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			return next, nil
+		}
+	}
+
 	ty, err := walk.readHeaderType(item.id)
 	if err != nil {
 		return nil, err
@@ -150,6 +170,74 @@ func (walk *Walk) expandCommits(item walkItem) ([]walkItem, error) {
 	}
 
 	return nil, fmt.Errorf("reachability: unreachable object type %d", ty)
+}
+
+func (walk *Walk) validateCommitObject(id objectid.ObjectID) error {
+	ty, err := walk.readHeaderType(id)
+	if err != nil {
+		return err
+	}
+
+	if ty != objecttype.TypeCommit {
+		return &ErrObjectType{OID: id, Got: ty, Want: objecttype.TypeCommit}
+	}
+
+	content, err := walk.readBytesContent(id)
+	if err != nil {
+		return err
+	}
+
+	_, err = object.ParseCommit(content, id.Algorithm())
+
+	return err
+}
+
+func (walk *Walk) expandCommitsFromGraph(id objectid.ObjectID) ([]walkItem, bool, error) {
+	pos, err := walk.reachability.graph.Lookup(id)
+	if err != nil {
+		var notFound *commitgraph.ErrNotFound
+		if errors.As(err, &notFound) {
+			return nil, false, nil
+		}
+
+		return nil, true, err
+	}
+
+	commit, err := walk.reachability.graph.CommitAt(pos)
+	if err != nil {
+		return nil, true, err
+	}
+
+	next := make([]walkItem, 0, 2+len(commit.ExtraParents))
+
+	if commit.Parent1.Valid {
+		parentOID, err := walk.reachability.graph.OIDAt(commit.Parent1.Pos)
+		if err != nil {
+			return nil, true, err
+		}
+
+		next = append(next, walkItem{id: parentOID, want: objecttype.TypeInvalid})
+	}
+
+	if commit.Parent2.Valid {
+		parentOID, err := walk.reachability.graph.OIDAt(commit.Parent2.Pos)
+		if err != nil {
+			return nil, true, err
+		}
+
+		next = append(next, walkItem{id: parentOID, want: objecttype.TypeInvalid})
+	}
+
+	for _, parentPos := range commit.ExtraParents {
+		parentOID, err := walk.reachability.graph.OIDAt(parentPos)
+		if err != nil {
+			return nil, true, err
+		}
+
+		next = append(next, walkItem{id: parentOID, want: objecttype.TypeInvalid})
+	}
+
+	return next, true, nil
 }
 
 func (walk *Walk) expandObjects(item walkItem) ([]walkItem, error) {
