@@ -54,6 +54,7 @@ func (session *Session) WriteReportStatus(result ReportStatusResult) error {
 	buf = pktline.AppendFlushPkt(buf)
 
 	w := session.base.PrimaryDataWriter()
+
 	_, err = w.Write(buf)
 	if err != nil {
 		return err
@@ -174,6 +175,7 @@ func (session *Session) WriteReportStatusV2(result ReportStatusResult) error {
 	buf = pktline.AppendFlushPkt(buf)
 
 	w := session.base.PrimaryDataWriter()
+
 	_, err = w.Write(buf)
 	if err != nil {
 		return err
