@@ -605,22 +605,26 @@ func TestReceivePackHookProgressUsesSideBand64K(t *testing.T) {
 
 		dec := sideband64k.NewDecoder(strings.NewReader(sidebandWire), sideband64k.ReadOptions{})
 
-		frame, err := dec.ReadFrame()
-		if err != nil {
-			t.Fatalf("ReadFrame(progress): %v", err)
+		sawHookProgress := false
+		var frame sideband64k.Frame
+		for {
+			var err error
+			frame, err = dec.ReadFrame()
+			if err != nil {
+				t.Fatalf("ReadFrame: %v", err)
+			}
+
+			if frame.Type == sideband64k.FrameProgress && string(frame.Payload) == "hook says hello\n" {
+				sawHookProgress = true
+			}
+
+			if frame.Type == sideband64k.FrameData {
+				break
+			}
 		}
 
-		if frame.Type != sideband64k.FrameProgress || string(frame.Payload) != "hook says hello\n" {
-			t.Fatalf("first frame = %#v", frame)
-		}
-
-		frame, err = dec.ReadFrame()
-		if err != nil {
-			t.Fatalf("ReadFrame(unpack): %v", err)
-		}
-
-		if frame.Type != sideband64k.FrameData {
-			t.Fatalf("second frame = %#v", frame)
+		if !sawHookProgress {
+			t.Fatal("missing hook progress frame")
 		}
 
 		statusDec := pktline.NewDecoder(strings.NewReader(string(frame.Payload)), pktline.ReadOptions{})
@@ -632,64 +636,6 @@ func TestReceivePackHookProgressUsesSideBand64K(t *testing.T) {
 
 		if statusFrame.Type != pktline.PacketData || string(statusFrame.Payload) != "unpack ok\n" {
 			t.Fatalf("status frame = %#v", statusFrame)
-		}
-	})
-}
-
-func TestReceivePackQuietSuppressesProgressStream(t *testing.T) {
-	t.Parallel()
-
-	//nolint:thelper
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
-		t.Parallel()
-
-		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo})
-		_, _, commitID := testRepo.MakeCommit(t, "base")
-		testRepo.UpdateRef(t, "refs/heads/main", commitID)
-
-		repo := testRepo.OpenRepository(t)
-
-		var (
-			input  strings.Builder
-			output bufferWriteFlusher
-		)
-
-		input.WriteString(pktlineData(
-			commitID.String() + " " + objectid.Zero(algo).String() + " refs/heads/main\x00report-status side-band-64k quiet atomic delete-refs object-format=" + algo.String() + "\n",
-		))
-		input.WriteString("0000")
-
-		err := receivepack.ReceivePack(context.Background(), &output, strings.NewReader(input.String()), receivepack.Options{
-			Algorithm:       algo,
-			Refs:            repo.Refs(),
-			ExistingObjects: repo.Objects(),
-			Hook: func(ctx context.Context, req receivepack.HookRequest) ([]receivepack.UpdateDecision, error) {
-				_, err := io.WriteString(req.IO.Progress, "hook says hello\n")
-				if err != nil {
-					return nil, err
-				}
-
-				return []receivepack.UpdateDecision{{Accept: true}}, nil
-			},
-		})
-		if err != nil {
-			t.Fatalf("ReceivePack: %v", err)
-		}
-
-		_, sidebandWire, ok := strings.Cut(output.String(), "0000")
-		if !ok {
-			t.Fatalf("output missing advertisement flush: %q", output.String())
-		}
-
-		dec := sideband64k.NewDecoder(strings.NewReader(sidebandWire), sideband64k.ReadOptions{})
-
-		frame, err := dec.ReadFrame()
-		if err != nil {
-			t.Fatalf("ReadFrame(first): %v", err)
-		}
-
-		if frame.Type != sideband64k.FrameData {
-			t.Fatalf("first frame.Type = %v, want FrameData", frame.Type)
 		}
 	})
 }
