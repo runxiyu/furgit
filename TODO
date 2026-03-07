@@ -1,0 +1,15 @@
+So the to-do list in README.md is more 
+
+* Better status reporting, filling in more things in report-status-v2.
+* Better progress reporting during network operations.
+* More accurate semantics for non-atomic batch updates:
+  - Git validates the batch against the transaction view while
+    we update against the actual store
+  - Duplicates should really just be a fatal transaction level issue
+  - Git basically makes it a single transaction with rejected entries
+    removed, but we basically commit each op separately, so
+    later operations see the live repository after earlier successful
+    ops. So, yeah, atomicity of the surviving subset.
+  - Definitely should stop string matching on errors
+* Design some way to pass commit graphs, or if possible, entire repo
+  objects to hooks. Unfortunately this is more difficult than it sounds.
