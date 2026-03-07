@@ -13,3 +13,5 @@ So the to-do list in README.md is more
   - Definitely should stop string matching on errors
 * Design some way to pass commit graphs, or if possible, entire repo
   objects to hooks. Unfortunately this is more difficult than it sounds.
+* Maybe the Progress/Error writers should return error on creation
+  instead of automatically discarding content?
