@@ -6,7 +6,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
-	"codeberg.org/lindenii/furgit/receivepack/internal/service"
+	"codeberg.org/lindenii/furgit/receivepack/service"
 	"codeberg.org/lindenii/furgit/refstore"
 )
 
