@@ -69,7 +69,7 @@ func (session *Session) WriteReportStatusV2(result ReportStatusResult) error {
 		unpackResult = result.UnpackError
 	}
 
-	if !session.negotiated.SideBand64K {
+	if !session.negotiated.SideBand64K { //nolint:nestif
 		err := session.base.WriteData(fmt.Appendf(nil, "unpack %s\n", unpackResult))
 		if err != nil {
 			return err
