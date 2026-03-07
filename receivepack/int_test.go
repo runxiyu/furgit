@@ -52,7 +52,8 @@ func TestReceivePackDeleteOnlyAtomicDeleteSucceeds(t *testing.T) {
 			t.Fatalf("unexpected receive-pack output %q", got)
 		}
 
-		if _, err := repo.Refs().Resolve("refs/heads/main"); err == nil {
+		_, err = repo.Refs().Resolve("refs/heads/main")
+		if err == nil {
 			t.Fatal("refs/heads/main still exists after delete push")
 		}
 	})
@@ -101,11 +102,13 @@ func TestReceivePackDeleteOnlyNonAtomicAppliesIndependentDeletes(t *testing.T) {
 			t.Fatalf("unexpected receive-pack output %q", got)
 		}
 
-		if _, err := repo.Refs().Resolve("refs/heads/main"); err != nil {
+		_, err = repo.Refs().Resolve("refs/heads/main")
+		if err != nil {
 			t.Fatalf("Resolve(main): %v", err)
 		}
 
-		if _, err := repo.Refs().Resolve("refs/heads/topic"); err == nil {
+		_, err = repo.Refs().Resolve("refs/heads/topic")
+		if err == nil {
 			t.Fatal("refs/heads/topic still exists after successful delete")
 		}
 	})
@@ -154,11 +157,13 @@ func TestReceivePackDeleteOnlyAtomicFailureLeavesAllRefsUntouched(t *testing.T) 
 			t.Fatalf("unexpected receive-pack output %q", got)
 		}
 
-		if _, err := repo.Refs().Resolve("refs/heads/main"); err != nil {
+		_, err = repo.Refs().Resolve("refs/heads/main")
+		if err != nil {
 			t.Fatalf("Resolve(main): %v", err)
 		}
 
-		if _, err := repo.Refs().Resolve("refs/heads/topic"); err != nil {
+		_, err = repo.Refs().Resolve("refs/heads/topic")
+		if err != nil {
 			t.Fatalf("Resolve(topic): %v", err)
 		}
 	})
@@ -449,11 +454,13 @@ func TestReceivePackHookSeesQuarantinedObjectsAndCanRejectBeforePromotion(t *tes
 						t.Fatalf("unexpected hook updates: %+v", req.Updates)
 					}
 
-					if _, _, err := req.ExistingObjects.ReadHeader(commitID); err == nil {
+					_, _, err := req.ExistingObjects.ReadHeader(commitID)
+					if err == nil {
 						t.Fatalf("existing objects unexpectedly contained quarantined commit %s", commitID)
 					}
 
-					if _, _, err := req.QuarantinedObjects.ReadHeader(commitID); err != nil {
+					_, _, err = req.QuarantinedObjects.ReadHeader(commitID)
+					if err != nil {
 						t.Fatalf("quarantined objects missing commit %s: %v", commitID, err)
 					}
 
@@ -477,7 +484,8 @@ func TestReceivePackHookSeesQuarantinedObjectsAndCanRejectBeforePromotion(t *tes
 			t.Fatalf("unexpected receive-pack output %q", got)
 		}
 
-		if _, err := repo.Refs().Resolve("refs/heads/main"); err == nil {
+		_, err = repo.Refs().Resolve("refs/heads/main")
+		if err == nil {
 			t.Fatal("refs/heads/main exists after hook rejection")
 		}
 
@@ -535,11 +543,13 @@ func TestReceivePackHookCanRejectSubsetOfNonAtomicDeleteOnlyPush(t *testing.T) {
 			t.Fatalf("unexpected receive-pack output %q", got)
 		}
 
-		if _, err := repo.Refs().Resolve("refs/heads/main"); err != nil {
+		_, err = repo.Refs().Resolve("refs/heads/main")
+		if err != nil {
 			t.Fatalf("Resolve(main): %v", err)
 		}
 
-		if _, err := repo.Refs().Resolve("refs/heads/topic"); err == nil {
+		_, err = repo.Refs().Resolve("refs/heads/topic")
+		if err == nil {
 			t.Fatal("refs/heads/topic still exists after successful delete")
 		}
 	})

@@ -169,16 +169,17 @@ func finalizeQuarantineFile(
 			return applyPromotedFilePermissions(root, dst, perms)
 		case !errors.Is(err, fs.ErrExist):
 			_, statErr := root.Stat(dst)
-			if statErr == nil {
+			switch {
+			case statErr == nil:
 				err = fs.ErrExist
-			} else if errors.Is(statErr, fs.ErrNotExist) {
+			case errors.Is(statErr, fs.ErrNotExist):
 				renameErr := root.Rename(src, dst)
 				if renameErr == nil {
 					return applyPromotedFilePermissions(root, dst, perms)
 				}
 
 				err = renameErr
-			} else {
+			default:
 				_ = root.Remove(src)
 
 				return statErr

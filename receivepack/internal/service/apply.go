@@ -15,6 +15,7 @@ func (service *Service) applyAtomic(result *Result, commands []Command) error {
 		err = queueWriteTransaction(tx, command)
 		if err != nil {
 			_ = tx.Abort()
+
 			fillCommandErrors(result, commands, err.Error())
 
 			return nil
