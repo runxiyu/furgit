@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"os"
+
+	"codeberg.org/lindenii/furgit/internal/utils"
 )
 
 // Execute validates one receive-pack request, optionally ingests its pack into
@@ -78,13 +80,18 @@ func (service *Service) Execute(ctx context.Context, req *Request) (*Result, err
 	if req.PackExpected {
 		// Git migrates quarantined objects into permanent storage immediately
 		// before starting ref updates.
+		utils.WriteProgressf(service.opts.Progress, "promoting quarantine...\r")
 		err = service.promoteQuarantine(quarantineName, quarantineRoot)
 		if err != nil {
+			utils.WriteProgressf(service.opts.Progress, "promoting quarantine: failed: %v\n", err)
+
 			result.UnpackError = err.Error()
 			fillCommandErrors(result, req.Commands, err.Error())
 
 			return result, nil
 		}
+
+		utils.WriteProgressf(service.opts.Progress, "promoting quarantine: done.\n")
 	}
 
 	if req.Atomic {

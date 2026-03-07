@@ -16,8 +16,6 @@ func (service *Service) ingestQuarantine(
 		return "", nil, true
 	}
 
-	utils.WriteProgressf(service.opts.Progress, "receiving objects: ingesting pack\n")
-
 	if req.Pack == nil {
 		utils.WriteProgressf(service.opts.Progress, "receiving objects: unpack failed: missing pack stream\n")
 
@@ -36,6 +34,7 @@ func (service *Service) ingestQuarantine(
 		return "", nil, false
 	}
 
+	utils.WriteProgressf(service.opts.Progress, "creating quarantine...\r")
 	quarantineName, quarantineRoot, err := service.createQuarantineRoot()
 	if err != nil {
 		utils.WriteProgressf(service.opts.Progress, "receiving objects: unpack failed: %v\n", err)
@@ -58,6 +57,8 @@ func (service *Service) ingestQuarantine(
 
 		return "", nil, false
 	}
+	utils.WriteProgressf(service.opts.Progress, "creating quarantine: done.\n")
+	utils.WriteProgressf(service.opts.Progress, "receiving objects: unpacking...\r")
 
 	ingested, err := ingest.Ingest(
 		req.Pack,
@@ -85,12 +86,7 @@ func (service *Service) ingestQuarantine(
 		return "", nil, false
 	}
 
-	utils.WriteProgressf(
-		service.opts.Progress,
-		"receiving objects: unpack ok, %d objects (%s)\n",
-		ingested.ObjectCount,
-		ingested.PackHash,
-	)
+	utils.WriteProgressf(service.opts.Progress, "receiving objects: unpacking: done (%d objects, %s).\n", ingested.ObjectCount, ingested.PackHash)
 
 	result.Ingest = &ingested
 

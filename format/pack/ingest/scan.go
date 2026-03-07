@@ -21,10 +21,12 @@ func streamPackAndScan(state *ingestState) error {
 		state.algo.Size(),
 	)
 
+	utils.WriteProgressf(state.opts.Progress, "validating pack header...\r")
 	err = readAndValidatePackHeader(state)
 	if err != nil {
 		return err
 	}
+	utils.WriteProgressf(state.opts.Progress, "validating pack header: done.\n")
 
 	state.records = make([]objectRecord, 0, state.objectCountHeader)
 	state.ofsDeltas = make([]ofsDeltaRef, 0, state.objectCountHeader)
