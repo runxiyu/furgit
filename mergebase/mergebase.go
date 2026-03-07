@@ -7,13 +7,14 @@ import (
 	"codeberg.org/lindenii/furgit/objectstore"
 )
 
-// Bases is one iterator merge-base query.
+// Bases is one merge-base query over two commit roots.
 type Bases struct {
 	store objectstore.Store
 	graph *commitgraphread.Reader
 	left  objectid.ObjectID
 	right objectid.ObjectID
 
-	seqUsed bool
-	err     error
+	computed bool
+	bases    []objectid.ObjectID
+	err      error
 }

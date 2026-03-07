@@ -16,28 +16,15 @@ func Base(
 	right objectid.ObjectID,
 ) (objectid.ObjectID, bool, error) {
 	query := Query(store, graph, left, right)
-	seq := query.Seq()
 
-	var (
-		first objectid.ObjectID
-		ok    bool
-	)
-
-	seq(func(id objectid.ObjectID) bool {
-		first = id
-		ok = true
-
-		return false
-	})
-
-	err := query.Err()
+	bases, err := query.All()
 	if err != nil {
 		return objectid.ObjectID{}, false, err
 	}
 
-	if !ok {
+	if len(bases) == 0 {
 		return objectid.ObjectID{}, false, nil
 	}
 
-	return first, true, nil
+	return bases[0], true, nil
 }

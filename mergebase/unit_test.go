@@ -38,19 +38,6 @@ func tagBody(target objectid.ObjectID, targetType objecttype.Type) []byte {
 	return fmt.Appendf(nil, "object %s\ntype %s\ntag t\n\nmsg\n", target.String(), targetName)
 }
 
-// collectSeq collects one object ID sequence into a slice.
-func collectSeq(seq func(func(objectid.ObjectID) bool)) []objectid.ObjectID {
-	var out []objectid.ObjectID
-
-	seq(func(id objectid.ObjectID) bool {
-		out = append(out, id)
-
-		return true
-	})
-
-	return out
-}
-
 // toSet converts one slice of object IDs into a set.
 func toSet(ids []objectid.ObjectID) map[objectid.ObjectID]struct{} {
 	set := make(map[objectid.ObjectID]struct{}, len(ids))
@@ -97,11 +84,9 @@ func TestQueryLinearHistory(t *testing.T) {
 		right := store.AddObject(objecttype.TypeCommit, commitBody(tree, left))
 
 		query := mergebase.Query(store, nil, left, right)
-		got := collectSeq(query.Seq())
-
-		err := query.Err()
+		got, err := query.All()
 		if err != nil {
-			t.Fatalf("query.Err(): %v", err)
+			t.Fatalf("query.All(): %v", err)
 		}
 
 		if !slices.Equal(got, []objectid.ObjectID{left}) {
@@ -145,11 +130,9 @@ func TestQueryPeelsAnnotatedTags(t *testing.T) {
 		tag := store.AddObject(objecttype.TypeTag, tagBody(right, objecttype.TypeCommit))
 
 		query := mergebase.Query(store, nil, left, tag)
-		got := collectSeq(query.Seq())
-
-		err := query.Err()
+		got, err := query.All()
 		if err != nil {
-			t.Fatalf("query.Err(): %v", err)
+			t.Fatalf("query.All(): %v", err)
 		}
 
 		if !slices.Equal(got, []objectid.ObjectID{base}) {
@@ -196,12 +179,11 @@ func TestQueryCrissCrossReturnsAllBestCommonAncestors(t *testing.T) {
 		right := store.AddObject(objecttype.TypeCommit, commitBody(rightTree, base2, base1))
 
 		query := mergebase.Query(store, nil, left, right)
-		got := toSet(collectSeq(query.Seq()))
-
-		err := query.Err()
+		all, err := query.All()
 		if err != nil {
-			t.Fatalf("query.Err(): %v", err)
+			t.Fatalf("query.All(): %v", err)
 		}
+		got := toSet(all)
 
 		want := map[objectid.ObjectID]struct{}{base1: {}, base2: {}}
 		if !maps.Equal(got, want) {
@@ -244,11 +226,9 @@ func TestQueryReturnsNoResultWhenNoCommonAncestorExists(t *testing.T) {
 		right := store.AddObject(objecttype.TypeCommit, commitBody(rightTree))
 
 		query := mergebase.Query(store, nil, left, right)
-		got := collectSeq(query.Seq())
-
-		err := query.Err()
+		got, err := query.All()
 		if err != nil {
-			t.Fatalf("query.Err(): %v", err)
+			t.Fatalf("query.All(): %v", err)
 		}
 
 		if len(got) != 0 {
@@ -281,9 +261,7 @@ func TestQueryRejectsNonCommitAfterPeel(t *testing.T) {
 		tagToTree := store.AddObject(objecttype.TypeTag, tagBody(tree, objecttype.TypeTree))
 
 		query := mergebase.Query(store, nil, commit, tagToTree)
-		_ = collectSeq(query.Seq())
-
-		err := query.Err()
+		_, err := query.All()
 		if err == nil {
 			t.Fatal("expected error")
 		}
@@ -299,7 +277,7 @@ func TestQueryRejectsNonCommitAfterPeel(t *testing.T) {
 	})
 }
 
-func TestQuerySeqSingleUse(t *testing.T) {
+func TestQueryAllIsRepeatable(t *testing.T) {
 	t.Parallel()
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
@@ -316,20 +294,33 @@ func TestQuerySeqSingleUse(t *testing.T) {
 
 		query := mergebase.Query(store, nil, left, right)
 
-		_ = collectSeq(query.Seq())
-		again := collectSeq(query.Seq())
-
-		if len(again) != 0 {
-			t.Fatalf("second Seq() unexpectedly yielded %v", again)
+		first, err := query.All()
+		if err != nil {
+			t.Fatalf("query.All() first call: %v", err)
 		}
 
-		err := query.Err()
-		if err == nil {
-			t.Fatal("expected error after second Seq()")
+		again, err := query.All()
+		if err != nil {
+			t.Fatalf("query.All() second call: %v", err)
 		}
 
-		if err.Error() != "mergebase: sequence already consumed" {
-			t.Fatalf("unexpected error: %v", err)
+		if !slices.Equal(again, first) {
+			t.Fatalf("second All()=%v, want %v", again, first)
+		}
+
+		if len(first) == 0 {
+			t.Fatal("first All() unexpectedly returned no results")
+		}
+
+		first[0] = objectid.ObjectID{}
+
+		third, err := query.All()
+		if err != nil {
+			t.Fatalf("query.All() third call: %v", err)
+		}
+
+		if third[0] == (objectid.ObjectID{}) {
+			t.Fatal("query.All() exposed internal slice state")
 		}
 	})
 }

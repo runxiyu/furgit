@@ -35,12 +35,11 @@ func TestQueryMatchesGitMergeBaseAll(t *testing.T) {
 		store := testRepo.OpenObjectStore(t)
 
 		query := mergebase.Query(store, nil, left, tag)
-		got := oidSetFromSeq(query.Seq())
-
-		err := query.Err()
+		all, err := query.All()
 		if err != nil {
-			t.Fatalf("query.Err(): %v", err)
+			t.Fatalf("query.All(): %v", err)
 		}
+		got := oidSetFromSlice(all)
 
 		want := gitMergeBaseAllSet(t, testRepo, left, tag)
 		if !maps.Equal(got, want) {
@@ -77,12 +76,11 @@ func TestQueryCrissCrossMatchesGitMergeBaseAll(t *testing.T) {
 		store := testRepo.OpenObjectStore(t)
 
 		query := mergebase.Query(store, nil, left, right)
-		got := oidSetFromSeq(query.Seq())
-
-		err := query.Err()
+		all, err := query.All()
 		if err != nil {
-			t.Fatalf("query.Err(): %v", err)
+			t.Fatalf("query.All(): %v", err)
 		}
+		got := oidSetFromSlice(all)
 
 		want := gitMergeBaseAllSet(t, testRepo, left, right)
 		if !maps.Equal(got, want) {
@@ -137,12 +135,11 @@ func TestQueryMatchesGitMergeBaseAllWithCommitGraph(t *testing.T) {
 		graph := testRepo.OpenCommitGraph(t)
 
 		query := mergebase.Query(store, graph, left, right)
-		got := oidSetFromSeq(query.Seq())
-
-		err := query.Err()
+		all, err := query.All()
 		if err != nil {
-			t.Fatalf("query.Err(): %v", err)
+			t.Fatalf("query.All(): %v", err)
 		}
+		got := oidSetFromSlice(all)
 
 		want := gitMergeBaseAllSet(t, testRepo, left, right)
 		if !maps.Equal(got, want) {
@@ -232,15 +229,13 @@ func TestBaseMatchesGitMergeBaseWithoutAll(t *testing.T) {
 	})
 }
 
-// oidSetFromSeq collects one object ID sequence into a set.
-func oidSetFromSeq(seq func(func(objectid.ObjectID) bool)) map[objectid.ObjectID]struct{} {
+// oidSetFromSlice collects one object ID slice into a set.
+func oidSetFromSlice(ids []objectid.ObjectID) map[objectid.ObjectID]struct{} {
 	out := make(map[objectid.ObjectID]struct{})
 
-	seq(func(id objectid.ObjectID) bool {
+	for _, id := range ids {
 		out[id] = struct{}{}
-
-		return true
-	})
+	}
 
 	return out
 }

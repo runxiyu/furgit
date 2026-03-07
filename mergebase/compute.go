@@ -8,14 +8,25 @@ import (
 	"codeberg.org/lindenii/furgit/objectid"
 )
 
-func (query *Bases) compute() ([]objectid.ObjectID, error) {
+// All returns all merge bases in Git's merge-base --all order.
+func (query *Bases) All() ([]objectid.ObjectID, error) {
+	if query.computed {
+		return slices.Clone(query.bases), query.err
+	}
+
+	query.computed = true
+
 	leftCommit, err := peel.ToCommit(query.store, query.left)
 	if err != nil {
+		query.err = err
+
 		return nil, err
 	}
 
 	rightCommit, err := peel.ToCommit(query.store, query.right)
 	if err != nil {
+		query.err = err
+
 		return nil, err
 	}
 
@@ -23,16 +34,22 @@ func (query *Bases) compute() ([]objectid.ObjectID, error) {
 
 	leftIdx, err := ctx.ResolveOID(leftCommit)
 	if err != nil {
+		query.err = err
+
 		return nil, err
 	}
 
 	rightIdx, err := ctx.ResolveOID(rightCommit)
 	if err != nil {
+		query.err = err
+
 		return nil, err
 	}
 
 	candidates, err := commitquery.MergeBases(ctx, leftIdx, rightIdx)
 	if err != nil {
+		query.err = err
+
 		return nil, err
 	}
 
@@ -47,10 +64,10 @@ func (query *Bases) compute() ([]objectid.ObjectID, error) {
 		}
 	})
 
-	out := make([]objectid.ObjectID, 0, len(candidates))
+	query.bases = make([]objectid.ObjectID, 0, len(candidates))
 	for _, idx := range candidates {
-		out = append(out, ctx.ID(idx))
+		query.bases = append(query.bases, ctx.ID(idx))
 	}
 
-	return out, nil
+	return slices.Clone(query.bases), nil
 }

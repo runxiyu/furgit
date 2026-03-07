@@ -6,7 +6,7 @@ import (
 	"codeberg.org/lindenii/furgit/objectstore"
 )
 
-// Query builds one single-use merge-base query over two commit roots.
+// Query builds one merge-base query over two commit roots.
 //
 // Both inputs are peeled through annotated tags before commit traversal.
 func Query(
