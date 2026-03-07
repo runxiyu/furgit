@@ -71,6 +71,11 @@ func (service *Service) promoteQuarantineDir(quarantineName string, quarantineRo
 				return err
 			}
 
+			err = service.applyPromotedDirectoryPermissions(childRel)
+			if err != nil {
+				return err
+			}
+
 			err = service.promoteQuarantineDir(quarantineName, quarantineRoot, childRel)
 			if err != nil {
 				return err
@@ -84,6 +89,7 @@ func (service *Service) promoteQuarantineDir(quarantineName string, quarantineRo
 			path.Join(quarantineName, childRel),
 			childRel,
 			isLooseObjectShardPath(rel),
+			service.opts.PromotedObjectPermissions,
 		)
 		if err == nil {
 			continue
@@ -126,7 +132,32 @@ func isHex(ch byte) bool {
 	return ('0' <= ch && ch <= '9') || ('a' <= ch && ch <= 'f') || ('A' <= ch && ch <= 'F')
 }
 
-func finalizeQuarantineFile(root *os.Root, src, dst string, skipCollisionCheck bool) error {
+func (service *Service) applyPromotedDirectoryPermissions(name string) error {
+	if service.opts.PromotedObjectPermissions == nil {
+		return nil
+	}
+
+	return service.opts.ObjectsRoot.Chmod(name, service.opts.PromotedObjectPermissions.DirMode)
+}
+
+func applyPromotedFilePermissions(
+	root *os.Root,
+	name string,
+	perms *PromotedObjectPermissions,
+) error {
+	if perms == nil {
+		return nil
+	}
+
+	return root.Chmod(name, perms.FileMode)
+}
+
+func finalizeQuarantineFile(
+	root *os.Root,
+	src, dst string,
+	skipCollisionCheck bool,
+	perms *PromotedObjectPermissions,
+) error {
 	const maxVanishedRetries = 5
 
 	for retries := 0; ; retries++ {
@@ -135,7 +166,7 @@ func finalizeQuarantineFile(root *os.Root, src, dst string, skipCollisionCheck b
 		case err == nil:
 			_ = root.Remove(src)
 
-			return nil
+			return applyPromotedFilePermissions(root, dst, perms)
 		case !errors.Is(err, fs.ErrExist):
 			_, statErr := root.Stat(dst)
 			if statErr == nil {
@@ -143,7 +174,7 @@ func finalizeQuarantineFile(root *os.Root, src, dst string, skipCollisionCheck b
 			} else if errors.Is(statErr, fs.ErrNotExist) {
 				renameErr := root.Rename(src, dst)
 				if renameErr == nil {
-					return nil
+					return applyPromotedFilePermissions(root, dst, perms)
 				}
 
 				err = renameErr
@@ -163,7 +194,7 @@ func finalizeQuarantineFile(root *os.Root, src, dst string, skipCollisionCheck b
 		if skipCollisionCheck {
 			_ = root.Remove(src)
 
-			return nil
+			return applyPromotedFilePermissions(root, dst, perms)
 		}
 
 		equal, vanished, cmpErr := compareRootFiles(root, src, dst)
@@ -185,7 +216,7 @@ func finalizeQuarantineFile(root *os.Root, src, dst string, skipCollisionCheck b
 
 		_ = root.Remove(src)
 
-		return nil
+		return applyPromotedFilePermissions(root, dst, perms)
 	}
 }
 

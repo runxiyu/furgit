@@ -9,6 +9,70 @@ import (
 	"codeberg.org/lindenii/furgit/objectstore/memory"
 )
 
+func TestPromoteQuarantineAppliesConfiguredPermissions(t *testing.T) {
+	t.Parallel()
+
+	objectsDir := t.TempDir()
+	objectsRoot, err := os.OpenRoot(objectsDir)
+	if err != nil {
+		t.Fatalf("os.OpenRoot: %v", err)
+	}
+
+	t.Cleanup(func() {
+		_ = objectsRoot.Close()
+	})
+
+	svc := New(Options{
+		Algorithm:       objectid.AlgorithmSHA1,
+		ExistingObjects: memory.New(objectid.AlgorithmSHA1),
+		ObjectsRoot:     objectsRoot,
+		PromotedObjectPermissions: &PromotedObjectPermissions{
+			DirMode:  0o751,
+			FileMode: 0o640,
+		},
+	})
+
+	quarantineName, quarantineRoot, err := svc.createQuarantineRoot()
+	if err != nil {
+		t.Fatalf("createQuarantineRoot: %v", err)
+	}
+
+	t.Cleanup(func() {
+		_ = quarantineRoot.Close()
+		_ = objectsRoot.RemoveAll(quarantineName)
+	})
+
+	if err := quarantineRoot.Mkdir("ab", 0o700); err != nil {
+		t.Fatalf("Mkdir(ab): %v", err)
+	}
+
+	if err := quarantineRoot.WriteFile(path.Join("ab", "cdef"), []byte("payload"), 0o600); err != nil {
+		t.Fatalf("WriteFile(quarantine loose): %v", err)
+	}
+
+	if err := svc.promoteQuarantine(quarantineName, quarantineRoot); err != nil {
+		t.Fatalf("promoteQuarantine: %v", err)
+	}
+
+	dirInfo, err := objectsRoot.Stat("ab")
+	if err != nil {
+		t.Fatalf("Stat(ab): %v", err)
+	}
+
+	if got := dirInfo.Mode().Perm(); got != 0o751 {
+		t.Fatalf("dir mode = %o, want 751", got)
+	}
+
+	fileInfo, err := objectsRoot.Stat(path.Join("ab", "cdef"))
+	if err != nil {
+		t.Fatalf("Stat(ab/cdef): %v", err)
+	}
+
+	if got := fileInfo.Mode().Perm(); got != 0o640 {
+		t.Fatalf("file mode = %o, want 640", got)
+	}
+}
+
 func TestPromoteQuarantineTreatsExistingLooseObjectAsSuccess(t *testing.T) {
 	t.Parallel()
 

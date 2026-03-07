@@ -71,6 +71,9 @@ func ReceivePack(
 		Refs:            opts.Refs,
 		ExistingObjects: opts.ExistingObjects,
 		ObjectsRoot:     opts.ObjectsRoot,
+		PromotedObjectPermissions: translatePromotedObjectPermissions(
+			opts.PromotedObjectPermissions,
+		),
 	})
 
 	result, err := svc.Execute(ctx, serviceReq)
@@ -89,4 +92,17 @@ func ReceivePack(
 	}
 
 	return nil
+}
+
+func translatePromotedObjectPermissions(
+	perms *PromotedObjectPermissions,
+) *service.PromotedObjectPermissions {
+	if perms == nil {
+		return nil
+	}
+
+	return &service.PromotedObjectPermissions{
+		DirMode:  perms.DirMode,
+		FileMode: perms.FileMode,
+	}
 }
