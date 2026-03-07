@@ -22,7 +22,7 @@ func (stored *StoredTree) ID() objectid.ObjectID {
 }
 
 // Object returns the parsed tree as the generic object interface.
-func (stored *StoredTree) Object() object.Object { //nolint:ireturn
+func (stored *StoredTree) Object() object.Object {
 	return stored.tree
 }
 

@@ -8,6 +8,7 @@ linters:
       - internal/compress/internal
   disable:
     - dupword          # extremely normal in tests and a pretty unnecessary linter
+    - ireturn          # can't seem to ignore this linter properly and we don't need anyway, cf. tagged unions
     - goconst          # unnecessary especially for our parsing code; many false positives
     - mnd              # unnecessary especially for our parsing code; many false positives
     - lll              # common sense is much better than these sort of rules

@@ -22,7 +22,7 @@ func (stored *StoredCommit) ID() objectid.ObjectID {
 }
 
 // Object returns the parsed commit as the generic object interface.
-func (stored *StoredCommit) Object() object.Object { //nolint:ireturn
+func (stored *StoredCommit) Object() object.Object {
 	return stored.commit
 }
 
