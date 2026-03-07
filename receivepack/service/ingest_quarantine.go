@@ -52,9 +52,11 @@ func (service *Service) ingestQuarantine(
 		req.Pack,
 		quarantinePackRoot,
 		service.opts.Algorithm,
-		true,
-		true,
-		service.opts.ExistingObjects,
+		ingest.Options{
+			FixThin:  true,
+			WriteRev: true,
+			Base:     service.opts.ExistingObjects,
+		},
 	)
 
 	_ = quarantinePackRoot.Close()

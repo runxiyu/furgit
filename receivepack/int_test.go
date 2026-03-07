@@ -4,17 +4,18 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 	"testing"
+	"time"
 
+	"codeberg.org/lindenii/furgit/format/pktline"
 	"codeberg.org/lindenii/furgit/format/sideband64k"
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/objectid"
 	receivepack "codeberg.org/lindenii/furgit/receivepack"
 	receivepackhooks "codeberg.org/lindenii/furgit/receivepack/hooks"
 )
-
-// TODO: actually test with send-pack
 
 func TestReceivePackDeleteOnlyAtomicDeleteSucceeds(t *testing.T) {
 	t.Parallel()
@@ -618,8 +619,19 @@ func TestReceivePackHookProgressUsesSideBand64K(t *testing.T) {
 			t.Fatalf("ReadFrame(unpack): %v", err)
 		}
 
-		if frame.Type != sideband64k.FrameData || string(frame.Payload) != "unpack ok\n" {
+		if frame.Type != sideband64k.FrameData {
 			t.Fatalf("second frame = %#v", frame)
+		}
+
+		statusDec := pktline.NewDecoder(strings.NewReader(string(frame.Payload)), pktline.ReadOptions{})
+
+		statusFrame, err := statusDec.ReadFrame()
+		if err != nil {
+			t.Fatalf("ReadFrame(status unpack): %v", err)
+		}
+
+		if statusFrame.Type != pktline.PacketData || string(statusFrame.Payload) != "unpack ok\n" {
+			t.Fatalf("status frame = %#v", statusFrame)
 		}
 	})
 }
@@ -734,6 +746,146 @@ func TestReceivePackReportStatusV2IncludesRefDetails(t *testing.T) {
 	})
 }
 
+func TestReceivePackGitPushCreatesBranch(t *testing.T) {
+	t.Parallel()
+
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		t.Parallel()
+
+		sender := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo})
+		_, _, commitID := sender.MakeCommit(t, "pushed commit")
+		sender.UpdateRef(t, "refs/heads/main", commitID)
+
+		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+		repo := receiver.OpenRepository(t)
+		objectsRoot := receiver.OpenObjectsRoot(t)
+
+		stdout, stderr, clientErr, serverErr := runGitPushFD(
+			t,
+			sender,
+			receivepack.Options{
+				Algorithm:       algo,
+				Refs:            repo.Refs(),
+				ExistingObjects: repo.Objects(),
+				ObjectsRoot:     objectsRoot,
+			},
+			"push", "--porcelain", "fd::3,4/test", "refs/heads/main:refs/heads/main",
+		)
+		if clientErr != nil {
+			t.Fatalf("git push failed: %v\nstdout=%s\nstderr=%s", clientErr, stdout, stderr)
+		}
+
+		if serverErr != nil {
+			t.Fatalf("ReceivePack: %v", serverErr)
+		}
+
+		resolved, err := receiver.OpenRepository(t).Refs().ResolveFully("refs/heads/main")
+		if err != nil {
+			t.Fatalf("ResolveFully(main): %v", err)
+		}
+
+		if resolved.ID != commitID {
+			t.Fatalf("refs/heads/main = %s, want %s", resolved.ID, commitID)
+		}
+	})
+}
+
+func TestReceivePackGitPushAtomicDelete(t *testing.T) {
+	t.Parallel()
+
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		t.Parallel()
+
+		sender := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo})
+		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+		_, _, commitID := receiver.MakeCommit(t, "base")
+		receiver.UpdateRef(t, "refs/heads/main", commitID)
+
+		repo := receiver.OpenRepository(t)
+
+		stdout, stderr, clientErr, serverErr := runGitPushFD(
+			t,
+			sender,
+			receivepack.Options{
+				Algorithm:       algo,
+				Refs:            repo.Refs(),
+				ExistingObjects: repo.Objects(),
+			},
+			"push", "--porcelain", "--atomic", "fd::3,4/test", ":refs/heads/main",
+		)
+		if clientErr != nil {
+			t.Fatalf("git push failed: %v\nstdout=%s\nstderr=%s", clientErr, stdout, stderr)
+		}
+
+		if serverErr != nil {
+			t.Fatalf("ReceivePack: %v", serverErr)
+		}
+
+		_, err := receiver.OpenRepository(t).Refs().Resolve("refs/heads/main")
+		if err == nil {
+			t.Fatal("refs/heads/main still exists after delete push")
+		}
+	})
+}
+
+func TestReceivePackGitPushRejectsForcedUpdateViaHook(t *testing.T) {
+	t.Parallel()
+
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		t.Parallel()
+
+		sender := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo})
+		blobID, treeID := sender.MakeSingleFileTree(t, "base.txt", []byte("base\n"))
+		baseID := sender.CommitTree(t, treeID, "base")
+		currentID := sender.CommitTree(t, treeID, "current", baseID)
+		forcedID := sender.CommitTree(t, treeID, "forced", baseID)
+		sender.UpdateRef(t, "refs/heads/main", forcedID)
+
+		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+		receiver.HashObject(t, "blob", sender.RunBytes(t, "cat-file", "blob", blobID.String()))
+		receiver.HashObject(t, "tree", sender.RunBytes(t, "cat-file", "tree", treeID.String()))
+		receiver.HashObject(t, "commit", sender.RunBytes(t, "cat-file", "commit", baseID.String()))
+		receiver.HashObject(t, "commit", sender.RunBytes(t, "cat-file", "commit", currentID.String()))
+		receiver.UpdateRef(t, "refs/heads/main", currentID)
+
+		repo := receiver.OpenRepository(t)
+		objectsRoot := receiver.OpenObjectsRoot(t)
+
+		stdout, stderr, clientErr, serverErr := runGitPushFD(
+			t,
+			sender,
+			receivepack.Options{
+				Algorithm:       algo,
+				Refs:            repo.Refs(),
+				ExistingObjects: repo.Objects(),
+				ObjectsRoot:     objectsRoot,
+				Hook:            receivepackhooks.RejectForcePush(),
+			},
+			"push", "--porcelain", "--force", "fd::3,4/test", "refs/heads/main:refs/heads/main",
+		)
+		if clientErr == nil {
+			t.Fatalf("git push unexpectedly succeeded\nstdout=%s\nstderr=%s", stdout, stderr)
+		}
+
+		if serverErr != nil {
+			t.Fatalf("ReceivePack: %v", serverErr)
+		}
+
+		if !strings.Contains(stdout, "non-fast-forward") && !strings.Contains(stderr, "non-fast-forward") {
+			t.Fatalf("git push output missing non-fast-forward message\nstdout=%s\nstderr=%s", stdout, stderr)
+		}
+
+		resolved, err := receiver.OpenRepository(t).Refs().ResolveFully("refs/heads/main")
+		if err != nil {
+			t.Fatalf("ResolveFully(main): %v", err)
+		}
+
+		if resolved.ID != currentID {
+			t.Fatalf("refs/heads/main = %s, want %s", resolved.ID, currentID)
+		}
+	})
+}
+
 type bufferWriteFlusher struct {
 	strings.Builder
 }
@@ -744,4 +896,90 @@ func (bufferWriteFlusher) Flush() error {
 
 func pktlineData(payload string) string {
 	return fmt.Sprintf("%04x%s", len(payload)+4, payload)
+}
+
+type fileWriteFlusher struct {
+	*os.File
+}
+
+func (fileWriteFlusher) Flush() error {
+	return nil
+}
+
+func runGitPushFD(
+	tb testing.TB,
+	sender *testgit.TestRepo,
+	opts receivepack.Options,
+	gitArgs ...string,
+) (stdout string, stderr string, clientErr error, serverErr error) {
+	tb.Helper()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	serverRead, clientWrite, err := os.Pipe()
+	if err != nil {
+		tb.Fatalf("os.Pipe(serverRead/clientWrite): %v", err)
+	}
+
+	clientRead, serverWrite, err := os.Pipe()
+	if err != nil {
+		tb.Fatalf("os.Pipe(clientRead/serverWrite): %v", err)
+	}
+
+	tb.Cleanup(func() {
+		_ = serverRead.Close()
+		_ = clientWrite.Close()
+		_ = clientRead.Close()
+		_ = serverWrite.Close()
+	})
+
+	go func() {
+		<-ctx.Done()
+
+		_ = serverRead.Close()
+		_ = clientWrite.Close()
+		_ = clientRead.Close()
+		_ = serverWrite.Close()
+	}()
+
+	serverErrCh := make(chan error, 1)
+
+	go func() {
+		defer func() {
+			_ = serverRead.Close()
+			_ = serverWrite.Close()
+		}()
+
+		serverErrCh <- receivepack.ReceivePack(
+			ctx,
+			fileWriteFlusher{serverWrite},
+			serverRead,
+			opts,
+		)
+	}()
+
+	stdoutBytes, stderrBytes, clientErr := sender.RunWithExtraFilesEnvContextE(
+		tb,
+		ctx,
+		nil,
+		[]*os.File{clientRead, clientWrite},
+		gitArgs...,
+	)
+	_ = clientRead.Close()
+	_ = clientWrite.Close()
+
+	serverErr = <-serverErrCh
+
+	if ctx.Err() != nil {
+		tb.Fatalf(
+			"git push fd:: timed out\nstdout=%s\nstderr=%s\nclientErr=%v\nserverErr=%v",
+			stdoutBytes,
+			stderrBytes,
+			clientErr,
+			serverErr,
+		)
+	}
+
+	return string(stdoutBytes), string(stderrBytes), clientErr, serverErr
 }
