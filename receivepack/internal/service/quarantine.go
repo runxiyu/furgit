@@ -141,14 +141,23 @@ func finalizeQuarantineFile(root *os.Root, src, dst string, skipCollisionCheck b
 			if statErr == nil {
 				err = fs.ErrExist
 			} else if errors.Is(statErr, fs.ErrNotExist) {
-				if renameErr := root.Rename(src, dst); renameErr == nil {
+				renameErr := root.Rename(src, dst)
+				if renameErr == nil {
 					return nil
 				}
 
-				return fmt.Errorf("promote quarantine %q -> %q: %w", src, dst, err)
+				err = renameErr
 			} else {
+				_ = root.Remove(src)
+
 				return statErr
 			}
+		}
+
+		if !errors.Is(err, fs.ErrExist) {
+			_ = root.Remove(src)
+
+			return fmt.Errorf("promote quarantine %q -> %q: %w", src, dst, err)
 		}
 
 		if skipCollisionCheck {
