@@ -1,20 +1,12 @@
 package receivepack
 
 import (
-	"io/fs"
 	"os"
 
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
 	"codeberg.org/lindenii/furgit/refstore"
 )
-
-// PromotedObjectPermissions configures the destination permissions applied to
-// objects and directories promoted out of quarantine.
-type PromotedObjectPermissions struct {
-	DirMode  fs.FileMode
-	FileMode fs.FileMode
-}
 
 // Options configures one receive-pack invocation.
 type Options struct {

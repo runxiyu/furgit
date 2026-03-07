@@ -4,9 +4,9 @@ import (
 	"os"
 
 	"codeberg.org/lindenii/furgit/objectstore"
-	objectmix "codeberg.org/lindenii/furgit/objectstore/mix"
-	"codeberg.org/lindenii/furgit/objectstore/memory"
 	"codeberg.org/lindenii/furgit/objectstore/loose"
+	"codeberg.org/lindenii/furgit/objectstore/memory"
+	objectmix "codeberg.org/lindenii/furgit/objectstore/mix"
 	"codeberg.org/lindenii/furgit/objectstore/packed"
 )
 

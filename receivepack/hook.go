@@ -5,6 +5,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
+	"codeberg.org/lindenii/furgit/receivepack/internal/service"
 	"codeberg.org/lindenii/furgit/refstore"
 )
 
@@ -37,3 +38,41 @@ type HookRequest struct {
 // promotion or ref updates. The returned decisions must have the same length as
 // HookRequest.Updates.
 type Hook func(context.Context, HookRequest) ([]UpdateDecision, error)
+
+func translateHook(hook Hook) service.Hook {
+	if hook == nil {
+		return nil
+	}
+
+	return func(ctx context.Context, req service.HookRequest) ([]service.UpdateDecision, error) {
+		translatedUpdates := make([]RefUpdate, 0, len(req.Updates))
+		for _, update := range req.Updates {
+			translatedUpdates = append(translatedUpdates, RefUpdate{
+				Name:  update.Name,
+				OldID: update.OldID,
+				NewID: update.NewID,
+			})
+		}
+
+		decisions, err := hook(ctx, HookRequest{
+			Refs:               req.Refs,
+			ExistingObjects:    req.ExistingObjects,
+			QuarantinedObjects: req.QuarantinedObjects,
+			Updates:            translatedUpdates,
+			PushOptions:        append([]string(nil), req.PushOptions...),
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		out := make([]service.UpdateDecision, 0, len(decisions))
+		for _, decision := range decisions {
+			out = append(out, service.UpdateDecision{
+				Accept:  decision.Accept,
+				Message: decision.Message,
+			})
+		}
+
+		return out, nil
+	}
+}

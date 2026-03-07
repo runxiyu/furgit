@@ -5,19 +5,6 @@ import (
 	"codeberg.org/lindenii/furgit/receivepack/internal/service"
 )
 
-func translateCommands(commands []protoreceive.Command) []service.Command {
-	out := make([]service.Command, 0, len(commands))
-	for _, command := range commands {
-		out = append(out, service.Command{
-			OldID: command.OldID,
-			NewID: command.NewID,
-			Name:  command.Name,
-		})
-	}
-
-	return out
-}
-
 func translateResult(result *service.Result) protoreceive.ReportStatusResult {
 	out := protoreceive.ReportStatusResult{
 		UnpackError: result.UnpackError,
