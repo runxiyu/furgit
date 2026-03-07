@@ -70,6 +70,11 @@ func ReceivePack(
 		return err
 	}
 
+	progressWriter := protoSession.ProgressWriter()
+	if req.Capabilities.Quiet {
+		progressWriter = io.Discard
+	}
+
 	serviceReq := &service.Request{
 		Commands:     translateCommands(req.Commands),
 		PushOptions:  append([]string(nil), req.PushOptions...),
@@ -89,8 +94,8 @@ func ReceivePack(
 		),
 		Hook: translateHook(opts.Hook),
 		HookIO: service.HookIO{
-			Progress: base.ProgressWriter(),
-			Error:    base.ErrorWriter(),
+			Progress: progressWriter,
+			Error:    protoSession.ErrorWriter(),
 		},
 	})
 
