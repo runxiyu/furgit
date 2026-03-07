@@ -11,3 +11,10 @@ func (testRepo *TestRepo) Algorithm() objectid.Algorithm {
 func (testRepo *TestRepo) Env() []string {
 	return append([]string(nil), testRepo.env...)
 }
+
+// DirButYouShouldReallyNotUseThisOkay returns the git dir of a repo.
+// Consider using a properly capability interface such as
+// os.Root instead; all uses of ambient path authority must be justified.
+func (testRepo *TestRepo) DirButYouShouldReallyNotUseThisOkay() string {
+	return testRepo.dir
+}
