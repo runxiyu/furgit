@@ -66,16 +66,17 @@ Some may be a few minutes of work, others may be months.
 * `pkt-line`
 * `side-band-64k`
 * Merge base
-
-### Planned
-
-* Verify pack
-* ls-tree
 * Quarantine areas
 * V0/V1 protocol
 * Protocol capabilities
-* Receiving/fetching
+* Receiving
 * Hooks (functions, not files)
+
+### Planned
+
+* Fetching
+* Verify pack
+* ls-tree
 * Digital signatures
 * Patience, histogram diffs
 * Three-way diffs
