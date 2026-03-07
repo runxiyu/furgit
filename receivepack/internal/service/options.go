@@ -16,10 +16,10 @@ type PromotedObjectPermissions struct {
 
 // Options configures one protocol-independent receive-pack service.
 type Options struct {
-	Algorithm                  objectid.Algorithm
-	Refs                       refstore.ReadWriteStore
-	ExistingObjects            objectstore.Store
-	ObjectsRoot                *os.Root
-	PromotedObjectPermissions  *PromotedObjectPermissions
-	// TODO: Hook and such callbacks.
+	Algorithm                 objectid.Algorithm
+	Refs                      refstore.ReadWriteStore
+	ExistingObjects           objectstore.Store
+	ObjectsRoot               *os.Root
+	PromotedObjectPermissions *PromotedObjectPermissions
+	Hook                      Hook
 }

@@ -403,6 +403,148 @@ func TestReceivePackPackCreatePromotesObjectsAndUpdatesRef(t *testing.T) {
 	})
 }
 
+func TestReceivePackHookSeesQuarantinedObjectsAndCanRejectBeforePromotion(t *testing.T) {
+	t.Parallel()
+
+	//nolint:thelper
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+		t.Parallel()
+
+		sender := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo})
+		_, _, commitID := sender.MakeCommit(t, "pushed commit")
+
+		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+		repo := receiver.OpenRepository(t)
+		objectsRoot := receiver.OpenObjectsRoot(t)
+
+		packStream := sender.PackObjectsReader(t, []string{commitID.String()}, false)
+		t.Cleanup(func() {
+			_ = packStream.Close()
+		})
+
+		var (
+			input      strings.Builder
+			output     bufferWriteFlusher
+			hookCalled bool
+		)
+
+		input.WriteString(pktlineData(
+			objectid.Zero(algo).String() + " " + commitID.String() + " refs/heads/main\x00report-status-v2 atomic object-format=" + algo.String() + "\n",
+		))
+		input.WriteString("0000")
+
+		err := receivepack.ReceivePack(
+			context.Background(),
+			&output,
+			io.MultiReader(strings.NewReader(input.String()), packStream),
+			receivepack.Options{
+				Algorithm:       algo,
+				Refs:            repo.Refs(),
+				ExistingObjects: repo.Objects(),
+				ObjectsRoot:     objectsRoot,
+				Hook: func(ctx context.Context, req receivepack.HookRequest) ([]receivepack.UpdateDecision, error) {
+					hookCalled = true
+
+					if len(req.Updates) != 1 || req.Updates[0].NewID != commitID {
+						t.Fatalf("unexpected hook updates: %+v", req.Updates)
+					}
+
+					if _, _, err := req.ExistingObjects.ReadHeader(commitID); err == nil {
+						t.Fatalf("existing objects unexpectedly contained quarantined commit %s", commitID)
+					}
+
+					if _, _, err := req.QuarantinedObjects.ReadHeader(commitID); err != nil {
+						t.Fatalf("quarantined objects missing commit %s: %v", commitID, err)
+					}
+
+					return []receivepack.UpdateDecision{{
+						Accept:  false,
+						Message: "blocked by hook",
+					}}, nil
+				},
+			},
+		)
+		if err != nil {
+			t.Fatalf("ReceivePack: %v", err)
+		}
+
+		if !hookCalled {
+			t.Fatal("hook was not called")
+		}
+
+		got := output.String()
+		if !strings.Contains(got, "unpack ok\n") || !strings.Contains(got, "ng refs/heads/main blocked by hook\n") {
+			t.Fatalf("unexpected receive-pack output %q", got)
+		}
+
+		if _, err := repo.Refs().Resolve("refs/heads/main"); err == nil {
+			t.Fatal("refs/heads/main exists after hook rejection")
+		}
+
+		packs := receiver.Run(t, "count-objects", "-v")
+		if !strings.Contains(packs, "packs: 0") {
+			t.Fatalf("count-objects output shows unexpected promoted pack: %q", packs)
+		}
+	})
+}
+
+func TestReceivePackHookCanRejectSubsetOfNonAtomicDeleteOnlyPush(t *testing.T) {
+	t.Parallel()
+
+	//nolint:thelper
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+		t.Parallel()
+
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo})
+		_, _, commitID := testRepo.MakeCommit(t, "base")
+		testRepo.UpdateRef(t, "refs/heads/main", commitID)
+		testRepo.UpdateRef(t, "refs/heads/topic", commitID)
+
+		repo := testRepo.OpenRepository(t)
+
+		var (
+			input  strings.Builder
+			output bufferWriteFlusher
+		)
+
+		input.WriteString(pktlineData(
+			commitID.String() + " " + objectid.Zero(algo).String() + " refs/heads/main\x00report-status delete-refs object-format=" + algo.String() + "\n",
+		))
+		input.WriteString(pktlineData(
+			commitID.String() + " " + objectid.Zero(algo).String() + " refs/heads/topic\n",
+		))
+		input.WriteString("0000")
+
+		err := receivepack.ReceivePack(context.Background(), &output, strings.NewReader(input.String()), receivepack.Options{
+			Algorithm:       algo,
+			Refs:            repo.Refs(),
+			ExistingObjects: repo.Objects(),
+			Hook: func(ctx context.Context, req receivepack.HookRequest) ([]receivepack.UpdateDecision, error) {
+				return []receivepack.UpdateDecision{
+					{Accept: false, Message: "leave main alone"},
+					{Accept: true},
+				}, nil
+			},
+		})
+		if err != nil {
+			t.Fatalf("ReceivePack: %v", err)
+		}
+
+		got := output.String()
+		if !strings.Contains(got, "ng refs/heads/main leave main alone\n") || !strings.Contains(got, "ok refs/heads/topic\n") {
+			t.Fatalf("unexpected receive-pack output %q", got)
+		}
+
+		if _, err := repo.Refs().Resolve("refs/heads/main"); err != nil {
+			t.Fatalf("Resolve(main): %v", err)
+		}
+
+		if _, err := repo.Refs().Resolve("refs/heads/topic"); err == nil {
+			t.Fatal("refs/heads/topic still exists after successful delete")
+		}
+	})
+}
+
 func TestReceivePackReportStatusV2IncludesRefDetails(t *testing.T) {
 	t.Parallel()
 

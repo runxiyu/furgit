@@ -34,7 +34,9 @@ type Options struct {
 	// PromotedObjectPermissions, when non-nil, is applied to objects and
 	// directories moved from quarantine into the permanent object store.
 	PromotedObjectPermissions *PromotedObjectPermissions
-	// TODO: Hook and policy callbacks.
+	// Hook, when non-nil, runs after pack ingestion into quarantine and before
+	// quarantine promotion or ref updates.
+	Hook Hook
 }
 
 func validateOptions(opts Options) error {
