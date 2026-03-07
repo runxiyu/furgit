@@ -19,5 +19,5 @@ type Repository struct {
 
 	objects                    objectstore.Store
 	objectsLooseForWritingOnly *objectloose.Store
-	refs                       refstore.ReadingStore
+	refs                       refstore.ReadWriteStore
 }

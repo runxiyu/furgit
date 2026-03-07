@@ -11,7 +11,7 @@ import (
 )
 
 //nolint:ireturn
-func openRefStore(root *os.Root, algo objectid.Algorithm, packedRefsTimeout time.Duration) (out refstore.ReadingStore, err error) {
+func openRefStore(root *os.Root, algo objectid.Algorithm, packedRefsTimeout time.Duration) (out refstore.ReadWriteStore, err error) {
 	refRoot, err := root.OpenRoot(".")
 	if err != nil {
 		return nil, fmt.Errorf("repository: open root for refs: %w", err)
@@ -30,6 +30,6 @@ func openRefStore(root *os.Root, algo objectid.Algorithm, packedRefsTimeout time
 // Refs returns the configured ref store.
 //
 //nolint:ireturn
-func (repo *Repository) Refs() refstore.ReadingStore {
+func (repo *Repository) Refs() refstore.ReadWriteStore {
 	return repo.refs
 }
