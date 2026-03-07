@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"log"
+	"os"
 
 	"codeberg.org/lindenii/furgit/format/pack/ingest"
 )
@@ -12,14 +12,17 @@ import (
 //
 // TODO: Invoke hook or policy callbacks to decide whether each planned update
 // should be allowed.
-// TODO: Apply planned ref updates with one atomic compare-and-swap ref
-// transaction once ref writing exists.
 func (service *Service) Execute(ctx context.Context, req *Request) (*Result, error) {
 	_ = ctx
 
 	result := &Result{
 		Commands: make([]CommandResult, 0, len(req.Commands)),
 	}
+	var (
+		quarantineName string
+		quarantineRoot *os.Root
+		err            error
+	)
 
 	if req.PackExpected {
 		if req.Pack == nil {
@@ -36,7 +39,7 @@ func (service *Service) Execute(ctx context.Context, req *Request) (*Result, err
 			return result, nil
 		}
 
-		quarantineName, quarantineRoot, err := service.createQuarantineRoot()
+		quarantineName, quarantineRoot, err = service.createQuarantineRoot()
 		if err != nil {
 			result.UnpackError = err.Error()
 			fillCommandErrors(result, req.Commands, err.Error())
@@ -46,14 +49,24 @@ func (service *Service) Execute(ctx context.Context, req *Request) (*Result, err
 
 		defer func() {
 			_ = quarantineRoot.Close()
-			// TODO: Promote accepted quarantined objects into the permanent object
-			// store once atomic ref application exists.
 			_ = service.opts.ObjectsRoot.RemoveAll(quarantineName)
+		}()
+
+		quarantinePackRoot, err := service.openQuarantinePackRoot(quarantineRoot)
+		if err != nil {
+			result.UnpackError = err.Error()
+			fillCommandErrors(result, req.Commands, err.Error())
+
+			return result, nil
+		}
+
+		defer func() {
+			_ = quarantinePackRoot.Close()
 		}()
 
 		ingested, err := ingest.Ingest(
 			req.Pack,
-			quarantineRoot,
+			quarantinePackRoot,
 			service.opts.Algorithm,
 			true,
 			true,
@@ -78,11 +91,35 @@ func (service *Service) Execute(ctx context.Context, req *Request) (*Result, err
 		})
 	}
 
-	fillCommandErrors(result, req.Commands, "ref updates not implemented yet")
-	log.Printf(
-		"receivepack: planned %d ref updates, but hook/policy checks and atomic ref writes are not implemented yet",
-		len(result.Planned),
-	)
+	if len(req.Commands) == 0 {
+		return result, nil
+	}
+
+	if req.PackExpected {
+		// Git migrates quarantined objects into permanent storage immediately
+		// before starting ref updates.
+		err = service.promoteQuarantine(quarantineName, quarantineRoot)
+		if err != nil {
+			result.UnpackError = err.Error()
+			fillCommandErrors(result, req.Commands, err.Error())
+
+			return result, nil
+		}
+	}
+
+	if req.Atomic {
+		err := service.applyAtomic(result, req.Commands)
+		if err != nil {
+			return result, err
+		}
+
+		return result, nil
+	}
+
+	err = service.applyBatch(result, req.Commands)
+	if err != nil {
+		return result, err
+	}
 
 	return result, nil
 }

@@ -11,7 +11,7 @@ import (
 // Options configures one protocol-independent receive-pack service.
 type Options struct {
 	Algorithm       objectid.Algorithm
-	Refs            refstore.ReadingStore
+	Refs            refstore.ReadWriteStore
 	ExistingObjects objectstore.Store
 	ObjectsRoot     *os.Root
 	// TODO: Hook and such callbacks.

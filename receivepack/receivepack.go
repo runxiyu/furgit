@@ -14,12 +14,9 @@ import (
 func ReceivePack(
 	ctx context.Context,
 	w pktline.WriteFlusher,
-	e io.Writer,
 	r io.Reader,
 	opts Options,
 ) error {
-	_ = e // TODO: Use stderr/progress sink explicitly as hook/progress behavior expands.
-
 	err := validateOptions(opts)
 	if err != nil {
 		return err
@@ -63,6 +60,7 @@ func ReceivePack(
 	serviceReq := &service.Request{
 		Commands:     translateCommands(req.Commands),
 		PushOptions:  append([]string(nil), req.PushOptions...),
+		Atomic:       req.Capabilities.Atomic,
 		DeleteOnly:   req.DeleteOnly,
 		PackExpected: req.PackExpected,
 		Pack:         r,

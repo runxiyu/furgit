@@ -12,12 +12,21 @@ type Command struct {
 func fillCommandErrors(result *Result, commands []Command, errText string) {
 	for _, command := range commands {
 		result.Commands = append(result.Commands, CommandResult{
-			Name:  command.Name,
-			Error: errText,
+			Name:    command.Name,
+			Error:   errText,
+			RefName: command.Name,
+			OldID:   objectIDPointer(command.OldID),
+			NewID:   objectIDPointer(command.NewID),
 		})
 	}
 }
 
 func isDelete(command Command) bool {
 	return command.NewID == objectid.Zero(command.NewID.Algorithm())
+}
+
+func objectIDPointer(id objectid.ObjectID) *objectid.ObjectID {
+	out := id
+
+	return &out
 }

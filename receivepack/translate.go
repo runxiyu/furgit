@@ -26,8 +26,12 @@ func translateResult(result *service.Result) protoreceive.ReportStatusResult {
 
 	for _, command := range result.Commands {
 		out.Commands = append(out.Commands, protoreceive.CommandResult{
-			Name:  command.Name,
-			Error: command.Error,
+			Name:         command.Name,
+			Error:        command.Error,
+			RefName:      command.RefName,
+			OldID:        command.OldID,
+			NewID:        command.NewID,
+			ForcedUpdate: command.ForcedUpdate,
 		})
 	}
 
