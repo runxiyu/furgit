@@ -59,6 +59,16 @@ func Compare(left, right ObjectID) int {
 	return bytes.Compare(left.RawBytes(), right.RawBytes())
 }
 
+// Zero returns the all-zero object ID for the specified algorithm.
+func Zero(algo Algorithm) ObjectID {
+	id, err := FromBytes(algo, make([]byte, algo.Size()))
+	if err != nil {
+		panic(err)
+	}
+
+	return id
+}
+
 // ParseHex parses an object ID from hex for the specified algorithm.
 func ParseHex(algo Algorithm, s string) (ObjectID, error) {
 	var id ObjectID
