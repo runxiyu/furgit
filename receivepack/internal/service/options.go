@@ -22,4 +22,5 @@ type Options struct {
 	ObjectsRoot               *os.Root
 	PromotedObjectPermissions *PromotedObjectPermissions
 	Hook                      Hook
+	HookIO                    HookIO
 }

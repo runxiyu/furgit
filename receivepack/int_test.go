@@ -7,9 +7,11 @@ import (
 	"strings"
 	"testing"
 
+	"codeberg.org/lindenii/furgit/format/sideband64k"
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/objectid"
 	receivepack "codeberg.org/lindenii/furgit/receivepack"
+	receivepackhooks "codeberg.org/lindenii/furgit/receivepack/hooks"
 )
 
 // TODO: actually test with send-pack
@@ -551,6 +553,136 @@ func TestReceivePackHookCanRejectSubsetOfNonAtomicDeleteOnlyPush(t *testing.T) {
 		_, err = repo.Refs().Resolve("refs/heads/topic")
 		if err == nil {
 			t.Fatal("refs/heads/topic still exists after successful delete")
+		}
+	})
+}
+
+func TestReceivePackHookProgressUsesSideBand64K(t *testing.T) {
+	t.Parallel()
+
+	//nolint:thelper
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+		t.Parallel()
+
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo})
+		_, _, commitID := testRepo.MakeCommit(t, "base")
+		testRepo.UpdateRef(t, "refs/heads/main", commitID)
+
+		repo := testRepo.OpenRepository(t)
+
+		var (
+			input  strings.Builder
+			output bufferWriteFlusher
+		)
+
+		input.WriteString(pktlineData(
+			commitID.String() + " " + objectid.Zero(algo).String() + " refs/heads/main\x00report-status side-band-64k atomic delete-refs object-format=" + algo.String() + "\n",
+		))
+		input.WriteString("0000")
+
+		err := receivepack.ReceivePack(context.Background(), &output, strings.NewReader(input.String()), receivepack.Options{
+			Algorithm:       algo,
+			Refs:            repo.Refs(),
+			ExistingObjects: repo.Objects(),
+			Hook: func(ctx context.Context, req receivepack.HookRequest) ([]receivepack.UpdateDecision, error) {
+				_, err := io.WriteString(req.IO.Progress, "hook says hello\n")
+				if err != nil {
+					return nil, err
+				}
+
+				return []receivepack.UpdateDecision{{Accept: true}}, nil
+			},
+		})
+		if err != nil {
+			t.Fatalf("ReceivePack: %v", err)
+		}
+
+		_, sidebandWire, ok := strings.Cut(output.String(), "0000")
+		if !ok {
+			t.Fatalf("output missing advertisement flush: %q", output.String())
+		}
+
+		dec := sideband64k.NewDecoder(strings.NewReader(sidebandWire), sideband64k.ReadOptions{})
+
+		frame, err := dec.ReadFrame()
+		if err != nil {
+			t.Fatalf("ReadFrame(progress): %v", err)
+		}
+
+		if frame.Type != sideband64k.FrameProgress || string(frame.Payload) != "hook says hello\n" {
+			t.Fatalf("first frame = %#v", frame)
+		}
+
+		frame, err = dec.ReadFrame()
+		if err != nil {
+			t.Fatalf("ReadFrame(unpack): %v", err)
+		}
+
+		if frame.Type != sideband64k.FrameData || string(frame.Payload) != "unpack ok\n" {
+			t.Fatalf("second frame = %#v", frame)
+		}
+	})
+}
+
+func TestReceivePackPredefinedRejectForcePushHookRejectsNonFastForward(t *testing.T) {
+	t.Parallel()
+
+	//nolint:thelper
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+		t.Parallel()
+
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+		_, treeID := testRepo.MakeSingleFileTree(t, "base.txt", []byte("base\n"))
+		baseID := testRepo.CommitTree(t, treeID, "base")
+		currentID := testRepo.CommitTree(t, treeID, "current", baseID)
+		forcedID := testRepo.CommitTree(t, treeID, "forced", baseID)
+		testRepo.UpdateRef(t, "refs/heads/main", currentID)
+
+		repo := testRepo.OpenRepository(t)
+		objectsRoot := testRepo.OpenObjectsRoot(t)
+		packStream := testRepo.PackObjectsReader(t, []string{forcedID.String(), "^" + currentID.String()}, false)
+		t.Cleanup(func() {
+			_ = packStream.Close()
+		})
+
+		var (
+			input  strings.Builder
+			output bufferWriteFlusher
+		)
+
+		input.WriteString(pktlineData(
+			currentID.String() + " " + forcedID.String() + " refs/heads/main\x00report-status atomic object-format=" + algo.String() + "\n",
+		))
+		input.WriteString("0000")
+
+		err := receivepack.ReceivePack(
+			context.Background(),
+			&output,
+			io.MultiReader(strings.NewReader(input.String()), packStream),
+			receivepack.Options{
+				Algorithm:       algo,
+				Refs:            repo.Refs(),
+				ExistingObjects: repo.Objects(),
+				ObjectsRoot:     objectsRoot,
+				Hook:            receivepackhooks.RejectForcePush(),
+			},
+		)
+		if err != nil {
+			t.Fatalf("ReceivePack: %v", err)
+		}
+
+		got := output.String()
+		if !strings.Contains(got, "ng refs/heads/main non-fast-forward\n") {
+			t.Fatalf("unexpected receive-pack output %q", got)
+		}
+
+		resolved, err := repo.Refs().ResolveFully("refs/heads/main")
+		if err != nil {
+			t.Fatalf("ResolveFully(main): %v", err)
+		}
+
+		if resolved.ID != currentID {
+			t.Fatalf("refs/heads/main = %s, want %s", resolved.ID, currentID)
 		}
 	})
 }

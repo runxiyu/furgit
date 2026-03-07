@@ -10,6 +10,14 @@ import (
 	"codeberg.org/lindenii/furgit/receivepack/internal/service"
 )
 
+// TODO: Some more designing to do. In particular, we'd like to have access to
+// commit graphs and stored object abstractions and such here, especially because
+// hooks might want to access full repos, but we risk creating
+// circular dependencies if we import repository/ here. Might need an interface-ish
+// design, but that risks being over-complicated.
+// Theoretically we could also just give the hooks an os.Root but that
+// feels a bit ugly.
+
 // ReceivePack serves one receive-pack session over r/w.
 func ReceivePack(
 	ctx context.Context,
@@ -75,6 +83,10 @@ func ReceivePack(
 			opts.PromotedObjectPermissions,
 		),
 		Hook: translateHook(opts.Hook),
+		HookIO: service.HookIO{
+			Progress: base.ProgressWriter(),
+			Error:    base.ErrorWriter(),
+		},
 	})
 
 	result, err := svc.Execute(ctx, serviceReq)

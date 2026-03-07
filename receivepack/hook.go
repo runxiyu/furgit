@@ -2,12 +2,18 @@ package receivepack
 
 import (
 	"context"
+	"io"
 
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
 	"codeberg.org/lindenii/furgit/receivepack/internal/service"
 	"codeberg.org/lindenii/furgit/refstore"
 )
+
+type HookIO struct {
+	Progress io.Writer
+	Error    io.Writer
+}
 
 // RefUpdate is one requested reference update presented to a receive-pack hook.
 type RefUpdate struct {
@@ -30,6 +36,7 @@ type HookRequest struct {
 	QuarantinedObjects objectstore.Store
 	Updates            []RefUpdate
 	PushOptions        []string
+	IO                 HookIO
 }
 
 // Hook decides whether each requested update should proceed.
@@ -60,6 +67,10 @@ func translateHook(hook Hook) service.Hook {
 			QuarantinedObjects: req.QuarantinedObjects,
 			Updates:            translatedUpdates,
 			PushOptions:        append([]string(nil), req.PushOptions...),
+			IO: HookIO{
+				Progress: req.IO.Progress,
+				Error:    req.IO.Error,
+			},
 		})
 		if err != nil {
 			return nil, err

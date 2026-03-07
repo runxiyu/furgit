@@ -41,6 +41,7 @@ func (service *Service) runHook(
 		QuarantinedObjects: quarantinedObjects,
 		Updates:            buildHookUpdates(commands),
 		PushOptions:        append([]string(nil), req.PushOptions...),
+		IO:                 service.opts.HookIO,
 	})
 	if err != nil {
 		return nil, nil, nil, false, err.Error()
