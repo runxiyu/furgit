@@ -2,6 +2,7 @@ package receivepack
 
 import (
 	"fmt"
+	"io"
 	"strings"
 
 	"codeberg.org/lindenii/furgit/objectid"
@@ -164,9 +165,23 @@ func (session *Session) WriteProgress(p []byte) error {
 	return session.base.WriteProgress(p)
 }
 
+// ProgressWriter returns one chunking writer for sideband progress output.
+//
+// When side-band-64k was not negotiated, writes are discarded.
+func (session *Session) ProgressWriter() io.Writer {
+	return session.base.ProgressWriter()
+}
+
 // WriteError writes one fatal error packet.
 func (session *Session) WriteError(p []byte) error {
 	return session.base.WriteError(p)
+}
+
+// ErrorWriter returns one chunking writer for sideband error output.
+//
+// When side-band-64k was not negotiated, writes are discarded.
+func (session *Session) ErrorWriter() io.Writer {
+	return session.base.ErrorWriter()
 }
 
 func trimOneLF(s string) string {
