@@ -21,7 +21,7 @@ func IsAncestor(ctx *Context, ancestor, descendant NodeIndex) (bool, error) {
 		minGeneration = ancestorGeneration
 	}
 
-	_, err := paintDownToCommon(ctx, ancestor, []NodeIndex{descendant}, minGeneration)
+	err := paintDownToCommon(ctx, ancestor, []NodeIndex{descendant}, minGeneration)
 	if err != nil {
 		return false, err
 	}

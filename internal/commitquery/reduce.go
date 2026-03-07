@@ -44,7 +44,7 @@ func removeRedundantNoGen(ctx *Context, candidates []NodeIndex) ([]NodeIndex, er
 			}
 		}
 
-		_, err := paintDownToCommon(ctx, candidate, work, minGeneration)
+		err := paintDownToCommon(ctx, candidate, work, minGeneration)
 		if err != nil {
 			return nil, err
 		}

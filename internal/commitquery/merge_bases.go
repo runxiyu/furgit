@@ -8,10 +8,12 @@ func MergeBases(ctx *Context, left, right NodeIndex) ([]NodeIndex, error) {
 		return []NodeIndex{left}, nil
 	}
 
-	candidates, err := paintDownToCommon(ctx, left, []NodeIndex{right}, 0)
+	err := paintDownToCommon(ctx, left, []NodeIndex{right}, 0)
 	if err != nil {
 		return nil, err
 	}
+
+	candidates := collectMarkedResults(ctx)
 
 	if len(candidates) <= 1 {
 		slices.SortFunc(candidates, ctx.Compare)
@@ -31,13 +33,15 @@ func MergeBases(ctx *Context, left, right NodeIndex) ([]NodeIndex, error) {
 	return reduced, nil
 }
 
-func paintDownToCommon(ctx *Context, left NodeIndex, rights []NodeIndex, minGeneration uint64) ([]NodeIndex, error) {
+func paintDownToCommon(ctx *Context, left NodeIndex, rights []NodeIndex, minGeneration uint64) error {
 	ctx.BeginMarkPhase()
 
 	ctx.SetMarks(left, markLeft)
 
 	if len(rights) == 0 {
-		return []NodeIndex{left}, nil
+		ctx.SetMarks(left, markResult)
+
+		return nil
 	}
 
 	queue := NewPriorityQueue(ctx)
@@ -49,14 +53,13 @@ func paintDownToCommon(ctx *Context, left NodeIndex, rights []NodeIndex, minGene
 	}
 
 	lastGeneration := generationInfinity
-	results := make([]NodeIndex, 0, 4)
 
 	for queueHasNonStale(ctx, queue) {
 		idx := queue.PopNode()
 
 		generation := ctx.EffectiveGeneration(idx)
 		if generation > lastGeneration {
-			return nil, errBadGenerationOrder
+			return errBadGenerationOrder
 		}
 
 		lastGeneration = generation
@@ -66,10 +69,7 @@ func paintDownToCommon(ctx *Context, left NodeIndex, rights []NodeIndex, minGene
 
 		flags := ctx.Marks(idx) & (markLeft | markRight | markStale)
 		if flags == (markLeft | markRight) {
-			if !ctx.HasAnyMarks(idx, markResult) {
-				ctx.SetMarks(idx, markResult)
-				results = append(results, idx)
-			}
+			ctx.SetMarks(idx, markResult)
 
 			flags |= markStale
 		}
@@ -84,14 +84,7 @@ func paintDownToCommon(ctx *Context, left NodeIndex, rights []NodeIndex, minGene
 		}
 	}
 
-	out := results[:0]
-	for _, idx := range results {
-		if !ctx.HasAnyMarks(idx, markStale) {
-			out = append(out, idx)
-		}
-	}
-
-	return out, nil
+	return nil
 }
 
 func queueHasNonStale(ctx *Context, queue *PriorityQueue) bool {
@@ -102,4 +95,22 @@ func queueHasNonStale(ctx *Context, queue *PriorityQueue) bool {
 	}
 
 	return false
+}
+
+func collectMarkedResults(ctx *Context) []NodeIndex {
+	out := make([]NodeIndex, 0, 4)
+
+	for _, idx := range ctx.touched {
+		if !ctx.HasAnyMarks(idx, markResult) {
+			continue
+		}
+
+		if ctx.HasAnyMarks(idx, markStale) {
+			continue
+		}
+
+		out = append(out, idx)
+	}
+
+	return out
 }
