@@ -232,7 +232,6 @@ func TestFilesDeleteWaitsForPackedRefsLockWithoutIntermediateState(t *testing.T)
 		testRepo.UpdateRef(t, prefix+"/foo", packedID)
 		testRepo.PackRefs(t, "--all", "--prune")
 		testRepo.UpdateRef(t, prefix+"/foo", looseID)
-		testRepo.Run(t, "config", "core.packedrefstimeout", "3000")
 		testRepo.WriteFile(t, "packed-refs.lock", []byte{}, 0o644)
 
 		store := openFilesStore(t, testRepo, algo)

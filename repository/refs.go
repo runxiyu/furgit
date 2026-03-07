@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/refstore"
@@ -10,13 +11,13 @@ import (
 )
 
 //nolint:ireturn
-func openRefStore(root *os.Root, algo objectid.Algorithm) (out refstore.ReadingStore, err error) {
+func openRefStore(root *os.Root, algo objectid.Algorithm, packedRefsTimeout time.Duration) (out refstore.ReadingStore, err error) {
 	refRoot, err := root.OpenRoot(".")
 	if err != nil {
 		return nil, fmt.Errorf("repository: open root for refs: %w", err)
 	}
 
-	store, err := reffiles.New(refRoot, algo)
+	store, err := reffiles.New(refRoot, algo, packedRefsTimeout)
 	if err != nil {
 		_ = refRoot.Close()
 

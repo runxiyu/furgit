@@ -5,18 +5,21 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/refstore/files"
 )
 
+const testPackedRefsTimeout = time.Second
+
 func openFilesStore(t *testing.T, testRepo *testgit.TestRepo, algo objectid.Algorithm) *files.Store {
 	t.Helper()
 
 	root := testRepo.OpenGitRoot(t)
 
-	store, err := files.New(root, algo)
+	store, err := files.New(root, algo, testPackedRefsTimeout)
 	if err != nil {
 		t.Fatalf("files.New: %v", err)
 	}
@@ -27,7 +30,7 @@ func openFilesStore(t *testing.T, testRepo *testgit.TestRepo, algo objectid.Algo
 func openFilesStoreAt(t *testing.T, root *os.Root, algo objectid.Algorithm) *files.Store {
 	t.Helper()
 
-	store, err := files.New(root, algo)
+	store, err := files.New(root, algo, testPackedRefsTimeout)
 	if err != nil {
 		t.Fatalf("files.New: %v", err)
 	}

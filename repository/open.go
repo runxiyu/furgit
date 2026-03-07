@@ -36,7 +36,7 @@ func Open(root *os.Root) (repo *Repository, err error) {
 	repo.objects = objects
 	repo.objectsLooseForWritingOnly = objectsLooseForWritingOnly
 
-	refs, err := openRefStore(root, algo)
+	refs, err := openRefStore(root, algo, detectPackedRefsTimeout(cfg))
 	if err != nil {
 		return nil, err
 	}
