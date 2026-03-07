@@ -171,7 +171,7 @@ Furgit is a low-level Git library in Go.
 * Mail map
 * format-patch, am
 
-### Not planned
+## Not planned
 
 * Any CLI tools whatsoever
 * Clone
