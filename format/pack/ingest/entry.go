@@ -16,10 +16,14 @@ func scanOneEntry(state *ingestState, startOffset uint64) (uint64, error) {
 		return 0, err
 	}
 
-	contentLen, consumedInput, oid, err := drainEntryPayload(state, record)
+	payloadStartConsumed := state.stream.consumed
+
+	contentLen, oid, err := drainEntryPayload(state, record)
 	if err != nil {
 		return 0, err
 	}
+
+	consumedInput := state.stream.consumed - payloadStartConsumed
 
 	if contentLen != record.declaredSize {
 		return 0, &MalformedPackEntryError{
