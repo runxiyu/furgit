@@ -108,3 +108,15 @@ func (session *Session) ErrorWriter() io.Writer {
 
 	return sideband64k.NewChunkWriter(session.sideband, sideband64k.BandError)
 }
+
+// PrimaryDataWriter returns one chunking writer for primary output bytes.
+//
+// When side-band-64k is enabled, writes are chunked into band-1 sideband
+// frames. Otherwise writes are chunked into direct pkt-line data frames.
+func (session *Session) PrimaryDataWriter() io.Writer {
+	if session.useSideBand {
+		return sideband64k.NewChunkWriter(session.sideband, sideband64k.BandData)
+	}
+
+	return pktline.NewChunkWriter(session.enc)
+}
