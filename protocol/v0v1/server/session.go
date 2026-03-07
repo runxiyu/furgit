@@ -86,3 +86,25 @@ func (session *Session) WriteFlush() error {
 
 	return session.enc.WriteFlush()
 }
+
+// ProgressWriter returns one chunking writer for sideband progress output.
+//
+// When side-band-64k was not negotiated, writes are discarded.
+func (session *Session) ProgressWriter() io.Writer {
+	if !session.useSideBand {
+		return io.Discard
+	}
+
+	return sideband64k.NewChunkWriter(session.sideband, sideband64k.BandProgress)
+}
+
+// ErrorWriter returns one chunking writer for sideband error output.
+//
+// When side-band-64k was not negotiated, writes are discarded.
+func (session *Session) ErrorWriter() io.Writer {
+	if !session.useSideBand {
+		return io.Discard
+	}
+
+	return sideband64k.NewChunkWriter(session.sideband, sideband64k.BandError)
+}
