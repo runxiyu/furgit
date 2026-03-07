@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"codeberg.org/lindenii/furgit/format/pack/ingest"
+	"codeberg.org/lindenii/furgit/internal/utils"
 )
 
 func (service *Service) ingestQuarantine(
@@ -15,7 +16,11 @@ func (service *Service) ingestQuarantine(
 		return "", nil, true
 	}
 
+	utils.WriteProgressf(service.opts.Progress, "receiving objects: ingesting pack\n")
+
 	if req.Pack == nil {
+		utils.WriteProgressf(service.opts.Progress, "receiving objects: unpack failed: missing pack stream\n")
+
 		result.UnpackError = "missing pack stream"
 		fillCommandErrors(result, commands, "missing pack stream")
 
@@ -23,6 +28,8 @@ func (service *Service) ingestQuarantine(
 	}
 
 	if service.opts.ObjectsRoot == nil {
+		utils.WriteProgressf(service.opts.Progress, "receiving objects: unpack failed: objects root not configured\n")
+
 		result.UnpackError = "objects root not configured"
 		fillCommandErrors(result, commands, "objects root not configured")
 
@@ -31,6 +38,8 @@ func (service *Service) ingestQuarantine(
 
 	quarantineName, quarantineRoot, err := service.createQuarantineRoot()
 	if err != nil {
+		utils.WriteProgressf(service.opts.Progress, "receiving objects: unpack failed: %v\n", err)
+
 		result.UnpackError = err.Error()
 		fillCommandErrors(result, commands, err.Error())
 
@@ -39,6 +48,8 @@ func (service *Service) ingestQuarantine(
 
 	quarantinePackRoot, err := service.openQuarantinePackRoot(quarantineRoot)
 	if err != nil {
+		utils.WriteProgressf(service.opts.Progress, "receiving objects: unpack failed: %v\n", err)
+
 		result.UnpackError = err.Error()
 		fillCommandErrors(result, commands, err.Error())
 
@@ -56,12 +67,15 @@ func (service *Service) ingestQuarantine(
 			FixThin:  true,
 			WriteRev: true,
 			Base:     service.opts.ExistingObjects,
+			Progress: service.opts.Progress,
 		},
 	)
 
 	_ = quarantinePackRoot.Close()
 
 	if err != nil {
+		utils.WriteProgressf(service.opts.Progress, "receiving objects: unpack failed: %v\n", err)
+
 		result.UnpackError = err.Error()
 		fillCommandErrors(result, commands, err.Error())
 
@@ -70,6 +84,12 @@ func (service *Service) ingestQuarantine(
 
 		return "", nil, false
 	}
+
+	utils.WriteProgressf(
+		"receiving objects: unpack ok, %d objects (%s)\n",
+		ingested.ObjectCount,
+		ingested.PackHash,
+	)
 
 	result.Ingest = &ingested
 

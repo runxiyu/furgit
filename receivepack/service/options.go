@@ -1,6 +1,7 @@
 package service
 
 import (
+	"io"
 	"io/fs"
 	"os"
 
@@ -20,6 +21,7 @@ type Options struct {
 	Refs                      refstore.ReadWriteStore
 	ExistingObjects           objectstore.Store
 	ObjectsRoot               *os.Root
+	Progress                  io.Writer
 	PromotedObjectPermissions *PromotedObjectPermissions
 	Hook                      Hook
 	HookIO                    HookIO

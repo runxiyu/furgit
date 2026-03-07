@@ -89,6 +89,7 @@ func ReceivePack(
 		Refs:            opts.Refs,
 		ExistingObjects: opts.ExistingObjects,
 		ObjectsRoot:     opts.ObjectsRoot,
+		Progress:        progressWriter,
 		PromotedObjectPermissions: translatePromotedObjectPermissions(
 			opts.PromotedObjectPermissions,
 		),
