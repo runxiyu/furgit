@@ -288,14 +288,6 @@ type Reader interface {
 	io.ByteReader
 }
 
-// InputProgress reports compressed input bytes consumed by inflate state.
-//
-// InputConsumed returns bytes that have been consumed by the decompressor's
-// parser and state machine, not bytes merely read ahead from the source.
-type InputProgress interface {
-	InputConsumed() int64
-}
-
 type step uint8
 
 const (
@@ -352,11 +344,6 @@ type decompressor struct {
 	final bool
 
 	flushMode flushMode
-}
-
-// InputConsumed returns compressed input bytes consumed by receiver.
-func (f *decompressor) InputConsumed() int64 {
-	return f.roffset
 }
 
 func (f *decompressor) nextBlock() {

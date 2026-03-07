@@ -95,13 +95,6 @@ func (z *Reader) reset(r io.Reader, dict []byte) error {
 			return z.err
 		}
 
-		progress, ok := z.decompressor.(flate.InputProgress)
-		if !ok {
-			panic("zlib: pooled decompressor does not implement flate.InputProgress")
-		}
-
-		z.progress = progress
-
 		z.digest = adler32.New()
 
 		return nil
@@ -112,13 +105,6 @@ func (z *Reader) reset(r io.Reader, dict []byte) error {
 	} else {
 		z.decompressor = flate.NewReader(z.r)
 	}
-
-	progress, ok := z.decompressor.(flate.InputProgress)
-	if !ok {
-		panic("zlib: decompressor does not implement flate.InputProgress")
-	}
-
-	z.progress = progress
 
 	z.digest = adler32.New()
 

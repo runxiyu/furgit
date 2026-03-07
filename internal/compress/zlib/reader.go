@@ -73,7 +73,6 @@ var readerPool = sync.Pool{
 type Reader struct {
 	r            flate.Reader
 	decompressor io.ReadCloser
-	progress     flate.InputProgress
 	digest       hash.Hash32
 	headerRead   uint64
 	trailerRead  uint64
@@ -161,24 +160,6 @@ func (z *Reader) Read(p []byte) (int, error) {
 	}
 
 	return n, io.EOF
-}
-
-// InputConsumed returns compressed bytes consumed from stream input.
-//
-// This count includes the zlib header, deflate payload, and zlib checksum
-// trailer bytes read by the reader.
-func (z *Reader) InputConsumed() uint64 {
-	out := z.headerRead + z.trailerRead
-	if z.progress != nil {
-		progressIn, err := intconv.Int64ToUint64(z.progress.InputConsumed())
-		if err != nil {
-			panic(err)
-		}
-
-		out += progressIn
-	}
-
-	return out
 }
 
 // Close does not close the wrapped [io.Reader] originally passed to [NewReader].
