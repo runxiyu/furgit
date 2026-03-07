@@ -35,10 +35,12 @@ func TestQueryMatchesGitMergeBaseAll(t *testing.T) {
 		store := testRepo.OpenObjectStore(t)
 
 		query := mergebase.Query(store, nil, left, tag)
+
 		all, err := query.All()
 		if err != nil {
 			t.Fatalf("query.All(): %v", err)
 		}
+
 		got := oidSetFromSlice(all)
 
 		want := gitMergeBaseAllSet(t, testRepo, left, tag)
@@ -76,10 +78,12 @@ func TestQueryCrissCrossMatchesGitMergeBaseAll(t *testing.T) {
 		store := testRepo.OpenObjectStore(t)
 
 		query := mergebase.Query(store, nil, left, right)
+
 		all, err := query.All()
 		if err != nil {
 			t.Fatalf("query.All(): %v", err)
 		}
+
 		got := oidSetFromSlice(all)
 
 		want := gitMergeBaseAllSet(t, testRepo, left, right)
@@ -135,10 +139,12 @@ func TestQueryMatchesGitMergeBaseAllWithCommitGraph(t *testing.T) {
 		graph := testRepo.OpenCommitGraph(t)
 
 		query := mergebase.Query(store, graph, left, right)
+
 		all, err := query.All()
 		if err != nil {
 			t.Fatalf("query.All(): %v", err)
 		}
+
 		got := oidSetFromSlice(all)
 
 		want := gitMergeBaseAllSet(t, testRepo, left, right)

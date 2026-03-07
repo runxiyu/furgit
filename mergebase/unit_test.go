@@ -84,6 +84,7 @@ func TestQueryLinearHistory(t *testing.T) {
 		right := store.AddObject(objecttype.TypeCommit, commitBody(tree, left))
 
 		query := mergebase.Query(store, nil, left, right)
+
 		got, err := query.All()
 		if err != nil {
 			t.Fatalf("query.All(): %v", err)
@@ -130,6 +131,7 @@ func TestQueryPeelsAnnotatedTags(t *testing.T) {
 		tag := store.AddObject(objecttype.TypeTag, tagBody(right, objecttype.TypeCommit))
 
 		query := mergebase.Query(store, nil, left, tag)
+
 		got, err := query.All()
 		if err != nil {
 			t.Fatalf("query.All(): %v", err)
@@ -179,10 +181,12 @@ func TestQueryCrissCrossReturnsAllBestCommonAncestors(t *testing.T) {
 		right := store.AddObject(objecttype.TypeCommit, commitBody(rightTree, base2, base1))
 
 		query := mergebase.Query(store, nil, left, right)
+
 		all, err := query.All()
 		if err != nil {
 			t.Fatalf("query.All(): %v", err)
 		}
+
 		got := toSet(all)
 
 		want := map[objectid.ObjectID]struct{}{base1: {}, base2: {}}
@@ -226,6 +230,7 @@ func TestQueryReturnsNoResultWhenNoCommonAncestorExists(t *testing.T) {
 		right := store.AddObject(objecttype.TypeCommit, commitBody(rightTree))
 
 		query := mergebase.Query(store, nil, left, right)
+
 		got, err := query.All()
 		if err != nil {
 			t.Fatalf("query.All(): %v", err)
@@ -261,6 +266,7 @@ func TestQueryRejectsNonCommitAfterPeel(t *testing.T) {
 		tagToTree := store.AddObject(objecttype.TypeTag, tagBody(tree, objecttype.TypeTree))
 
 		query := mergebase.Query(store, nil, commit, tagToTree)
+
 		_, err := query.All()
 		if err == nil {
 			t.Fatal("expected error")
