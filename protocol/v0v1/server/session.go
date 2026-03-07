@@ -87,6 +87,15 @@ func (session *Session) WriteFlush() error {
 	return session.enc.WriteFlush()
 }
 
+// FlushIO flushes buffered transport output without emitting pkt-line frames.
+func (session *Session) FlushIO() error {
+	if session.useSideBand {
+		return session.sideband.FlushIO()
+	}
+
+	return session.enc.FlushIO()
+}
+
 // ProgressWriter returns one chunking writer for sideband progress output.
 //
 // When side-band-64k was not negotiated, writes are discarded.
