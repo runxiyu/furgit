@@ -26,7 +26,7 @@ func openTemporaryArtifacts(state *ingestState) error {
 	revName := ""
 
 	var revFile *os.File
-	if state.writeRev {
+	if state.opts.WriteRev {
 		revName, revFile, err = createTempFile(state.destination, "tmp_rev_")
 		if err != nil {
 			_ = idxFile.Close()

@@ -14,7 +14,7 @@ const (
 
 // writeRev writes rev index for resolved records.
 func writeRev(state *ingestState) error {
-	if !state.writeRev {
+	if !state.opts.WriteRev {
 		return nil
 	}
 

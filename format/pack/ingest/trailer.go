@@ -8,8 +8,8 @@ import (
 )
 
 // finishAndFlushTrailer reads trailer hash bytes, verifies trailer checksum,
-// and ensures no trailing garbage remains in stream.
-func (scanner *streamScanner) finishAndFlushTrailer() error {
+// and optionally requires the source stream to hit EOF afterward.
+func (scanner *streamScanner) finishAndFlushTrailer(requireTrailingEOF bool) error {
 	if scanner.hashSize <= 0 {
 		return fmt.Errorf("format/pack/ingest: invalid hash size")
 	}
@@ -24,6 +24,19 @@ func (scanner *streamScanner) finishAndFlushTrailer() error {
 	}
 
 	scanner.packTrailer = append(scanner.packTrailer[:0], trailer...)
+
+	if scanner.n-scanner.off > 0 {
+		return fmt.Errorf("format/pack/ingest: pack has trailing garbage")
+	}
+
+	if !requireTrailingEOF {
+		computed := scanner.hash.Sum(nil)
+		if !bytes.Equal(computed, trailer) {
+			return &PackTrailerMismatchError{}
+		}
+
+		return nil
+	}
 
 	var probe [1]byte
 

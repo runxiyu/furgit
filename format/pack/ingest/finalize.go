@@ -16,7 +16,7 @@ func finalizeArtifacts(state *ingestState) (Result, error) {
 	idxFinal := base + ".idx"
 
 	revFinal := ""
-	if state.writeRev {
+	if state.opts.WriteRev {
 		revFinal = base + ".rev"
 	}
 
@@ -30,7 +30,7 @@ func finalizeArtifacts(state *ingestState) (Result, error) {
 		return Result{}, err
 	}
 
-	if state.writeRev {
+	if state.opts.WriteRev {
 		err := linkTempToFinal(state, state.revTmpName, revFinal)
 		if err != nil {
 			return Result{}, err

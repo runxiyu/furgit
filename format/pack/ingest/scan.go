@@ -40,7 +40,7 @@ func streamPackAndScan(state *ingestState) error {
 		}
 	}
 
-	err = state.stream.finishAndFlushTrailer()
+	err = state.stream.finishAndFlushTrailer(state.opts.RequireTrailingEOF)
 	if err != nil {
 		return err
 	}

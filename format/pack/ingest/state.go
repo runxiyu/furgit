@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/objectstore"
 )
 
 const (
@@ -17,9 +16,7 @@ type ingestState struct {
 	src         io.Reader
 	destination *os.Root
 	algo        objectid.Algorithm
-	fixThin     bool
-	writeRev    bool
-	base        objectstore.Store
+	opts        Options
 
 	packFile    *os.File
 	packTmpName string
@@ -49,9 +46,7 @@ func newIngestState(
 	src io.Reader,
 	destination *os.Root,
 	algo objectid.Algorithm,
-	fixThin bool,
-	writeRev bool,
-	base objectstore.Store,
+	opts Options,
 ) (*ingestState, error) {
 	if algo.Size() == 0 {
 		return nil, objectid.ErrInvalidAlgorithm
@@ -61,9 +56,7 @@ func newIngestState(
 		src:            src,
 		destination:    destination,
 		algo:           algo,
-		fixThin:        fixThin,
-		writeRev:       writeRev,
-		base:           base,
+		opts:           opts,
 		offsetToRecord: make(map[uint64]int),
 		objectToRecord: make(map[objectid.ObjectID]int),
 		baseCache:      newDeltaBaseCache(defaultDeltaBaseCacheMaxBytes),
