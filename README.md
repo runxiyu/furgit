@@ -19,12 +19,7 @@ Furgit is a low-level Git library in Go.
 * Prioritize APIs for forges and other server-side uses first
 * Aim for clear architecture then high performance
 
-## Features
-
-Succinct ideas of the areas that we lack.
-Some may be a few minutes of work, others may be months.
-
-### Implemented
+## Implemented
 
 * Parsing configs
 * Object ID and hash algorithms (SHA-256, SHA-1)
@@ -72,7 +67,7 @@ Some may be a few minutes of work, others may be months.
 * Receiving
 * Hooks (functions, not files)
 
-### Planned
+## Planned
 
 * Fetching
 * Verify pack
