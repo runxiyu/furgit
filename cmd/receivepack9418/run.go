@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -37,7 +38,7 @@ func run(listenAddr, repoPath string) error {
 		objectsRoot: objectsRoot,
 	}
 
-	ln, err := net.Listen("tcp", listenAddr)
+	ln, err := (&net.ListenConfig{}).Listen(context.Background(), "tcp", listenAddr)
 	if err != nil {
 		return fmt.Errorf("listen %q: %w", listenAddr, err)
 	}
