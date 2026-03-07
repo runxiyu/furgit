@@ -1,50 +1,29 @@
 package repository
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/refstore"
-	refchain "codeberg.org/lindenii/furgit/refstore/chain"
-	refloose "codeberg.org/lindenii/furgit/refstore/loose"
-	refpacked "codeberg.org/lindenii/furgit/refstore/packed"
+	reffiles "codeberg.org/lindenii/furgit/refstore/files"
 )
 
 //nolint:ireturn
 func openRefStore(root *os.Root, algo objectid.Algorithm) (out refstore.ReadingStore, err error) {
-	looseRoot, err := root.OpenRoot(".")
+	refRoot, err := root.OpenRoot(".")
 	if err != nil {
-		return nil, fmt.Errorf("repository: open root for loose refs: %w", err)
+		return nil, fmt.Errorf("repository: open root for refs: %w", err)
 	}
 
-	looseStore, err := refloose.New(looseRoot, algo)
+	store, err := reffiles.New(refRoot, algo)
 	if err != nil {
-		_ = looseRoot.Close()
+		_ = refRoot.Close()
 
 		return nil, err
 	}
 
-	backends := []refstore.ReadingStore{looseStore}
-
-	_, err = root.Stat("packed-refs")
-	if err == nil {
-		packedStore, packedErr := refpacked.New(root, algo)
-		if packedErr != nil {
-			_ = looseStore.Close()
-
-			return nil, packedErr
-		}
-
-		backends = append(backends, packedStore)
-	} else if !errors.Is(err, os.ErrNotExist) {
-		_ = looseStore.Close()
-
-		return nil, fmt.Errorf("repository: stat packed-refs: %w", err)
-	}
-
-	return refchain.New(backends...), nil
+	return store, nil
 }
 
 // Refs returns the configured ref store.
