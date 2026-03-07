@@ -16,6 +16,10 @@ type Options struct {
 	WriteRev bool
 	// Base supplies existing objects for thin-pack fixup.
 	Base objectstore.Store
+	// Progress receives human-readable progress messages.
+	//
+	// When nil, no progress output is emitted.
+	Progress io.Writer
 	// RequireTrailingEOF requires the source to hit EOF after the pack trailer.
 	//
 	// This is suitable for exact pack-file readers, but should be disabled for

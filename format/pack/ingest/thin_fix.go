@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/internal/intconv"
+	"codeberg.org/lindenii/furgit/internal/utils"
 )
 
 // maybeFixThin appends missing bases and rewrites pack header/trailer when needed.
@@ -11,6 +12,12 @@ func maybeFixThin(state *ingestState) error {
 	if len(state.unresolvedRefDeltas) == 0 {
 		return nil
 	}
+
+	utils.WriteProgressf(
+		state.opts.Progress,
+		"fixing thin pack: %d unresolved bases\r",
+		len(state.unresolvedRefDeltas),
+	)
 
 	if !state.opts.FixThin {
 		return &ThinPackUnresolvedError{Count: len(state.unresolvedRefDeltas)}
@@ -47,7 +54,8 @@ func maybeFixThin(state *ingestState) error {
 	state.stream.consumed = consumed
 
 	baseIDs := unresolvedThinBaseIDs(state)
-	for _, id := range baseIDs {
+	total := len(baseIDs)
+	for i, id := range baseIDs {
 		ty, content, err := state.opts.Base.ReadBytesContent(id)
 		if err != nil {
 			continue
@@ -59,11 +67,17 @@ func maybeFixThin(state *ingestState) error {
 		}
 
 		state.thinFixed = true
+
+		utils.WriteProgressf(state.opts.Progress, "fixing thin pack: %d/%d\r", i+1, total)
 	}
 
 	err = rewritePackHeaderAndTrailer(state)
 	if err != nil {
 		return err
+	}
+
+	if state.thinFixed {
+		utils.WriteProgressf(state.opts.Progress, "fixing thin pack: done.\n")
 	}
 
 	return nil

@@ -86,6 +86,7 @@ func (service *Service) ingestQuarantine(
 	}
 
 	utils.WriteProgressf(
+		service.opts.Progress,
 		"receiving objects: unpack ok, %d objects (%s)\n",
 		ingested.ObjectCount,
 		ingested.PackHash,
