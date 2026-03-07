@@ -29,6 +29,19 @@ type Options struct {
 	// Hook, when non-nil, runs after pack ingestion into quarantine and before
 	// quarantine promotion or ref updates.
 	Hook Hook
+	// Agent is the receive-pack agent string advertised via capability.
+	//
+	// When empty, ReceivePack derives one from build info and falls back to
+	// "furgit".
+	Agent string
+	// SessionID is the advertised receive-pack session-id capability value.
+	//
+	// When empty, ReceivePack generates one random value per invocation.
+	SessionID string
+	// PushCertNonce is the advertised push-cert nonce capability value.
+	//
+	// When empty, ReceivePack generates one random value per invocation.
+	PushCertNonce string
 }
 
 func validateOptions(opts Options) error {

@@ -37,6 +37,21 @@ func ReceivePack(
 		Algorithm: opts.Algorithm,
 	})
 
+	agent := opts.Agent
+	if agent == "" {
+		agent = defaultAgent()
+	}
+
+	sessionID := opts.SessionID
+	if sessionID == "" {
+		sessionID = defaultSessionID()
+	}
+
+	pushCertNonce := opts.PushCertNonce
+	if pushCertNonce == "" {
+		pushCertNonce = defaultPushCertNonce()
+	}
+
 	protoSession := protoreceive.NewSession(base, protoreceive.Capabilities{
 		ReportStatus:   true,
 		ReportStatusV2: true,
@@ -46,8 +61,10 @@ func ReceivePack(
 		Atomic:         true,
 		OfsDelta:       true,
 		PushOptions:    true,
+		PushCertNonce:  pushCertNonce,
+		SessionID:      sessionID,
 		ObjectFormat:   opts.Algorithm,
-		// TODO: PushCertNonce, SessionID, Agent, whatever.
+		Agent:          agent,
 	})
 
 	refs, err := advertisedRefs(opts)
