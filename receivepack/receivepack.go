@@ -60,6 +60,11 @@ func ReceivePack(
 		return err
 	}
 
+	err = base.FlushIO()
+	if err != nil {
+		return err
+	}
+
 	req, err := protoSession.ReadRequest()
 	if err != nil {
 		return err
@@ -97,12 +102,16 @@ func ReceivePack(
 	protoResult := translateResult(result)
 
 	if req.Capabilities.ReportStatusV2 {
-		return protoSession.WriteReportStatusV2(protoResult)
+		err = protoSession.WriteReportStatusV2(protoResult)
+		if err != nil {
+			return err
+		}
+	} else if req.Capabilities.ReportStatus {
+		err = protoSession.WriteReportStatus(protoResult)
+		if err != nil {
+			return err
+		}
 	}
 
-	if req.Capabilities.ReportStatus {
-		return protoSession.WriteReportStatus(protoResult)
-	}
-
-	return nil
+	return base.FlushIO()
 }
