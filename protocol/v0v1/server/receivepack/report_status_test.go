@@ -101,26 +101,46 @@ func TestWriteReportStatusUsesSideBand64KWhenNegotiated(t *testing.T) {
 			t.Fatalf("ReadFrame(unpack): %v", err)
 		}
 
-		if frame.Type != sideband64k.FrameData || string(frame.Payload) != "unpack ok\n" {
+		if frame.Type != sideband64k.FrameData {
 			t.Fatalf("first frame = %#v", frame)
 		}
 
-		frame, err = dec.ReadFrame()
+		statusDec := pktline.NewDecoder(strings.NewReader(string(frame.Payload)), pktline.ReadOptions{})
+
+		statusFrame, err := statusDec.ReadFrame()
 		if err != nil {
-			t.Fatalf("ReadFrame(ok): %v", err)
+			t.Fatalf("ReadFrame(unpack status): %v", err)
 		}
 
-		if frame.Type != sideband64k.FrameData || string(frame.Payload) != "ok refs/heads/main\n" {
-			t.Fatalf("second frame = %#v", frame)
+		if statusFrame.Type != pktline.PacketData || string(statusFrame.Payload) != "unpack ok\n" {
+			t.Fatalf("first status frame = %#v", statusFrame)
+		}
+
+		statusFrame, err = statusDec.ReadFrame()
+		if err != nil {
+			t.Fatalf("ReadFrame(ok status): %v", err)
+		}
+
+		if statusFrame.Type != pktline.PacketData || string(statusFrame.Payload) != "ok refs/heads/main\n" {
+			t.Fatalf("second status frame = %#v", statusFrame)
+		}
+
+		statusFrame, err = statusDec.ReadFrame()
+		if err != nil {
+			t.Fatalf("ReadFrame(status flush): %v", err)
+		}
+
+		if statusFrame.Type != pktline.PacketFlush {
+			t.Fatalf("status flush frame.Type = %v, want FrameFlush", statusFrame.Type)
 		}
 
 		frame, err = dec.ReadFrame()
 		if err != nil {
-			t.Fatalf("ReadFrame(flush): %v", err)
+			t.Fatalf("ReadFrame(outer flush): %v", err)
 		}
 
 		if frame.Type != sideband64k.FrameFlush {
-			t.Fatalf("flush frame.Type = %v, want FrameFlush", frame.Type)
+			t.Fatalf("outer flush frame.Type = %v, want FrameFlush", frame.Type)
 		}
 	})
 }
