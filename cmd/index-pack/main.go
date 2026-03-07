@@ -85,7 +85,12 @@ func run(repoPath, destinationPath, objectFormat string, fixThin, writeRev bool)
 
 	defer func() { _ = destinationRoot.Close() }()
 
-	result, err := ingest.Ingest(os.Stdin, destinationRoot, algo, fixThin, writeRev, base)
+	result, err := ingest.Ingest(os.Stdin, destinationRoot, algo, ingest.Options{
+		FixThin:            fixThin,
+		WriteRev:           writeRev,
+		Base:               base,
+		RequireTrailingEOF: true,
+	})
 	if err != nil {
 		return err
 	}
