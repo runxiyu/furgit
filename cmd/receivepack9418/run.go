@@ -15,18 +15,21 @@ func run(listenAddr, repoPath string) error {
 	if err != nil {
 		return fmt.Errorf("open repo root: %w", err)
 	}
+
 	defer func() { _ = repoRoot.Close() }()
 
 	repo, err := repository.Open(repoRoot)
 	if err != nil {
 		return fmt.Errorf("open repository: %w", err)
 	}
+
 	defer func() { _ = repo.Close() }()
 
 	objectsRoot, err := repoRoot.OpenRoot("objects")
 	if err != nil {
 		return fmt.Errorf("open objects root: %w", err)
 	}
+
 	defer func() { _ = objectsRoot.Close() }()
 
 	srv := &server{
@@ -38,6 +41,7 @@ func run(listenAddr, repoPath string) error {
 	if err != nil {
 		return fmt.Errorf("listen %q: %w", listenAddr, err)
 	}
+
 	defer func() { _ = ln.Close() }()
 
 	log.Printf("receivepack9418: listening on %s", listenAddr)
@@ -53,6 +57,7 @@ func run(listenAddr, repoPath string) error {
 			var nerr net.Error
 			if errors.As(err, &nerr) && nerr.Temporary() {
 				log.Printf("receivepack9418: temporary accept error: %v", err)
+
 				continue
 			}
 

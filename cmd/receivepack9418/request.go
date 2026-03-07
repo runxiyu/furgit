@@ -21,6 +21,7 @@ func parseGitProtoRequestPayload(payload []byte) (gitProtoRequest, error) {
 	}
 
 	commandPath := string(parts[0])
+
 	command, pathname, ok := strings.Cut(commandPath, " ")
 	if !ok || command == "" || pathname == "" {
 		return gitProtoRequest{}, fmt.Errorf("malformed command/path segment %q", commandPath)
