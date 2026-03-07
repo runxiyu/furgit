@@ -22,10 +22,12 @@ func streamPackAndScan(state *ingestState) error {
 	)
 
 	utils.WriteProgressf(state.opts.Progress, "validating pack header...\r")
+
 	err = readAndValidatePackHeader(state)
 	if err != nil {
 		return err
 	}
+
 	utils.WriteProgressf(state.opts.Progress, "validating pack header: done.\n")
 
 	state.records = make([]objectRecord, 0, state.objectCountHeader)
@@ -36,7 +38,7 @@ func streamPackAndScan(state *ingestState) error {
 	step := progressStep(total)
 	utils.WriteProgressf(state.opts.Progress, "receiving objects:   0%% (0/%d)\r", total)
 
-	for i := uint32(0); i < total; i++ {
+	for i := range total {
 		nextOffset, err := scanOneEntry(state, state.stream.consumed)
 		if err != nil {
 			return err

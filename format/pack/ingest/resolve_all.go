@@ -11,6 +11,7 @@ func resolveAll(state *ingestState) error {
 	state.unresolvedRefDeltas = state.unresolvedRefDeltas[:0]
 
 	var pending uint32
+
 	for idx := range state.records {
 		if !state.records[idx].resolved {
 			pending++
@@ -22,7 +23,9 @@ func resolveAll(state *ingestState) error {
 	}
 
 	step := progressStep(pending)
+
 	var done uint32
+
 	utils.WriteProgressf(state.opts.Progress, "resolving deltas:   0%% (0/%d)\r", pending)
 
 	for idx := range state.records {

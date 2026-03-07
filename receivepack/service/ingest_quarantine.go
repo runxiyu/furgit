@@ -35,6 +35,7 @@ func (service *Service) ingestQuarantine(
 	}
 
 	utils.WriteProgressf(service.opts.Progress, "creating quarantine...\r")
+
 	quarantineName, quarantineRoot, err := service.createQuarantineRoot()
 	if err != nil {
 		utils.WriteProgressf(service.opts.Progress, "unpack failed: %v\n", err)
@@ -57,6 +58,7 @@ func (service *Service) ingestQuarantine(
 
 		return "", nil, false
 	}
+
 	utils.WriteProgressf(service.opts.Progress, "creating quarantine: done.\n")
 	utils.WriteProgressf(service.opts.Progress, "unpacking...\r")
 

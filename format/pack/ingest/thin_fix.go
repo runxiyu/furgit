@@ -54,6 +54,7 @@ func maybeFixThin(state *ingestState) error {
 	state.stream.consumed = consumed
 
 	baseIDs := unresolvedThinBaseIDs(state)
+
 	total := len(baseIDs)
 	if total > 0 {
 		utils.WriteProgressf(state.opts.Progress, "fixing thin pack:   0%% (0/%d)\r", total)

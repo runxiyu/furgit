@@ -81,6 +81,7 @@ func (service *Service) Execute(ctx context.Context, req *Request) (*Result, err
 		// Git migrates quarantined objects into permanent storage immediately
 		// before starting ref updates.
 		utils.WriteProgressf(service.opts.Progress, "promoting quarantine...\r")
+
 		err = service.promoteQuarantine(quarantineName, quarantineRoot)
 		if err != nil {
 			utils.WriteProgressf(service.opts.Progress, "promoting quarantine: failed: %v\n", err)

@@ -41,6 +41,7 @@ func (service *Service) applyAtomic(result *Result, commands []Command) error {
 	for _, command := range commands {
 		result.Commands = append(result.Commands, successCommandResult(command))
 	}
+
 	utils.WriteProgressf(service.opts.Progress, "updating refs: done.\n")
 
 	return nil
@@ -48,6 +49,7 @@ func (service *Service) applyAtomic(result *Result, commands []Command) error {
 
 func (service *Service) applyBatch(result *Result, commands []Command) error {
 	total := len(commands)
+
 	utils.WriteProgressf(service.opts.Progress, "updating refs...\r")
 
 	batch, err := service.opts.Refs.BeginBatch()
@@ -77,10 +79,12 @@ func (service *Service) applyBatch(result *Result, commands []Command) error {
 		}
 
 		result.Commands = append(result.Commands, item)
+
 		utils.WriteProgressf(service.opts.Progress, "updating refs: %d/%d\r", i+1, total)
 	}
 
 	result.Applied = appliedAny
+
 	utils.WriteProgressf(service.opts.Progress, "updating refs: done.\n")
 
 	return nil

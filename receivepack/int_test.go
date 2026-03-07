@@ -606,9 +606,12 @@ func TestReceivePackHookProgressUsesSideBand64K(t *testing.T) {
 		dec := sideband64k.NewDecoder(strings.NewReader(sidebandWire), sideband64k.ReadOptions{})
 
 		sawHookProgress := false
+
 		var frame sideband64k.Frame
+
 		for {
 			var err error
+
 			frame, err = dec.ReadFrame()
 			if err != nil {
 				t.Fatalf("ReadFrame: %v", err)
