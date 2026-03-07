@@ -2,6 +2,7 @@ package receivepack_test
 
 import (
 	"errors"
+	"io"
 	"strings"
 	"testing"
 
@@ -206,4 +207,87 @@ func TestWriteProgressRequiresSideBand64K(t *testing.T) {
 	if !errors.Is(err, common.ErrSideBandNotEnabled) {
 		t.Fatalf("WriteProgress error = %v, want %v", err, common.ErrSideBandNotEnabled)
 	}
+}
+
+func TestProgressWriterDiscardsWithoutSideBand64K(t *testing.T) {
+	t.Parallel()
+
+	var out bufferWriteFlusher
+
+	base := common.NewSession(strings.NewReader(""), &out, common.Options{})
+	session := receivepack.NewSession(base, receivepack.Capabilities{})
+
+	n, err := io.WriteString(session.ProgressWriter(), "progress line\n")
+	if err != nil {
+		t.Fatalf("ProgressWriter.Write: %v", err)
+	}
+
+	if n != len("progress line\n") {
+		t.Fatalf("ProgressWriter.Write n = %d, want %d", n, len("progress line\n"))
+	}
+
+	if out.String() != "" {
+		t.Fatalf("unexpected wire output without side-band-64k: %q", out.String())
+	}
+}
+
+func TestProgressWriterUsesSideBand64KWhenNegotiated(t *testing.T) {
+	t.Parallel()
+
+	//nolint:thelper
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+		t.Parallel()
+
+		var requestWire bufferWriteFlusher
+
+		requestEnc := pktline.NewEncoder(&requestWire)
+
+		err := requestEnc.WriteData([]byte(
+			objectid.Zero(algo).String() + " " + mustHexID(t, algo, "1").String() + " refs/heads/main\x00report-status side-band-64k object-format=" + algo.String() + "\n",
+		))
+		if err != nil {
+			t.Fatalf("WriteData(request): %v", err)
+		}
+
+		err = requestEnc.WriteFlush()
+		if err != nil {
+			t.Fatalf("WriteFlush(request): %v", err)
+		}
+
+		var out bufferWriteFlusher
+
+		base := common.NewSession(strings.NewReader(requestWire.String()), &out, common.Options{
+			Algorithm: algo,
+		})
+		session := receivepack.NewSession(base, receivepack.Capabilities{
+			ReportStatus: true,
+			SideBand64K:  true,
+			ObjectFormat: algo,
+		})
+
+		_, err = session.ReadRequest()
+		if err != nil {
+			t.Fatalf("ReadRequest: %v", err)
+		}
+
+		_, err = io.WriteString(session.ProgressWriter(), "remote: stage 1\r")
+		if err != nil {
+			t.Fatalf("ProgressWriter.Write: %v", err)
+		}
+
+		dec := sideband64k.NewDecoder(strings.NewReader(out.String()), sideband64k.ReadOptions{})
+
+		frame, err := dec.ReadFrame()
+		if err != nil {
+			t.Fatalf("ReadFrame(progress): %v", err)
+		}
+
+		if frame.Type != sideband64k.FrameProgress {
+			t.Fatalf("frame.Type = %v, want FrameProgress", frame.Type)
+		}
+
+		if string(frame.Payload) != "remote: stage 1\r" {
+			t.Fatalf("frame.Payload = %q, want %q", frame.Payload, "remote: stage 1\r")
+		}
+	})
 }
