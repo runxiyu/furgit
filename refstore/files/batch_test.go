@@ -47,11 +47,13 @@ func TestBatchApplyRejectsStaleDeleteAndAppliesIndependentDelete(t *testing.T) {
 			t.Fatalf("valid delete failed: %v", results[1].Error)
 		}
 
-		if _, err := store.Resolve("refs/heads/main"); err != nil {
+		_, err = store.Resolve("refs/heads/main")
+		if err != nil {
 			t.Fatalf("Resolve(main): %v", err)
 		}
 
-		if _, err := store.Resolve("refs/heads/topic"); err == nil {
+		_, err = store.Resolve("refs/heads/topic")
+		if err == nil {
 			t.Fatal("refs/heads/topic still exists")
 		}
 	})
@@ -91,7 +93,8 @@ func TestBatchApplyRejectsDuplicateQueuedRef(t *testing.T) {
 			t.Fatal("duplicate ref operation did not report an error")
 		}
 
-		if _, err := store.Resolve("refs/heads/main"); err != nil {
+		_, err = store.Resolve("refs/heads/main")
+		if err != nil {
 			t.Fatalf("Resolve(main): %v", err)
 		}
 	})

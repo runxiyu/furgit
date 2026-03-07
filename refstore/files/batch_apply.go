@@ -38,18 +38,21 @@ func (batch *Batch) Apply() ([]refstore.BatchResult, error) {
 			ops:   []txOp{op},
 		}
 
-		if err := tx.validateOp(op); err != nil {
+		err := tx.validateOp(op)
+		if err != nil {
 			results[i].Error = err
+
 			continue
 		}
 
-		err := tx.Commit()
+		err = tx.Commit()
 		if err == nil {
 			continue
 		}
 
 		if isBatchRejected(err) {
 			results[i].Error = err
+
 			continue
 		}
 
