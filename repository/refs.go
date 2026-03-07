@@ -13,7 +13,7 @@ import (
 )
 
 //nolint:ireturn
-func openRefStore(root *os.Root, algo objectid.Algorithm) (out refstore.Store, err error) {
+func openRefStore(root *os.Root, algo objectid.Algorithm) (out refstore.ReadingStore, err error) {
 	looseRoot, err := root.OpenRoot(".")
 	if err != nil {
 		return nil, fmt.Errorf("repository: open root for loose refs: %w", err)
@@ -26,7 +26,7 @@ func openRefStore(root *os.Root, algo objectid.Algorithm) (out refstore.Store, e
 		return nil, err
 	}
 
-	backends := []refstore.Store{looseStore}
+	backends := []refstore.ReadingStore{looseStore}
 
 	_, err = root.Stat("packed-refs")
 	if err == nil {
@@ -50,6 +50,6 @@ func openRefStore(root *os.Root, algo objectid.Algorithm) (out refstore.Store, e
 // Refs returns the configured ref store.
 //
 //nolint:ireturn
-func (repo *Repository) Refs() refstore.Store {
+func (repo *Repository) Refs() refstore.ReadingStore {
 	return repo.refs
 }

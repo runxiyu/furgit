@@ -18,7 +18,7 @@ type Store struct {
 	algo objectid.Algorithm
 }
 
-var _ refstore.Store = (*Store)(nil)
+var _ refstore.ReadingStore = (*Store)(nil)
 
 // New creates a loose ref store rooted at a repository root.
 func New(root *os.Root, algo objectid.Algorithm) (*Store, error) {

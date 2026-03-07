@@ -12,4 +12,4 @@ type Store struct {
 	ordered []ref.Detached
 }
 
-var _ refstore.Store = (*Store)(nil)
+var _ refstore.ReadingStore = (*Store)(nil)

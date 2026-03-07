@@ -6,5 +6,5 @@ import "codeberg.org/lindenii/furgit/refstore"
 
 // Chain queries multiple reference stores in order.
 type Chain struct {
-	backends []refstore.Store
+	backends []refstore.ReadingStore
 }

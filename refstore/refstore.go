@@ -11,8 +11,8 @@ import (
 // TODO: Interface error? Just like object not found in objectstore.
 var ErrReferenceNotFound = errors.New("refstore: reference not found")
 
-// Store reads Git references.
-type Store interface {
+// ReadingStore reads Git references.
+type ReadingStore interface {
 	// Resolve resolves a reference name to either a symbolic or detached ref.
 	//
 	// Implementations should return value forms (ref.Detached or ref.Symbolic),
