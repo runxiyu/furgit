@@ -19,157 +19,196 @@ Furgit is a low-level Git library in Go.
 * Prioritize APIs for forges and other server-side uses first
 * Aim for clear architecture then high performance
 
-## Implemented
+## Features
 
-* Parsing configs
-* Object ID and hash algorithms (SHA-256, SHA-1)
-* Object type enums
-* Blobs
-* Trees
-* Commits
-* Annotated tags
-* Object header parsing
-* Parsing objects
-* Serializing objects
-* Diffing lines via Myers
-* Diffing trees
-* Object storer interface
-* Reading loose objects
-* Applying deltas
-* `.idx` lookup
-* Reading packed objects
-* Object storer chain and mixer
-* Ref types (detached, symbolic)
-* Basic ref resolution
-* Tag ref peeling
-* Ref storer interface
-* Reading loose refs
-* Reading packed refs
-* Ref storer chain
-* Reachability iterators
-* Is-ancestor
-* Repository abstractions
-* Adler-32 optimizations
-* ZLIB pooling
-* Streaming `.pack`/`.idx` hash verifier
-* `.idx` and `.rev` writing
-* Pack ingestion
-* Un-thinning thin packs
-* Commit graph reading
-* Commit graph chain reading
-* Commit graph bloom filters
-* `pkt-line`
-* `side-band-64k`
-* Merge base
-* Quarantine areas
-* V0/V1 protocol
-* Protocol capabilities
-* Receiving
-* Hooks (functions, not files)
-
-## Planned
-
-* Fetching
-* Verify pack
-* ls-tree
-* Digital signatures
-* Patience, histogram diffs
-* Three-way diffs
-* Init
-* Multi-pack indexes
-* Pack bitmaps
-* Multi-pack bitmaps
-* Delta base selection, e.g., islands
-* Compressing deltas
-* Writing packfiles
-* Writing thin packs
-* Protocol V2
-* Ref advertisement
-* Signed push
-* Pushing/sending
-* DEFLATE optimizations
-* Aggressive buffer pooling
-* Ref namespaces
-* Refname validation/normalization
-* Writing refs
-* Packing refs
-* Reflogs
-* Ref transactions
-* Fsck
-* reftable
-* Alternates
-* Object borrowing
-* Bundles
-* Bundle URI
-* Packfile URI
-* Submodules
-* Archive
-* Pathspec
-* Refspec
-* Revision syntax
-* Revision walking, log
-* Path-limited history
-* Revision walking ordering (e.g., topo, date)
-* grep
-* Word diff
-* Describe
-* Cherry pick
-* Revert
-* Promisors remotes
-* Shallow clones
-* Object filtering
-* Partial clones
-* Repacking
-* Pack maintenance, gc
-* Cruft packs
-* Expiration
-* Compression agility
-* Working trees
-* File modes
-* Working tree conversions (e.g., CRLF)
-* Common dir
-* Worktree management
-* Index
-* ls-files
-* LFS
-* add, rm, mv, clean
-* Index conflicts
-* Split index
-* Untracked cache
-* status
-* FS monitor
-* Other index extensions
-* reset, restore, switch, checkout
-* Pseudorefs
-* Merge
-* More merge strategies (recursive, ort, rename)
-* Conflict resolution
-* Pseudo-merge bitmaps
-* Checkout
-* Sparse checkout
-* Sparse index
-* Git attributes
-* Ignore rules
-* Notes
-* Stash
-* Blame (incl., incremental)
-* Annotate
-* Similarity detection
-* Rename/copy detection
-* Replace refs, grafts
-* Rebase
-* More rebase variants
-* Commit graph writing
-* Config includes
-* Writing configs
-* Rerere
-* Fast import/export
-* Diff apply
-* Patch-id
-* Range-diff
-* Filter branch
-* Mail map
-* format-patch, am
+* Configuration
+  * [X] Parsing
+  * [ ] Includes
+  * [ ] Writing
+* [X] Object IDs
+  * [X] SHA-256
+  * [X] SHA-1
+* [X] Object model (incl., parse, serialize)
+  * [X] Blobs
+  * [X] Trees
+    * [X] File mode definitions
+    * [X] Entry insertion ordering
+    * [X] Traversal
+    * [ ] Pathspec
+  * [X] Commits
+  * [X] Annotated tags
+  * [X] Stored objects
+* Further cryptography
+  * [ ] OpenPGP signatures
+  * [ ] SSH signatures
+* [X] Reading object stores
+  * [X] Pluggable interface
+  * [X] Chain lookup store
+  * [X] Bundle store
+  * [X] MRU lookup store
+  * [X] Reading loose objects
+  * [ ] Promisor remotes
+  * [ ] Alternates
+  * [X] Reading packed objects
+    * [X] Pack index lookups
+    * [X] Delta caching
+    * [X] Delta application
+    * [ ] Multi pack indexes
+* [ ] Writing objects
+  * [X] Loose object writing
+* Misc bundle features
+  * [ ] Writing bundles
+* Misc packfile features
+  * [X] Writing pack indexes
+  * [X] Writing reverse pack indexes
+  * [ ] Writing packfiles
+    * [ ] Writing thin packs
+    * [ ] Compressing deltas
+      * [ ] Delta islands
+  * [ ] Pack verification
+* Compression
+  * [ ] Plugabble compression algorithms
+  * [X] ZLIB support
+  * [ ] DEFLATE optimizations
+  * [X] Adler-32 SIMD optimizations
+* [X] References
+  * [X] Detached references
+  * [X] Symbolic references
+  * [X] Name verification/resolution
+  * [X] Annotated tag ref peeling
+  * [ ] Describe
+  * [ ] Revision syntax
+  * [ ] Namespaces
+  * [ ] Repalce refs, grafts
+* [X] Reference stores
+  * [X] Chain lookup store
+  * [X] Files reference store
+    * [X] Reading loose refs
+    * [X] Reading packed refs
+    * [X] Atomic writes
+    * [X] Batched writes
+    * [ ] Packing refs
+    * [ ] Reflogs
+  * [ ] Reftable
+* Reachability
+  * [X] Have/wants walks
+  * [X] Is ancestor
+  * [X] Merge bases
+  * [X] Commit graph
+    * [X] Changed path bloom filters
+    * [X] Chained graphs
+    * [ ] Writing
+  * [ ] Reachability bitmaps
+    * [ ] For a single packfile
+    * [ ] For Multi pack indexes
+* Misc repository
+  * [X] Opening relevant stores
+  * [ ] Creating repositories
+  * [ ] Filter branch/repo
+  * [ ] Fast import/export
+  * [ ] Git notes
+  * [ ] Git attributes
+  * [ ] Pseudorefs
+  * Integrity and maintainence
+    * [ ] Fsck
+    * [ ] Repacking
+    * [ ] Garbage collection
+    * [ ] Cruft packing
+    * [ ] Expiration
+  * [ ] Grep
+  * [ ] Submodules
+  * [ ] Worktrees
+  * [ ] Archive
+  * [ ] LFS
+  * [ ] Revision log walk
+    * [ ] Topological ordering
+    * [ ] Date ordering
+    * [ ] Path-limited
+* [ ] Diffing
+  * [ ] Blame
+  * [ ] Annotate
+  * [X] Tree diffing
+    * [ ] Similarity/rename/copy detection
+  * [ ] Multi-way diffs
+  * [ ] Patch-id
+  * [ ] Range-diff
+  * Blob diffing
+    * [ ] Word diffs
+    * [X] Myers
+    * [ ] Patience
+    * [ ] Histogram
+    * [ ] Tree-way
+  * Format patch
+  * Apply/amend patch
+* Branch integration/rewrite/etc methods
+  * [ ] Merge
+    * [ ] Recursive
+    * [ ] ORT
+  * [ ] Rebase
+  * [ ] Cherry pick
+  * [ ] Revert
+  * [ ] Rerere
+* Network protocols and related features
+  * [X] pkt-line
+  * [X] side-band-64k
+  * [X] Ingesting packfiles
+    * [X] Quarantine areas
+    * [X] Un-thinning thin packs
+  * Version 0, version 1 protocols
+    * [X] Server side
+      * [X] Reference advertisement
+      * [X] Capability negotiation
+      * [X] Receive
+      * [ ] "Upload"
+    * [ ] Client side
+      * [ ] Send
+      * [ ] Fetch
+  * Version 2 protocol
+    * [ ] Server side
+      * [ ] "Upload"
+    * [ ] Client side
+      * [ ] Fetch
+  * Protocol-independent logic
+    * Common
+      * [X] Progress meters
+    * Client side
+      * [ ] Refspec
+      * [ ] Fetch
+        * [ ] Partial clones
+          * [ ] Object filtering
+        * [ ] Bundle URI
+        * [ ] Packfile URI
+        * [ ] Shallow clones
+      * [ ] Send
+    * Server side
+      * [ ] Upload
+        * [ ] Object filtering
+      * [X] Receive
+        * [ ] Signed push
+        * Hooks
+          * Slots
+            * [ ] After ref negotiation
+            * [X] After object unpacking
+          * Provided samples
+            * [X] Chain
+            * [X] Force push rejection
+* [ ] Working trees
+  * [ ] Stashing
+  * [ ] Ignore rules
+  * [ ] Checkouts
+    * [ ] Sparse checkouts
+    * [ ] CR/LF conversions
+    * [ ] File mode conversions
+  * [ ] Indexes
+    * [ ] Conflict resolution
+    * [ ] Split index
+    * [ ] Sparse index
+    * [ ] Untracked cache
+  * [ ] Status listing
+  * [ ] Filesystem monitor
+  * [ ] Worktree
+    * [ ] Common directory
+    * [ ] Worktree-specific references
 
 ## Not planned
 
