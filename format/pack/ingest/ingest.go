@@ -34,7 +34,7 @@ func ingest(state *ingestState) (out Result, err error) {
 	}
 
 	if state.thinFixed {
-		err := resolveAll(state)
+		err = resolveAll(state)
 		if err != nil {
 			return Result{}, err
 		}
@@ -49,8 +49,6 @@ func ingest(state *ingestState) (out Result, err error) {
 		return Result{}, err
 	}
 
-	writeProgress(state, "writing index...\r")
-
 	err = state.packFile.Sync()
 	if err != nil {
 		return Result{}, &DestinationWriteError{Op: fmt.Sprintf("sync pack: %v", err)}
@@ -61,19 +59,9 @@ func ingest(state *ingestState) (out Result, err error) {
 		return Result{}, err
 	}
 
-	writeProgress(state, "writing index: done.\n")
-
-	if state.opts.WriteRev {
-		writeProgress(state, "writing reverse index...\r")
-	}
-
 	err = writeRev(state)
 	if err != nil {
 		return Result{}, err
-	}
-
-	if state.opts.WriteRev {
-		writeProgress(state, "writing reverse index: done.\n")
 	}
 
 	return finalizeArtifacts(state)

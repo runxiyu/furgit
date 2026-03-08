@@ -9,6 +9,7 @@ import (
 	"slices"
 
 	"codeberg.org/lindenii/furgit/internal/intconv"
+	"codeberg.org/lindenii/furgit/internal/progress"
 )
 
 const (
@@ -26,33 +27,33 @@ func writeIdx(state *ingestState) error {
 	}
 
 	write := func(src []byte) error {
-		_, err := state.idxFile.Write(src)
-		if err != nil {
-			return err
+		_, writeErr := state.idxFile.Write(src)
+		if writeErr != nil {
+			return writeErr
 		}
 
-		_, err = hashImpl.Write(src)
-		if err != nil {
-			return err
+		_, writeErr = hashImpl.Write(src)
+		if writeErr != nil {
+			return writeErr
 		}
 
 		return nil
 	}
 
 	var scratch [8]byte
-	binary.BigEndian.PutUint32(scratch[:4], idxMagicV2)
-	binary.BigEndian.PutUint32(scratch[4:8], idxVersionV2)
-
-	err = write(scratch[:8])
-	if err != nil {
-		return err
-	}
-
 	var fanout [256]uint32
+	writeProgress(state, "writing index fanout...\r")
 
 	for _, recordIdx := range order {
 		idRaw := state.records[recordIdx].objectID.Bytes()
 		fanout[idRaw[0]]++
+	}
+
+	binary.BigEndian.PutUint32(scratch[:4], idxMagicV2)
+	binary.BigEndian.PutUint32(scratch[4:8], idxVersionV2)
+	err = write(scratch[:8])
+	if err != nil {
+		return err
 	}
 
 	var cumulative uint32
@@ -65,6 +66,22 @@ func writeIdx(state *ingestState) error {
 			return err
 		}
 	}
+	writeProgress(state, "writing index fanout: done.\n")
+
+	largeOffsetCount := 0
+	for idx := range state.records {
+		if state.records[idx].offset >= 0x80000000 {
+			largeOffsetCount++
+		}
+	}
+
+	oidMeter := progress.New(progress.Options{
+		Writer: state.opts.Progress,
+		Flush:  state.opts.ProgressFlush,
+		Title:  "writing index object ids",
+		Total:  uint64(len(order)),
+	})
+	var oidDone uint64
 
 	for _, recordIdx := range order {
 		idRaw := state.records[recordIdx].objectID.Bytes()
@@ -73,7 +90,21 @@ func writeIdx(state *ingestState) error {
 		if err != nil {
 			return err
 		}
+
+		oidDone++
+		oidMeter.Set(oidDone, 0)
 	}
+	if oidDone > 0 {
+		oidMeter.Stop("done")
+	}
+
+	crcMeter := progress.New(progress.Options{
+		Writer: state.opts.Progress,
+		Flush:  state.opts.ProgressFlush,
+		Title:  "writing index crc32",
+		Total:  uint64(len(order)),
+	})
+	var crcDone uint64
 
 	for _, recordIdx := range order {
 		binary.BigEndian.PutUint32(scratch[:4], state.records[recordIdx].crc32)
@@ -82,9 +113,22 @@ func writeIdx(state *ingestState) error {
 		if err != nil {
 			return err
 		}
+
+		crcDone++
+		crcMeter.Set(crcDone, 0)
+	}
+	if crcDone > 0 {
+		crcMeter.Stop("done")
 	}
 
 	largeOffsets := make([]uint64, 0)
+	offsetMeter := progress.New(progress.Options{
+		Writer: state.opts.Progress,
+		Flush:  state.opts.ProgressFlush,
+		Title:  "writing index offsets",
+		Total:  uint64(len(order)),
+	})
+	var offsetDone uint64
 
 	for _, recordIdx := range order {
 		offset := state.records[recordIdx].offset
@@ -107,8 +151,21 @@ func writeIdx(state *ingestState) error {
 		if err != nil {
 			return err
 		}
+
+		offsetDone++
+		offsetMeter.Set(offsetDone, 0)
+	}
+	if offsetDone > 0 {
+		offsetMeter.Stop("done")
 	}
 
+	largeOffsetMeter := progress.New(progress.Options{
+		Writer: state.opts.Progress,
+		Flush:  state.opts.ProgressFlush,
+		Title:  "writing index large offsets",
+		Total:  uint64(largeOffsetCount),
+	})
+	var largeOffsetDone uint64
 	for _, off := range largeOffsets {
 		binary.BigEndian.PutUint64(scratch[:8], off)
 
@@ -116,7 +173,15 @@ func writeIdx(state *ingestState) error {
 		if err != nil {
 			return err
 		}
+
+		largeOffsetDone++
+		largeOffsetMeter.Set(largeOffsetDone, 0)
 	}
+	if largeOffsetDone > 0 {
+		largeOffsetMeter.Stop("done")
+	}
+
+	writeProgress(state, "writing index trailer...\r")
 
 	err = write(state.packHash.Bytes())
 	if err != nil {
@@ -130,7 +195,13 @@ func writeIdx(state *ingestState) error {
 		return err
 	}
 
-	return state.idxFile.Sync()
+	err = state.idxFile.Sync()
+	if err != nil {
+		return err
+	}
+	writeProgress(state, "writing index trailer: done.\n")
+
+	return nil
 }
 
 // buildIdxOrder returns record indexes sorted by ObjectID.
