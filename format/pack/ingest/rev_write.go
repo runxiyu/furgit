@@ -35,7 +35,7 @@ func writeRev(state *ingestState) error {
 
 	var scratch [8]byte
 
-	writeProgress(state, "writing reverse index header...\r")
+	writeProgressf(state, "writing reverse index header...\r")
 	binary.BigEndian.PutUint32(scratch[:4], revMagic)
 
 	err = writeAndHash(state.revFile, hashImpl, scratch[:4])
@@ -57,7 +57,7 @@ func writeRev(state *ingestState) error {
 		return err
 	}
 
-	writeProgress(state, "writing reverse index header: done.\n")
+	writeProgressf(state, "writing reverse index header: done.\n")
 
 	entriesMeter := progress.New(progress.Options{
 		Writer: state.opts.Progress,
@@ -89,7 +89,7 @@ func writeRev(state *ingestState) error {
 		entriesMeter.Stop("done")
 	}
 
-	writeProgress(state, "writing reverse index trailer...\r")
+	writeProgressf(state, "writing reverse index trailer...\r")
 
 	err = writeAndHash(state.revFile, hashImpl, state.packHash.Bytes())
 	if err != nil {
@@ -108,7 +108,7 @@ func writeRev(state *ingestState) error {
 		return err
 	}
 
-	writeProgress(state, "writing reverse index trailer: done.\n")
+	writeProgressf(state, "writing reverse index trailer: done.\n")
 
 	return nil
 }

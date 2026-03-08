@@ -45,7 +45,7 @@ func writeIdx(state *ingestState) error {
 		fanout  [256]uint32
 	)
 
-	writeProgress(state, "writing index fanout...\r")
+	writeProgressf(state, "writing index fanout...\r")
 
 	for _, recordIdx := range order {
 		idRaw := state.records[recordIdx].objectID.Bytes()
@@ -71,7 +71,7 @@ func writeIdx(state *ingestState) error {
 		}
 	}
 
-	writeProgress(state, "writing index fanout: done.\n")
+	writeProgressf(state, "writing index fanout: done.\n")
 
 	largeOffsetCount := 0
 
@@ -196,7 +196,7 @@ func writeIdx(state *ingestState) error {
 		largeOffsetMeter.Stop("done")
 	}
 
-	writeProgress(state, "writing index trailer...\r")
+	writeProgressf(state, "writing index trailer...\r")
 
 	err = write(state.packHash.Bytes())
 	if err != nil {
@@ -215,7 +215,7 @@ func writeIdx(state *ingestState) error {
 		return err
 	}
 
-	writeProgress(state, "writing index trailer: done.\n")
+	writeProgressf(state, "writing index trailer: done.\n")
 
 	return nil
 }

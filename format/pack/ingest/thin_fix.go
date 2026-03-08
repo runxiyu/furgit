@@ -15,7 +15,7 @@ func maybeFixThin(state *ingestState) error {
 		return nil
 	}
 
-	writeProgress(
+	writeProgressf(
 		state,
 		"fixing thin pack: %d unresolved bases\r",
 		len(state.unresolvedRefDeltas),
