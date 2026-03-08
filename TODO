@@ -18,3 +18,4 @@ So the to-do list in README.md is more
 * Actually making signed-push work reasonably
 * Investigate fsck issues with receive-pack
 * Improve performance of delta resolution
+* Consider unifying how flush works.
