@@ -40,8 +40,11 @@ func writeIdx(state *ingestState) error {
 		return nil
 	}
 
-	var scratch [8]byte
-	var fanout [256]uint32
+	var (
+		scratch [8]byte
+		fanout  [256]uint32
+	)
+
 	writeProgress(state, "writing index fanout...\r")
 
 	for _, recordIdx := range order {
@@ -51,6 +54,7 @@ func writeIdx(state *ingestState) error {
 
 	binary.BigEndian.PutUint32(scratch[:4], idxMagicV2)
 	binary.BigEndian.PutUint32(scratch[4:8], idxVersionV2)
+
 	err = write(scratch[:8])
 	if err != nil {
 		return err
@@ -66,9 +70,11 @@ func writeIdx(state *ingestState) error {
 			return err
 		}
 	}
+
 	writeProgress(state, "writing index fanout: done.\n")
 
 	largeOffsetCount := 0
+
 	for idx := range state.records {
 		if state.records[idx].offset >= 0x80000000 {
 			largeOffsetCount++
@@ -81,6 +87,7 @@ func writeIdx(state *ingestState) error {
 		Title:  "writing index object ids",
 		Total:  uint64(len(order)),
 	})
+
 	var oidDone uint64
 
 	for _, recordIdx := range order {
@@ -94,6 +101,7 @@ func writeIdx(state *ingestState) error {
 		oidDone++
 		oidMeter.Set(oidDone, 0)
 	}
+
 	if oidDone > 0 {
 		oidMeter.Stop("done")
 	}
@@ -104,6 +112,7 @@ func writeIdx(state *ingestState) error {
 		Title:  "writing index crc32",
 		Total:  uint64(len(order)),
 	})
+
 	var crcDone uint64
 
 	for _, recordIdx := range order {
@@ -117,6 +126,7 @@ func writeIdx(state *ingestState) error {
 		crcDone++
 		crcMeter.Set(crcDone, 0)
 	}
+
 	if crcDone > 0 {
 		crcMeter.Stop("done")
 	}
@@ -128,6 +138,7 @@ func writeIdx(state *ingestState) error {
 		Title:  "writing index offsets",
 		Total:  uint64(len(order)),
 	})
+
 	var offsetDone uint64
 
 	for _, recordIdx := range order {
@@ -155,6 +166,7 @@ func writeIdx(state *ingestState) error {
 		offsetDone++
 		offsetMeter.Set(offsetDone, 0)
 	}
+
 	if offsetDone > 0 {
 		offsetMeter.Stop("done")
 	}
@@ -165,7 +177,9 @@ func writeIdx(state *ingestState) error {
 		Title:  "writing index large offsets",
 		Total:  uint64(largeOffsetCount),
 	})
+
 	var largeOffsetDone uint64
+
 	for _, off := range largeOffsets {
 		binary.BigEndian.PutUint64(scratch[:8], off)
 
@@ -177,6 +191,7 @@ func writeIdx(state *ingestState) error {
 		largeOffsetDone++
 		largeOffsetMeter.Set(largeOffsetDone, 0)
 	}
+
 	if largeOffsetDone > 0 {
 		largeOffsetMeter.Stop("done")
 	}
@@ -199,6 +214,7 @@ func writeIdx(state *ingestState) error {
 	if err != nil {
 		return err
 	}
+
 	writeProgress(state, "writing index trailer: done.\n")
 
 	return nil

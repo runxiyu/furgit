@@ -89,6 +89,7 @@ func ReceivePack(
 
 	progressWriter := protoSession.ProgressWriter()
 	progressFlush := base.FlushIO
+
 	if req.Capabilities.Quiet {
 		progressWriter = io.Discard
 		progressFlush = nil

@@ -9,6 +9,7 @@ func humanizeBytes(n uint64) string {
 	}
 
 	value := float64(n)
+
 	units := []string{"KiB", "MiB", "GiB", "TiB", "PiB"}
 	for i := range units {
 		value /= unit

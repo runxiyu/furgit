@@ -88,6 +88,7 @@ func (store *Store) touchCandidate(packName string) {
 	}
 
 	node.prev = nil
+
 	node.next = store.mruHead
 	if store.mruHead != nil {
 		store.mruHead.prev = node

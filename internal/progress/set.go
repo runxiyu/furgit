@@ -17,6 +17,7 @@ func (meter *Meter) Set(done uint64, bytes uint64) {
 	forced := meter.consumeUpdateTick(now)
 
 	percentChanged := false
+
 	if meter.total > 0 {
 		percent := int(done * 100 / meter.total)
 		percentChanged = percent != meter.lastPercent
