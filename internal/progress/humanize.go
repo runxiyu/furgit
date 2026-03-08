@@ -10,7 +10,7 @@ func humanizeBytes(n uint64) string {
 
 	value := float64(n)
 	units := []string{"KiB", "MiB", "GiB", "TiB", "PiB"}
-	for i := 0; i < len(units); i++ {
+	for i := range units {
 		value /= unit
 		if value < unit || i == len(units)-1 {
 			return fmt.Sprintf("%.2f %s", value, units[i])
