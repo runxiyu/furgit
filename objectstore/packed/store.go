@@ -4,6 +4,7 @@ package packed
 import (
 	"os"
 	"sync"
+	"sync/atomic"
 
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
@@ -17,26 +18,26 @@ type Store struct {
 	root *os.Root
 	// algo is the expected object ID algorithm for lookups.
 	algo objectid.Algorithm
+	// refreshPolicy controls automatic candidate refresh on lookup misses.
+	refreshPolicy RefreshPolicy
 
-	// discoverOnce guards one-time pack candidate discovery.
-	discoverOnce sync.Once
-	// discoverErr stores candidate discovery failures.
-	discoverErr error
-	// candidateHead is the first candidate in lookup priority order.
-	candidateHead *packCandidateNode
-	// candidateTail is the last candidate in lookup priority order.
-	candidateTail *packCandidateNode
-	// candidateByPack maps pack basename to discovered candidate.
-	candidateByPack map[string]packCandidate
-	// candidateNodeByPack maps pack basename to linked-list node.
-	candidateNodeByPack map[string]*packCandidateNode
+	// candidates stores the latest immutable candidate snapshot.
+	candidates atomic.Pointer[candidateSnapshot]
+	// refreshMu serializes candidate refresh.
+	refreshMu sync.Mutex
+	// mruMu guards candidate MRU linked-list state.
+	mruMu sync.RWMutex
+	// mruHead is the first pack in MRU order.
+	mruHead *packCandidateNode
+	// mruTail is the last pack in MRU order.
+	mruTail *packCandidateNode
+	// mruNodeByPack maps pack basename to MRU node.
+	mruNodeByPack map[string]*packCandidateNode
 	// idxByPack caches opened and parsed indexes by pack basename.
 	idxByPack map[string]*idxFile
 
 	// stateMu guards pack cache and close state.
 	stateMu sync.RWMutex
-	// candidatesMu guards discovered candidates and MRU order.
-	candidatesMu sync.RWMutex
 	// idxMu guards parsed index cache.
 	idxMu sync.RWMutex
 	// cacheMu guards delta cache operations.

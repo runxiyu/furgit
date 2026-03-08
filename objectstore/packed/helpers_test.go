@@ -19,7 +19,7 @@ func openPackedStore(t *testing.T, testRepo *testgit.TestRepo, algo objectid.Alg
 
 	root := testRepo.OpenPackRoot(t)
 
-	store, err := packed.New(root, algo)
+	store, err := packed.New(root, algo, packed.Options{})
 	if err != nil {
 		t.Fatalf("packed.New: %v", err)
 	}

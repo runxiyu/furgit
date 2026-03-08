@@ -34,6 +34,18 @@ func (service *Service) ingestQuarantine(
 		return "", nil, false
 	}
 
+	var err error
+
+	err = service.opts.ExistingObjects.Refresh()
+	if err != nil {
+		utils.BestEffortFprintf(service.opts.Progress, "unpack failed: refresh existing objects: %v.\n", err)
+
+		result.UnpackError = err.Error()
+		fillCommandErrors(result, commands, err.Error())
+
+		return "", nil, false
+	}
+
 	pending, err := ingest.Ingest(
 		req.Pack,
 		service.opts.Algorithm,

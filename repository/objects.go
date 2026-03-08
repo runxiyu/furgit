@@ -30,7 +30,11 @@ func openObjectStore(root *os.Root, algo objectid.Algorithm) (objectstore.Store,
 	if err == nil {
 		var packedStore *objectpacked.Store
 
-		packedStore, err = objectpacked.New(packRoot, algo)
+		packedStore, err = objectpacked.New(
+			packRoot,
+			algo,
+			objectpacked.Options{RefreshPolicy: objectpacked.RefreshPolicyNever},
+		)
 		if err != nil {
 			_ = looseStore.Close()
 

@@ -191,7 +191,7 @@ func TestPackedStoreInvalidAlgorithm(t *testing.T) {
 
 	root := testRepo.OpenPackRoot(t)
 
-	_, err := packed.New(root, objectid.AlgorithmUnknown)
+	_, err := packed.New(root, objectid.AlgorithmUnknown, packed.Options{})
 	if !errors.Is(err, objectid.ErrInvalidAlgorithm) {
 		t.Fatalf("packed.New invalid algorithm error = %v", err)
 	}

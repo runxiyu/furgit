@@ -29,7 +29,7 @@ func (service *Service) openQuarantinedObjects(quarantineName string) (objectsto
 
 	packRoot, err := looseRoot.OpenRoot("pack")
 	if err == nil {
-		packedStore, packedErr := packed.New(packRoot, service.opts.Algorithm)
+		packedStore, packedErr := packed.New(packRoot, service.opts.Algorithm, packed.Options{})
 		if packedErr != nil {
 			_ = packRoot.Close()
 			_ = looseStore.Close()

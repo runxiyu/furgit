@@ -17,50 +17,48 @@ type packCandidate struct {
 	mtime int64
 }
 
-// ensureCandidates discovers pack/index pairs once.
-func (store *Store) ensureCandidates() error {
-	store.discoverOnce.Do(func() {
-		candidates, err := store.discoverCandidates()
-		candidateByPack := make(map[string]packCandidate, len(candidates))
-		nodeByPack := make(map[string]*packCandidateNode, len(candidates))
+type candidateSnapshot struct {
+	candidates      []packCandidate
+	candidateByPack map[string]packCandidate
+}
 
-		var (
-			head *packCandidateNode
-			tail *packCandidateNode
-		)
+// Refresh rescans objects/pack and atomically installs a fresh candidate list.
+func (store *Store) Refresh() error {
+	store.refreshMu.Lock()
+	defer store.refreshMu.Unlock()
 
-		for _, candidate := range candidates {
-			node := &packCandidateNode{
-				candidate: candidate,
-				prev:      tail,
-			}
-			if tail != nil {
-				tail.next = node
-			}
+	candidates, err := store.discoverCandidates()
+	if err != nil {
+		return err
+	}
 
-			if head == nil {
-				head = node
-			}
+	candidateByPack := make(map[string]packCandidate, len(candidates))
+	for _, candidate := range candidates {
+		candidateByPack[candidate.packName] = candidate
+	}
 
-			tail = node
-			candidateByPack[candidate.packName] = candidate
-			nodeByPack[candidate.packName] = node
-		}
+	store.reconcileMRU(candidates)
 
-		store.candidatesMu.Lock()
-		store.candidateHead = head
-		store.candidateTail = tail
-		store.candidateByPack = candidateByPack
-		store.candidateNodeByPack = nodeByPack
-		store.discoverErr = err
-		store.candidatesMu.Unlock()
+	store.candidates.Store(&candidateSnapshot{
+		candidates:      candidates,
+		candidateByPack: candidateByPack,
 	})
 
-	store.candidatesMu.RLock()
-	err := store.discoverErr
-	store.candidatesMu.RUnlock()
+	return nil
+}
 
-	return err
+func (store *Store) ensureCandidates() (*candidateSnapshot, error) {
+	snapshot := store.candidates.Load()
+	if snapshot != nil {
+		return snapshot, nil
+	}
+
+	err := store.Refresh()
+	if err != nil {
+		return nil, err
+	}
+
+	return store.candidates.Load(), nil
 }
 
 // discoverCandidates scans the objects/pack root and returns sorted pack/index

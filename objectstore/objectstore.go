@@ -38,6 +38,10 @@ type Store interface {
 	ReadSize(id objectid.ObjectID) (int64, error)
 	// ReadHeader reads an object's type and declared content length.
 	ReadHeader(id objectid.ObjectID) (objecttype.Type, int64, error)
+	// Refresh updates any backend-local discovery/cache view of on-disk objects.
+	//
+	// Backends without dynamic discovery should return nil.
+	Refresh() error
 	// Close releases resources associated with the backend.
 	Close() error
 }

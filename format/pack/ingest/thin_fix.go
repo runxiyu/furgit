@@ -64,6 +64,7 @@ func maybeFixThin(state *ingestState) error {
 		Title:  "fixing thin pack",
 		Total:  uint64(total),
 	})
+	meter.Set(0, 0)
 
 	var appended uint64
 
@@ -93,9 +94,7 @@ func maybeFixThin(state *ingestState) error {
 		return err
 	}
 
-	if state.thinFixed {
-		meter.Stop("done")
-	}
+	meter.Stop(fmt.Sprintf("appended %d/%d, done", appended, total))
 
 	return nil
 }
