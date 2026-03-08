@@ -69,11 +69,13 @@ func (service *Service) applyBatch(result *Result, commands []Command) error {
 	}
 
 	appliedAny := false
+	failedCount := 0
 
 	for i, command := range commands {
 		item := successCommandResult(command)
 		if i < len(batchResults) && batchResults[i].Error != nil {
 			item.Error = batchResults[i].Error.Error()
+			failedCount++
 		} else {
 			appliedAny = true
 		}
@@ -85,7 +87,11 @@ func (service *Service) applyBatch(result *Result, commands []Command) error {
 
 	result.Applied = appliedAny
 
-	utils.WriteProgressf(service.opts.Progress, "updating refs: done.\n")
+	if failedCount == 0 {
+		utils.WriteProgressf(service.opts.Progress, "updating refs: done.\n")
+	} else {
+		utils.WriteProgressf(service.opts.Progress, "updating refs: failed (%d/%d)\n", failedCount, total)
+	}
 
 	return nil
 }
