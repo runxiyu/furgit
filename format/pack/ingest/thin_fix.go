@@ -13,7 +13,7 @@ func maybeFixThin(state *ingestState) error {
 		return nil
 	}
 
-	utils.FprintfBestEffort(
+	utils.BestEffortFprintf(
 		state.opts.Progress,
 		"fixing thin pack: %d unresolved bases\r",
 		len(state.unresolvedRefDeltas),
@@ -57,7 +57,7 @@ func maybeFixThin(state *ingestState) error {
 
 	total := len(baseIDs)
 	if total > 0 {
-		utils.FprintfBestEffort(state.opts.Progress, "fixing thin pack:   0%% (0/%d)\r", total)
+		utils.BestEffortFprintf(state.opts.Progress, "fixing thin pack:   0%% (0/%d)\r", total)
 	}
 
 	for i, id := range baseIDs {
@@ -75,7 +75,7 @@ func maybeFixThin(state *ingestState) error {
 
 		done := i + 1
 		percent := done * 100 / total
-		utils.FprintfBestEffort(state.opts.Progress, "fixing thin pack: %3d%% (%d/%d)\r", percent, done, total)
+		utils.BestEffortFprintf(state.opts.Progress, "fixing thin pack: %3d%% (%d/%d)\r", percent, done, total)
 	}
 
 	err = rewritePackHeaderAndTrailer(state)
@@ -84,7 +84,7 @@ func maybeFixThin(state *ingestState) error {
 	}
 
 	if state.thinFixed {
-		utils.FprintfBestEffort(state.opts.Progress, "fixing thin pack: 100%% (%d/%d), done.\n", total, total)
+		utils.BestEffortFprintf(state.opts.Progress, "fixing thin pack: 100%% (%d/%d), done.\n", total, total)
 	}
 
 	return nil

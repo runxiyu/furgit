@@ -6,10 +6,10 @@ import (
 	"io"
 )
 
-// FprintfBestEffort writes one formatted message to w.
+// BestEffortFprintf writes one formatted message to w.
 //
 // It is nil-safe and ignores write errors by design.
-func FprintfBestEffort(w io.Writer, format string, args ...any) {
+func BestEffortFprintf(w io.Writer, format string, args ...any) {
 	if w == nil {
 		return
 	}

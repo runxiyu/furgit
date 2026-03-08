@@ -26,7 +26,7 @@ func resolveAll(state *ingestState) error {
 
 	var done uint32
 
-	utils.FprintfBestEffort(state.opts.Progress, "resolving deltas:   0%% (0/%d)\r", pending)
+	utils.BestEffortFprintf(state.opts.Progress, "resolving deltas:   0%% (0/%d)\r", pending)
 
 	for idx := range state.records {
 		if state.records[idx].resolved {
@@ -36,7 +36,7 @@ func resolveAll(state *ingestState) error {
 		done++
 		if done%step == 0 || done == pending {
 			percent := done * 100 / pending
-			utils.FprintfBestEffort(state.opts.Progress, "resolving deltas: %3d%% (%d/%d)\r", percent, done, pending)
+			utils.BestEffortFprintf(state.opts.Progress, "resolving deltas: %3d%% (%d/%d)\r", percent, done, pending)
 		}
 
 		visiting := make(map[int]struct{})
@@ -65,7 +65,7 @@ func resolveAll(state *ingestState) error {
 		state.baseCache.add(idx, ty, content)
 	}
 
-	utils.FprintfBestEffort(state.opts.Progress, "resolving deltas: 100%% (%d/%d), done.\n", pending, pending)
+	utils.BestEffortFprintf(state.opts.Progress, "resolving deltas: 100%% (%d/%d), done.\n", pending, pending)
 
 	return nil
 }

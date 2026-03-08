@@ -21,14 +21,14 @@ func streamPackAndScan(state *ingestState) error {
 		state.algo.Size(),
 	)
 
-	utils.FprintfBestEffort(state.opts.Progress, "validating pack header...\r")
+	utils.BestEffortFprintf(state.opts.Progress, "validating pack header...\r")
 
 	err = seedStreamWithPackHeader(state)
 	if err != nil {
 		return err
 	}
 
-	utils.FprintfBestEffort(state.opts.Progress, "validating pack header: done.\n")
+	utils.BestEffortFprintf(state.opts.Progress, "validating pack header: done.\n")
 
 	state.records = make([]objectRecord, 0, state.objectCountHeader)
 	state.ofsDeltas = make([]ofsDeltaRef, 0, state.objectCountHeader)
@@ -36,7 +36,7 @@ func streamPackAndScan(state *ingestState) error {
 
 	total := state.objectCountHeader
 	step := progressStep(total)
-	utils.FprintfBestEffort(state.opts.Progress, "receiving objects:   0%% (0/%d)\r", total)
+	utils.BestEffortFprintf(state.opts.Progress, "receiving objects:   0%% (0/%d)\r", total)
 
 	for i := range total {
 		nextOffset, err := scanOneEntry(state, state.stream.consumed)
@@ -51,11 +51,11 @@ func streamPackAndScan(state *ingestState) error {
 		done := i + 1
 		if done%step == 0 || done == total {
 			percent := done * 100 / total
-			utils.FprintfBestEffort(state.opts.Progress, "receiving objects: %3d%% (%d/%d)\r", percent, done, total)
+			utils.BestEffortFprintf(state.opts.Progress, "receiving objects: %3d%% (%d/%d)\r", percent, done, total)
 		}
 	}
 
-	utils.FprintfBestEffort(state.opts.Progress, "receiving objects: 100%% (%d/%d), done.\n", total, total)
+	utils.BestEffortFprintf(state.opts.Progress, "receiving objects: 100%% (%d/%d), done.\n", total, total)
 
 	err = state.stream.finishAndFlushTrailer(state.opts.RequireTrailingEOF)
 	if err != nil {
