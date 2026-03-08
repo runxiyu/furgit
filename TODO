@@ -16,3 +16,4 @@ So the to-do list in README.md is more
 * Maybe the Progress/Error writers should return error on creation
   instead of automatically discarding content?
 * Actually making signed-push work reasonably
+* Investigate fsck issues with receive-pack
