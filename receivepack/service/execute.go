@@ -77,7 +77,7 @@ func (service *Service) Execute(ctx context.Context, req *Request) (*Result, err
 		return result, nil
 	}
 
-	if req.PackExpected {
+	if req.PackExpected && quarantineRoot != nil {
 		// Git migrates quarantined objects into permanent storage immediately
 		// before starting ref updates.
 		utils.WriteProgressf(service.opts.Progress, "promoting quarantine...\r")

@@ -1,6 +1,9 @@
 package ingest
 
 import (
+	"bufio"
+	"bytes"
+	"errors"
 	"io"
 	"os"
 
@@ -48,23 +51,138 @@ type Result struct {
 	ThinFixed bool
 }
 
-// Ingest ingests one pack stream from src into destination.
-//
-// Ingest performs streaming pack read/write/verification, delta resolution,
-// optional thin fixup, then writes .idx and optionally .rev.
-//
-// destination ownership and lifecycle are managed by the caller.
-// Ingest does not perform quarantine promotion/migration.
+// HeaderInfo describes the parsed PACK header.
+type HeaderInfo struct {
+	Version     uint32
+	ObjectCount uint32
+}
+
+// DiscardResult describes one successful Discard call.
+type DiscardResult struct {
+	PackHash    objectid.ObjectID
+	ObjectCount uint32
+}
+
+// Pending is one started ingest operation awaiting Continue or Discard.
+type Pending struct {
+	reader    *bufio.Reader
+	algo      objectid.Algorithm
+	opts      Options
+	header    HeaderInfo
+	headerRaw [packHeaderSize]byte
+
+	finalized bool
+}
+
+// Ingest reads and validates one PACK header, returning one pending operation.
 func Ingest(
 	src io.Reader,
-	destination *os.Root,
 	algo objectid.Algorithm,
 	opts Options,
-) (Result, error) {
-	state, err := newIngestState(src, destination, algo, opts)
+) (*Pending, error) {
+	if algo.Size() == 0 {
+		return nil, objectid.ErrInvalidAlgorithm
+	}
+
+	reader := bufio.NewReader(src)
+
+	header, headerRaw, err := readAndValidatePackHeader(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Pending{
+		reader:    reader,
+		algo:      algo,
+		opts:      opts,
+		header:    header,
+		headerRaw: headerRaw,
+	}, nil
+}
+
+// Header returns parsed PACK header info.
+func (pending *Pending) Header() HeaderInfo {
+	return pending.header
+}
+
+// Continue ingests the pack stream into destination and writes pack artifacts.
+func (pending *Pending) Continue(destination *os.Root) (Result, error) {
+	if pending.finalized {
+		return Result{}, ErrAlreadyFinalized
+	}
+
+	pending.finalized = true
+
+	if pending.header.ObjectCount == 0 {
+		return Result{}, ErrZeroObjectContinue
+	}
+
+	state, err := newIngestState(
+		pending.reader,
+		destination,
+		pending.algo,
+		pending.opts,
+		pending.header,
+		pending.headerRaw,
+	)
 	if err != nil {
 		return Result{}, err
 	}
 
 	return ingest(state)
+}
+
+// Discard consumes and verifies one zero-object pack stream without writing files.
+func (pending *Pending) Discard() (DiscardResult, error) {
+	if pending.finalized {
+		return DiscardResult{}, ErrAlreadyFinalized
+	}
+
+	pending.finalized = true
+
+	if pending.header.ObjectCount != 0 {
+		return DiscardResult{}, ErrNonZeroDiscard
+	}
+
+	hashImpl, err := pending.algo.New()
+	if err != nil {
+		return DiscardResult{}, err
+	}
+
+	_, _ = hashImpl.Write(pending.headerRaw[:])
+
+	trailer := make([]byte, pending.algo.Size())
+
+	_, err = io.ReadFull(pending.reader, trailer)
+	if err != nil {
+		return DiscardResult{}, &PackTrailerMismatchError{}
+	}
+
+	computed := hashImpl.Sum(nil)
+	if !bytes.Equal(computed, trailer) {
+		return DiscardResult{}, &PackTrailerMismatchError{}
+	}
+
+	if pending.opts.RequireTrailingEOF {
+		var probe [1]byte
+
+		n, err := pending.reader.Read(probe[:])
+		if n > 0 || err == nil {
+			return DiscardResult{}, errors.New("format/pack/ingest: pack has trailing garbage")
+		}
+
+		if err != io.EOF {
+			return DiscardResult{}, err
+		}
+	}
+
+	packHash, err := objectid.FromBytes(pending.algo, trailer)
+	if err != nil {
+		return DiscardResult{}, err
+	}
+
+	return DiscardResult{
+		PackHash:    packHash,
+		ObjectCount: 0,
+	}, nil
 }

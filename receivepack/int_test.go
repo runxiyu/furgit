@@ -797,6 +797,61 @@ func TestReceivePackGitPushCreatesBranch(t *testing.T) {
 	})
 }
 
+func TestReceivePackGitPushRefUpdateWithoutNewObjectsSucceeds(t *testing.T) {
+	t.Parallel()
+
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		t.Parallel()
+
+		sender := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo})
+		blobID, treeID := sender.MakeSingleFileTree(t, "base.txt", []byte("base\n"))
+		commitID := sender.CommitTree(t, treeID, "base")
+		sender.UpdateRef(t, "refs/heads/main", commitID)
+
+		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+		receiver.HashObject(t, "blob", sender.RunBytes(t, "cat-file", "blob", blobID.String()))
+		receiver.HashObject(t, "tree", sender.RunBytes(t, "cat-file", "tree", treeID.String()))
+		receiver.HashObject(t, "commit", sender.RunBytes(t, "cat-file", "commit", commitID.String()))
+		receiver.UpdateRef(t, "refs/heads/main", commitID)
+
+		repo := receiver.OpenRepository(t)
+		objectsRoot := receiver.OpenObjectsRoot(t)
+
+		stdout, stderr, clientErr, serverErr := runGitPushFD(
+			t,
+			sender,
+			receivepack.Options{
+				Algorithm:       algo,
+				Refs:            repo.Refs(),
+				ExistingObjects: repo.Objects(),
+				ObjectsRoot:     objectsRoot,
+			},
+			"push", "--porcelain", "fd::3,4/test", "refs/heads/main:refs/heads/topic",
+		)
+		if clientErr != nil {
+			t.Fatalf("git push failed: %v\nstdout=%s\nstderr=%s", clientErr, stdout, stderr)
+		}
+
+		if serverErr != nil {
+			t.Fatalf("ReceivePack: %v", serverErr)
+		}
+
+		resolved, err := receiver.OpenRepository(t).Refs().ResolveFully("refs/heads/topic")
+		if err != nil {
+			t.Fatalf("ResolveFully(topic): %v", err)
+		}
+
+		if resolved.ID != commitID {
+			t.Fatalf("refs/heads/topic = %s, want %s", resolved.ID, commitID)
+		}
+
+		packs := receiver.Run(t, "count-objects", "-v")
+		if !strings.Contains(packs, "packs: 0") {
+			t.Fatalf("count-objects output shows unexpected promoted pack: %q", packs)
+		}
+	})
+}
+
 func TestReceivePackGitPushAtomicDelete(t *testing.T) {
 	t.Parallel()
 

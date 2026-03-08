@@ -18,6 +18,8 @@ type ingestState struct {
 	algo        objectid.Algorithm
 	opts        Options
 
+	packHeaderRaw [packHeaderSize]byte
+
 	packFile    *os.File
 	packTmpName string
 	idxFile     *os.File
@@ -47,18 +49,22 @@ func newIngestState(
 	destination *os.Root,
 	algo objectid.Algorithm,
 	opts Options,
+	header HeaderInfo,
+	headerRaw [packHeaderSize]byte,
 ) (*ingestState, error) {
 	if algo.Size() == 0 {
 		return nil, objectid.ErrInvalidAlgorithm
 	}
 
 	return &ingestState{
-		src:            src,
-		destination:    destination,
-		algo:           algo,
-		opts:           opts,
-		offsetToRecord: make(map[uint64]int),
-		objectToRecord: make(map[objectid.ObjectID]int),
-		baseCache:      newDeltaBaseCache(defaultDeltaBaseCacheMaxBytes),
+		src:               src,
+		destination:       destination,
+		algo:              algo,
+		opts:              opts,
+		packHeaderRaw:     headerRaw,
+		objectCountHeader: header.ObjectCount,
+		offsetToRecord:    make(map[uint64]int),
+		objectToRecord:    make(map[objectid.ObjectID]int),
+		baseCache:         newDeltaBaseCache(defaultDeltaBaseCacheMaxBytes),
 	}, nil
 }

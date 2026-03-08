@@ -23,7 +23,7 @@ func streamPackAndScan(state *ingestState) error {
 
 	utils.WriteProgressf(state.opts.Progress, "validating pack header...\r")
 
-	err = readAndValidatePackHeader(state)
+	err = seedStreamWithPackHeader(state)
 	if err != nil {
 		return err
 	}
@@ -74,4 +74,31 @@ func streamPackAndScan(state *ingestState) error {
 	state.packHash = packHash
 
 	return state.stream.flush()
+}
+
+// seedStreamWithPackHeader writes the already-validated PACK header to output,
+// seeds the running pack hash, and advances stream offset accounting.
+func seedStreamWithPackHeader(state *ingestState) error {
+	written := 0
+	for written < len(state.packHeaderRaw) {
+		n, err := state.packFile.Write(state.packHeaderRaw[written:])
+		if err != nil {
+			return &DestinationWriteError{Op: fmt.Sprintf("write pack header: %v", err)}
+		}
+
+		if n == 0 {
+			return &DestinationWriteError{Op: "write pack header: short write"}
+		}
+
+		written += n
+	}
+
+	_, err := state.stream.hash.Write(state.packHeaderRaw[:])
+	if err != nil {
+		return err
+	}
+
+	state.stream.consumed = packHeaderSize
+
+	return nil
 }

@@ -66,3 +66,12 @@ func (err *DestinationWriteError) Error() string {
 }
 
 var errExternalThinBase = errors.New("format/pack/ingest: external thin base required")
+
+var (
+	// ErrAlreadyFinalized indicates Continue/Discard already called.
+	ErrAlreadyFinalized = errors.New("format/pack/ingest: operation already finalized")
+	// ErrZeroObjectContinue indicates Continue was called for a zero-object pack.
+	ErrZeroObjectContinue = errors.New("format/pack/ingest: cannot continue zero-object pack")
+	// ErrNonZeroDiscard indicates Discard was called for a non-zero-object pack.
+	ErrNonZeroDiscard = errors.New("format/pack/ingest: cannot discard non-zero pack")
+)

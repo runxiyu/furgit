@@ -34,6 +34,51 @@ func (service *Service) ingestQuarantine(
 		return "", nil, false
 	}
 
+	pending, err := ingest.Ingest(
+		req.Pack,
+		service.opts.Algorithm,
+		ingest.Options{
+			FixThin:  true,
+			WriteRev: true,
+			Base:     service.opts.ExistingObjects,
+			Progress: service.opts.Progress,
+		},
+	)
+	if err != nil {
+		utils.WriteProgressf(service.opts.Progress, "unpack failed: %v\n", err)
+
+		result.UnpackError = err.Error()
+		fillCommandErrors(result, commands, err.Error())
+
+		return "", nil, false
+	}
+
+	if pending.Header().ObjectCount == 0 {
+		discarded, err := pending.Discard()
+		if err != nil {
+			utils.WriteProgressf(service.opts.Progress, "unpack failed: %v\n", err)
+
+			result.UnpackError = err.Error()
+			fillCommandErrors(result, commands, err.Error())
+
+			return "", nil, false
+		}
+
+		result.Ingest = &ingest.Result{
+			PackHash:    discarded.PackHash,
+			ObjectCount: discarded.ObjectCount,
+		}
+
+		utils.WriteProgressf(
+			service.opts.Progress,
+			"unpacking: done (%d objects, %s).\n",
+			discarded.ObjectCount,
+			discarded.PackHash,
+		)
+
+		return "", nil, true
+	}
+
 	utils.WriteProgressf(service.opts.Progress, "creating quarantine...\r")
 
 	quarantineName, quarantineRoot, err := service.createQuarantineRoot()
@@ -62,17 +107,7 @@ func (service *Service) ingestQuarantine(
 	utils.WriteProgressf(service.opts.Progress, "creating quarantine: done.\n")
 	utils.WriteProgressf(service.opts.Progress, "unpacking...\r")
 
-	ingested, err := ingest.Ingest(
-		req.Pack,
-		quarantinePackRoot,
-		service.opts.Algorithm,
-		ingest.Options{
-			FixThin:  true,
-			WriteRev: true,
-			Base:     service.opts.ExistingObjects,
-			Progress: service.opts.Progress,
-		},
-	)
+	ingested, err := pending.Continue(quarantinePackRoot)
 
 	_ = quarantinePackRoot.Close()
 

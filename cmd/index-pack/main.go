@@ -85,12 +85,28 @@ func run(repoPath, destinationPath, objectFormat string, fixThin, writeRev bool)
 
 	defer func() { _ = destinationRoot.Close() }()
 
-	result, err := ingest.Ingest(os.Stdin, destinationRoot, algo, ingest.Options{
+	pending, err := ingest.Ingest(os.Stdin, algo, ingest.Options{
 		FixThin:            fixThin,
 		WriteRev:           writeRev,
 		Base:               base,
 		RequireTrailingEOF: true,
 	})
+	if err != nil {
+		return err
+	}
+
+	if pending.Header().ObjectCount == 0 {
+		discarded, err := pending.Discard()
+		if err != nil {
+			return err
+		}
+
+		_, _ = fmt.Fprintf(os.Stdout, "pack\t%s\n", discarded.PackHash.String())
+
+		return nil
+	}
+
+	result, err := pending.Continue(destinationRoot)
 	if err != nil {
 		return err
 	}

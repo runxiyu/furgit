@@ -2,7 +2,9 @@ package ingest_test
 
 import (
 	"bytes"
+	"encoding/binary"
 	"errors"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -24,6 +26,20 @@ func (r *noExtraReadReader) Read(p []byte) (int, error) {
 	}
 
 	return r.reader.Read(p)
+}
+
+func beginAndContinue(
+	src io.Reader,
+	packRoot *os.Root,
+	algo objectid.Algorithm,
+	opts ingest.Options,
+) (ingest.Result, error) {
+	pending, err := ingest.Ingest(src, algo, opts)
+	if err != nil {
+		return ingest.Result{}, err
+	}
+
+	return pending.Continue(packRoot)
 }
 
 // fixturePath returns one fixture file path for the selected algorithm.
@@ -173,7 +189,7 @@ func TestIngestNonThinPackWritesPackIdxRev(t *testing.T) {
 
 		packRoot := receiver.OpenPackRoot(t)
 
-		result, err := ingest.Ingest(bytes.NewReader(packBytes), packRoot, algo, ingest.Options{
+		result, err := beginAndContinue(bytes.NewReader(packBytes), packRoot, algo, ingest.Options{
 			WriteRev:           true,
 			RequireTrailingEOF: true,
 		})
@@ -221,7 +237,7 @@ func TestIngestThinPackWithoutFixReturnsUnresolved(t *testing.T) {
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		packRoot := receiver.OpenPackRoot(t)
 
-		_, err := ingest.Ingest(bytes.NewReader(thinPack), packRoot, algo, ingest.Options{
+		_, err := beginAndContinue(bytes.NewReader(thinPack), packRoot, algo, ingest.Options{
 			WriteRev:           true,
 			RequireTrailingEOF: true,
 		})
@@ -257,7 +273,7 @@ func TestIngestThinPackWithFixThin(t *testing.T) {
 
 		packRoot := receiver.OpenPackRoot(t)
 
-		_, err := ingest.Ingest(bytes.NewReader(basePack), packRoot, algo, ingest.Options{
+		_, err := beginAndContinue(bytes.NewReader(basePack), packRoot, algo, ingest.Options{
 			RequireTrailingEOF: true,
 		})
 		if err != nil {
@@ -266,7 +282,7 @@ func TestIngestThinPackWithFixThin(t *testing.T) {
 
 		receiverRepo := receiver.OpenRepository(t)
 
-		result, err := ingest.Ingest(bytes.NewReader(thinPack), packRoot, algo, ingest.Options{
+		result, err := beginAndContinue(bytes.NewReader(thinPack), packRoot, algo, ingest.Options{
 			FixThin:            true,
 			WriteRev:           true,
 			Base:               receiverRepo.Objects(),
@@ -301,7 +317,7 @@ func TestIngestPackTrailerMismatch(t *testing.T) {
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		packRoot := receiver.OpenPackRoot(t)
 
-		_, err := ingest.Ingest(bytes.NewReader(packBytes), packRoot, algo, ingest.Options{
+		_, err := beginAndContinue(bytes.NewReader(packBytes), packRoot, algo, ingest.Options{
 			WriteRev:           true,
 			RequireTrailingEOF: true,
 		})
@@ -326,6 +342,74 @@ func TestIngestPackTrailerMismatch(t *testing.T) {
 	})
 }
 
+func zeroObjectPackBytes(t *testing.T, algo objectid.Algorithm) []byte {
+	t.Helper()
+
+	hashImpl, err := algo.New()
+	if err != nil {
+		t.Fatalf("algo.New: %v", err)
+	}
+
+	var header [12]byte
+	copy(header[:4], []byte{'P', 'A', 'C', 'K'})
+	binary.BigEndian.PutUint32(header[4:8], 2)
+	binary.BigEndian.PutUint32(header[8:12], 0)
+
+	_, _ = hashImpl.Write(header[:])
+
+	return append(header[:], hashImpl.Sum(nil)...)
+}
+
+func TestIngestDiscardZeroObjectPack(t *testing.T) {
+	t.Parallel()
+
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		packBytes := zeroObjectPackBytes(t, algo)
+
+		pending, err := ingest.Ingest(bytes.NewReader(packBytes), algo, ingest.Options{
+			RequireTrailingEOF: true,
+		})
+		if err != nil {
+			t.Fatalf("Ingest: %v", err)
+		}
+
+		if pending.Header().ObjectCount != 0 {
+			t.Fatalf("ObjectCount = %d, want 0", pending.Header().ObjectCount)
+		}
+
+		discarded, err := pending.Discard()
+		if err != nil {
+			t.Fatalf("Discard: %v", err)
+		}
+
+		if discarded.ObjectCount != 0 {
+			t.Fatalf("Discard.ObjectCount = %d, want 0", discarded.ObjectCount)
+		}
+	})
+}
+
+func TestIngestContinueRejectsZeroObjectPack(t *testing.T) {
+	t.Parallel()
+
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		packBytes := zeroObjectPackBytes(t, algo)
+		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+		packRoot := receiver.OpenPackRoot(t)
+
+		pending, err := ingest.Ingest(bytes.NewReader(packBytes), algo, ingest.Options{
+			RequireTrailingEOF: true,
+		})
+		if err != nil {
+			t.Fatalf("Ingest: %v", err)
+		}
+
+		_, err = pending.Continue(packRoot)
+		if !errors.Is(err, ingest.ErrZeroObjectContinue) {
+			t.Fatalf("Continue error = %v, want ErrZeroObjectContinue", err)
+		}
+	})
+}
+
 func TestIngestCanFinishWithoutTrailingEOF(t *testing.T) {
 	t.Parallel()
 
@@ -336,7 +420,7 @@ func TestIngestCanFinishWithoutTrailingEOF(t *testing.T) {
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		packRoot := receiver.OpenPackRoot(t)
 
-		result, err := ingest.Ingest(&noExtraReadReader{reader: bytes.NewReader(packBytes)}, packRoot, algo, ingest.Options{
+		result, err := beginAndContinue(&noExtraReadReader{reader: bytes.NewReader(packBytes)}, packRoot, algo, ingest.Options{
 			WriteRev: true,
 		})
 		if err != nil {
