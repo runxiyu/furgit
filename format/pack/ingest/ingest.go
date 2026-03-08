@@ -51,7 +51,7 @@ func ingest(state *ingestState) (out Result, err error) {
 		return Result{}, err
 	}
 
-	utils.WriteProgressf(state.opts.Progress, "writing index...\r")
+	utils.FprintfBestEffort(state.opts.Progress, "writing index...\r")
 
 	err = state.packFile.Sync()
 	if err != nil {
@@ -63,10 +63,10 @@ func ingest(state *ingestState) (out Result, err error) {
 		return Result{}, err
 	}
 
-	utils.WriteProgressf(state.opts.Progress, "writing index: done.\n")
+	utils.FprintfBestEffort(state.opts.Progress, "writing index: done.\n")
 
 	if state.opts.WriteRev {
-		utils.WriteProgressf(state.opts.Progress, "writing reverse index...\r")
+		utils.FprintfBestEffort(state.opts.Progress, "writing reverse index...\r")
 	}
 
 	err = writeRev(state)
@@ -75,7 +75,7 @@ func ingest(state *ingestState) (out Result, err error) {
 	}
 
 	if state.opts.WriteRev {
-		utils.WriteProgressf(state.opts.Progress, "writing reverse index: done.\n")
+		utils.FprintfBestEffort(state.opts.Progress, "writing reverse index: done.\n")
 	}
 
 	return finalizeArtifacts(state)

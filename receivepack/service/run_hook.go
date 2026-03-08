@@ -30,11 +30,11 @@ func (service *Service) runHook(
 		return allowedCommands, allowedIndices, rejected, true, ""
 	}
 
-	utils.WriteProgressf(service.opts.Progress, "running hooks...\r")
+	utils.FprintfBestEffort(service.opts.Progress, "running hooks...\r")
 
 	quarantinedObjects, err := service.openQuarantinedObjects(quarantineName)
 	if err != nil {
-		utils.WriteProgressf(service.opts.Progress, "running hooks: failed: %v.\n", err)
+		utils.FprintfBestEffort(service.opts.Progress, "running hooks: failed: %v.\n", err)
 
 		return nil, nil, nil, false, err.Error()
 	}
@@ -52,13 +52,13 @@ func (service *Service) runHook(
 		IO:                 service.opts.HookIO,
 	})
 	if err != nil {
-		utils.WriteProgressf(service.opts.Progress, "running hooks: failed: %v.\n", err)
+		utils.FprintfBestEffort(service.opts.Progress, "running hooks: failed: %v.\n", err)
 
 		return nil, nil, nil, false, err.Error()
 	}
 
 	if len(decisions) != len(commands) {
-		utils.WriteProgressf(service.opts.Progress, "running hooks: failed: wrong decision count.\n")
+		utils.FprintfBestEffort(service.opts.Progress, "running hooks: failed: wrong decision count.\n")
 
 		return nil, nil, nil, false, "hook returned wrong number of update decisions"
 	}
@@ -82,7 +82,7 @@ func (service *Service) runHook(
 		rejected[index] = message
 	}
 
-	utils.WriteProgressf(
+	utils.FprintfBestEffort(
 		service.opts.Progress,
 		"running hooks: done (%d/%d accepted).\n",
 		len(allowedCommands),

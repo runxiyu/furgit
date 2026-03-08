@@ -8,7 +8,7 @@ import (
 
 func (service *Service) applyAtomic(result *Result, commands []Command) error {
 	total := len(commands)
-	utils.WriteProgressf(service.opts.Progress, "updating refs: 0/%d\r", total)
+	utils.FprintfBestEffort(service.opts.Progress, "updating refs: 0/%d\r", total)
 
 	tx, err := service.opts.Refs.BeginTransaction()
 	if err != nil {
@@ -21,18 +21,18 @@ func (service *Service) applyAtomic(result *Result, commands []Command) error {
 			_ = tx.Abort()
 
 			fillCommandErrors(result, commands, err.Error())
-			utils.WriteProgressf(service.opts.Progress, "updating refs: failed at %d/%d.\n", i+1, total)
+			utils.FprintfBestEffort(service.opts.Progress, "updating refs: failed at %d/%d.\n", i+1, total)
 
 			return nil
 		}
 
-		utils.WriteProgressf(service.opts.Progress, "updating refs: %d/%d\r", i+1, total)
+		utils.FprintfBestEffort(service.opts.Progress, "updating refs: %d/%d\r", i+1, total)
 	}
 
 	err = tx.Commit()
 	if err != nil {
 		fillCommandErrors(result, commands, err.Error())
-		utils.WriteProgressf(service.opts.Progress, "updating refs: failed at commit.\n")
+		utils.FprintfBestEffort(service.opts.Progress, "updating refs: failed at commit.\n")
 
 		return nil
 	}
@@ -42,7 +42,7 @@ func (service *Service) applyAtomic(result *Result, commands []Command) error {
 		result.Commands = append(result.Commands, successCommandResult(command))
 	}
 
-	utils.WriteProgressf(service.opts.Progress, "updating refs: done.\n")
+	utils.FprintfBestEffort(service.opts.Progress, "updating refs: done.\n")
 
 	return nil
 }
@@ -50,7 +50,7 @@ func (service *Service) applyAtomic(result *Result, commands []Command) error {
 func (service *Service) applyBatch(result *Result, commands []Command) error {
 	total := len(commands)
 
-	utils.WriteProgressf(service.opts.Progress, "updating refs...\r")
+	utils.FprintfBestEffort(service.opts.Progress, "updating refs...\r")
 
 	batch, err := service.opts.Refs.BeginBatch()
 	if err != nil {
@@ -63,7 +63,7 @@ func (service *Service) applyBatch(result *Result, commands []Command) error {
 
 	batchResults, err := batch.Apply()
 	if err != nil && len(batchResults) == 0 {
-		utils.WriteProgressf(service.opts.Progress, "updating refs: failed at apply.\n")
+		utils.FprintfBestEffort(service.opts.Progress, "updating refs: failed at apply.\n")
 
 		return err
 	}
@@ -82,15 +82,15 @@ func (service *Service) applyBatch(result *Result, commands []Command) error {
 
 		result.Commands = append(result.Commands, item)
 
-		utils.WriteProgressf(service.opts.Progress, "updating refs: %d/%d\r", i+1, total)
+		utils.FprintfBestEffort(service.opts.Progress, "updating refs: %d/%d\r", i+1, total)
 	}
 
 	result.Applied = appliedAny
 
 	if failedCount == 0 {
-		utils.WriteProgressf(service.opts.Progress, "updating refs: done.\n")
+		utils.FprintfBestEffort(service.opts.Progress, "updating refs: done.\n")
 	} else {
-		utils.WriteProgressf(service.opts.Progress, "updating refs: failed (%d/%d).\n", failedCount, total)
+		utils.FprintfBestEffort(service.opts.Progress, "updating refs: failed (%d/%d).\n", failedCount, total)
 	}
 
 	return nil

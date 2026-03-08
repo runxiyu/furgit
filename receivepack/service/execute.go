@@ -80,11 +80,11 @@ func (service *Service) Execute(ctx context.Context, req *Request) (*Result, err
 	if req.PackExpected && quarantineRoot != nil {
 		// Git migrates quarantined objects into permanent storage immediately
 		// before starting ref updates.
-		utils.WriteProgressf(service.opts.Progress, "promoting quarantine...\r")
+		utils.FprintfBestEffort(service.opts.Progress, "promoting quarantine...\r")
 
 		err = service.promoteQuarantine(quarantineName, quarantineRoot)
 		if err != nil {
-			utils.WriteProgressf(service.opts.Progress, "promoting quarantine: failed: %v.\n", err)
+			utils.FprintfBestEffort(service.opts.Progress, "promoting quarantine: failed: %v.\n", err)
 
 			result.UnpackError = err.Error()
 			fillCommandErrors(result, req.Commands, err.Error())
@@ -92,7 +92,7 @@ func (service *Service) Execute(ctx context.Context, req *Request) (*Result, err
 			return result, nil
 		}
 
-		utils.WriteProgressf(service.opts.Progress, "promoting quarantine: done.\n")
+		utils.FprintfBestEffort(service.opts.Progress, "promoting quarantine: done.\n")
 	}
 
 	if req.Atomic {

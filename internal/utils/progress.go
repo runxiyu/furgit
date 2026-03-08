@@ -6,10 +6,10 @@ import (
 	"io"
 )
 
-// WriteProgressf writes one formatted progress message to w.
+// FprintfBestEffort writes one formatted message to w.
 //
 // It is nil-safe and ignores write errors by design.
-func WriteProgressf(w io.Writer, format string, args ...any) {
+func FprintfBestEffort(w io.Writer, format string, args ...any) {
 	if w == nil {
 		return
 	}
