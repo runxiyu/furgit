@@ -1,6 +1,10 @@
 package progress
 
-import "time"
+import (
+	"time"
+
+	"codeberg.org/lindenii/furgit/internal/intconv"
+)
 
 // Set records current progress and renders when percent changed or the 1s tick
 // elapsed.
@@ -19,7 +23,11 @@ func (meter *Meter) Set(done uint64, bytes uint64) {
 	percentChanged := false
 
 	if meter.total > 0 {
-		percent := int(done * 100 / meter.total)
+		percent, err := intconv.Uint64ToInt(done * 100 / meter.total)
+		if err != nil {
+			return // TODO
+		}
+
 		percentChanged = percent != meter.lastPercent
 	}
 

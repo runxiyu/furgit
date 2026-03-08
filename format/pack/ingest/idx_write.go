@@ -171,11 +171,16 @@ func writeIdx(state *ingestState) error {
 		offsetMeter.Stop("done")
 	}
 
+	total, err := intconv.IntToUint64(largeOffsetCount)
+	if err != nil {
+		return err
+	}
+
 	largeOffsetMeter := progress.New(progress.Options{
 		Writer: state.opts.Progress,
 		Flush:  state.opts.ProgressFlush,
 		Title:  "writing index large offsets",
-		Total:  uint64(largeOffsetCount),
+		Total:  total,
 	})
 
 	var largeOffsetDone uint64

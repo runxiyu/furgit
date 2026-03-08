@@ -28,7 +28,7 @@ func (store *Store) lookup(id objectid.ObjectID) (location, error) {
 		return loc, nil
 	}
 
-	if store.refreshPolicy == RefreshPolicyOnMissing {
+	if store.refreshPolicy == RefreshPolicyOnMissing { //nolint:nestif
 		err = store.Refresh()
 		if err != nil {
 			return zero, err

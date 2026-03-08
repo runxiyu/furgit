@@ -16,16 +16,16 @@ func (meter *Meter) render(now time.Time, eol string) {
 
 	counters := meter.renderCounters()
 
-	clear := 0
+	clear1 := 0
 	if len(counters) < meter.lastCounterW {
-		clear = meter.lastCounterW - len(counters) + 1
+		clear1 = meter.lastCounterW - len(counters) + 1
 	}
 
 	meter.lastCounterW = len(counters)
 
 	line := meter.title + ": " + counters
-	if clear > 0 {
-		line += strings.Repeat(" ", clear)
+	if clear1 > 0 {
+		line += strings.Repeat(" ", clear1)
 	}
 
 	line += eol
