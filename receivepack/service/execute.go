@@ -84,7 +84,7 @@ func (service *Service) Execute(ctx context.Context, req *Request) (*Result, err
 
 		err = service.promoteQuarantine(quarantineName, quarantineRoot)
 		if err != nil {
-			utils.WriteProgressf(service.opts.Progress, "promoting quarantine: failed: %v\n", err)
+			utils.WriteProgressf(service.opts.Progress, "promoting quarantine: failed: %v.\n", err)
 
 			result.UnpackError = err.Error()
 			fillCommandErrors(result, req.Commands, err.Error())

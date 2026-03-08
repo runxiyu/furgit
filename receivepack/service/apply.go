@@ -21,7 +21,7 @@ func (service *Service) applyAtomic(result *Result, commands []Command) error {
 			_ = tx.Abort()
 
 			fillCommandErrors(result, commands, err.Error())
-			utils.WriteProgressf(service.opts.Progress, "updating refs: failed at %d/%d\n", i+1, total)
+			utils.WriteProgressf(service.opts.Progress, "updating refs: failed at %d/%d.\n", i+1, total)
 
 			return nil
 		}
@@ -32,7 +32,7 @@ func (service *Service) applyAtomic(result *Result, commands []Command) error {
 	err = tx.Commit()
 	if err != nil {
 		fillCommandErrors(result, commands, err.Error())
-		utils.WriteProgressf(service.opts.Progress, "updating refs: failed at commit\n")
+		utils.WriteProgressf(service.opts.Progress, "updating refs: failed at commit.\n")
 
 		return nil
 	}
@@ -63,7 +63,7 @@ func (service *Service) applyBatch(result *Result, commands []Command) error {
 
 	batchResults, err := batch.Apply()
 	if err != nil && len(batchResults) == 0 {
-		utils.WriteProgressf(service.opts.Progress, "updating refs: failed at apply\n")
+		utils.WriteProgressf(service.opts.Progress, "updating refs: failed at apply.\n")
 
 		return err
 	}
@@ -90,7 +90,7 @@ func (service *Service) applyBatch(result *Result, commands []Command) error {
 	if failedCount == 0 {
 		utils.WriteProgressf(service.opts.Progress, "updating refs: done.\n")
 	} else {
-		utils.WriteProgressf(service.opts.Progress, "updating refs: failed (%d/%d)\n", failedCount, total)
+		utils.WriteProgressf(service.opts.Progress, "updating refs: failed (%d/%d).\n", failedCount, total)
 	}
 
 	return nil

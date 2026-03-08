@@ -17,7 +17,7 @@ func (service *Service) ingestQuarantine(
 	}
 
 	if req.Pack == nil {
-		utils.WriteProgressf(service.opts.Progress, "unpack failed: missing pack stream\n")
+		utils.WriteProgressf(service.opts.Progress, "unpack failed: missing pack stream.\n")
 
 		result.UnpackError = "missing pack stream"
 		fillCommandErrors(result, commands, "missing pack stream")
@@ -26,7 +26,7 @@ func (service *Service) ingestQuarantine(
 	}
 
 	if service.opts.ObjectsRoot == nil {
-		utils.WriteProgressf(service.opts.Progress, "unpack failed: objects root not configured\n")
+		utils.WriteProgressf(service.opts.Progress, "unpack failed: objects root not configured.\n")
 
 		result.UnpackError = "objects root not configured"
 		fillCommandErrors(result, commands, "objects root not configured")
@@ -45,7 +45,7 @@ func (service *Service) ingestQuarantine(
 		},
 	)
 	if err != nil {
-		utils.WriteProgressf(service.opts.Progress, "unpack failed: %v\n", err)
+		utils.WriteProgressf(service.opts.Progress, "unpack failed: %v.\n", err)
 
 		result.UnpackError = err.Error()
 		fillCommandErrors(result, commands, err.Error())
@@ -56,7 +56,7 @@ func (service *Service) ingestQuarantine(
 	if pending.Header().ObjectCount == 0 {
 		discarded, err := pending.Discard()
 		if err != nil {
-			utils.WriteProgressf(service.opts.Progress, "unpack failed: %v\n", err)
+			utils.WriteProgressf(service.opts.Progress, "unpack failed: %v.\n", err)
 
 			result.UnpackError = err.Error()
 			fillCommandErrors(result, commands, err.Error())
@@ -83,7 +83,7 @@ func (service *Service) ingestQuarantine(
 
 	quarantineName, quarantineRoot, err := service.createQuarantineRoot()
 	if err != nil {
-		utils.WriteProgressf(service.opts.Progress, "unpack failed: %v\n", err)
+		utils.WriteProgressf(service.opts.Progress, "unpack failed: %v.\n", err)
 
 		result.UnpackError = err.Error()
 		fillCommandErrors(result, commands, err.Error())
@@ -93,7 +93,7 @@ func (service *Service) ingestQuarantine(
 
 	quarantinePackRoot, err := service.openQuarantinePackRoot(quarantineRoot)
 	if err != nil {
-		utils.WriteProgressf(service.opts.Progress, "unpack failed: %v\n", err)
+		utils.WriteProgressf(service.opts.Progress, "unpack failed: %v.\n", err)
 
 		result.UnpackError = err.Error()
 		fillCommandErrors(result, commands, err.Error())
@@ -112,7 +112,7 @@ func (service *Service) ingestQuarantine(
 	_ = quarantinePackRoot.Close()
 
 	if err != nil {
-		utils.WriteProgressf(service.opts.Progress, "unpack failed: %v\n", err)
+		utils.WriteProgressf(service.opts.Progress, "unpack failed: %v.\n", err)
 
 		result.UnpackError = err.Error()
 		fillCommandErrors(result, commands, err.Error())
