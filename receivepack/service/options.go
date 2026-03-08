@@ -22,6 +22,7 @@ type Options struct {
 	ExistingObjects           objectstore.Store
 	ObjectsRoot               *os.Root
 	Progress                  io.Writer
+	ProgressFlush             func() error
 	PromotedObjectPermissions *PromotedObjectPermissions
 	Hook                      Hook
 	HookIO                    HookIO
