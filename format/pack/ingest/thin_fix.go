@@ -1,10 +1,12 @@
 package ingest
 
 import (
+	"errors"
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/internal/intconv"
 	"codeberg.org/lindenii/furgit/internal/progress"
+	"codeberg.org/lindenii/furgit/objectstore"
 )
 
 // maybeFixThin appends missing bases and rewrites pack header/trailer when needed.
@@ -61,13 +63,18 @@ func maybeFixThin(state *ingestState) error {
 		Flush:  state.opts.ProgressFlush,
 		Title:  "fixing thin pack",
 		Total:  uint64(total),
-		Sparse: true,
 	})
 
-	for i, id := range baseIDs {
+	var appended uint64
+
+	for _, id := range baseIDs {
 		ty, content, err := state.opts.Base.ReadBytesContent(id)
 		if err != nil {
-			continue
+			if errors.Is(err, objectstore.ErrObjectNotFound) {
+				continue
+			}
+
+			return fmt.Errorf("format/pack/ingest: read thin base %s: %w", id, err)
 		}
 
 		_, err = appendBaseObject(state, id, ty, content)
@@ -77,8 +84,8 @@ func maybeFixThin(state *ingestState) error {
 
 		state.thinFixed = true
 
-		done := i + 1
-		meter.Set(uint64(done), 0)
+		appended++
+		meter.Set(appended, 0)
 	}
 
 	err = rewritePackHeaderAndTrailer(state)
