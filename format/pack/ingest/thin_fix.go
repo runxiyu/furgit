@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/internal/intconv"
-	"codeberg.org/lindenii/furgit/internal/utils"
+	"codeberg.org/lindenii/furgit/internal/progress"
 )
 
 // maybeFixThin appends missing bases and rewrites pack header/trailer when needed.
@@ -13,8 +13,8 @@ func maybeFixThin(state *ingestState) error {
 		return nil
 	}
 
-	utils.BestEffortFprintf(
-		state.opts.Progress,
+	writeProgress(
+		state,
 		"fixing thin pack: %d unresolved bases\r",
 		len(state.unresolvedRefDeltas),
 	)
@@ -56,9 +56,13 @@ func maybeFixThin(state *ingestState) error {
 	baseIDs := unresolvedThinBaseIDs(state)
 
 	total := len(baseIDs)
-	if total > 0 {
-		utils.BestEffortFprintf(state.opts.Progress, "fixing thin pack:   0%% (0/%d)\r", total)
-	}
+	meter := progress.New(progress.Options{
+		Writer: state.opts.Progress,
+		Flush:  state.opts.ProgressFlush,
+		Title:  "fixing thin pack",
+		Total:  uint64(total),
+		Sparse: true,
+	})
 
 	for i, id := range baseIDs {
 		ty, content, err := state.opts.Base.ReadBytesContent(id)
@@ -74,8 +78,7 @@ func maybeFixThin(state *ingestState) error {
 		state.thinFixed = true
 
 		done := i + 1
-		percent := done * 100 / total
-		utils.BestEffortFprintf(state.opts.Progress, "fixing thin pack: %3d%% (%d/%d)\r", percent, done, total)
+		meter.Set(uint64(done), 0)
 	}
 
 	err = rewritePackHeaderAndTrailer(state)
@@ -84,7 +87,7 @@ func maybeFixThin(state *ingestState) error {
 	}
 
 	if state.thinFixed {
-		utils.BestEffortFprintf(state.opts.Progress, "fixing thin pack: 100%% (%d/%d), done.\n", total, total)
+		meter.Stop("done")
 	}
 
 	return nil

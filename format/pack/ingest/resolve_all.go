@@ -3,7 +3,7 @@ package ingest
 import (
 	"errors"
 
-	"codeberg.org/lindenii/furgit/internal/utils"
+	"codeberg.org/lindenii/furgit/internal/progress"
 )
 
 // resolveAll resolves all delta records and finalizes ObjectID/RealType for every record.
@@ -22,11 +22,14 @@ func resolveAll(state *ingestState) error {
 		return nil
 	}
 
-	step := progressStep(pending)
-
 	var done uint32
 
-	utils.BestEffortFprintf(state.opts.Progress, "resolving deltas:   0%% (0/%d)\r", pending)
+	meter := progress.New(progress.Options{
+		Writer: state.opts.Progress,
+		Flush:  state.opts.ProgressFlush,
+		Title:  "resolving deltas",
+		Total:  uint64(pending),
+	})
 
 	for idx := range state.records {
 		if state.records[idx].resolved {
@@ -34,10 +37,7 @@ func resolveAll(state *ingestState) error {
 		}
 
 		done++
-		if done%step == 0 || done == pending {
-			percent := done * 100 / pending
-			utils.BestEffortFprintf(state.opts.Progress, "resolving deltas: %3d%% (%d/%d)\r", percent, done, pending)
-		}
+		meter.Set(uint64(done), 0)
 
 		visiting := make(map[int]struct{})
 
@@ -65,7 +65,7 @@ func resolveAll(state *ingestState) error {
 		state.baseCache.add(idx, ty, content)
 	}
 
-	utils.BestEffortFprintf(state.opts.Progress, "resolving deltas: 100%% (%d/%d), done.\n", pending, pending)
+	meter.Stop("done")
 
 	return nil
 }

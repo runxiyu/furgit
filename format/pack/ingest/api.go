@@ -23,6 +23,10 @@ type Options struct {
 	//
 	// When nil, no progress output is emitted.
 	Progress io.Writer
+	// ProgressFlush flushes transport output after progress writes.
+	//
+	// When nil, no explicit flush is attempted.
+	ProgressFlush func() error
 	// RequireTrailingEOF requires the source to hit EOF after the pack trailer.
 	//
 	// This is suitable for exact pack-file readers, but should be disabled for

@@ -2,8 +2,6 @@ package ingest
 
 import (
 	"fmt"
-
-	"codeberg.org/lindenii/furgit/internal/utils"
 )
 
 // ingest initializes transaction state and executes the ingest pipeline.
@@ -51,7 +49,7 @@ func ingest(state *ingestState) (out Result, err error) {
 		return Result{}, err
 	}
 
-	utils.BestEffortFprintf(state.opts.Progress, "writing index...\r")
+	writeProgress(state, "writing index...\r")
 
 	err = state.packFile.Sync()
 	if err != nil {
@@ -63,10 +61,10 @@ func ingest(state *ingestState) (out Result, err error) {
 		return Result{}, err
 	}
 
-	utils.BestEffortFprintf(state.opts.Progress, "writing index: done.\n")
+	writeProgress(state, "writing index: done.\n")
 
 	if state.opts.WriteRev {
-		utils.BestEffortFprintf(state.opts.Progress, "writing reverse index...\r")
+		writeProgress(state, "writing reverse index...\r")
 	}
 
 	err = writeRev(state)
@@ -75,7 +73,7 @@ func ingest(state *ingestState) (out Result, err error) {
 	}
 
 	if state.opts.WriteRev {
-		utils.BestEffortFprintf(state.opts.Progress, "writing reverse index: done.\n")
+		writeProgress(state, "writing reverse index: done.\n")
 	}
 
 	return finalizeArtifacts(state)

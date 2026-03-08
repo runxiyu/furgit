@@ -3,7 +3,7 @@ package ingest
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/internal/utils"
+	"codeberg.org/lindenii/furgit/internal/progress"
 	"codeberg.org/lindenii/furgit/objectid"
 )
 
@@ -21,22 +21,27 @@ func streamPackAndScan(state *ingestState) error {
 		state.algo.Size(),
 	)
 
-	utils.BestEffortFprintf(state.opts.Progress, "validating pack header...\r")
+	writeProgress(state, "validating pack header...\r")
 
 	err = seedStreamWithPackHeader(state)
 	if err != nil {
 		return err
 	}
 
-	utils.BestEffortFprintf(state.opts.Progress, "validating pack header: done.\n")
+	writeProgress(state, "validating pack header: done.\n")
 
 	state.records = make([]objectRecord, 0, state.objectCountHeader)
 	state.ofsDeltas = make([]ofsDeltaRef, 0, state.objectCountHeader)
 	state.refDeltas = make([]refDeltaRef, 0, state.objectCountHeader)
 
 	total := state.objectCountHeader
-	step := progressStep(total)
-	utils.BestEffortFprintf(state.opts.Progress, "receiving objects:   0%% (0/%d)\r", total)
+	meter := progress.New(progress.Options{
+		Writer:     state.opts.Progress,
+		Flush:      state.opts.ProgressFlush,
+		Title:      "receiving objects",
+		Total:      uint64(total),
+		Throughput: true,
+	})
 
 	for i := range total {
 		nextOffset, err := scanOneEntry(state, state.stream.consumed)
@@ -49,13 +54,10 @@ func streamPackAndScan(state *ingestState) error {
 		}
 
 		done := i + 1
-		if done%step == 0 || done == total {
-			percent := done * 100 / total
-			utils.BestEffortFprintf(state.opts.Progress, "receiving objects: %3d%% (%d/%d)\r", percent, done, total)
-		}
+		meter.Set(uint64(done), state.stream.consumed)
 	}
 
-	utils.BestEffortFprintf(state.opts.Progress, "receiving objects: 100%% (%d/%d), done.\n", total, total)
+	meter.Stop("done")
 
 	err = state.stream.finishAndFlushTrailer(state.opts.RequireTrailingEOF)
 	if err != nil {
