@@ -29,7 +29,11 @@ func appendBaseObject(state *ingestState, id objectid.ObjectID, realType objectt
 	headerLenInt64 := int64(len(header))
 	section := &fileSectionWriter{file: state.packFile, off: startInt64 + headerLenInt64}
 	crc := crc32.NewIEEE()
-	_, _ = crc.Write(header)
+	_, err = crc.Write(header)
+	if err != nil {
+		return 0, err
+	}
+
 	counting := &countingWriter{dst: section}
 
 	zw := zlib.NewWriter(io.MultiWriter(counting, crc))
