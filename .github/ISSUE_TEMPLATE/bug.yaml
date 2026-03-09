@@ -1,0 +1,75 @@
+name: Bug
+description: Report incorrect or unexpected behavior
+title: "Bug: "
+labels:
+  - bug
+assignees:
+  - runxiyu
+
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What is the bug? Provide a concise summary.
+      placeholder: Describe the unexpected behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction recipe (Go program)
+      description: |
+        Provide a minimal Go program that:
+        - creates an empty repository;
+        - executes the Furgit and/or Git commands needed;
+        - demonstrates the faulty behavior.
+      placeholder: |
+        package main
+
+        import "codeberg.org/lindenii/furgit"
+
+        func main() {
+        	// do something
+        }
+      render: go
+    validations:
+      required: false
+
+  - type: textarea
+    id: regression-test-help
+    attributes:
+      label: Help needed writing a regression test?
+      description: |
+        If you are unsure how to turn your reproduction into an automated test,
+        explain what you want help with. We expect to create a regression test
+        before fixing the issue.
+      placeholder: Describe where you got stuck or what guidance you need.
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternative-reproduction
+    attributes:
+      label: Alternative reproduction
+      description: |
+        If writing an automated reproduction truly isn’t possible, explain *in
+        very clear, step-by-step detail* how to reproduce the problem manually.
+        Include command output where relevant.
+      placeholder: |
+        1. Run command X
+        2. Run command Y
+        3. Observe unexpected behavior
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I read the project's guidance on regression tests.
+          required: true
+        - label: I attempted to write a reproduction Go program, or provided clear manual reproduction steps if automation was not possible.
+          required: true
