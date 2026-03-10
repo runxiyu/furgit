@@ -138,8 +138,8 @@ Furgit is a low-level Git library in Go.
     * [ ] Patience
     * [ ] Histogram
     * [ ] Tree-way
-  * Format patch
-  * Apply/amend patch
+  * [ ] Format patch
+  * [ ] Apply/amend patch
 * Branch integration/rewrite/etc methods
   * [ ] Merge
     * [ ] Recursive
@@ -209,6 +209,12 @@ Furgit is a low-level Git library in Go.
   * [ ] Worktree
     * [ ] Common directory
     * [ ] Worktree-specific references
+* Research
+  * [ ] Dynamic packfiles
+    * [ ] Compaction; page-sized hole punching
+    * [ ] Dynamic indexing
+      * [ ] Linear/extendible/spiral hashing
+    * [ ] Dynamic reachability bitmaps
 
 ## Not planned
 
