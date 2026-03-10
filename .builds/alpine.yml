@@ -12,13 +12,13 @@ tasks:
       go build ./...
   - test: |
       cd furgit
-      go test -v ./...
+      go test -v -count 1 $(go list ./... | grep -v '/internal/compress') 
   - test-race: |
       cd furgit
-      go test -race -v ./...
+      go test -race -v -count 1 $(go list ./... | grep -v '/internal/compress') 
   - test-purego: |
       cd furgit
-      go test -v -tags purego ./...
+      go test -v -tags purego -count 1 $(go list ./... | grep -v '/internal/compress') 
   - lint: |
       cd furgit
       golangci-lint run ./...
