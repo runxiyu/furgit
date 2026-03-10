@@ -31,12 +31,12 @@ func readAndValidatePackHeader(src io.Reader) (HeaderInfo, [packHeaderSize]byte,
 
 // parseAndValidatePackHeader validates one already-read PACK header.
 func parseAndValidatePackHeader(hdr [packHeaderSize]byte) (HeaderInfo, error) {
-	if binary.BigEndian.Uint32(hdr[:4]) != pack.Signature {
+	if binary.BigEndian.Uint32(hdr[:4]) != packfile.Signature {
 		return HeaderInfo{}, &InvalidPackHeaderError{Reason: "signature mismatch"}
 	}
 
 	version := binary.BigEndian.Uint32(hdr[4:8])
-	if !pack.VersionSupported(version) {
+	if !packfile.VersionSupported(version) {
 		return HeaderInfo{}, &InvalidPackHeaderError{
 			Reason: fmt.Sprintf("unsupported version %d", version),
 		}
