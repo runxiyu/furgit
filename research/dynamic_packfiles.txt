@@ -1,0 +1,16 @@
+dynamic packfiles to append objects
+
+gc/refcount process punches page-sized holes in them for pages fully
+within the space of unwanted objects, after setting a tombstone mark
+
+holes are recorded in an index and re-used
+
+then, if desired, the repack process removes all the punched holes
+and anything surrounding from unwanted objects that are slightly out
+of the page boundary
+
+.idx is not a bsearch because that would cause me to need to rewrite
+the entire pack every time i add objects; instead use an extendible
+hash table.
+
+genreational bloom filters
