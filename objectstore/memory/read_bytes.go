@@ -1,7 +1,7 @@
 package memory
 
 import (
-	"codeberg.org/lindenii/furgit/object/header"
+	"codeberg.org/lindenii/furgit/objectheader"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
 	"codeberg.org/lindenii/furgit/objecttype"
@@ -14,7 +14,7 @@ func (store *Store) ReadBytesFull(id objectid.ObjectID) ([]byte, error) {
 		return nil, objectstore.ErrObjectNotFound
 	}
 
-	header, ok := header.Encode(obj.ty, int64(len(obj.content)))
+	header, ok := objectheader.Encode(obj.ty, int64(len(obj.content)))
 	if !ok {
 		panic("failed to encode object header")
 	}

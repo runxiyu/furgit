@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 
-	"codeberg.org/lindenii/furgit/object/header"
+	"codeberg.org/lindenii/furgit/objectheader"
 )
 
 // acceptFull validates and accounts raw full-object input.
@@ -15,7 +15,7 @@ func (writer *streamWriter) acceptFull(src []byte) error {
 			headerChunkLen := nul + 1
 			writer.headerBuf = append(writer.headerBuf, src[:headerChunkLen]...)
 
-			_, size, _, ok := header.Parse(writer.headerBuf)
+			_, size, _, ok := objectheader.Parse(writer.headerBuf)
 			if !ok {
 				return errors.New("objectstore/loose: malformed object header")
 			}

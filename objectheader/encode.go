@@ -1,4 +1,4 @@
-package header
+package objectheader
 
 import "codeberg.org/lindenii/furgit/objecttype"
 
