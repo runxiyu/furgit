@@ -14,3 +14,6 @@ the entire pack every time i add objects; instead use an extendible
 hash table.
 
 genreational bloom filters
+
+
+research bitcask
