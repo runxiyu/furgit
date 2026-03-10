@@ -3,7 +3,7 @@ package object
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/objectheader"
+	"codeberg.org/lindenii/furgit/object/header"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
@@ -12,7 +12,7 @@ import (
 //
 //nolint:ireturn
 func ParseObjectWithHeader(raw []byte, algo objectid.Algorithm) (Object, error) {
-	ty, size, headerLen, ok := objectheader.Parse(raw)
+	ty, size, headerLen, ok := header.Parse(raw)
 	if !ok {
 		return nil, fmt.Errorf("object: malformed object header")
 	}

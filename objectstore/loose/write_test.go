@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/objectheader"
+	"codeberg.org/lindenii/furgit/object/header"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
@@ -58,9 +58,9 @@ func TestLooseStoreWriteReaderFullAgainstGit(t *testing.T) {
 
 		body := []byte("full-reader-body\n")
 
-		header, ok := objectheader.Encode(objecttype.TypeBlob, int64(len(body)))
+		header, ok := header.Encode(objecttype.TypeBlob, int64(len(body)))
 		if !ok {
-			t.Fatalf("objectheader.Encode failed")
+			t.Fatalf("header.Encode failed")
 		}
 
 		raw := make([]byte, len(header)+len(body))

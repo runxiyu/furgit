@@ -3,7 +3,7 @@ package packed
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/objectheader"
+	"codeberg.org/lindenii/furgit/object/header"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
@@ -25,7 +25,7 @@ func (store *Store) ReadBytesFull(id objectid.ObjectID) ([]byte, error) {
 		return nil, err
 	}
 
-	header, ok := objectheader.Encode(ty, int64(len(content)))
+	header, ok := header.Encode(ty, int64(len(content)))
 	if !ok {
 		return nil, fmt.Errorf("objectstore/packed: failed to encode object header for type %d", ty)
 	}

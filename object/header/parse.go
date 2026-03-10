@@ -1,5 +1,5 @@
-// Package objectheader parses and serializes object headers ("type size\0").
-package objectheader
+// Package header parses and serializes object headers ("type size\0").
+package header
 
 import (
 	"bytes"

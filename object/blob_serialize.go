@@ -3,7 +3,7 @@ package object
 import (
 	"errors"
 
-	"codeberg.org/lindenii/furgit/objectheader"
+	"codeberg.org/lindenii/furgit/object/header"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
@@ -19,7 +19,7 @@ func (blob *Blob) SerializeWithHeader() ([]byte, error) {
 		return nil, err
 	}
 
-	header, ok := objectheader.Encode(objecttype.TypeBlob, int64(len(body)))
+	header, ok := header.Encode(objecttype.TypeBlob, int64(len(body)))
 	if !ok {
 		return nil, errors.New("object: blob: failed to encode object header")
 	}

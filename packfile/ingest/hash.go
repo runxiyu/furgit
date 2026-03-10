@@ -3,14 +3,14 @@ package ingest
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/objectheader"
+	"codeberg.org/lindenii/furgit/object/header"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
 // hashCanonicalObject hashes canonical object bytes (header+content).
 func hashCanonicalObject(algo objectid.Algorithm, ty objecttype.Type, content []byte) (objectid.ObjectID, error) {
-	header, ok := objectheader.Encode(ty, int64(len(content)))
+	header, ok := header.Encode(ty, int64(len(content)))
 	if !ok {
 		return objectid.ObjectID{}, fmt.Errorf("packfile/ingest: encode object header for type %d", ty)
 	}

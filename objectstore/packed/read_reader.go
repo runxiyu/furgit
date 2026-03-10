@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"codeberg.org/lindenii/furgit/internal/iolimit"
-	"codeberg.org/lindenii/furgit/objectheader"
+	"codeberg.org/lindenii/furgit/object/header"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
 	packfmt "codeberg.org/lindenii/furgit/packfile"
@@ -61,7 +61,7 @@ func (store *Store) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) 
 	}
 
 	if packfmt.IsBaseObjectType(meta.ty) {
-		header, ok := objectheader.Encode(meta.ty, meta.size)
+		header, ok := header.Encode(meta.ty, meta.size)
 		if !ok {
 			return nil, fmt.Errorf("objectstore/packed: failed to encode object header for type %d", meta.ty)
 		}

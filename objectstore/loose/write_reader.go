@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"codeberg.org/lindenii/furgit/objectheader"
+	"codeberg.org/lindenii/furgit/object/header"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
@@ -18,7 +18,7 @@ func (store *Store) WriteReaderContent(ty objecttype.Type, size int64, src io.Re
 		return objectid.ObjectID{}, fmt.Errorf("objectstore/loose: negative content size: %d", size)
 	}
 
-	header, ok := objectheader.Encode(ty, size)
+	header, ok := header.Encode(ty, size)
 	if !ok {
 		return objectid.ObjectID{}, fmt.Errorf("objectstore/loose: failed to encode object header for type %v", ty)
 	}

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/objectheader"
+	"codeberg.org/lindenii/furgit/object/header"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
@@ -55,7 +55,7 @@ func (tag *Tag) SerializeWithHeader() ([]byte, error) {
 		return nil, err
 	}
 
-	header, ok := objectheader.Encode(objecttype.TypeTag, int64(len(body)))
+	header, ok := header.Encode(objecttype.TypeTag, int64(len(body)))
 	if !ok {
 		return nil, errors.New("object: tag: failed to encode object header")
 	}
