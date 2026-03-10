@@ -3,14 +3,14 @@ package ingest
 import (
 	"fmt"
 
-	packfmt "codeberg.org/lindenii/furgit/format/pack"
 	"codeberg.org/lindenii/furgit/objecttype"
+	packfmt "codeberg.org/lindenii/furgit/packfile"
 )
 
 // resolveRecord resolves one record and returns canonical type/content.
 func resolveRecord(state *ingestState, idx int, visiting map[int]struct{}) (objecttype.Type, []byte, error) {
 	if idx < 0 || idx >= len(state.records) {
-		return objecttype.TypeInvalid, nil, fmt.Errorf("format/pack/ingest: record index out of bounds")
+		return objecttype.TypeInvalid, nil, fmt.Errorf("packfile/ingest: record index out of bounds")
 	}
 
 	if _, ok := visiting[idx]; ok {

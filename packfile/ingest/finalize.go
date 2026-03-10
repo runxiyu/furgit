@@ -70,11 +70,11 @@ func rollbackTemporaryArtifacts(state *ingestState) {
 // linkTempToFinal hard-links tmp to final, tolerating existing final paths.
 func linkTempToFinal(state *ingestState, tmp, final string) error {
 	if tmp == "" || final == "" {
-		return fmt.Errorf("format/pack/ingest: invalid finalize names tmp=%q final=%q", tmp, final)
+		return fmt.Errorf("packfile/ingest: invalid finalize names tmp=%q final=%q", tmp, final)
 	}
 
 	if strings.Contains(final, "/") {
-		return fmt.Errorf("format/pack/ingest: final name must be leaf: %q", final)
+		return fmt.Errorf("packfile/ingest: final name must be leaf: %q", final)
 	}
 
 	err := state.destination.Link(tmp, final)

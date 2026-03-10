@@ -96,8 +96,8 @@ func createTempFile(root *os.Root, prefix string) (string, *os.File, error) {
 			continue
 		}
 
-		return "", nil, fmt.Errorf("format/pack/ingest: create temp file %q: %w", name, err)
+		return "", nil, fmt.Errorf("packfile/ingest: create temp file %q: %w", name, err)
 	}
 
-	return "", nil, fmt.Errorf("format/pack/ingest: unable to create temporary file for prefix %q", prefix)
+	return "", nil, fmt.Errorf("packfile/ingest: unable to create temporary file for prefix %q", prefix)
 }

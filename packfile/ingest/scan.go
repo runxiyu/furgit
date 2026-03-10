@@ -50,7 +50,7 @@ func streamPackAndScan(state *ingestState) error {
 		}
 
 		if nextOffset != state.stream.consumed {
-			return fmt.Errorf("format/pack/ingest: internal stream offset mismatch")
+			return fmt.Errorf("packfile/ingest: internal stream offset mismatch")
 		}
 
 		done := i + 1
@@ -65,7 +65,7 @@ func streamPackAndScan(state *ingestState) error {
 	}
 
 	if len(state.stream.packTrailer) != state.algo.Size() {
-		return fmt.Errorf("format/pack/ingest: invalid trailer size")
+		return fmt.Errorf("packfile/ingest: invalid trailer size")
 	}
 
 	packHash, err := objectid.FromBytes(state.algo, state.stream.packTrailer)

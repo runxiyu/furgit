@@ -8,7 +8,7 @@ import (
 // use consumes n unread bytes and updates accounting/checksum state.
 func (scanner *streamScanner) use(n int) error {
 	if n < 0 || n > scanner.n-scanner.off {
-		return fmt.Errorf("format/pack/ingest: invalid consume length %d", n)
+		return fmt.Errorf("packfile/ingest: invalid consume length %d", n)
 	}
 
 	if n == 0 {

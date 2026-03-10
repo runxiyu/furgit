@@ -3,7 +3,7 @@ package ingest
 import (
 	"fmt"
 
-	deltaapply "codeberg.org/lindenii/furgit/format/delta/apply"
+	deltaapply "codeberg.org/lindenii/furgit/delta/apply"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
@@ -11,7 +11,7 @@ import (
 func applyDeltaRecord(state *ingestState, idx int, baseType objecttype.Type, baseContent []byte) (objecttype.Type, []byte, error) {
 	record := state.records[idx]
 	if record.packedType != objecttype.TypeOfsDelta && record.packedType != objecttype.TypeRefDelta {
-		return objecttype.TypeInvalid, nil, fmt.Errorf("format/pack/ingest: record %d is not a delta record", idx)
+		return objecttype.TypeInvalid, nil, fmt.Errorf("packfile/ingest: record %d is not a delta record", idx)
 	}
 
 	deltaPayload, err := inflateRecordPayload(state, idx)

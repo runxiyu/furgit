@@ -13,7 +13,7 @@ func (scanner *streamScanner) fill(minLen int) error {
 	}
 
 	if minLen > len(scanner.buf) {
-		return fmt.Errorf("format/pack/ingest: fill(%d) exceeds scanner buffer", minLen)
+		return fmt.Errorf("packfile/ingest: fill(%d) exceeds scanner buffer", minLen)
 	}
 
 	for scanner.n-scanner.off < minLen {

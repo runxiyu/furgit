@@ -8,9 +8,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"codeberg.org/lindenii/furgit/format/pack/ingest"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
+	"codeberg.org/lindenii/furgit/packfile/ingest"
 	"codeberg.org/lindenii/furgit/repository"
 )
 

@@ -3,8 +3,8 @@ package ingest
 import (
 	"fmt"
 
-	packfmt "codeberg.org/lindenii/furgit/format/pack"
 	"codeberg.org/lindenii/furgit/objecttype"
+	packfmt "codeberg.org/lindenii/furgit/packfile"
 )
 
 // scanOneEntry scans one pack entry from stream and appends one record.

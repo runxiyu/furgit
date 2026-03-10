@@ -1,8 +1,8 @@
 package packed
 
 import (
-	packfmt "codeberg.org/lindenii/furgit/format/pack"
 	"codeberg.org/lindenii/furgit/objecttype"
+	packfmt "codeberg.org/lindenii/furgit/packfile"
 )
 
 // deltaResolveContent resolves one object's content bytes from its pack location.

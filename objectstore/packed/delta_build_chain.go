@@ -3,8 +3,8 @@ package packed
 import (
 	"fmt"
 
-	packfmt "codeberg.org/lindenii/furgit/format/pack"
 	"codeberg.org/lindenii/furgit/objecttype"
+	packfmt "codeberg.org/lindenii/furgit/packfile"
 )
 
 // deltaBuildChain walks one object's chain and builds a reconstruction chain.

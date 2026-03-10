@@ -11,7 +11,7 @@ import (
 // and optionally requires the source stream to hit EOF afterward.
 func (scanner *streamScanner) finishAndFlushTrailer(requireTrailingEOF bool) error {
 	if scanner.hashSize <= 0 {
-		return fmt.Errorf("format/pack/ingest: invalid hash size")
+		return fmt.Errorf("packfile/ingest: invalid hash size")
 	}
 
 	trailer := make([]byte, scanner.hashSize)
@@ -26,7 +26,7 @@ func (scanner *streamScanner) finishAndFlushTrailer(requireTrailingEOF bool) err
 	scanner.packTrailer = append(scanner.packTrailer[:0], trailer...)
 
 	if scanner.n-scanner.off > 0 {
-		return fmt.Errorf("format/pack/ingest: pack has trailing garbage")
+		return fmt.Errorf("packfile/ingest: pack has trailing garbage")
 	}
 
 	if !requireTrailingEOF {
@@ -42,7 +42,7 @@ func (scanner *streamScanner) finishAndFlushTrailer(requireTrailingEOF bool) err
 
 	n, err := scanner.Read(probe[:])
 	if n > 0 || err == nil {
-		return fmt.Errorf("format/pack/ingest: pack has trailing garbage")
+		return fmt.Errorf("packfile/ingest: pack has trailing garbage")
 	}
 
 	if !errors.Is(err, io.EOF) {

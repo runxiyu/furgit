@@ -18,7 +18,7 @@ func Apply(base, delta []byte) ([]byte, error) {
 	}
 
 	if srcSize != len(base) {
-		return nil, fmt.Errorf("format/delta/apply: delta source size mismatch: got %d want %d", srcSize, len(base))
+		return nil, fmt.Errorf("delta/apply: delta source size mismatch: got %d want %d", srcSize, len(base))
 	}
 
 	out := make([]byte, dstSize)
@@ -34,7 +34,7 @@ func Apply(base, delta []byte) ([]byte, error) {
 
 			if op&0x01 != 0 {
 				if pos >= len(delta) {
-					return nil, fmt.Errorf("format/delta/apply: malformed delta copy offset")
+					return nil, fmt.Errorf("delta/apply: malformed delta copy offset")
 				}
 
 				off |= int(delta[pos])
@@ -43,7 +43,7 @@ func Apply(base, delta []byte) ([]byte, error) {
 
 			if op&0x02 != 0 {
 				if pos >= len(delta) {
-					return nil, fmt.Errorf("format/delta/apply: malformed delta copy offset")
+					return nil, fmt.Errorf("delta/apply: malformed delta copy offset")
 				}
 
 				off |= int(delta[pos]) << 8
@@ -52,7 +52,7 @@ func Apply(base, delta []byte) ([]byte, error) {
 
 			if op&0x04 != 0 {
 				if pos >= len(delta) {
-					return nil, fmt.Errorf("format/delta/apply: malformed delta copy offset")
+					return nil, fmt.Errorf("delta/apply: malformed delta copy offset")
 				}
 
 				off |= int(delta[pos]) << 16
@@ -61,7 +61,7 @@ func Apply(base, delta []byte) ([]byte, error) {
 
 			if op&0x08 != 0 {
 				if pos >= len(delta) {
-					return nil, fmt.Errorf("format/delta/apply: malformed delta copy offset")
+					return nil, fmt.Errorf("delta/apply: malformed delta copy offset")
 				}
 
 				off |= int(delta[pos]) << 24
@@ -72,7 +72,7 @@ func Apply(base, delta []byte) ([]byte, error) {
 
 			if op&0x10 != 0 {
 				if pos >= len(delta) {
-					return nil, fmt.Errorf("format/delta/apply: malformed delta copy size")
+					return nil, fmt.Errorf("delta/apply: malformed delta copy size")
 				}
 
 				n |= int(delta[pos])
@@ -81,7 +81,7 @@ func Apply(base, delta []byte) ([]byte, error) {
 
 			if op&0x20 != 0 {
 				if pos >= len(delta) {
-					return nil, fmt.Errorf("format/delta/apply: malformed delta copy size")
+					return nil, fmt.Errorf("delta/apply: malformed delta copy size")
 				}
 
 				n |= int(delta[pos]) << 8
@@ -90,7 +90,7 @@ func Apply(base, delta []byte) ([]byte, error) {
 
 			if op&0x40 != 0 {
 				if pos >= len(delta) {
-					return nil, fmt.Errorf("format/delta/apply: malformed delta copy size")
+					return nil, fmt.Errorf("delta/apply: malformed delta copy size")
 				}
 
 				n |= int(delta[pos]) << 16
@@ -102,7 +102,7 @@ func Apply(base, delta []byte) ([]byte, error) {
 			}
 
 			if off < 0 || n < 0 || off+n > len(base) || outPos+n > len(out) {
-				return nil, fmt.Errorf("format/delta/apply: delta copy out of bounds")
+				return nil, fmt.Errorf("delta/apply: delta copy out of bounds")
 			}
 
 			copy(out[outPos:outPos+n], base[off:off+n])
@@ -112,12 +112,12 @@ func Apply(base, delta []byte) ([]byte, error) {
 		}
 
 		if op == 0 {
-			return nil, fmt.Errorf("format/delta/apply: invalid delta opcode 0")
+			return nil, fmt.Errorf("delta/apply: invalid delta opcode 0")
 		}
 
 		n := int(op)
 		if pos+n > len(delta) || outPos+n > len(out) {
-			return nil, fmt.Errorf("format/delta/apply: delta insert out of bounds")
+			return nil, fmt.Errorf("delta/apply: delta insert out of bounds")
 		}
 
 		copy(out[outPos:outPos+n], delta[pos:pos+n])
@@ -126,7 +126,7 @@ func Apply(base, delta []byte) ([]byte, error) {
 	}
 
 	if outPos != len(out) {
-		return nil, fmt.Errorf("format/delta/apply: delta output size mismatch: got %d want %d", outPos, len(out))
+		return nil, fmt.Errorf("delta/apply: delta output size mismatch: got %d want %d", outPos, len(out))
 	}
 
 	return out, nil
@@ -139,7 +139,7 @@ func readVarint(buf []byte, pos *int) (int, error) {
 
 	for {
 		if *pos >= len(buf) {
-			return 0, fmt.Errorf("format/delta/apply: malformed delta varint")
+			return 0, fmt.Errorf("delta/apply: malformed delta varint")
 		}
 
 		b := buf[*pos]
@@ -152,7 +152,7 @@ func readVarint(buf []byte, pos *int) (int, error) {
 
 		shift += 7
 		if shift > 63 {
-			return 0, fmt.Errorf("format/delta/apply: delta varint overflow")
+			return 0, fmt.Errorf("delta/apply: delta varint overflow")
 		}
 	}
 

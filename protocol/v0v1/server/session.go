@@ -3,9 +3,9 @@ package server
 import (
 	"io"
 
+	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/protocol/pktline"
 	"codeberg.org/lindenii/furgit/protocol/sideband64k"
-	"codeberg.org/lindenii/furgit/objectid"
 )
 
 // Options configures one server-side v0/v1 session.

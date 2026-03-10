@@ -3,10 +3,10 @@ package packed
 import (
 	"fmt"
 
-	packfmt "codeberg.org/lindenii/furgit/format/pack"
 	"codeberg.org/lindenii/furgit/internal/intconv"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
+	packfmt "codeberg.org/lindenii/furgit/packfile"
 )
 
 // entryMeta describes one parsed pack entry header.

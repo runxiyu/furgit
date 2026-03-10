@@ -172,7 +172,7 @@ func (pending *Pending) Discard() (DiscardResult, error) {
 
 		n, err := pending.reader.Read(probe[:])
 		if n > 0 || err == nil {
-			return DiscardResult{}, errors.New("format/pack/ingest: pack has trailing garbage")
+			return DiscardResult{}, errors.New("packfile/ingest: pack has trailing garbage")
 		}
 
 		if err != io.EOF {

@@ -38,7 +38,7 @@ func maybeFixThin(state *ingestState) error {
 
 	size := info.Size()
 	if size < hashSize {
-		return fmt.Errorf("format/pack/ingest: pack too short to trim trailer")
+		return fmt.Errorf("packfile/ingest: pack too short to trim trailer")
 	}
 
 	newEnd := size - hashSize
@@ -75,7 +75,7 @@ func maybeFixThin(state *ingestState) error {
 				continue
 			}
 
-			return fmt.Errorf("format/pack/ingest: read thin base %s: %w", id, err)
+			return fmt.Errorf("packfile/ingest: read thin base %s: %w", id, err)
 		}
 
 		_, err = appendBaseObject(state, id, ty, content)

@@ -1,7 +1,7 @@
 package service
 
 import (
-	"codeberg.org/lindenii/furgit/format/pack/ingest"
+	"codeberg.org/lindenii/furgit/packfile/ingest"
 )
 
 // Result is one receive-pack execution result.

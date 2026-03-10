@@ -11,7 +11,7 @@ func (scanner *streamScanner) beginEntryCRC() {
 // endEntryCRC finishes inline CRC accumulation for one packed entry.
 func (scanner *streamScanner) endEntryCRC() (uint32, error) {
 	if !scanner.inEntryCRC {
-		return 0, fmt.Errorf("format/pack/ingest: entry CRC not started")
+		return 0, fmt.Errorf("packfile/ingest: entry CRC not started")
 	}
 
 	crc := scanner.entryCRC

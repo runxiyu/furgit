@@ -3,15 +3,15 @@ package ingest
 import (
 	"fmt"
 
-	packfmt "codeberg.org/lindenii/furgit/format/pack"
 	"codeberg.org/lindenii/furgit/objecttype"
+	packfmt "codeberg.org/lindenii/furgit/packfile"
 )
 
 // readBaseRecordContent reads canonical base content for one non-delta record.
 func readBaseRecordContent(state *ingestState, idx int) (objecttype.Type, []byte, error) {
 	record := state.records[idx]
 	if !packfmt.IsBaseObjectType(record.packedType) {
-		return objecttype.TypeInvalid, nil, fmt.Errorf("format/pack/ingest: record %d is not a base object", idx)
+		return objecttype.TypeInvalid, nil, fmt.Errorf("packfile/ingest: record %d is not a base object", idx)
 	}
 
 	content, err := inflateRecordPayload(state, idx)

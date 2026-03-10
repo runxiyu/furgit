@@ -12,7 +12,7 @@ import (
 func hashCanonicalObject(algo objectid.Algorithm, ty objecttype.Type, content []byte) (objectid.ObjectID, error) {
 	header, ok := objectheader.Encode(ty, int64(len(content)))
 	if !ok {
-		return objectid.ObjectID{}, fmt.Errorf("format/pack/ingest: encode object header for type %d", ty)
+		return objectid.ObjectID{}, fmt.Errorf("packfile/ingest: encode object header for type %d", ty)
 	}
 
 	hashImpl, err := algo.New()

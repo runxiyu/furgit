@@ -31,7 +31,7 @@ func readVarintFromByteReader(reader io.ByteReader) (int, error) {
 	for {
 		b, err := reader.ReadByte()
 		if err != nil {
-			return 0, fmt.Errorf("format/delta/apply: malformed delta varint: %w", err)
+			return 0, fmt.Errorf("delta/apply: malformed delta varint: %w", err)
 		}
 
 		value |= int(b&0x7f) << shift
@@ -41,7 +41,7 @@ func readVarintFromByteReader(reader io.ByteReader) (int, error) {
 
 		shift += 7
 		if shift > 63 {
-			return 0, fmt.Errorf("format/delta/apply: delta varint overflow")
+			return 0, fmt.Errorf("delta/apply: delta varint overflow")
 		}
 	}
 }

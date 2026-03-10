@@ -20,7 +20,7 @@ type EntryHeader struct {
 func ParseEntryHeader(data []byte) (EntryHeader, error) {
 	var zero EntryHeader
 	if len(data) == 0 {
-		return zero, fmt.Errorf("format/pack: truncated entry header")
+		return zero, fmt.Errorf("packfile: truncated entry header")
 	}
 
 	first := data[0]
@@ -35,7 +35,7 @@ func ParseEntryHeader(data []byte) (EntryHeader, error) {
 	b := first
 	for b&0x80 != 0 {
 		if header.HeaderSize >= len(data) {
-			return zero, fmt.Errorf("format/pack: truncated entry header")
+			return zero, fmt.Errorf("packfile: truncated entry header")
 		}
 
 		b = data[header.HeaderSize]
@@ -45,7 +45,7 @@ func ParseEntryHeader(data []byte) (EntryHeader, error) {
 	}
 
 	if header.Size < 0 {
-		return zero, fmt.Errorf("format/pack: negative entry size")
+		return zero, fmt.Errorf("packfile: negative entry size")
 	}
 
 	return header, nil
@@ -89,12 +89,12 @@ func ParseEntry(data []byte, hashSize int) (Entry, error) {
 		// Base object entries have no extra prefix fields.
 	case objecttype.TypeRefDelta:
 		if hashSize <= 0 {
-			return zero, fmt.Errorf("format/pack: invalid hash size %d", hashSize)
+			return zero, fmt.Errorf("packfile: invalid hash size %d", hashSize)
 		}
 
 		end := entry.DataOffset + hashSize
 		if end > len(data) {
-			return zero, fmt.Errorf("format/pack: truncated ref-delta base id")
+			return zero, fmt.Errorf("packfile: truncated ref-delta base id")
 		}
 
 		entry.RefBaseID = data[entry.DataOffset:end]
@@ -108,13 +108,13 @@ func ParseEntry(data []byte, hashSize int) (Entry, error) {
 		entry.OfsBaseDistance = dist
 		entry.DataOffset += consumed
 	case objecttype.TypeInvalid, objecttype.TypeFuture:
-		return zero, fmt.Errorf("format/pack: unsupported object type %d", entry.Type)
+		return zero, fmt.Errorf("packfile: unsupported object type %d", entry.Type)
 	default:
-		return zero, fmt.Errorf("format/pack: unsupported object type %d", entry.Type)
+		return zero, fmt.Errorf("packfile: unsupported object type %d", entry.Type)
 	}
 
 	if entry.DataOffset > len(data) {
-		return zero, fmt.Errorf("format/pack: entry data offset out of bounds")
+		return zero, fmt.Errorf("packfile: entry data offset out of bounds")
 	}
 
 	return entry, nil

@@ -3,8 +3,8 @@ package service
 import (
 	"os"
 
-	"codeberg.org/lindenii/furgit/format/pack/ingest"
 	"codeberg.org/lindenii/furgit/internal/utils"
+	"codeberg.org/lindenii/furgit/packfile/ingest"
 )
 
 func (service *Service) ingestQuarantine(

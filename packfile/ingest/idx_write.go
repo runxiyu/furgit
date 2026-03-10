@@ -243,7 +243,7 @@ func buildIdxOrder(state *ingestState) []int {
 func verifyResolvedRecords(state *ingestState) error {
 	for idx, record := range state.records {
 		if !record.resolved {
-			return fmt.Errorf("format/pack/ingest: unresolved record %d at offset %d", idx, record.offset)
+			return fmt.Errorf("packfile/ingest: unresolved record %d at offset %d", idx, record.offset)
 		}
 	}
 

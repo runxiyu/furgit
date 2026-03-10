@@ -3,7 +3,7 @@ package packed
 import (
 	"fmt"
 
-	deltaapply "codeberg.org/lindenii/furgit/format/delta/apply"
+	deltaapply "codeberg.org/lindenii/furgit/delta/apply"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 

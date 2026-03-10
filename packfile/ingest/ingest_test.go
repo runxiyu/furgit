@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/format/pack/ingest"
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/objectid"
+	"codeberg.org/lindenii/furgit/packfile/ingest"
 )
 
 type noExtraReadReader struct {
