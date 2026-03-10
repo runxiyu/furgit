@@ -17,3 +17,11 @@ genreational bloom filters
 
 
 research bitcask
+
+
+
+fetch: take current pack, remove dead objects/holes, filter objects
+out, record offsets and adjust ofs_deltas since they always go
+backwards, write the pack back; then stream written pack to client.
+two-step necessary because pack header includes object count; could
+have a custom new protocol that doesn't do so.
