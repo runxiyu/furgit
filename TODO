@@ -19,3 +19,21 @@ So the to-do list in README.md is more
 * Investigate fsck issues with receive-pack
 * Improve performance of delta resolution
 * Consider unifying how flush works.
+
+* Okay, I think this is a pretty big design issue between the object
+  store and network operations: Things are modular enough that implementing
+  this probably doesn't break many other things, so it's not too big of a deal,
+  but it's an architectural debt that we should concsider: we have nice
+  pluggable object stores, but network-related paths like ingest still take an
+  *os.Root to write their quarantines and final packs into. This is fine for
+  the normal repository that uses Git packfiles, but would obviously not work
+  if we add something like dynamic packs, or want to write to any other sort of
+  object store. Perhaps object stores should get a batch writing interface? But
+  any general purpose, non-pack-aware writing interface would probably perform
+  significantly worse than just natively teeing the network pack (since what we
+  get from the network are always literally packs) to an indexer and the
+  filesystem.  A possible design is to require implementations to implement
+  their own pack ingestion algorithm; but that would make it harder to have
+  alternative protocols in the future, however for now it seems like a valid
+  solution. When there is any sight of alternative, non-pack-based protocols in
+  the future, we should think of another way.
