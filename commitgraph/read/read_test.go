@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/format/commitgraph/bloom"
-	"codeberg.org/lindenii/furgit/format/commitgraph/read"
+	"codeberg.org/lindenii/furgit/commitgraph/bloom"
+	"codeberg.org/lindenii/furgit/commitgraph/read"
 	"codeberg.org/lindenii/furgit/internal/intconv"
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/objectid"

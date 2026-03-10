@@ -1,6 +1,6 @@
 package read
 
-import "codeberg.org/lindenii/furgit/format/commitgraph"
+import "codeberg.org/lindenii/furgit/commitgraph"
 
 // ParentRef references one parent position.
 type ParentRef struct {

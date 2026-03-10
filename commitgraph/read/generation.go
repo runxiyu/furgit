@@ -3,7 +3,7 @@ package read
 import (
 	"encoding/binary"
 
-	"codeberg.org/lindenii/furgit/format/commitgraph"
+	"codeberg.org/lindenii/furgit/commitgraph"
 	"codeberg.org/lindenii/furgit/internal/intconv"
 )
 

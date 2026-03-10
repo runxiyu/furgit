@@ -1,7 +1,7 @@
 package mergebase
 
 import (
-	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
+	commitgraphread "codeberg.org/lindenii/furgit/commitgraph/read"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
 )

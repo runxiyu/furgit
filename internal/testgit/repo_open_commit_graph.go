@@ -3,7 +3,7 @@ package testgit
 import (
 	"testing"
 
-	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
+	commitgraphread "codeberg.org/lindenii/furgit/commitgraph/read"
 )
 
 // OpenCommitGraph opens the repository commit-graph and registers cleanup on

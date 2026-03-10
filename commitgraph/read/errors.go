@@ -13,7 +13,7 @@ type NotFoundError struct {
 
 // Error implements error.
 func (err *NotFoundError) Error() string {
-	return fmt.Sprintf("format/commitgraph: object not found: %s", err.OID)
+	return fmt.Sprintf("commitgraph: object not found: %s", err.OID)
 }
 
 // PositionOutOfRangeError reports an invalid graph position.
@@ -23,7 +23,7 @@ type PositionOutOfRangeError struct {
 
 // Error implements error.
 func (err *PositionOutOfRangeError) Error() string {
-	return fmt.Sprintf("format/commitgraph: position out of range: graph=%d index=%d", err.Pos.Graph, err.Pos.Index)
+	return fmt.Sprintf("commitgraph: position out of range: graph=%d index=%d", err.Pos.Graph, err.Pos.Index)
 }
 
 // MalformedError reports malformed commit-graph data.
@@ -34,7 +34,7 @@ type MalformedError struct {
 
 // Error implements error.
 func (err *MalformedError) Error() string {
-	return fmt.Sprintf("format/commitgraph: malformed %q: %s", err.Path, err.Reason)
+	return fmt.Sprintf("commitgraph: malformed %q: %s", err.Path, err.Reason)
 }
 
 // UnsupportedVersionError reports unsupported commit-graph version.
@@ -44,7 +44,7 @@ type UnsupportedVersionError struct {
 
 // Error implements error.
 func (err *UnsupportedVersionError) Error() string {
-	return fmt.Sprintf("format/commitgraph: unsupported version %d", err.Version)
+	return fmt.Sprintf("commitgraph: unsupported version %d", err.Version)
 }
 
 // BloomUnavailableError reports missing changed-path bloom data at one position.
@@ -54,5 +54,5 @@ type BloomUnavailableError struct {
 
 // Error implements error.
 func (err *BloomUnavailableError) Error() string {
-	return fmt.Sprintf("format/commitgraph: bloom unavailable at position graph=%d index=%d", err.Pos.Graph, err.Pos.Index)
+	return fmt.Sprintf("commitgraph: bloom unavailable at position graph=%d index=%d", err.Pos.Graph, err.Pos.Index)
 }

@@ -19,6 +19,6 @@ func Open(root *os.Root, algo objectid.Algorithm, mode OpenMode) (*Reader, error
 	case OpenChain:
 		return openChain(root, algo)
 	default:
-		return nil, fmt.Errorf("format/commitgraph: invalid open mode %d", mode)
+		return nil, fmt.Errorf("commitgraph: invalid open mode %d", mode)
 	}
 }
