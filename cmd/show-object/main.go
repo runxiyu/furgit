@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
+	"codeberg.org/lindenii/furgit/object/stored"
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/objectstored"
 	"codeberg.org/lindenii/furgit/objecttype"
 	"codeberg.org/lindenii/furgit/repository"
 )
@@ -50,14 +50,14 @@ func run(repoPath, name *string) error {
 		return fmt.Errorf("resolve %q: %w", *name, err)
 	}
 
-	stored, err := repo.ReadStored(id)
+	s, err := repo.ReadStored(id)
 	if err != nil {
 		_ = repo.Close()
 
 		return fmt.Errorf("read object %s: %w", id, err)
 	}
 
-	printStored(stored)
+	printStored(s)
 
 	err = repo.Close()
 	if err != nil {
@@ -81,11 +81,11 @@ func resolveInput(repo *repository.Repository, input string) (objectid.ObjectID,
 	return resolved.ID, nil
 }
 
-func printStored(stored objectstored.StoredObject) {
+func printStored(s stored.StoredObject) {
 	var b strings.Builder
 
-	id := stored.ID()
-	ty := stored.Object().ObjectType()
+	id := s.ID()
+	ty := s.Object().ObjectType()
 
 	tyName, ok := objecttype.Name(ty)
 	if !ok {
@@ -95,20 +95,20 @@ func printStored(stored objectstored.StoredObject) {
 	fmt.Fprintf(&b, "id: %s\n", id)
 	fmt.Fprintf(&b, "type: %s\n", tyName)
 
-	switch stored := stored.(type) {
-	case *objectstored.StoredBlob:
-		blob := stored.Blob()
+	switch s := s.(type) {
+	case *stored.StoredBlob:
+		blob := s.Blob()
 		fmt.Fprintf(&b, "size: %d\n", len(blob.Data))
 		fmt.Fprintf(&b, "data: %q\n", string(blob.Data))
-	case *objectstored.StoredTree:
-		tree := stored.Tree()
+	case *stored.StoredTree:
+		tree := s.Tree()
 		fmt.Fprintf(&b, "entries: %d\n", len(tree.Entries))
 
 		for _, entry := range tree.Entries {
 			fmt.Fprintf(&b, "%06o %s\t%s\n", entry.Mode, entry.ID, entry.Name)
 		}
-	case *objectstored.StoredCommit:
-		commit := stored.Commit()
+	case *stored.StoredCommit:
+		commit := s.Commit()
 		fmt.Fprintf(&b, "tree: %s\n", commit.Tree)
 
 		for _, parent := range commit.Parents {
@@ -118,8 +118,8 @@ func printStored(stored objectstored.StoredObject) {
 		fmt.Fprintf(&b, "author: %s <%s>\n", commit.Author.Name, commit.Author.Email)
 		fmt.Fprintf(&b, "committer: %s <%s>\n", commit.Committer.Name, commit.Committer.Email)
 		fmt.Fprintf(&b, "message:\n%s\n", string(commit.Message))
-	case *objectstored.StoredTag:
-		tag := stored.Tag()
+	case *stored.StoredTag:
+		tag := s.Tag()
 
 		targetTy, ok := objecttype.Name(tag.TargetType)
 		if !ok {
@@ -135,7 +135,7 @@ func printStored(stored objectstored.StoredObject) {
 
 		fmt.Fprintf(&b, "message:\n%s\n", string(tag.Message))
 	default:
-		fmt.Fprintf(&b, "%#v\n", stored.Object())
+		fmt.Fprintf(&b, "%#v\n", s.Object())
 	}
 
 	_, _ = os.Stdout.WriteString(b.String())

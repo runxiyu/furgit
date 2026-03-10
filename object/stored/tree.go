@@ -1,4 +1,4 @@
-package objectstored
+package stored
 
 import (
 	"codeberg.org/lindenii/furgit/object"

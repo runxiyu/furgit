@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/object"
-	"codeberg.org/lindenii/furgit/objectstored"
+	"codeberg.org/lindenii/furgit/object/stored"
 )
 
 // ResolveTreeEntry resolves one path within a stored root tree.
 //
 // parts must contain at least one path segment. Intermediate segments must be
 // tree entries.
-func (repo *Repository) ResolveTreeEntry(tree *objectstored.StoredTree, parts [][]byte) (object.TreeEntry, error) {
+func (repo *Repository) ResolveTreeEntry(tree *stored.StoredTree, parts [][]byte) (object.TreeEntry, error) {
 	if tree == nil {
 		return object.TreeEntry{}, errors.New("repository: nil root tree")
 	}
