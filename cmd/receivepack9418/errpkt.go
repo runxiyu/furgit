@@ -3,7 +3,7 @@ package main
 import (
 	"io"
 
-	"codeberg.org/lindenii/furgit/format/pktline"
+	"codeberg.org/lindenii/furgit/protocol/pktline"
 )
 
 func writeErrPkt(w io.Writer, message string) {

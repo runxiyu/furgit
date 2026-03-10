@@ -3,8 +3,8 @@ package server
 import (
 	"io"
 
-	"codeberg.org/lindenii/furgit/format/pktline"
-	"codeberg.org/lindenii/furgit/format/sideband64k"
+	"codeberg.org/lindenii/furgit/protocol/pktline"
+	"codeberg.org/lindenii/furgit/protocol/sideband64k"
 	"codeberg.org/lindenii/furgit/objectid"
 )
 

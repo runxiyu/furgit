@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"codeberg.org/lindenii/furgit/format/pktline"
+	"codeberg.org/lindenii/furgit/protocol/pktline"
 )
 
 func readGitProtoRequest(r io.Reader) (gitProtoRequest, error) {

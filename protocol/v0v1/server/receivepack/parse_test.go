@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/format/pktline"
+	"codeberg.org/lindenii/furgit/protocol/pktline"
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/objectid"
 	common "codeberg.org/lindenii/furgit/protocol/v0v1/server"

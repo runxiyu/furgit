@@ -1,6 +1,6 @@
 package server
 
-import "codeberg.org/lindenii/furgit/format/pktline"
+import "codeberg.org/lindenii/furgit/protocol/pktline"
 
 // FrameType identifies one low-level v0/v1 server pkt-line frame type.
 type FrameType = pktline.PacketType
