@@ -9,19 +9,34 @@ then, if desired, the repack process removes all the punched holes
 and anything surrounding from unwanted objects that are slightly out
 of the page boundary
 
-.idx is not a bsearch because that would cause me to need to rewrite
-the entire pack every time i add objects; instead use an extendible
-hash table.
-
 genreational bloom filters
 
+idx design
+==========
 
-research bitcask
+so, let's first get our invariants and patterns clear.
+
+* fixed-length cryptographic object IDs
+* essentially uniform key distribution
+* exact lookup only, no range scans, no ordered iteration requirements
+* reads are extremely important
+* writes are mostly append-like
+* deletes/tombstones may happen later but are secondary
+
+1st design
+----------
+
+* mutable front index
+* immutable base index
+* period merge/compaction into a new base generation
 
 
 
-fetch: take current pack, remove dead objects/holes, filter objects
-out, record offsets and adjust ofs_deltas since they always go
-backwards, write the pack back; then stream written pack to client.
-two-step necessary because pack header includes object count; could
-have a custom new protocol that doesn't do so.
+upload-pack/send-pack/repack
+============================
+
+take current pack, remove dead objects/holes, filter objects out, record
+offsets and adjust ofs_deltas since they always go backwards, write the pack
+back; then stream written pack to client. two-step necessary because pack
+header includes object count; could have a custom new protocol that doesn't do
+so.
