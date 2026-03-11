@@ -128,3 +128,14 @@ relevant object format hash algorithm could be used to fill up the bloom
 filters, rendering some buckets useless. In the worst case, if they somehow
 fill all filters, this proposal's optimizations become useless, but would not
 be a significant DoS vector.
+
+TODOs
+-----
+
+* Consider dropping mmap (page read vs cachline read)
+* How should B and K be chosen?
+* How does creation/insert work? Note that packfiles and `.idx`es are immutable.
+* What are the sizes?
+* What are the false positive rates?
+* Is there a way to make this SIMD friendly?
+* How are benchmarks?
