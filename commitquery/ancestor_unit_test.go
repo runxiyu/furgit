@@ -1,4 +1,4 @@
-package ancestor_test
+package commitquery_test
 
 import (
 	"errors"
@@ -12,11 +12,11 @@ import (
 	"codeberg.org/lindenii/furgit/objectstore/memory"
 	"codeberg.org/lindenii/furgit/objecttype"
 
-	"codeberg.org/lindenii/furgit/ancestor"
+	"codeberg.org/lindenii/furgit/commitquery"
 )
 
-// commitBody serializes one minimal commit body.
-func commitBody(tree objectid.ObjectID, parents ...objectid.ObjectID) []byte {
+// ancestorCommitBody serializes one minimal commit body.
+func ancestorCommitBody(tree objectid.ObjectID, parents ...objectid.ObjectID) []byte {
 	buf := fmt.Appendf(nil, "tree %s\n", tree.String())
 	for _, parent := range parents {
 		buf = append(buf, fmt.Appendf(nil, "parent %s\n", parent.String())...)
@@ -27,8 +27,8 @@ func commitBody(tree objectid.ObjectID, parents ...objectid.ObjectID) []byte {
 	return buf
 }
 
-// tagBody serializes one minimal annotated tag body.
-func tagBody(target objectid.ObjectID, targetType objecttype.Type) []byte {
+// ancestorTagBody serializes one minimal annotated tag body.
+func ancestorTagBody(target objectid.ObjectID, targetType objecttype.Type) []byte {
 	targetName, ok := objecttype.Name(targetType)
 	if !ok {
 		panic("invalid tag target type")
@@ -37,8 +37,8 @@ func tagBody(target objectid.ObjectID, targetType objecttype.Type) []byte {
 	return fmt.Appendf(nil, "object %s\ntype %s\ntag t\n\nmsg\n", target.String(), targetName)
 }
 
-// mustSerializeTree serializes one tree or fails the test.
-func mustSerializeTree(tb testing.TB, tree *object.Tree) []byte {
+// mustSerializeAncestorTree serializes one tree or fails the test.
+func mustSerializeAncestorTree(tb testing.TB, tree *object.Tree) []byte {
 	tb.Helper()
 
 	body, err := tree.SerializeWithoutHeader()
@@ -55,23 +55,23 @@ func TestIs(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
 		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
+		tree := store.AddObject(objecttype.TypeTree, mustSerializeAncestorTree(t, &object.Tree{Entries: []object.TreeEntry{{
 			Mode: object.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
-		c1 := store.AddObject(objecttype.TypeCommit, commitBody(tree))
-		c2 := store.AddObject(objecttype.TypeCommit, commitBody(tree, c1))
+		c1 := store.AddObject(objecttype.TypeCommit, ancestorCommitBody(tree))
+		c2 := store.AddObject(objecttype.TypeCommit, ancestorCommitBody(tree, c1))
 		otherBlob := store.AddObject(objecttype.TypeBlob, []byte("other-blob\n"))
-		otherTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
+		otherTree := store.AddObject(objecttype.TypeTree, mustSerializeAncestorTree(t, &object.Tree{Entries: []object.TreeEntry{{
 			Mode: object.FileModeRegular,
 			Name: []byte("g"),
 			ID:   otherBlob,
 		}}}))
-		c3 := store.AddObject(objecttype.TypeCommit, commitBody(otherTree))
-		tag := store.AddObject(objecttype.TypeTag, tagBody(c2, objecttype.TypeCommit))
+		c3 := store.AddObject(objecttype.TypeCommit, ancestorCommitBody(otherTree))
+		tag := store.AddObject(objecttype.TypeTag, ancestorTagBody(c2, objecttype.TypeCommit))
 
-		ok, err := ancestor.Is(store, nil, c1, tag)
+		ok, err := commitquery.New(store, nil).IsAncestor(c1, tag)
 		if err != nil {
 			t.Fatalf("Is(c1, tag): %v", err)
 		}
@@ -80,7 +80,7 @@ func TestIs(t *testing.T) {
 			t.Fatal("expected c1 to be ancestor of tag->c2")
 		}
 
-		ok, err = ancestor.Is(store, nil, c3, c2)
+		ok, err = commitquery.New(store, nil).IsAncestor(c3, c2)
 		if err != nil {
 			t.Fatalf("Is(c3, c2): %v", err)
 		}
@@ -97,15 +97,15 @@ func TestIsRejectsNonCommitAfterPeel(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
 		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
+		tree := store.AddObject(objecttype.TypeTree, mustSerializeAncestorTree(t, &object.Tree{Entries: []object.TreeEntry{{
 			Mode: object.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
-		commit := store.AddObject(objecttype.TypeCommit, commitBody(tree))
-		tagToTree := store.AddObject(objecttype.TypeTag, tagBody(tree, objecttype.TypeTree))
+		commit := store.AddObject(objecttype.TypeCommit, ancestorCommitBody(tree))
+		tagToTree := store.AddObject(objecttype.TypeTag, ancestorTagBody(tree, objecttype.TypeTree))
 
-		_, err := ancestor.Is(store, nil, commit, tagToTree)
+		_, err := commitquery.New(store, nil).IsAncestor(commit, tagToTree)
 		if err == nil {
 			t.Fatal("expected error")
 		}

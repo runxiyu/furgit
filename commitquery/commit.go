@@ -5,10 +5,10 @@ import (
 	"codeberg.org/lindenii/furgit/objectid"
 )
 
-// Commit stores the metadata needed by commit-domain queries.
-type Commit struct {
+// commitData stores the metadata needed by commit-domain queries.
+type commitData struct {
 	ID            objectid.ObjectID
-	Parents       []Parent
+	Parents       []parentRef
 	CommitTime    int64
 	Generation    uint64
 	HasGeneration bool

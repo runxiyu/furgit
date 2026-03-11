@@ -1,4 +1,4 @@
-package mergebase_test
+package commitquery_test
 
 import (
 	"maps"
@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"codeberg.org/lindenii/furgit/commitquery"
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/mergebase"
 	"codeberg.org/lindenii/furgit/objectid"
 )
 
@@ -34,9 +34,9 @@ func TestQueryMatchesGitMergeBaseAll(t *testing.T) {
 
 		store := testRepo.OpenObjectStore(t)
 
-		query := mergebase.Query(store, nil, left, tag)
+		query := commitquery.New(store, nil)
 
-		all, err := query.All()
+		all, err := query.MergeBases(left, tag)
 		if err != nil {
 			t.Fatalf("query.All(): %v", err)
 		}
@@ -77,9 +77,9 @@ func TestQueryCrissCrossMatchesGitMergeBaseAll(t *testing.T) {
 
 		store := testRepo.OpenObjectStore(t)
 
-		query := mergebase.Query(store, nil, left, right)
+		query := commitquery.New(store, nil)
 
-		all, err := query.All()
+		all, err := query.MergeBases(left, right)
 		if err != nil {
 			t.Fatalf("query.All(): %v", err)
 		}
@@ -91,7 +91,7 @@ func TestQueryCrissCrossMatchesGitMergeBaseAll(t *testing.T) {
 			t.Fatalf("Query(left, right) mismatch:\n got=%v\nwant=%v", sortedOIDStrings(got), sortedOIDStrings(want))
 		}
 
-		first, ok, err := mergebase.Base(store, nil, left, right)
+		first, ok, err := query.MergeBase(left, right)
 		if err != nil {
 			t.Fatalf("Base(left, right): %v", err)
 		}
@@ -138,9 +138,9 @@ func TestQueryMatchesGitMergeBaseAllWithCommitGraph(t *testing.T) {
 		store := testRepo.OpenObjectStore(t)
 		graph := testRepo.OpenCommitGraph(t)
 
-		query := mergebase.Query(store, graph, left, right)
+		query := commitquery.New(store, graph)
 
-		all, err := query.All()
+		all, err := query.MergeBases(left, right)
 		if err != nil {
 			t.Fatalf("query.All(): %v", err)
 		}
@@ -152,7 +152,7 @@ func TestQueryMatchesGitMergeBaseAllWithCommitGraph(t *testing.T) {
 			t.Fatalf("Query(left, right) with commit-graph mismatch:\n got=%v\nwant=%v", sortedOIDStrings(got), sortedOIDStrings(want))
 		}
 
-		first, ok, err := mergebase.Base(store, graph, left, right)
+		first, ok, err := query.MergeBase(left, right)
 		if err != nil {
 			t.Fatalf("Base(left, right): %v", err)
 		}
@@ -200,7 +200,9 @@ func TestBaseMatchesGitMergeBaseWithoutAll(t *testing.T) {
 
 		store := testRepo.OpenObjectStore(t)
 
-		got, ok, err := mergebase.Base(store, nil, left, right)
+		query := commitquery.New(store, nil)
+
+		got, ok, err := query.MergeBase(left, right)
 		if err != nil {
 			t.Fatalf("Base(left, right): %v", err)
 		}
@@ -220,7 +222,7 @@ func TestBaseMatchesGitMergeBaseWithoutAll(t *testing.T) {
 
 		graph := testRepo.OpenCommitGraph(t)
 
-		got, ok, err = mergebase.Base(store, graph, left, right)
+		got, ok, err = commitquery.New(store, graph).MergeBase(left, right)
 		if err != nil {
 			t.Fatalf("Base(left, right) with commit-graph: %v", err)
 		}

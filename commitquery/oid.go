@@ -5,27 +5,25 @@ import (
 
 	commitgraphread "codeberg.org/lindenii/furgit/commitgraph/read"
 	giterrors "codeberg.org/lindenii/furgit/errors"
+	"codeberg.org/lindenii/furgit/internal/peel"
 	"codeberg.org/lindenii/furgit/object"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
 	"codeberg.org/lindenii/furgit/objecttype"
 )
 
-// ID returns the canonical object ID of one internal node.
-func (ctx *Context) ID(idx NodeIndex) objectid.ObjectID {
-	return ctx.nodes[idx].id
+func (query *Query) id(idx nodeIndex) objectid.ObjectID {
+	return query.nodes[idx].id
 }
 
-// CommitTime returns the committer timestamp used for one internal node.
-func (ctx *Context) CommitTime(idx NodeIndex) int64 {
-	return ctx.nodes[idx].commitTime
+func (query *Query) commitTime(idx nodeIndex) int64 {
+	return query.nodes[idx].commitTime
 }
 
-// ResolveOID resolves one commit object ID to one internal query node.
-func (ctx *Context) ResolveOID(id objectid.ObjectID) (NodeIndex, error) {
-	idx, ok := ctx.byOID[id]
+func (query *Query) resolveOID(id objectid.ObjectID) (nodeIndex, error) {
+	idx, ok := query.byOID[id]
 	if ok {
-		err := ctx.ensureLoaded(idx)
+		err := query.ensureLoaded(idx)
 		if err != nil {
 			return 0, err
 		}
@@ -33,12 +31,12 @@ func (ctx *Context) ResolveOID(id objectid.ObjectID) (NodeIndex, error) {
 		return idx, nil
 	}
 
-	idx = ctx.newNode(id)
-	ctx.byOID[id] = idx
+	idx = query.newNode(id)
+	query.byOID[id] = idx
 
-	err := ctx.loadByOID(idx)
+	err := query.loadByOID(idx)
 	if err != nil {
-		delete(ctx.byOID, id)
+		delete(query.byOID, id)
 
 		return 0, err
 	}
@@ -46,22 +44,31 @@ func (ctx *Context) ResolveOID(id objectid.ObjectID) (NodeIndex, error) {
 	return idx, nil
 }
 
-// loadByOID populates one node from an object ID.
-func (ctx *Context) loadByOID(idx NodeIndex) error {
-	id := ctx.nodes[idx].id
+func (query *Query) resolveCommitish(id objectid.ObjectID) (nodeIndex, error) {
+	commitID, err := peel.ToCommit(query.store, id)
+	if err != nil {
+		return 0, err
+	}
 
-	if ctx.graph != nil {
-		pos, err := ctx.graph.Lookup(id)
+	return query.resolveOID(commitID)
+}
+
+// loadByOID populates one node from an object ID.
+func (query *Query) loadByOID(idx nodeIndex) error {
+	id := query.nodes[idx].id
+
+	if query.graph != nil {
+		pos, err := query.graph.Lookup(id)
 		if err != nil {
 			if _, ok := stderrors.AsType[*commitgraphread.NotFoundError](err); !ok {
 				return err
 			}
 		} else {
-			return ctx.loadCommitAtGraphPos(idx, pos)
+			return query.loadCommitAtGraphPos(idx, pos)
 		}
 	}
 
-	ty, content, err := ctx.store.ReadBytesContent(id)
+	ty, content, err := query.store.ReadBytesContent(id)
 	if err != nil {
 		if stderrors.Is(err, objectstore.ErrObjectNotFound) {
 			return &giterrors.ObjectMissingError{OID: id}
@@ -79,16 +86,16 @@ func (ctx *Context) loadByOID(idx NodeIndex) error {
 		return err
 	}
 
-	parents := make([]Parent, 0, len(commitObj.Parents))
+	parents := make([]parentRef, 0, len(commitObj.Parents))
 	for _, parentID := range commitObj.Parents {
-		parents = append(parents, Parent{ID: parentID})
+		parents = append(parents, parentRef{ID: parentID})
 	}
 
-	commit := Commit{
+	commit := commitData{
 		ID:         id,
 		Parents:    parents,
 		CommitTime: commitObj.Committer.WhenUnix,
 	}
 
-	return ctx.populateNode(idx, commit)
+	return query.populateNode(idx, commit)
 }

@@ -4,13 +4,13 @@ import "container/heap"
 
 // priorityQueue orders internal nodes using one query context's comparator.
 type priorityQueue struct {
-	ctx   *Context
-	items []NodeIndex
+	query *Query
+	items []nodeIndex
 }
 
 // newPriorityQueue builds one empty priority queue over one query context.
-func newPriorityQueue(ctx *Context) *priorityQueue {
-	queue := &priorityQueue{ctx: ctx}
+func newPriorityQueue(query *Query) *priorityQueue {
+	queue := &priorityQueue{query: query}
 	heap.Init(queue)
 
 	return queue
@@ -23,7 +23,7 @@ func (queue *priorityQueue) Len() int {
 
 // Less reports whether one heap slot sorts ahead of another.
 func (queue *priorityQueue) Less(left, right int) bool {
-	return queue.ctx.Compare(queue.items[left], queue.items[right]) > 0
+	return queue.query.compare(queue.items[left], queue.items[right]) > 0
 }
 
 // Swap exchanges two heap slots.
@@ -33,9 +33,9 @@ func (queue *priorityQueue) Swap(left, right int) {
 
 // Push appends one heap element.
 func (queue *priorityQueue) Push(item any) {
-	idx, ok := item.(NodeIndex)
+	idx, ok := item.(nodeIndex)
 	if !ok {
-		panic("commitquery: heap push item is not a NodeIndex")
+		panic("commitquery: heap push item is not a nodeIndex")
 	}
 
 	queue.items = append(queue.items, idx)
@@ -51,17 +51,17 @@ func (queue *priorityQueue) Pop() any {
 }
 
 // PushNode inserts one internal node.
-func (queue *priorityQueue) PushNode(idx NodeIndex) {
+func (queue *priorityQueue) PushNode(idx nodeIndex) {
 	heap.Push(queue, idx)
 }
 
 // PopNode removes the highest-priority internal node.
-func (queue *priorityQueue) PopNode() NodeIndex {
+func (queue *priorityQueue) PopNode() nodeIndex {
 	item := heap.Pop(queue)
 
-	idx, ok := item.(NodeIndex)
+	idx, ok := item.(nodeIndex)
 	if !ok {
-		panic("commitquery: heap pop item is not a NodeIndex")
+		panic("commitquery: heap pop item is not a nodeIndex")
 	}
 
 	return idx

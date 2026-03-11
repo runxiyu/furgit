@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/ancestor"
+	"codeberg.org/lindenii/furgit/commitquery"
 	"codeberg.org/lindenii/furgit/objectid"
 	objectmix "codeberg.org/lindenii/furgit/objectstore/mix"
 	receivepack "codeberg.org/lindenii/furgit/receivepack"
@@ -46,7 +46,7 @@ func RejectForcePush() receivepack.Hook {
 				continue
 			}
 
-			ok, err := ancestor.Is(objects, nil, current.ID, update.NewID)
+			ok, err := commitquery.New(objects, nil).IsAncestor(current.ID, update.NewID)
 			if err != nil {
 				return nil, fmt.Errorf("check fast-forward %s: %w", update.Name, err)
 			}

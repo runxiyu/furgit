@@ -5,23 +5,23 @@ import (
 	"codeberg.org/lindenii/furgit/objectid"
 )
 
-// Parent references one commit parent.
-type Parent struct {
+// parentRef references one commit parent.
+type parentRef struct {
 	ID          objectid.ObjectID
 	GraphPos    commitgraphread.Position
 	HasGraphPos bool
 }
 
 // Parents returns resolved parent node indices for one internal node.
-func (ctx *Context) Parents(idx NodeIndex) []NodeIndex {
-	return ctx.nodes[idx].parents
+func (query *Query) parents(idx nodeIndex) []nodeIndex {
+	return query.nodes[idx].parents
 }
 
 // resolveParent resolves one parent descriptor to one internal node.
-func (ctx *Context) resolveParent(parent Parent) (NodeIndex, error) {
+func (query *Query) resolveParent(parent parentRef) (nodeIndex, error) {
 	if parent.HasGraphPos {
-		return ctx.ResolveGraphPos(parent.GraphPos)
+		return query.resolveGraphPos(parent.GraphPos)
 	}
 
-	return ctx.ResolveOID(parent.ID)
+	return query.resolveOID(parent.ID)
 }

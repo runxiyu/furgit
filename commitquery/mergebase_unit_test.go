@@ -1,4 +1,4 @@
-package mergebase_test
+package commitquery_test
 
 import (
 	"errors"
@@ -7,9 +7,9 @@ import (
 	"slices"
 	"testing"
 
+	"codeberg.org/lindenii/furgit/commitquery"
 	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/mergebase"
 	"codeberg.org/lindenii/furgit/object"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore/memory"
@@ -83,9 +83,9 @@ func TestQueryLinearHistory(t *testing.T) {
 		left := store.AddObject(objecttype.TypeCommit, commitBody(tree, base))
 		right := store.AddObject(objecttype.TypeCommit, commitBody(tree, left))
 
-		query := mergebase.Query(store, nil, left, right)
+		query := commitquery.New(store, nil)
 
-		got, err := query.All()
+		got, err := query.MergeBases(left, right)
 		if err != nil {
 			t.Fatalf("query.All(): %v", err)
 		}
@@ -94,7 +94,7 @@ func TestQueryLinearHistory(t *testing.T) {
 			t.Fatalf("Query(left, right)=%v, want [%s]", got, left)
 		}
 
-		first, ok, err := mergebase.Base(store, nil, left, right)
+		first, ok, err := query.MergeBase(left, right)
 		if err != nil {
 			t.Fatalf("Base(left, right): %v", err)
 		}
@@ -130,9 +130,9 @@ func TestQueryPeelsAnnotatedTags(t *testing.T) {
 		right := store.AddObject(objecttype.TypeCommit, commitBody(rightTree, base))
 		tag := store.AddObject(objecttype.TypeTag, tagBody(right, objecttype.TypeCommit))
 
-		query := mergebase.Query(store, nil, left, tag)
+		query := commitquery.New(store, nil)
 
-		got, err := query.All()
+		got, err := query.MergeBases(left, tag)
 		if err != nil {
 			t.Fatalf("query.All(): %v", err)
 		}
@@ -180,9 +180,9 @@ func TestQueryCrissCrossReturnsAllBestCommonAncestors(t *testing.T) {
 		left := store.AddObject(objecttype.TypeCommit, commitBody(leftTree, base1, base2))
 		right := store.AddObject(objecttype.TypeCommit, commitBody(rightTree, base2, base1))
 
-		query := mergebase.Query(store, nil, left, right)
+		query := commitquery.New(store, nil)
 
-		all, err := query.All()
+		all, err := query.MergeBases(left, right)
 		if err != nil {
 			t.Fatalf("query.All(): %v", err)
 		}
@@ -194,7 +194,7 @@ func TestQueryCrissCrossReturnsAllBestCommonAncestors(t *testing.T) {
 			t.Fatalf("Query(left, right)=%v, want %v", slices.Collect(maps.Keys(got)), slices.Collect(maps.Keys(want)))
 		}
 
-		first, ok, err := mergebase.Base(store, nil, left, right)
+		first, ok, err := query.MergeBase(left, right)
 		if err != nil {
 			t.Fatalf("Base(left, right): %v", err)
 		}
@@ -229,9 +229,9 @@ func TestQueryReturnsNoResultWhenNoCommonAncestorExists(t *testing.T) {
 		left := store.AddObject(objecttype.TypeCommit, commitBody(leftTree))
 		right := store.AddObject(objecttype.TypeCommit, commitBody(rightTree))
 
-		query := mergebase.Query(store, nil, left, right)
+		query := commitquery.New(store, nil)
 
-		got, err := query.All()
+		got, err := query.MergeBases(left, right)
 		if err != nil {
 			t.Fatalf("query.All(): %v", err)
 		}
@@ -240,7 +240,7 @@ func TestQueryReturnsNoResultWhenNoCommonAncestorExists(t *testing.T) {
 			t.Fatalf("Query(left, right)=%v, want no results", got)
 		}
 
-		_, ok, err := mergebase.Base(store, nil, left, right)
+		_, ok, err := query.MergeBase(left, right)
 		if err != nil {
 			t.Fatalf("Base(left, right): %v", err)
 		}
@@ -265,9 +265,9 @@ func TestQueryRejectsNonCommitAfterPeel(t *testing.T) {
 		commit := store.AddObject(objecttype.TypeCommit, commitBody(tree))
 		tagToTree := store.AddObject(objecttype.TypeTag, tagBody(tree, objecttype.TypeTree))
 
-		query := mergebase.Query(store, nil, commit, tagToTree)
+		query := commitquery.New(store, nil)
 
-		_, err := query.All()
+		_, err := query.MergeBases(commit, tagToTree)
 		if err == nil {
 			t.Fatal("expected error")
 		}
@@ -298,16 +298,16 @@ func TestQueryAllIsRepeatable(t *testing.T) {
 		left := store.AddObject(objecttype.TypeCommit, commitBody(tree, base))
 		right := store.AddObject(objecttype.TypeCommit, commitBody(tree, left))
 
-		query := mergebase.Query(store, nil, left, right)
+		query := commitquery.New(store, nil)
 
-		first, err := query.All()
+		first, err := query.MergeBases(left, right)
 		if err != nil {
-			t.Fatalf("query.All() first call: %v", err)
+			t.Fatalf("query.MergeBases() first call: %v", err)
 		}
 
-		again, err := query.All()
+		again, err := query.MergeBases(left, right)
 		if err != nil {
-			t.Fatalf("query.All() second call: %v", err)
+			t.Fatalf("query.MergeBases() second call: %v", err)
 		}
 
 		if !slices.Equal(again, first) {
@@ -315,18 +315,18 @@ func TestQueryAllIsRepeatable(t *testing.T) {
 		}
 
 		if len(first) == 0 {
-			t.Fatal("first All() unexpectedly returned no results")
+			t.Fatal("first MergeBases() unexpectedly returned no results")
 		}
 
 		first[0] = objectid.ObjectID{}
 
-		third, err := query.All()
+		third, err := query.MergeBases(left, right)
 		if err != nil {
-			t.Fatalf("query.All() third call: %v", err)
+			t.Fatalf("query.MergeBases() third call: %v", err)
 		}
 
 		if third[0] == (objectid.ObjectID{}) {
-			t.Fatal("query.All() exposed internal slice state")
+			t.Fatal("query.MergeBases() exposed internal slice state")
 		}
 	})
 }

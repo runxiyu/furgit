@@ -1,14 +1,13 @@
-package ancestor_test
+package commitquery_test
 
 import (
 	"errors"
 	"testing"
 
+	"codeberg.org/lindenii/furgit/commitquery"
 	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/objectid"
-
-	"codeberg.org/lindenii/furgit/ancestor"
 )
 
 func TestIsMatchesGitMergeBase(t *testing.T) {
@@ -34,7 +33,7 @@ func TestIsMatchesGitMergeBase(t *testing.T) {
 
 		store := testRepo.OpenObjectStore(t)
 
-		got, err := ancestor.Is(store, nil, c1, tag)
+		got, err := commitquery.New(store, nil).IsAncestor(c1, tag)
 		if err != nil {
 			t.Fatalf("Is(c1, tag): %v", err)
 		}
@@ -44,7 +43,7 @@ func TestIsMatchesGitMergeBase(t *testing.T) {
 			t.Fatalf("Is(c1, tag)=%v, want %v", got, want)
 		}
 
-		got, err = ancestor.Is(store, nil, c3, c2)
+		got, err = commitquery.New(store, nil).IsAncestor(c3, c2)
 		if err != nil {
 			t.Fatalf("Is(c3, c2): %v", err)
 		}
@@ -79,7 +78,7 @@ func TestIsMatchesGitMergeBaseWithCommitGraph(t *testing.T) {
 		store := testRepo.OpenObjectStore(t)
 		graph := testRepo.OpenCommitGraph(t)
 
-		got, err := ancestor.Is(store, graph, c1, c2)
+		got, err := commitquery.New(store, graph).IsAncestor(c1, c2)
 		if err != nil {
 			t.Fatalf("Is(c1, c2): %v", err)
 		}
@@ -107,7 +106,7 @@ func TestIsMissingObject(t *testing.T) {
 
 		store := testRepo.OpenObjectStore(t)
 
-		_, err := ancestor.Is(store, nil, treeID, commitID)
+		_, err := commitquery.New(store, nil).IsAncestor(treeID, commitID)
 		if err == nil {
 			t.Fatal("expected error")
 		}

@@ -5,14 +5,14 @@ import (
 	"codeberg.org/lindenii/furgit/objectid"
 )
 
-// NodeIndex identifies one internal query node.
-type NodeIndex int
+// nodeIndex identifies one internal query node.
+type nodeIndex int
 
 // node stores one mutable commit traversal node.
 type node struct {
 	id objectid.ObjectID
 
-	parents []NodeIndex
+	parents []nodeIndex
 
 	commitTime int64
 	generation uint64
@@ -28,12 +28,12 @@ type node struct {
 }
 
 // newNode allocates one empty internal node.
-func (ctx *Context) newNode(id objectid.ObjectID) NodeIndex {
-	count := len(ctx.nodes)
+func (query *Query) newNode(id objectid.ObjectID) nodeIndex {
+	count := len(query.nodes)
 
-	idx := NodeIndex(count)
+	idx := nodeIndex(count)
 
-	ctx.nodes = append(ctx.nodes, node{id: id})
+	query.nodes = append(query.nodes, node{id: id})
 
 	return idx
 }

@@ -1,0 +1,34 @@
+// Package commitquery answers commit ancestry and merge-base queries.
+package commitquery
+
+import (
+	commitgraphread "codeberg.org/lindenii/furgit/commitgraph/read"
+	"codeberg.org/lindenii/furgit/objectid"
+	"codeberg.org/lindenii/furgit/objectstore"
+)
+
+// Query owns the mutable node arena for commit-domain queries over one object
+// store.
+type Query struct {
+	store objectstore.Store
+	graph *commitgraphread.Reader
+
+	nodes []node
+
+	byOID      map[objectid.ObjectID]nodeIndex
+	byGraphPos map[commitgraphread.Position]nodeIndex
+
+	markPhase uint32
+	touched   []nodeIndex
+}
+
+// New builds one reusable commit query arena over one object store and optional
+// commit-graph reader.
+func New(store objectstore.Store, graph *commitgraphread.Reader) *Query {
+	return &Query{
+		store:      store,
+		graph:      graph,
+		byOID:      make(map[objectid.ObjectID]nodeIndex),
+		byGraphPos: make(map[commitgraphread.Position]nodeIndex),
+	}
+}
