@@ -144,7 +144,7 @@ func walkRepositoryFromRoot(t *testing.T, root *os.Root, label string) {
 
 	defer func() { _ = repo.Close() }()
 
-	head, err := repo.Refs().ResolveFully("HEAD")
+	head, err := repo.Refs().ResolveToDetached("HEAD")
 	if err != nil {
 		t.Fatalf("ResolveRefFully(HEAD): %v", err)
 	}

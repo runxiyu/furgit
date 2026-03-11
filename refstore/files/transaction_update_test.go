@@ -38,7 +38,7 @@ func TestFilesTransactionPackedUpdateCreatesLooseOverride(t *testing.T) {
 			t.Fatalf("Commit: %v", err)
 		}
 
-		got, err := store.ResolveFully("refs/heads/main")
+		got, err := store.ResolveToDetached("refs/heads/main")
 		if err != nil {
 			t.Fatalf("ResolveFully(main): %v", err)
 		}
@@ -137,7 +137,7 @@ func TestFilesTransactionDerefAndDirectSymbolic(t *testing.T) {
 			t.Fatalf("Commit(update HEAD): %v", err)
 		}
 
-		mainRef, err := store.ResolveFully("refs/heads/main")
+		mainRef, err := store.ResolveToDetached("refs/heads/main")
 		if err != nil {
 			t.Fatalf("ResolveFully(main): %v", err)
 		}

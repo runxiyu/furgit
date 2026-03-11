@@ -73,7 +73,7 @@ func resolveInput(repo *repository.Repository, input string) (objectid.ObjectID,
 		return id, nil
 	}
 
-	resolved, err := repo.Refs().ResolveFully(input)
+	resolved, err := repo.Refs().ResolveToDetached(input)
 	if err != nil {
 		return objectid.ObjectID{}, err
 	}

@@ -56,7 +56,7 @@ func TestOpenFilesRefFormat(t *testing.T) {
 			t.Fatalf("Resolve(refs/heads/main) id = %s, want %s", detached.ID, commitID)
 		}
 
-		head, err := repo.Refs().ResolveFully("HEAD")
+		head, err := repo.Refs().ResolveToDetached("HEAD")
 		if err != nil {
 			t.Fatalf("ResolveFully(HEAD): %v", err)
 		}
@@ -102,7 +102,7 @@ func assertResolveFully(t *testing.T, repoHarness *testgit.TestRepo, name string
 
 	repo := repoHarness.OpenRepository(t)
 
-	resolved, err := repo.Refs().ResolveFully(name)
+	resolved, err := repo.Refs().ResolveToDetached(name)
 	if err != nil {
 		t.Fatalf("ResolveFully(%s): %v", name, err)
 	}

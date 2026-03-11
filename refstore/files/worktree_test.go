@@ -50,7 +50,7 @@ func TestFilesWorktreeRefsMatchGit(t *testing.T) {
 		wt1Store := openFilesStoreAt(t, openGitRootUnder(t, repoRoot, "wt1"), algo)
 		wt2Store := openFilesStoreAt(t, openGitRootUnder(t, repoRoot, "wt2"), algo)
 
-		got, err := mainStore.ResolveFully("refs/worktree/foo")
+		got, err := mainStore.ResolveToDetached("refs/worktree/foo")
 		if err != nil {
 			t.Fatalf("ResolveFully(main refs/worktree/foo): %v", err)
 		}
@@ -59,7 +59,7 @@ func TestFilesWorktreeRefsMatchGit(t *testing.T) {
 			t.Fatalf("ResolveFully(main refs/worktree/foo) = %s, want %s", got.ID, initialID)
 		}
 
-		got, err = wt1Store.ResolveFully("refs/worktree/foo")
+		got, err = wt1Store.ResolveToDetached("refs/worktree/foo")
 		if err != nil {
 			t.Fatalf("ResolveFully(wt1 refs/worktree/foo): %v", err)
 		}
@@ -68,7 +68,7 @@ func TestFilesWorktreeRefsMatchGit(t *testing.T) {
 			t.Fatalf("ResolveFully(wt1 refs/worktree/foo) = %s, want %s", got.ID, wt1ID)
 		}
 
-		got, err = wt2Store.ResolveFully("refs/worktree/foo")
+		got, err = wt2Store.ResolveToDetached("refs/worktree/foo")
 		if err != nil {
 			t.Fatalf("ResolveFully(wt2 refs/worktree/foo): %v", err)
 		}
@@ -77,7 +77,7 @@ func TestFilesWorktreeRefsMatchGit(t *testing.T) {
 			t.Fatalf("ResolveFully(wt2 refs/worktree/foo) = %s, want %s", got.ID, wt2ID)
 		}
 
-		got, err = wt1Store.ResolveFully("main-worktree/HEAD")
+		got, err = wt1Store.ResolveToDetached("main-worktree/HEAD")
 		if err != nil {
 			t.Fatalf("ResolveFully(wt1 main-worktree/HEAD): %v", err)
 		}
@@ -86,7 +86,7 @@ func TestFilesWorktreeRefsMatchGit(t *testing.T) {
 			t.Fatalf("ResolveFully(wt1 main-worktree/HEAD) = %s, want %s", got.ID, initialID)
 		}
 
-		got, err = mainStore.ResolveFully("worktrees/wt1/HEAD")
+		got, err = mainStore.ResolveToDetached("worktrees/wt1/HEAD")
 		if err != nil {
 			t.Fatalf("ResolveFully(main worktrees/wt1/HEAD): %v", err)
 		}
@@ -95,7 +95,7 @@ func TestFilesWorktreeRefsMatchGit(t *testing.T) {
 			t.Fatalf("ResolveFully(main worktrees/wt1/HEAD) = %s, want %s", got.ID, wt1ID)
 		}
 
-		got, err = wt2Store.ResolveFully("worktrees/wt1/HEAD")
+		got, err = wt2Store.ResolveToDetached("worktrees/wt1/HEAD")
 		if err != nil {
 			t.Fatalf("ResolveFully(wt2 worktrees/wt1/HEAD): %v", err)
 		}
@@ -164,7 +164,7 @@ func TestFilesTransactionPerWorktreeRefsMatchGit(t *testing.T) {
 			t.Fatalf("Commit(wt-only): %v", err)
 		}
 
-		got, err := mainStore.ResolveFully("refs/bisect/main-only")
+		got, err := mainStore.ResolveToDetached("refs/bisect/main-only")
 		if err != nil {
 			t.Fatalf("ResolveFully(main-only): %v", err)
 		}
@@ -173,7 +173,7 @@ func TestFilesTransactionPerWorktreeRefsMatchGit(t *testing.T) {
 			t.Fatalf("ResolveFully(main-only) = %s, want %s", got.ID, mainID)
 		}
 
-		got, err = wt1Store.ResolveFully("refs/bisect/wt-only")
+		got, err = wt1Store.ResolveToDetached("refs/bisect/wt-only")
 		if err != nil {
 			t.Fatalf("ResolveFully(wt-only): %v", err)
 		}

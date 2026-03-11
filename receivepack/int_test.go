@@ -391,7 +391,7 @@ func TestReceivePackPackCreatePromotesObjectsAndUpdatesRef(t *testing.T) {
 
 		reopened := receiver.OpenRepository(t)
 
-		resolved, err := reopened.Refs().ResolveFully("refs/heads/main")
+		resolved, err := reopened.Refs().ResolveToDetached("refs/heads/main")
 		if err != nil {
 			t.Fatalf("ResolveFully(main): %v", err)
 		}
@@ -695,7 +695,7 @@ func TestReceivePackPredefinedRejectForcePushHookRejectsNonFastForward(t *testin
 			t.Fatalf("unexpected receive-pack output %q", got)
 		}
 
-		resolved, err := repo.Refs().ResolveFully("refs/heads/main")
+		resolved, err := repo.Refs().ResolveToDetached("refs/heads/main")
 		if err != nil {
 			t.Fatalf("ResolveFully(main): %v", err)
 		}
@@ -786,7 +786,7 @@ func TestReceivePackGitPushCreatesBranch(t *testing.T) {
 			t.Fatalf("ReceivePack: %v", serverErr)
 		}
 
-		resolved, err := receiver.OpenRepository(t).Refs().ResolveFully("refs/heads/main")
+		resolved, err := receiver.OpenRepository(t).Refs().ResolveToDetached("refs/heads/main")
 		if err != nil {
 			t.Fatalf("ResolveFully(main): %v", err)
 		}
@@ -836,7 +836,7 @@ func TestReceivePackGitPushRefUpdateWithoutNewObjectsSucceeds(t *testing.T) {
 			t.Fatalf("ReceivePack: %v", serverErr)
 		}
 
-		resolved, err := receiver.OpenRepository(t).Refs().ResolveFully("refs/heads/topic")
+		resolved, err := receiver.OpenRepository(t).Refs().ResolveToDetached("refs/heads/topic")
 		if err != nil {
 			t.Fatalf("ResolveFully(topic): %v", err)
 		}
@@ -937,7 +937,7 @@ func TestReceivePackGitPushRejectsForcedUpdateViaHook(t *testing.T) {
 			t.Fatalf("git push output missing non-fast-forward message\nstdout=%s\nstderr=%s", stdout, stderr)
 		}
 
-		resolved, err := receiver.OpenRepository(t).Refs().ResolveFully("refs/heads/main")
+		resolved, err := receiver.OpenRepository(t).Refs().ResolveToDetached("refs/heads/main")
 		if err != nil {
 			t.Fatalf("ResolveFully(main): %v", err)
 		}

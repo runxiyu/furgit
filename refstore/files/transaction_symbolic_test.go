@@ -54,7 +54,7 @@ func TestFilesTransactionDirectSymbolicDeletes(t *testing.T) {
 			t.Fatalf("Resolve(SYMREF after delete) err=%v", err)
 		}
 
-		got, err := store.ResolveFully("refs/heads/main")
+		got, err := store.ResolveToDetached("refs/heads/main")
 		if err != nil {
 			t.Fatalf("ResolveFully(main): %v", err)
 		}

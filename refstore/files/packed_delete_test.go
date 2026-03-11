@@ -53,7 +53,7 @@ func TestFilesTransactionPackedDeleteFailureLeavesRefsUnchanged(t *testing.T) {
 				t.Fatalf("ShowRef after failed delete = %v, want %v", actual, unchanged)
 			}
 
-			got, err := store.ResolveFully(prefix + "/foo")
+			got, err := store.ResolveToDetached(prefix + "/foo")
 			if err != nil {
 				t.Fatalf("ResolveFully(lock held): %v", err)
 			}
@@ -106,7 +106,7 @@ func TestFilesTransactionPackedDeleteFailureLeavesRefsUnchanged(t *testing.T) {
 				t.Fatalf("ShowRef after failed delete = %v, want %v", actual, unchanged)
 			}
 
-			got, err := store.ResolveFully(prefix + "/foo")
+			got, err := store.ResolveToDetached(prefix + "/foo")
 			if err != nil {
 				t.Fatalf("ResolveFully(new exists): %v", err)
 			}
@@ -182,7 +182,7 @@ func TestFilesPackedRefIgnoresEmptyDirectories(t *testing.T) {
 
 		store := openFilesStore(t, testRepo, algo)
 
-		got, err := store.ResolveFully(name)
+		got, err := store.ResolveToDetached(name)
 		if err != nil {
 			t.Fatalf("ResolveFully: %v", err)
 		}
@@ -204,7 +204,7 @@ func TestFilesPackedRefIgnoresEmptyDirectories(t *testing.T) {
 
 		fullActual := make([]string, 0, len(actual))
 		for _, name := range actual {
-			refValue, resolveErr := store.ResolveFully(name)
+			refValue, resolveErr := store.ResolveToDetached(name)
 			if resolveErr != nil {
 				t.Fatalf("ResolveFully(%q): %v", name, resolveErr)
 			}
@@ -262,7 +262,7 @@ func TestFilesDeleteWaitsForPackedRefsLockWithoutIntermediateState(t *testing.T)
 		default:
 		}
 
-		got, err := store.ResolveFully(prefix + "/foo")
+		got, err := store.ResolveToDetached(prefix + "/foo")
 		if err != nil {
 			t.Fatalf("ResolveFully while lock held: %v", err)
 		}

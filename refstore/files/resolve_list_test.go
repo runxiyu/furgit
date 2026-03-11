@@ -53,7 +53,7 @@ func TestFilesResolveAndListOverlay(t *testing.T) {
 			t.Fatalf("Resolve(HEAD) target = %q, want %q", headSym.Target, "refs/heads/main")
 		}
 
-		fullHead, err := store.ResolveFully("HEAD")
+		fullHead, err := store.ResolveToDetached("HEAD")
 		if err != nil {
 			t.Fatalf("ResolveFully(HEAD): %v", err)
 		}
@@ -96,7 +96,7 @@ func TestFilesLooseRefParsingMatchesGit(t *testing.T) {
 
 		store := openFilesStore(t, testRepo, algo)
 
-		got, err := store.ResolveFully("refs/heads/no-lf")
+		got, err := store.ResolveToDetached("refs/heads/no-lf")
 		if err != nil {
 			t.Fatalf("ResolveFully(no-lf): %v", err)
 		}
@@ -105,7 +105,7 @@ func TestFilesLooseRefParsingMatchesGit(t *testing.T) {
 			t.Fatalf("ResolveFully(no-lf) = %s, want %s", got.ID, oid)
 		}
 
-		got, err = store.ResolveFully("refs/heads/trailing-ws")
+		got, err = store.ResolveToDetached("refs/heads/trailing-ws")
 		if err != nil {
 			t.Fatalf("ResolveFully(trailing-ws): %v", err)
 		}
@@ -217,7 +217,7 @@ func TestFilesPackedRefsReadSemanticsMatchGit(t *testing.T) {
 
 			store := openFilesStore(t, testRepo, algo)
 
-			got, err := store.ResolveFully("refs/heads/main")
+			got, err := store.ResolveToDetached("refs/heads/main")
 			if err != nil {
 				t.Fatalf("ResolveFully(main): %v", err)
 			}

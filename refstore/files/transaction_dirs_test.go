@@ -57,7 +57,7 @@ func TestFilesTransactionEmptyDirectoriesDoNotBlock(t *testing.T) {
 			t.Fatalf("Commit(update with empty directories): %v", err)
 		}
 
-		got, err := store.ResolveFully("refs/e-update/foo")
+		got, err := store.ResolveToDetached("refs/e-update/foo")
 		if err != nil {
 			t.Fatalf("ResolveFully(updated foo): %v", err)
 		}
@@ -84,7 +84,7 @@ func TestFilesTransactionEmptyDirectoriesDoNotBlock(t *testing.T) {
 			t.Fatalf("Commit(create with empty directories): %v", err)
 		}
 
-		got, err = store.ResolveFully("refs/e-create/foo")
+		got, err = store.ResolveToDetached("refs/e-create/foo")
 		if err != nil {
 			t.Fatalf("ResolveFully(created foo): %v", err)
 		}

@@ -9,7 +9,7 @@ import (
 
 // ResolveFully resolves symbolic references through the visible files store
 // namespace until one detached reference is reached.
-func (store *Store) ResolveFully(name string) (ref.Detached, error) {
+func (store *Store) ResolveToDetached(name string) (ref.Detached, error) {
 	cur := name
 	seen := make(map[string]struct{})
 

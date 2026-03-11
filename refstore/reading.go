@@ -19,7 +19,7 @@ type ReadingStore interface {
 	//
 	// ResolveFully resolves symbolic references only. It does not imply peeling
 	// annotated tag objects.
-	ResolveFully(name string) (ref.Detached, error)
+	ResolveToDetached(name string) (ref.Detached, error)
 	// List returns references matching pattern.
 	//
 	// The exact pattern language is backend-defined.

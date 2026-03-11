@@ -33,7 +33,7 @@ func RejectForcePush() receivepack.Hook {
 				continue
 			}
 
-			current, err := req.Refs.ResolveFully(update.Name)
+			current, err := req.Refs.ResolveToDetached(update.Name)
 			switch {
 			case err == nil:
 			case errors.Is(err, refstore.ErrReferenceNotFound):

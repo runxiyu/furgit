@@ -35,7 +35,7 @@ func TestFilesTransactionPseudorefLifecycle(t *testing.T) {
 			t.Fatalf("Commit(create PSEUDOREF): %v", err)
 		}
 
-		got, err := store.ResolveFully("PSEUDOREF")
+		got, err := store.ResolveToDetached("PSEUDOREF")
 		if err != nil {
 			t.Fatalf("ResolveFully(PSEUDOREF): %v", err)
 		}
@@ -59,7 +59,7 @@ func TestFilesTransactionPseudorefLifecycle(t *testing.T) {
 			t.Fatalf("Commit(update PSEUDOREF): %v", err)
 		}
 
-		got, err = store.ResolveFully("PSEUDOREF")
+		got, err = store.ResolveToDetached("PSEUDOREF")
 		if err != nil {
 			t.Fatalf("ResolveFully(PSEUDOREF) after update: %v", err)
 		}

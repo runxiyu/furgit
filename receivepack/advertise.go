@@ -37,7 +37,7 @@ func buildAdvertisedRefs(opts Options, listed []ref.Ref) ([]common.AdvertisedRef
 				continue
 			}
 
-			head, err := opts.Refs.ResolveFully("HEAD")
+			head, err := opts.Refs.ResolveToDetached("HEAD")
 			if err != nil {
 				if errors.Is(err, refstore.ErrReferenceNotFound) {
 					continue

@@ -36,7 +36,7 @@ func (chain *Chain) Resolve(name string) (ref.Ref, error) {
 //
 // It intentionally does not call backend ResolveFully. This allows symbolic
 // references to cross backends in the chain.
-func (chain *Chain) ResolveFully(name string) (ref.Detached, error) {
+func (chain *Chain) ResolveToDetached(name string) (ref.Detached, error) {
 	cur := name
 
 	seen := map[string]struct{}{}
