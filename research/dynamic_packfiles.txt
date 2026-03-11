@@ -9,6 +9,9 @@ then, if desired, the repack process removes all the punched holes
 and anything surrounding from unwanted objects that are slightly out
 of the page boundary
 
+repack is not really git's repack algorithm, it's bascially just
+defragmentation.
+
 genreational bloom filters
 
 idx design
@@ -32,7 +35,7 @@ so, let's first get our invariants and patterns clear.
 
 
 
-upload-pack/send-pack/repack
+upload-pack/send-pack/defrag
 ============================
 
 take current pack, remove dead objects/holes, filter objects out, record
