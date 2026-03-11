@@ -55,11 +55,11 @@ func TestFilesTransactionPackedDeleteFailureLeavesRefsUnchanged(t *testing.T) {
 
 			got, err := store.ResolveToDetached(prefix + "/foo")
 			if err != nil {
-				t.Fatalf("ResolveFully(lock held): %v", err)
+				t.Fatalf("ResolveToDetached(lock held): %v", err)
 			}
 
 			if got.ID != looseID {
-				t.Fatalf("ResolveFully(lock held) = %s, want %s", got.ID, looseID)
+				t.Fatalf("ResolveToDetached(lock held) = %s, want %s", got.ID, looseID)
 			}
 
 			gitRoot := testRepo.OpenGitRoot(t)
@@ -108,11 +108,11 @@ func TestFilesTransactionPackedDeleteFailureLeavesRefsUnchanged(t *testing.T) {
 
 			got, err := store.ResolveToDetached(prefix + "/foo")
 			if err != nil {
-				t.Fatalf("ResolveFully(new exists): %v", err)
+				t.Fatalf("ResolveToDetached(new exists): %v", err)
 			}
 
 			if got.ID != looseID {
-				t.Fatalf("ResolveFully(new exists) = %s, want %s", got.ID, looseID)
+				t.Fatalf("ResolveToDetached(new exists) = %s, want %s", got.ID, looseID)
 			}
 		})
 	})
@@ -184,11 +184,11 @@ func TestFilesPackedRefIgnoresEmptyDirectories(t *testing.T) {
 
 		got, err := store.ResolveToDetached(name)
 		if err != nil {
-			t.Fatalf("ResolveFully: %v", err)
+			t.Fatalf("ResolveToDetached: %v", err)
 		}
 
 		if got.ID != commitID {
-			t.Fatalf("ResolveFully = %s, want %s", got.ID, commitID)
+			t.Fatalf("ResolveToDetached = %s, want %s", got.ID, commitID)
 		}
 
 		actual := make([]string, 0)
@@ -206,7 +206,7 @@ func TestFilesPackedRefIgnoresEmptyDirectories(t *testing.T) {
 		for _, name := range actual {
 			refValue, resolveErr := store.ResolveToDetached(name)
 			if resolveErr != nil {
-				t.Fatalf("ResolveFully(%q): %v", name, resolveErr)
+				t.Fatalf("ResolveToDetached(%q): %v", name, resolveErr)
 			}
 
 			fullActual = append(fullActual, refValue.ID.String()+" "+name)
@@ -264,11 +264,11 @@ func TestFilesDeleteWaitsForPackedRefsLockWithoutIntermediateState(t *testing.T)
 
 		got, err := store.ResolveToDetached(prefix + "/foo")
 		if err != nil {
-			t.Fatalf("ResolveFully while lock held: %v", err)
+			t.Fatalf("ResolveToDetached while lock held: %v", err)
 		}
 
 		if got.ID != looseID {
-			t.Fatalf("ResolveFully while lock held = %s, want %s", got.ID, looseID)
+			t.Fatalf("ResolveToDetached while lock held = %s, want %s", got.ID, looseID)
 		}
 
 		testRepo.Remove(t, "packed-refs.lock")

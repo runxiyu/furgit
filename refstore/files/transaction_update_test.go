@@ -40,11 +40,11 @@ func TestFilesTransactionPackedUpdateCreatesLooseOverride(t *testing.T) {
 
 		got, err := store.ResolveToDetached("refs/heads/main")
 		if err != nil {
-			t.Fatalf("ResolveFully(main): %v", err)
+			t.Fatalf("ResolveToDetached(main): %v", err)
 		}
 
 		if got.ID != newID {
-			t.Fatalf("ResolveFully(main) = %s, want %s", got.ID, newID)
+			t.Fatalf("ResolveToDetached(main) = %s, want %s", got.ID, newID)
 		}
 
 		packedRefs := string(testRepo.ReadFile(t, "packed-refs"))
@@ -139,7 +139,7 @@ func TestFilesTransactionDerefAndDirectSymbolic(t *testing.T) {
 
 		mainRef, err := store.ResolveToDetached("refs/heads/main")
 		if err != nil {
-			t.Fatalf("ResolveFully(main): %v", err)
+			t.Fatalf("ResolveToDetached(main): %v", err)
 		}
 
 		if mainRef.ID != secondID {

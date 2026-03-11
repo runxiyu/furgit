@@ -58,11 +58,11 @@ func TestOpenFilesRefFormat(t *testing.T) {
 
 		head, err := repo.Refs().ResolveToDetached("HEAD")
 		if err != nil {
-			t.Fatalf("ResolveFully(HEAD): %v", err)
+			t.Fatalf("ResolveToDetached(HEAD): %v", err)
 		}
 
 		if head.ID != commitID {
-			t.Fatalf("ResolveFully(HEAD) id = %s, want %s", head.ID, commitID)
+			t.Fatalf("ResolveToDetached(HEAD) id = %s, want %s", head.ID, commitID)
 		}
 	})
 }
@@ -74,7 +74,7 @@ func TestOpenFilesWithPackedRefs(t *testing.T) {
 		repoHarness := newRepoForRefs(t, algo, "files")
 		commitID := writeMainAndHead(t, repoHarness)
 		repoHarness.PackRefs(t, "--all", "--prune")
-		assertResolveFully(t, repoHarness, "refs/heads/main", commitID)
+		assertResolveToDetached(t, repoHarness, "refs/heads/main", commitID)
 	})
 }
 
@@ -97,17 +97,17 @@ func writeMainAndHead(t *testing.T, repoHarness *testgit.TestRepo) objectid.Obje
 	return commitID
 }
 
-func assertResolveFully(t *testing.T, repoHarness *testgit.TestRepo, name string, want objectid.ObjectID) {
+func assertResolveToDetached(t *testing.T, repoHarness *testgit.TestRepo, name string, want objectid.ObjectID) {
 	t.Helper()
 
 	repo := repoHarness.OpenRepository(t)
 
 	resolved, err := repo.Refs().ResolveToDetached(name)
 	if err != nil {
-		t.Fatalf("ResolveFully(%s): %v", name, err)
+		t.Fatalf("ResolveToDetached(%s): %v", name, err)
 	}
 
 	if resolved.ID != want {
-		t.Fatalf("ResolveFully(%s) id = %s, want %s", name, resolved.ID, want)
+		t.Fatalf("ResolveToDetached(%s) id = %s, want %s", name, resolved.ID, want)
 	}
 }

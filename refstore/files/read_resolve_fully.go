@@ -7,7 +7,7 @@ import (
 	"codeberg.org/lindenii/furgit/ref"
 )
 
-// ResolveFully resolves symbolic references through the visible files store
+// ResolveToDetached resolves symbolic references through the visible files store
 // namespace until one detached reference is reached.
 func (store *Store) ResolveToDetached(name string) (ref.Detached, error) {
 	cur := name

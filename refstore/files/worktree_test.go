@@ -52,56 +52,56 @@ func TestFilesWorktreeRefsMatchGit(t *testing.T) {
 
 		got, err := mainStore.ResolveToDetached("refs/worktree/foo")
 		if err != nil {
-			t.Fatalf("ResolveFully(main refs/worktree/foo): %v", err)
+			t.Fatalf("ResolveToDetached(main refs/worktree/foo): %v", err)
 		}
 
 		if got.ID != initialID {
-			t.Fatalf("ResolveFully(main refs/worktree/foo) = %s, want %s", got.ID, initialID)
+			t.Fatalf("ResolveToDetached(main refs/worktree/foo) = %s, want %s", got.ID, initialID)
 		}
 
 		got, err = wt1Store.ResolveToDetached("refs/worktree/foo")
 		if err != nil {
-			t.Fatalf("ResolveFully(wt1 refs/worktree/foo): %v", err)
+			t.Fatalf("ResolveToDetached(wt1 refs/worktree/foo): %v", err)
 		}
 
 		if got.ID != wt1ID {
-			t.Fatalf("ResolveFully(wt1 refs/worktree/foo) = %s, want %s", got.ID, wt1ID)
+			t.Fatalf("ResolveToDetached(wt1 refs/worktree/foo) = %s, want %s", got.ID, wt1ID)
 		}
 
 		got, err = wt2Store.ResolveToDetached("refs/worktree/foo")
 		if err != nil {
-			t.Fatalf("ResolveFully(wt2 refs/worktree/foo): %v", err)
+			t.Fatalf("ResolveToDetached(wt2 refs/worktree/foo): %v", err)
 		}
 
 		if got.ID != wt2ID {
-			t.Fatalf("ResolveFully(wt2 refs/worktree/foo) = %s, want %s", got.ID, wt2ID)
+			t.Fatalf("ResolveToDetached(wt2 refs/worktree/foo) = %s, want %s", got.ID, wt2ID)
 		}
 
 		got, err = wt1Store.ResolveToDetached("main-worktree/HEAD")
 		if err != nil {
-			t.Fatalf("ResolveFully(wt1 main-worktree/HEAD): %v", err)
+			t.Fatalf("ResolveToDetached(wt1 main-worktree/HEAD): %v", err)
 		}
 
 		if got.ID != initialID {
-			t.Fatalf("ResolveFully(wt1 main-worktree/HEAD) = %s, want %s", got.ID, initialID)
+			t.Fatalf("ResolveToDetached(wt1 main-worktree/HEAD) = %s, want %s", got.ID, initialID)
 		}
 
 		got, err = mainStore.ResolveToDetached("worktrees/wt1/HEAD")
 		if err != nil {
-			t.Fatalf("ResolveFully(main worktrees/wt1/HEAD): %v", err)
+			t.Fatalf("ResolveToDetached(main worktrees/wt1/HEAD): %v", err)
 		}
 
 		if got.ID != wt1ID {
-			t.Fatalf("ResolveFully(main worktrees/wt1/HEAD) = %s, want %s", got.ID, wt1ID)
+			t.Fatalf("ResolveToDetached(main worktrees/wt1/HEAD) = %s, want %s", got.ID, wt1ID)
 		}
 
 		got, err = wt2Store.ResolveToDetached("worktrees/wt1/HEAD")
 		if err != nil {
-			t.Fatalf("ResolveFully(wt2 worktrees/wt1/HEAD): %v", err)
+			t.Fatalf("ResolveToDetached(wt2 worktrees/wt1/HEAD): %v", err)
 		}
 
 		if got.ID != wt1ID {
-			t.Fatalf("ResolveFully(wt2 worktrees/wt1/HEAD) = %s, want %s", got.ID, wt1ID)
+			t.Fatalf("ResolveToDetached(wt2 worktrees/wt1/HEAD) = %s, want %s", got.ID, wt1ID)
 		}
 
 		assertListMatchesGitForEachRef(t, testRepo.Run(t, "for-each-ref", "--format=%(refname)"), mainStore)
@@ -166,20 +166,20 @@ func TestFilesTransactionPerWorktreeRefsMatchGit(t *testing.T) {
 
 		got, err := mainStore.ResolveToDetached("refs/bisect/main-only")
 		if err != nil {
-			t.Fatalf("ResolveFully(main-only): %v", err)
+			t.Fatalf("ResolveToDetached(main-only): %v", err)
 		}
 
 		if got.ID != mainID {
-			t.Fatalf("ResolveFully(main-only) = %s, want %s", got.ID, mainID)
+			t.Fatalf("ResolveToDetached(main-only) = %s, want %s", got.ID, mainID)
 		}
 
 		got, err = wt1Store.ResolveToDetached("refs/bisect/wt-only")
 		if err != nil {
-			t.Fatalf("ResolveFully(wt-only): %v", err)
+			t.Fatalf("ResolveToDetached(wt-only): %v", err)
 		}
 
 		if got.ID != wt1ID {
-			t.Fatalf("ResolveFully(wt-only) = %s, want %s", got.ID, wt1ID)
+			t.Fatalf("ResolveToDetached(wt-only) = %s, want %s", got.ID, wt1ID)
 		}
 
 		_, err = mainStore.Resolve("refs/bisect/wt-only")

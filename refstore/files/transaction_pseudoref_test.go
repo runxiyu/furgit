@@ -37,7 +37,7 @@ func TestFilesTransactionPseudorefLifecycle(t *testing.T) {
 
 		got, err := store.ResolveToDetached("PSEUDOREF")
 		if err != nil {
-			t.Fatalf("ResolveFully(PSEUDOREF): %v", err)
+			t.Fatalf("ResolveToDetached(PSEUDOREF): %v", err)
 		}
 
 		if got.ID != aID {
@@ -61,7 +61,7 @@ func TestFilesTransactionPseudorefLifecycle(t *testing.T) {
 
 		got, err = store.ResolveToDetached("PSEUDOREF")
 		if err != nil {
-			t.Fatalf("ResolveFully(PSEUDOREF) after update: %v", err)
+			t.Fatalf("ResolveToDetached(PSEUDOREF) after update: %v", err)
 		}
 
 		if got.ID != bID {

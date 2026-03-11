@@ -59,7 +59,7 @@ func TestFilesTransactionEmptyDirectoriesDoNotBlock(t *testing.T) {
 
 		got, err := store.ResolveToDetached("refs/e-update/foo")
 		if err != nil {
-			t.Fatalf("ResolveFully(updated foo): %v", err)
+			t.Fatalf("ResolveToDetached(updated foo): %v", err)
 		}
 
 		if got.ID != newID {
@@ -86,7 +86,7 @@ func TestFilesTransactionEmptyDirectoriesDoNotBlock(t *testing.T) {
 
 		got, err = store.ResolveToDetached("refs/e-create/foo")
 		if err != nil {
-			t.Fatalf("ResolveFully(created foo): %v", err)
+			t.Fatalf("ResolveToDetached(created foo): %v", err)
 		}
 
 		if got.ID != oldID {

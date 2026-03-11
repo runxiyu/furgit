@@ -56,7 +56,7 @@ func TestFilesTransactionDirectSymbolicDeletes(t *testing.T) {
 
 		got, err := store.ResolveToDetached("refs/heads/main")
 		if err != nil {
-			t.Fatalf("ResolveFully(main): %v", err)
+			t.Fatalf("ResolveToDetached(main): %v", err)
 		}
 
 		if got.ID != mainID {

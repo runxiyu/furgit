@@ -11,13 +11,13 @@ type ReadingStore interface {
 	// If the reference does not exist, implementations should return
 	// ErrReferenceNotFound.
 	Resolve(name string) (ref.Ref, error)
-	// ResolveFully resolves a reference name to a detached object ID.
+	// ResolveToDetached resolves a reference name to a detached object ID.
 	//
 	// Implementations may use backend-local lookup semantics for symbolic hops.
 	// Callers that need cross-backend symbolic resolution (for example in a
 	// chain of stores) should prefer repeatedly calling Resolve.
 	//
-	// ResolveFully resolves symbolic references only. It does not imply peeling
+	// ResolveToDetached resolves symbolic references only. It does not imply peeling
 	// annotated tag objects.
 	ResolveToDetached(name string) (ref.Detached, error)
 	// List returns references matching pattern.

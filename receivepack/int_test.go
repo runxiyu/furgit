@@ -393,7 +393,7 @@ func TestReceivePackPackCreatePromotesObjectsAndUpdatesRef(t *testing.T) {
 
 		resolved, err := reopened.Refs().ResolveToDetached("refs/heads/main")
 		if err != nil {
-			t.Fatalf("ResolveFully(main): %v", err)
+			t.Fatalf("ResolveToDetached(main): %v", err)
 		}
 
 		if resolved.ID != commitID {
@@ -697,7 +697,7 @@ func TestReceivePackPredefinedRejectForcePushHookRejectsNonFastForward(t *testin
 
 		resolved, err := repo.Refs().ResolveToDetached("refs/heads/main")
 		if err != nil {
-			t.Fatalf("ResolveFully(main): %v", err)
+			t.Fatalf("ResolveToDetached(main): %v", err)
 		}
 
 		if resolved.ID != currentID {
@@ -788,7 +788,7 @@ func TestReceivePackGitPushCreatesBranch(t *testing.T) {
 
 		resolved, err := receiver.OpenRepository(t).Refs().ResolveToDetached("refs/heads/main")
 		if err != nil {
-			t.Fatalf("ResolveFully(main): %v", err)
+			t.Fatalf("ResolveToDetached(main): %v", err)
 		}
 
 		if resolved.ID != commitID {
@@ -838,7 +838,7 @@ func TestReceivePackGitPushRefUpdateWithoutNewObjectsSucceeds(t *testing.T) {
 
 		resolved, err := receiver.OpenRepository(t).Refs().ResolveToDetached("refs/heads/topic")
 		if err != nil {
-			t.Fatalf("ResolveFully(topic): %v", err)
+			t.Fatalf("ResolveToDetached(topic): %v", err)
 		}
 
 		if resolved.ID != commitID {
@@ -939,7 +939,7 @@ func TestReceivePackGitPushRejectsForcedUpdateViaHook(t *testing.T) {
 
 		resolved, err := receiver.OpenRepository(t).Refs().ResolveToDetached("refs/heads/main")
 		if err != nil {
-			t.Fatalf("ResolveFully(main): %v", err)
+			t.Fatalf("ResolveToDetached(main): %v", err)
 		}
 
 		if resolved.ID != currentID {

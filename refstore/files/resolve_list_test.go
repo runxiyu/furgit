@@ -55,11 +55,11 @@ func TestFilesResolveAndListOverlay(t *testing.T) {
 
 		fullHead, err := store.ResolveToDetached("HEAD")
 		if err != nil {
-			t.Fatalf("ResolveFully(HEAD): %v", err)
+			t.Fatalf("ResolveToDetached(HEAD): %v", err)
 		}
 
 		if fullHead.ID != looseID {
-			t.Fatalf("ResolveFully(HEAD) = %s, want %s", fullHead.ID, looseID)
+			t.Fatalf("ResolveToDetached(HEAD) = %s, want %s", fullHead.ID, looseID)
 		}
 
 		allRefs, err := store.List("")
@@ -98,20 +98,20 @@ func TestFilesLooseRefParsingMatchesGit(t *testing.T) {
 
 		got, err := store.ResolveToDetached("refs/heads/no-lf")
 		if err != nil {
-			t.Fatalf("ResolveFully(no-lf): %v", err)
+			t.Fatalf("ResolveToDetached(no-lf): %v", err)
 		}
 
 		if got.ID != oid {
-			t.Fatalf("ResolveFully(no-lf) = %s, want %s", got.ID, oid)
+			t.Fatalf("ResolveToDetached(no-lf) = %s, want %s", got.ID, oid)
 		}
 
 		got, err = store.ResolveToDetached("refs/heads/trailing-ws")
 		if err != nil {
-			t.Fatalf("ResolveFully(trailing-ws): %v", err)
+			t.Fatalf("ResolveToDetached(trailing-ws): %v", err)
 		}
 
 		if got.ID != oid {
-			t.Fatalf("ResolveFully(trailing-ws) = %s, want %s", got.ID, oid)
+			t.Fatalf("ResolveToDetached(trailing-ws) = %s, want %s", got.ID, oid)
 		}
 
 		_, err = store.Resolve("refs/heads/leading-ws")
@@ -219,11 +219,11 @@ func TestFilesPackedRefsReadSemanticsMatchGit(t *testing.T) {
 
 			got, err := store.ResolveToDetached("refs/heads/main")
 			if err != nil {
-				t.Fatalf("ResolveFully(main): %v", err)
+				t.Fatalf("ResolveToDetached(main): %v", err)
 			}
 
 			if got.ID == oneID {
-				t.Fatalf("ResolveFully(main) unexpectedly returned stale packed id %s", oneID)
+				t.Fatalf("ResolveToDetached(main) unexpectedly returned stale packed id %s", oneID)
 			}
 
 			tagRef, err := store.Resolve("refs/tags/v1.0")

@@ -32,9 +32,9 @@ func (chain *Chain) Resolve(name string) (ref.Ref, error) {
 	return nil, refstore.ErrReferenceNotFound
 }
 
-// ResolveFully resolves symbolic references through Resolve until detached.
+// ResolveToDetached resolves symbolic references through Resolve until detached.
 //
-// It intentionally does not call backend ResolveFully. This allows symbolic
+// It intentionally does not call backend ResolveToDetached. This allows symbolic
 // references to cross backends in the chain.
 func (chain *Chain) ResolveToDetached(name string) (ref.Detached, error) {
 	cur := name
