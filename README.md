@@ -272,16 +272,14 @@ Mainly tests the packfile object reader.
 
 ## History and lineage
 
-* I wrote Lindenii Forge
-* I wrote [hare-git](https://codeberg.org/lindenii/hare-git)
-* I wanted a faster Git library for
+* Lindenii Forge
+* [hare-git](https://codeberg.org/lindenii/hare-git)
+* Faster Git library needed for
   [Lindenii Villosa](https://codeberg.org/lindenii/villosa)
   the next generation of Lindenii Forge
-* I translated hare-git and put it into `internal/common/git` in Villosa
-* I extracted it out into a general-purpose library, which is what we
-  have now
-* I was thinking of names and I accidentally typed "git" as "fur" (i.e., left
-  shifted one key on my QWERTY keyboard), so, "Furgit"
+* Translated hare-git and put it into `internal/common/git` in Villosa
+* Extracted it out into this general-purpose library
+* "Fur" is "git" left-shifted by 1 on QWERTY
 * Some architectual elements inspired by [upstream Git](https://git-scm.com),
   OpenBSD's [Game of Trees](https://gameoftrees.org), and
   [9front Git](https://git.9front.org/plan9front/9front/HEAD/sys/src/cmd/git/f.html).
