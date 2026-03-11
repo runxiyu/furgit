@@ -44,7 +44,7 @@ func paintDownToCommon(ctx *Context, left NodeIndex, rights []NodeIndex, minGene
 		return nil
 	}
 
-	queue := NewPriorityQueue(ctx)
+	queue := newPriorityQueue(ctx)
 	queue.PushNode(left)
 
 	for _, right := range rights {
@@ -87,7 +87,7 @@ func paintDownToCommon(ctx *Context, left NodeIndex, rights []NodeIndex, minGene
 	return nil
 }
 
-func queueHasNonStale(ctx *Context, queue *PriorityQueue) bool {
+func queueHasNonStale(ctx *Context, queue *priorityQueue) bool {
 	for _, idx := range queue.items {
 		if !ctx.HasAnyMarks(idx, markStale) {
 			return true
