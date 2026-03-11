@@ -53,6 +53,7 @@ Furgit is a low-level Git library in Go.
     * [X] Pack index lookups
     * [X] Delta caching
     * [X] Delta application
+    * [ ] Pack-wide bloom filters
     * [ ] Multi pack indexes
 * [ ] Writing objects
   * [X] Loose object writing
