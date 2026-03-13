@@ -58,7 +58,7 @@ File layout
 * 4-octet object hash algorithm identifier (= 1 for SHA-1, 2 for SHA-256)
 * 4-octet B (number of buckets)
 * 2-octet K (number of bits set and tested per object ID)
-* 6-octet padding (must be all zeros)
+* 46-octet padding (must be all zeros)
 * B buckets of 64 octets each.
 
 Validation
@@ -71,7 +71,7 @@ Validation
 * K must be nonzero
 * log2(B) + 9K <= hash length in bits
 * Padding must be all zero
-* File size must be 24 + 64 * B octets
+* File size must be 64 + 64 * B octets
 
 Lookup procedure
 ----------------
@@ -137,5 +137,4 @@ TODOs
 * How does creation/insert work? Note that packfiles and `.idx`es are immutable.
 * What are the sizes?
 * What are the false positive rates?
-* Is there a way to make this SIMD friendly?
 * How are benchmarks?
