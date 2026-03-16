@@ -138,3 +138,5 @@ TODOs
 * What are the sizes?
 * What are the false positive rates?
 * How are benchmarks?
+
+* Switch to XOR filters since those are immutable sets anyway.
