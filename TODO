@@ -1,5 +1,9 @@
 So the to-do list in README.md is more 
 
+* report-status-v2
+* non-atomic batch update semantics
+* how to pass commit graph to hooks
+
 * Better status reporting, filling in more things in report-status-v2.
 * Better progress reporting during network operations.
 * More accurate semantics for non-atomic batch updates:
