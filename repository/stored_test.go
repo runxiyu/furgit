@@ -33,8 +33,8 @@ func TestReadStoredTyped(t *testing.T) {
 			t.Fatalf("blob ID = %s, want %s", blob.ID(), blobID)
 		}
 
-		if string(blob.Blob().Data) != "commit-body\n" {
-			t.Fatalf("blob body = %q, want %q", blob.Blob().Data, "commit-body\n")
+		if string(blob.Object().Data) != "commit-body\n" {
+			t.Fatalf("blob body = %q, want %q", blob.Object().Data, "commit-body\n")
 		}
 
 		tree, err := repo.ReadStoredTree(treeID)
@@ -46,8 +46,8 @@ func TestReadStoredTyped(t *testing.T) {
 			t.Fatalf("tree ID = %s, want %s", tree.ID(), treeID)
 		}
 
-		if len(tree.Tree().Entries) != 1 {
-			t.Fatalf("tree entries = %d, want 1", len(tree.Tree().Entries))
+		if len(tree.Object().Entries) != 1 {
+			t.Fatalf("tree entries = %d, want 1", len(tree.Object().Entries))
 		}
 
 		commit, err := repo.ReadStoredCommit(commitID)
@@ -59,8 +59,8 @@ func TestReadStoredTyped(t *testing.T) {
 			t.Fatalf("commit ID = %s, want %s", commit.ID(), commitID)
 		}
 
-		if commit.Commit().Tree != treeID {
-			t.Fatalf("commit tree = %s, want %s", commit.Commit().Tree, treeID)
+		if commit.Object().Tree != treeID {
+			t.Fatalf("commit tree = %s, want %s", commit.Object().Tree, treeID)
 		}
 	})
 }
@@ -240,7 +240,7 @@ func TestReadStoredTreeMixedModes(t *testing.T) {
 		}
 
 		for name, wantMode := range expect {
-			entry := rootTree.Tree().Entry([]byte(name))
+			entry := rootTree.Object().Entry([]byte(name))
 
 			if entry == nil {
 				t.Fatalf("Entry(%q) returned nil", name)

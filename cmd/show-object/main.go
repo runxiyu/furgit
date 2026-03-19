@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"codeberg.org/lindenii/furgit/object"
 	"codeberg.org/lindenii/furgit/object/stored"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objecttype"
@@ -81,7 +82,7 @@ func resolveInput(repo *repository.Repository, input string) (objectid.ObjectID,
 	return resolved.ID, nil
 }
 
-func printStored(s stored.StoredObject) {
+func printStored(s *stored.Stored[object.Object]) {
 	var b strings.Builder
 
 	id := s.ID()
@@ -95,20 +96,20 @@ func printStored(s stored.StoredObject) {
 	fmt.Fprintf(&b, "id: %s\n", id)
 	fmt.Fprintf(&b, "type: %s\n", tyName)
 
-	switch s := s.(type) {
-	case *stored.StoredBlob:
-		blob := s.Blob()
+	switch obj := s.Object().(type) {
+	case *object.Blob:
+		blob := obj
 		fmt.Fprintf(&b, "size: %d\n", len(blob.Data))
 		fmt.Fprintf(&b, "data: %q\n", string(blob.Data))
-	case *stored.StoredTree:
-		tree := s.Tree()
+	case *object.Tree:
+		tree := obj
 		fmt.Fprintf(&b, "entries: %d\n", len(tree.Entries))
 
 		for _, entry := range tree.Entries {
 			fmt.Fprintf(&b, "%06o %s\t%s\n", entry.Mode, entry.ID, entry.Name)
 		}
-	case *stored.StoredCommit:
-		commit := s.Commit()
+	case *object.Commit:
+		commit := obj
 		fmt.Fprintf(&b, "tree: %s\n", commit.Tree)
 
 		for _, parent := range commit.Parents {
@@ -118,8 +119,8 @@ func printStored(s stored.StoredObject) {
 		fmt.Fprintf(&b, "author: %s <%s>\n", commit.Author.Name, commit.Author.Email)
 		fmt.Fprintf(&b, "committer: %s <%s>\n", commit.Committer.Name, commit.Committer.Email)
 		fmt.Fprintf(&b, "message:\n%s\n", string(commit.Message))
-	case *stored.StoredTag:
-		tag := s.Tag()
+	case *object.Tag:
+		tag := obj
 
 		targetTy, ok := objecttype.Name(tag.TargetType)
 		if !ok {
@@ -135,7 +136,7 @@ func printStored(s stored.StoredObject) {
 
 		fmt.Fprintf(&b, "message:\n%s\n", string(tag.Message))
 	default:
-		fmt.Fprintf(&b, "%#v\n", s.Object())
+		fmt.Fprintf(&b, "%#v\n", obj)
 	}
 
 	_, _ = os.Stdout.WriteString(b.String())

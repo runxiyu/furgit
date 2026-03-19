@@ -12,7 +12,7 @@ import (
 //
 // parts must contain at least one path segment. Intermediate segments must be
 // tree entries.
-func (repo *Repository) ResolveTreeEntry(tree *stored.StoredTree, parts [][]byte) (object.TreeEntry, error) {
+func (repo *Repository) ResolveTreeEntry(tree *stored.Stored[*object.Tree], parts [][]byte) (object.TreeEntry, error) {
 	if tree == nil {
 		return object.TreeEntry{}, errors.New("repository: nil root tree")
 	}
@@ -28,7 +28,7 @@ func (repo *Repository) ResolveTreeEntry(tree *stored.StoredTree, parts [][]byte
 			return object.TreeEntry{}, errors.New("repository: empty tree path segment")
 		}
 
-		entry := current.Tree().Entry(part)
+		entry := current.Object().Entry(part)
 		if entry == nil {
 			return object.TreeEntry{}, fmt.Errorf("repository: tree entry %q not found", part)
 		}

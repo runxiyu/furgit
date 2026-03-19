@@ -10,86 +10,33 @@ import (
 )
 
 // ReadStored reads, parses, and wraps one object by ID.
-//
-//nolint:ireturn
-func (repo *Repository) ReadStored(id objectid.ObjectID) (stored.StoredObject, error) {
+func (repo *Repository) ReadStored(id objectid.ObjectID) (*stored.Stored[object.Object], error) {
 	parsed, err := repo.readParsedObject(id)
 	if err != nil {
 		return nil, err
 	}
 
-	switch parsed := parsed.(type) {
-	case *object.Blob:
-		return stored.NewStoredBlob(id, parsed), nil
-	case *object.Tree:
-		return stored.NewStoredTree(id, parsed), nil
-	case *object.Commit:
-		return stored.NewStoredCommit(id, parsed), nil
-	case *object.Tag:
-		return stored.NewStoredTag(id, parsed), nil
-	default:
-		return nil, fmt.Errorf("repository: unsupported parsed object type %T", parsed)
-	}
+	return stored.New(id, parsed), nil
 }
 
 // ReadStoredBlob reads and parses a blob object by ID.
-func (repo *Repository) ReadStoredBlob(id objectid.ObjectID) (*stored.StoredBlob, error) {
-	s, err := repo.ReadStored(id)
-	if err != nil {
-		return nil, err
-	}
-
-	blob, ok := s.(*stored.StoredBlob)
-	if !ok {
-		return nil, fmt.Errorf("repository: expected blob object %s, got %v", id, s.Object().ObjectType())
-	}
-
-	return blob, nil
+func (repo *Repository) ReadStoredBlob(id objectid.ObjectID) (*stored.Stored[*object.Blob], error) {
+	return readStoredAs[*object.Blob](repo, id)
 }
 
 // ReadStoredTree reads and parses a tree object by ID.
-func (repo *Repository) ReadStoredTree(id objectid.ObjectID) (*stored.StoredTree, error) {
-	s, err := repo.ReadStored(id)
-	if err != nil {
-		return nil, err
-	}
-
-	tree, ok := s.(*stored.StoredTree)
-	if !ok {
-		return nil, fmt.Errorf("repository: expected tree object %s, got %v", id, s.Object().ObjectType())
-	}
-
-	return tree, nil
+func (repo *Repository) ReadStoredTree(id objectid.ObjectID) (*stored.Stored[*object.Tree], error) {
+	return readStoredAs[*object.Tree](repo, id)
 }
 
 // ReadStoredCommit reads and parses a commit object by ID.
-func (repo *Repository) ReadStoredCommit(id objectid.ObjectID) (*stored.StoredCommit, error) {
-	s, err := repo.ReadStored(id)
-	if err != nil {
-		return nil, err
-	}
-
-	commit, ok := s.(*stored.StoredCommit)
-	if !ok {
-		return nil, fmt.Errorf("repository: expected commit object %s, got %v", id, s.Object().ObjectType())
-	}
-
-	return commit, nil
+func (repo *Repository) ReadStoredCommit(id objectid.ObjectID) (*stored.Stored[*object.Commit], error) {
+	return readStoredAs[*object.Commit](repo, id)
 }
 
 // ReadStoredTag reads and parses a tag object by ID.
-func (repo *Repository) ReadStoredTag(id objectid.ObjectID) (*stored.StoredTag, error) {
-	s, err := repo.ReadStored(id)
-	if err != nil {
-		return nil, err
-	}
-
-	tag, ok := s.(*stored.StoredTag)
-	if !ok {
-		return nil, fmt.Errorf("repository: expected tag object %s, got %v", id, s.Object().ObjectType())
-	}
-
-	return tag, nil
+func (repo *Repository) ReadStoredTag(id objectid.ObjectID) (*stored.Stored[*object.Tag], error) {
+	return readStoredAs[*object.Tag](repo, id)
 }
 
 // readParsedObject reads bytes content from storage and parses one object.
@@ -112,4 +59,18 @@ func (repo *Repository) readParsedObject(id objectid.ObjectID) (object.Object, e
 	}
 
 	return parsed, nil
+}
+
+func readStoredAs[T object.Object](repo *Repository, id objectid.ObjectID) (*stored.Stored[T], error) {
+	parsed, err := repo.readParsedObject(id)
+	if err != nil {
+		return nil, err
+	}
+
+	typed, ok := parsed.(T)
+	if !ok {
+		return nil, fmt.Errorf("repository: expected %T object %s, got %v", *new(T), id, parsed.ObjectType())
+	}
+
+	return stored.New(id, typed), nil
 }
