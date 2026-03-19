@@ -1,0 +1,18 @@
+package resolve
+
+import (
+	"io"
+
+	"codeberg.org/lindenii/furgit/objectid"
+)
+
+// PeelToBlobReader returns a reader for the content of the peeled blob at id,
+// together with its content size in bytes.
+func (r *Resolver) PeelToBlobReader(id objectid.ObjectID) (io.ReadCloser, int64, error) {
+	blobID, err := r.PeelToBlobID(id)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return r.ExactBlobReader(blobID)
+}

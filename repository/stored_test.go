@@ -24,9 +24,9 @@ func TestReadStoredTyped(t *testing.T) {
 
 		repo := repoHarness.OpenRepository(t)
 
-		blob, err := repo.ReadStoredBlob(blobID)
+		blob, err := repo.Resolver().ExactBlob(blobID)
 		if err != nil {
-			t.Fatalf("ReadStoredBlob: %v", err)
+			t.Fatalf("ExactBlob: %v", err)
 		}
 
 		if blob.ID() != blobID {
@@ -37,9 +37,9 @@ func TestReadStoredTyped(t *testing.T) {
 			t.Fatalf("blob body = %q, want %q", blob.Object().Data, "commit-body\n")
 		}
 
-		tree, err := repo.ReadStoredTree(treeID)
+		tree, err := repo.Resolver().ExactTree(treeID)
 		if err != nil {
-			t.Fatalf("ReadStoredTree: %v", err)
+			t.Fatalf("ExactTree: %v", err)
 		}
 
 		if tree.ID() != treeID {
@@ -50,9 +50,9 @@ func TestReadStoredTyped(t *testing.T) {
 			t.Fatalf("tree entries = %d, want 1", len(tree.Object().Entries))
 		}
 
-		commit, err := repo.ReadStoredCommit(commitID)
+		commit, err := repo.Resolver().ExactCommit(commitID)
 		if err != nil {
-			t.Fatalf("ReadStoredCommit: %v", err)
+			t.Fatalf("ExactCommit: %v", err)
 		}
 
 		if commit.ID() != commitID {
@@ -65,7 +65,7 @@ func TestReadStoredTyped(t *testing.T) {
 	})
 }
 
-func TestResolveTreeEntry(t *testing.T) {
+func TestResolverPath(t *testing.T) {
 	t.Parallel()
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
@@ -81,27 +81,22 @@ func TestResolveTreeEntry(t *testing.T) {
 
 		repo := repoHarness.OpenRepository(t)
 
-		rootTree, err := repo.ReadStoredTree(rootTreeID)
+		entry, err := repo.Resolver().Path(rootTreeID, [][]byte{[]byte("dir"), []byte("leaf.txt")})
 		if err != nil {
-			t.Fatalf("ReadStoredTree(root): %v", err)
-		}
-
-		entry, err := repo.ResolveTreeEntry(rootTree, [][]byte{[]byte("dir"), []byte("leaf.txt")})
-		if err != nil {
-			t.Fatalf("ResolveTreeEntry: %v", err)
+			t.Fatalf("Path: %v", err)
 		}
 
 		if entry.Mode != object.FileModeRegular {
-			t.Fatalf("ResolveTreeEntry mode = %o, want %o", entry.Mode, object.FileModeRegular)
+			t.Fatalf("Path mode = %o, want %o", entry.Mode, object.FileModeRegular)
 		}
 
 		if entry.ID != blobID {
-			t.Fatalf("ResolveTreeEntry id = %s, want %s", entry.ID, blobID)
+			t.Fatalf("Path id = %s, want %s", entry.ID, blobID)
 		}
 	})
 }
 
-func TestResolveTreeEntryErrors(t *testing.T) {
+func TestResolverPathErrors(t *testing.T) {
 	t.Parallel()
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
@@ -117,14 +112,9 @@ func TestResolveTreeEntryErrors(t *testing.T) {
 
 			repo := repoHarness.OpenRepository(t)
 
-			rootTree, err := repo.ReadStoredTree(rootTreeID)
-			if err != nil {
-				t.Fatalf("ReadStoredTree(root): %v", err)
-			}
-
-			_, err = repo.ResolveTreeEntry(rootTree, [][]byte{[]byte("missing")})
+			_, err := repo.Resolver().Path(rootTreeID, [][]byte{[]byte("missing")})
 			if err == nil || !strings.Contains(err.Error(), "not found") {
-				t.Fatalf("ResolveTreeEntry missing: err = %v, want not found error", err)
+				t.Fatalf("Path missing: err = %v, want not found error", err)
 			}
 		})
 
@@ -140,20 +130,15 @@ func TestResolveTreeEntryErrors(t *testing.T) {
 
 			repo := repoHarness.OpenRepository(t)
 
-			rootTree, err := repo.ReadStoredTree(rootTreeID)
-			if err != nil {
-				t.Fatalf("ReadStoredTree(root): %v", err)
-			}
-
-			_, err = repo.ResolveTreeEntry(rootTree, [][]byte{[]byte("dir"), []byte("leaf")})
+			_, err := repo.Resolver().Path(rootTreeID, [][]byte{[]byte("dir"), []byte("leaf")})
 			if err == nil || !strings.Contains(err.Error(), "is not a tree") {
-				t.Fatalf("ResolveTreeEntry non-tree: err = %v, want non-tree error", err)
+				t.Fatalf("Path non-tree: err = %v, want non-tree error", err)
 			}
 		})
 	})
 }
 
-func TestResolveTreeEntryDeepPath(t *testing.T) {
+func TestResolverPathDeepPath(t *testing.T) {
 	t.Parallel()
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
@@ -179,22 +164,17 @@ func TestResolveTreeEntryDeepPath(t *testing.T) {
 
 		repo := repoHarness.OpenRepository(t)
 
-		rootTree, err := repo.ReadStoredTree(currentTree)
+		entry, err := repo.Resolver().Path(currentTree, parts)
 		if err != nil {
-			t.Fatalf("ReadStoredTree(root): %v", err)
-		}
-
-		entry, err := repo.ResolveTreeEntry(rootTree, parts)
-		if err != nil {
-			t.Fatalf("ResolveTreeEntry(deep): %v", err)
+			t.Fatalf("Path(deep): %v", err)
 		}
 
 		if entry.Mode != object.FileModeRegular {
-			t.Fatalf("ResolveTreeEntry(deep) mode = %o, want %o", entry.Mode, object.FileModeRegular)
+			t.Fatalf("Path(deep) mode = %o, want %o", entry.Mode, object.FileModeRegular)
 		}
 
 		if entry.ID != leafBlobID {
-			t.Fatalf("ResolveTreeEntry(deep) id = %s, want %s", entry.ID, leafBlobID)
+			t.Fatalf("Path(deep) id = %s, want %s", entry.ID, leafBlobID)
 		}
 	})
 }
@@ -227,9 +207,9 @@ func TestReadStoredTreeMixedModes(t *testing.T) {
 
 		repo := repoHarness.OpenRepository(t)
 
-		rootTree, err := repo.ReadStoredTree(rootTreeID)
+		rootTree, err := repo.Resolver().ExactTree(rootTreeID)
 		if err != nil {
-			t.Fatalf("ReadStoredTree(root): %v", err)
+			t.Fatalf("ExactTree(root): %v", err)
 		}
 
 		expect := map[string]object.FileMode{
