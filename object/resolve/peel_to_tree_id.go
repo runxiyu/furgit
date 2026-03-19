@@ -33,6 +33,12 @@ func (r *Resolver) PeelToTreeID(id objectid.ObjectID) (objectid.ObjectID, error)
 			}
 
 			id = tag.Object().Target
+		case objecttype.TypeInvalid,
+			objecttype.TypeBlob,
+			objecttype.TypeFuture,
+			objecttype.TypeOfsDelta,
+			objecttype.TypeRefDelta:
+			return objectid.ObjectID{}, fmt.Errorf("object/resolve: expected tree-ish object %s, got %v", id, ty)
 		default:
 			return objectid.ObjectID{}, fmt.Errorf("object/resolve: expected tree-ish object %s, got %v", id, ty)
 		}

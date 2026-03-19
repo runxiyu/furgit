@@ -25,6 +25,13 @@ func (r *Resolver) PeelToBlobID(id objectid.ObjectID) (objectid.ObjectID, error)
 			}
 
 			id = tag.Object().Target
+		case objecttype.TypeInvalid,
+			objecttype.TypeCommit,
+			objecttype.TypeTree,
+			objecttype.TypeFuture,
+			objecttype.TypeOfsDelta,
+			objecttype.TypeRefDelta:
+			return objectid.ObjectID{}, fmt.Errorf("object/resolve: expected blob-ish object %s, got %v", id, ty)
 		default:
 			return objectid.ObjectID{}, fmt.Errorf("object/resolve: expected blob-ish object %s, got %v", id, ty)
 		}
