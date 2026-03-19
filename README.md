@@ -13,11 +13,11 @@ Furgit is a low-level Git library in Go.
 * Several years away from stable
 * Will use [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) starting at 1.0.0
 
-## General goals
+## Goals
 
-* General-purpose Git library for UNIX-like systems
-* Prioritize APIs for forges and other server-side uses first
+* General-purpose Git plumbing library for UNIX-like systems
 * Aim for clear architecture then high performance
+* Expect familiarity with Git internals
 
 ## Features
 
@@ -219,7 +219,7 @@ Furgit is a low-level Git library in Go.
 
 ## Not planned
 
-* Any CLI tools whatsoever
+* CLI tools
 * Clone
 * Anything reasonably considered "porcelain"
 * Credential helper
