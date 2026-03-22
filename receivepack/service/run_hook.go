@@ -41,6 +41,8 @@ func (service *Service) runHook(
 
 	var (
 		quarantineObjectsStore objectstore.Store
+		quarantineLooseStore   *loose.Store
+		quarantinePackedStore  *packed.Store
 		quarantineLooseRoot    *os.Root
 		quarantinePackRoot     *os.Root
 		err                    error
@@ -54,7 +56,7 @@ func (service *Service) runHook(
 			return nil, nil, nil, false, err.Error()
 		}
 
-		quarantineLooseStore, err := loose.New(quarantineLooseRoot, service.opts.Algorithm)
+		quarantineLooseStore, err = loose.New(quarantineLooseRoot, service.opts.Algorithm)
 		if err != nil {
 			_ = quarantineLooseRoot.Close()
 
@@ -68,7 +70,9 @@ func (service *Service) runHook(
 
 		quarantinePackRoot, err = quarantineLooseRoot.OpenRoot("pack")
 		if err == nil {
-			quarantinePackedStore, packedErr := packed.New(quarantinePackRoot, service.opts.Algorithm, packed.Options{})
+			var packedErr error
+
+			quarantinePackedStore, packedErr = packed.New(quarantinePackRoot, service.opts.Algorithm, packed.Options{})
 			if packedErr != nil {
 				_ = quarantineLooseStore.Close()
 				_ = quarantinePackRoot.Close()
@@ -93,6 +97,14 @@ func (service *Service) runHook(
 		defer func() {
 			if quarantineObjectsStore != nil {
 				_ = quarantineObjectsStore.Close()
+			}
+
+			if quarantinePackedStore != nil {
+				_ = quarantinePackedStore.Close()
+			}
+
+			if quarantineLooseStore != nil {
+				_ = quarantineLooseStore.Close()
 			}
 
 			if quarantinePackRoot != nil {

@@ -15,10 +15,6 @@ func (chain *Chain) List(pattern string) ([]ref.Ref, error) {
 	seen := map[string]struct{}{}
 
 	for i, backend := range chain.backends {
-		if backend == nil {
-			continue
-		}
-
 		listed, err := backend.List(pattern)
 		if err != nil {
 			return nil, fmt.Errorf("refstore: backend %d list: %w", i, err)

@@ -13,10 +13,6 @@ import (
 // ReadReaderFull reads a full serialized object stream from the first backend that has it.
 func (chain *Chain) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) {
 	for i, backend := range chain.backends {
-		if backend == nil {
-			continue
-		}
-
 		reader, err := backend.ReadReaderFull(id)
 		if err == nil {
 			return reader, nil
@@ -35,10 +31,6 @@ func (chain *Chain) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) 
 // ReadReaderContent reads an object's type, declared content length, and content stream from the first backend that has it.
 func (chain *Chain) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, int64, io.ReadCloser, error) {
 	for i, backend := range chain.backends {
-		if backend == nil {
-			continue
-		}
-
 		ty, size, reader, err := backend.ReadReaderContent(id)
 		if err == nil {
 			return ty, size, reader, nil

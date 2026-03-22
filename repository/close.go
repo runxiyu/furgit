@@ -21,15 +21,15 @@ func (repo *Repository) Close() error {
 		}
 	}
 
-	if repo.objectsLooseForWritingOnly != nil {
-		err := repo.objectsLooseForWritingOnly.Close()
+	if repo.objectsPacked != nil {
+		err := repo.objectsPacked.Close()
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
 
-	if repo.objectsWriteRoot != nil {
-		err := repo.objectsWriteRoot.Close()
+	if repo.objectsLoose != nil {
+		err := repo.objectsLoose.Close()
 		if err != nil {
 			errs = append(errs, err)
 		}

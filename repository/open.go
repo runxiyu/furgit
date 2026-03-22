@@ -33,7 +33,7 @@ func Open(root *os.Root) (repo *Repository, err error) {
 
 	repo.algo = algo
 
-	objects, objectsRoot, objectsPackRoot, objectsLooseForWritingOnly, objectsWriteRoot, err := openObjectStore(root, algo)
+	objects, objectsRoot, objectsPackRoot, objectsLoose, objectsPacked, err := openObjectStore(root, algo)
 	if err != nil {
 		return nil, err
 	}
@@ -41,8 +41,8 @@ func Open(root *os.Root) (repo *Repository, err error) {
 	repo.objects = objects
 	repo.objectsRoot = objectsRoot
 	repo.objectsPackRoot = objectsPackRoot
-	repo.objectsLooseForWritingOnly = objectsLooseForWritingOnly
-	repo.objectsWriteRoot = objectsWriteRoot
+	repo.objectsLoose = objectsLoose
+	repo.objectsPacked = objectsPacked
 
 	refRoot, err := root.OpenRoot(".")
 	if err != nil {

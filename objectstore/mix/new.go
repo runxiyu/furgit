@@ -3,6 +3,9 @@ package mix
 import "codeberg.org/lindenii/furgit/objectstore"
 
 // New creates a Mix from backends.
+//
+// The provided backends must be non-nil and distinct.
+// Mix borrows the provided backends and does not close them in Close.
 func New(backends ...objectstore.Store) *Mix {
 	nodeByStore := make(map[objectstore.Store]*backendNode, len(backends))
 
@@ -12,10 +15,6 @@ func New(backends ...objectstore.Store) *Mix {
 	)
 
 	for _, backend := range backends {
-		if backend == nil {
-			continue
-		}
-
 		node := &backendNode{
 			backend: backend,
 			prev:    tail,

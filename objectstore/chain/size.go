@@ -11,10 +11,6 @@ import (
 // ReadSize reads object content length from the first backend that has it.
 func (chain *Chain) ReadSize(id objectid.ObjectID) (int64, error) {
 	for i, backend := range chain.backends {
-		if backend == nil {
-			continue
-		}
-
 		size, err := backend.ReadSize(id)
 		if err == nil {
 			return size, nil

@@ -5,5 +5,5 @@ import (
 )
 
 func (repo *Repository) LooseStoreForWriting() *objectloose.Store {
-	return repo.objectsLooseForWritingOnly
+	return repo.objectsLoose
 }

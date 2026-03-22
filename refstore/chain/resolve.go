@@ -13,10 +13,6 @@ import (
 //nolint:ireturn
 func (chain *Chain) Resolve(name string) (ref.Ref, error) {
 	for i, backend := range chain.backends {
-		if backend == nil {
-			continue
-		}
-
 		resolved, err := backend.Resolve(name)
 		if err == nil {
 			return resolved, nil

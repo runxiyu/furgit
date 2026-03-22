@@ -7,10 +7,6 @@ func (chain *Chain) Refresh() error {
 	var errs []error
 
 	for _, backend := range chain.backends {
-		if backend == nil {
-			continue
-		}
-
 		err := backend.Refresh()
 		if err != nil {
 			errs = append(errs, err)

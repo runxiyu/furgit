@@ -12,10 +12,6 @@ import (
 // ReadBytesFull reads a full serialized object from the first backend that has it.
 func (chain *Chain) ReadBytesFull(id objectid.ObjectID) ([]byte, error) {
 	for i, backend := range chain.backends {
-		if backend == nil {
-			continue
-		}
-
 		full, err := backend.ReadBytesFull(id)
 		if err == nil {
 			return full, nil
@@ -34,10 +30,6 @@ func (chain *Chain) ReadBytesFull(id objectid.ObjectID) ([]byte, error) {
 // ReadBytesContent reads an object's type and content bytes from the first backend that has it.
 func (chain *Chain) ReadBytesContent(id objectid.ObjectID) (objecttype.Type, []byte, error) {
 	for i, backend := range chain.backends {
-		if backend == nil {
-			continue
-		}
-
 		ty, content, err := backend.ReadBytesContent(id)
 		if err == nil {
 			return ty, content, nil

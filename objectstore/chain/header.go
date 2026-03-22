@@ -12,10 +12,6 @@ import (
 // ReadHeader reads object header data from the first backend that has it.
 func (chain *Chain) ReadHeader(id objectid.ObjectID) (objecttype.Type, int64, error) {
 	for i, backend := range chain.backends {
-		if backend == nil {
-			continue
-		}
-
 		ty, size, err := backend.ReadHeader(id)
 		if err == nil {
 			return ty, size, nil

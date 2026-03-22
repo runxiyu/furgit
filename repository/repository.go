@@ -8,6 +8,7 @@ import (
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
 	objectloose "codeberg.org/lindenii/furgit/objectstore/loose"
+	objectpacked "codeberg.org/lindenii/furgit/objectstore/packed"
 	"codeberg.org/lindenii/furgit/refstore"
 )
 
@@ -19,11 +20,11 @@ type Repository struct {
 	config *config.Config
 	algo   objectid.Algorithm
 
-	objects                    objectstore.Store
-	objectsRoot                *os.Root
-	objectsPackRoot            *os.Root
-	objectsLooseForWritingOnly *objectloose.Store
-	objectsWriteRoot           *os.Root
-	refRoot                    *os.Root
-	refs                       refstore.ReadWriteStore
+	objects         objectstore.Store
+	objectsRoot     *os.Root
+	objectsPackRoot *os.Root
+	objectsLoose    *objectloose.Store
+	objectsPacked   *objectpacked.Store
+	refRoot         *os.Root
+	refs            refstore.ReadWriteStore
 }

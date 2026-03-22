@@ -9,6 +9,8 @@ import (
 )
 
 // Mix queries multiple object databases with an MRU backend preference.
+//
+// Mix borrows its backend stores.
 type Mix struct {
 	mu sync.RWMutex
 

@@ -20,8 +20,8 @@ func openObjectStore(
 	objects objectstore.Store,
 	objectsRoot *os.Root,
 	objectsPackRoot *os.Root,
-	objectsLooseForWritingOnly *objectloose.Store,
-	objectsWriteRoot *os.Root,
+	objectsLoose *objectloose.Store,
+	objectsPacked *objectpacked.Store,
 	err error,
 ) {
 	objectsRoot, err = root.OpenRoot("objects")
@@ -29,35 +29,33 @@ func openObjectStore(
 		return nil, nil, nil, nil, nil, fmt.Errorf("repository: open objects: %w", err)
 	}
 
-	looseStore, err := objectloose.New(objectsRoot, algo)
+	objectsLoose, err = objectloose.New(objectsRoot, algo)
 	if err != nil {
 		_ = objectsRoot.Close()
 
 		return nil, nil, nil, nil, nil, err
 	}
 
-	backends := []objectstore.Store{looseStore}
+	backends := []objectstore.Store{objectsLoose}
 
 	objectsPackRoot, err = objectsRoot.OpenRoot("pack")
 	if err == nil {
-		var packedStore *objectpacked.Store
-
-		packedStore, err = objectpacked.New(
+		objectsPacked, err = objectpacked.New(
 			objectsPackRoot,
 			algo,
 			objectpacked.Options{RefreshPolicy: objectpacked.RefreshPolicyNever},
 		)
 		if err != nil {
 			_ = objectsPackRoot.Close()
-			_ = looseStore.Close()
+			_ = objectsLoose.Close()
 			_ = objectsRoot.Close()
 
 			return nil, nil, nil, nil, nil, err
 		}
 
-		backends = append(backends, packedStore)
+		backends = append(backends, objectsPacked)
 	} else if !errors.Is(err, os.ErrNotExist) {
-		_ = looseStore.Close()
+		_ = objectsLoose.Close()
 		_ = objectsRoot.Close()
 
 		return nil, nil, nil, nil, nil, fmt.Errorf("repository: open objects/pack: %w", err)
@@ -65,33 +63,7 @@ func openObjectStore(
 
 	objects = objectmix.New(backends...)
 
-	objectsWriteRoot, err = root.OpenRoot("objects")
-	if err != nil {
-		_ = objects.Close()
-		if objectsPackRoot != nil {
-			_ = objectsPackRoot.Close()
-		}
-
-		_ = objectsRoot.Close()
-
-		return nil, nil, nil, nil, nil, fmt.Errorf("repository: open objects for loose writing: %w", err)
-	}
-
-	objectsLooseForWritingOnly, err = objectloose.New(objectsWriteRoot, algo)
-	if err != nil {
-		_ = objects.Close()
-
-		_ = objectsWriteRoot.Close()
-		if objectsPackRoot != nil {
-			_ = objectsPackRoot.Close()
-		}
-
-		_ = objectsRoot.Close()
-
-		return nil, nil, nil, nil, nil, err
-	}
-
-	return objects, objectsRoot, objectsPackRoot, objectsLooseForWritingOnly, objectsWriteRoot, nil
+	return objects, objectsRoot, objectsPackRoot, objectsLoose, objectsPacked, nil
 }
 
 // Objects returns the configured object store.
