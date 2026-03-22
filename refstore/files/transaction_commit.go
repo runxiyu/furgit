@@ -6,15 +6,8 @@ import (
 )
 
 func (tx *Transaction) Commit() error {
-	err := tx.ensureOpen()
-	if err != nil {
-		return err
-	}
-
 	prepared, err := tx.prepare()
 	if err != nil {
-		tx.closed = true
-
 		return err
 	}
 
@@ -29,16 +22,12 @@ func (tx *Transaction) Commit() error {
 
 		err = tx.writeLoose(item)
 		if err != nil {
-			tx.closed = true
-
 			return err
 		}
 	}
 
 	err = tx.applyPackedDeletes(prepared)
 	if err != nil {
-		tx.closed = true
-
 		return err
 	}
 
@@ -48,8 +37,6 @@ func (tx *Transaction) Commit() error {
 			if item.target.ref.isLoose {
 				err = tx.store.rootFor(item.target.loc.root).Remove(item.target.loc.path)
 				if err != nil && !errors.Is(err, os.ErrNotExist) {
-					tx.closed = true
-
 					return err
 				}
 
@@ -58,8 +45,6 @@ func (tx *Transaction) Commit() error {
 		case txCreate, txUpdate, txVerify, txCreateSymbolic, txUpdateSymbolic, txVerifySymbolic:
 		}
 	}
-
-	tx.closed = true
 
 	return nil
 }

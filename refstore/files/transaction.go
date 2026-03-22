@@ -5,9 +5,8 @@ import (
 )
 
 type Transaction struct {
-	store  *Store
-	ops    []txOp
-	closed bool
+	store *Store
+	ops   []txOp
 }
 
 var _ refstore.Transaction = (*Transaction)(nil)
