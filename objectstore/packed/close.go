@@ -3,6 +3,7 @@ package packed
 // Close releases mapped pack/index resources associated with the store.
 //
 // Store borrows its root, so Close does not close it.
+// Close releases cached pack/index mappings retained by the store.
 //
 // Repeated calls to Close are undefined behavior.
 func (store *Store) Close() error {

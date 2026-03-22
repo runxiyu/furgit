@@ -11,6 +11,8 @@ import (
 )
 
 // Store reads Git objects from pack/index files under an objects/pack root.
+//
+// Store borrows its root. Cached pack/index mappings are retained until Close.
 type Store struct {
 	// root is the borrowed objects/pack capability used for all file access.
 	root *os.Root

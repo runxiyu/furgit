@@ -22,7 +22,12 @@ type candidateSnapshot struct {
 	candidateByPack map[string]packCandidate
 }
 
-// Refresh rescans objects/pack and atomically installs a fresh candidate list.
+// Refresh rescans objects/pack and atomically installs a fresh candidate list
+// for future lookups.
+//
+// Refresh does not invalidate existing readers. Cached pack/index mappings,
+// including ones for previously visible candidates, may be retained until
+// Close.
 func (store *Store) Refresh() error {
 	store.refreshMu.Lock()
 	defer store.refreshMu.Unlock()
