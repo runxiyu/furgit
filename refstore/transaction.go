@@ -4,6 +4,9 @@ import "codeberg.org/lindenii/furgit/objectid"
 
 // Transaction stages reference updates for one atomic commit.
 //
+// A transaction borrows its underlying store and is invalid after that store
+// is closed.
+//
 // Ordinary methods operate in dereference mode if name resolves to
 // a symbolic ref, the operation applies to the final referent rather
 // than to the symbolic ref itself.

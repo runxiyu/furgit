@@ -6,6 +6,9 @@ import "codeberg.org/lindenii/furgit/objectid"
 //
 // Unlike Transaction, Batch may reject some queued operations while still
 // applying others successfully when Apply runs.
+//
+// A batch borrows its underlying store and is invalid after that store is
+// closed.
 type Batch interface {
 	// Create creates one detached reference, requiring that the logical
 	// reference does not already exist.
