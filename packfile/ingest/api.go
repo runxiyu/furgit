@@ -68,6 +68,8 @@ type DiscardResult struct {
 }
 
 // Pending is one started ingest operation awaiting Continue or Discard.
+//
+// Exactly one of Continue or Discard may be called.
 type Pending struct {
 	reader    *bufio.Reader
 	algo      objectid.Algorithm
@@ -110,11 +112,13 @@ func (pending *Pending) Header() HeaderInfo {
 }
 
 // Continue ingests the pack stream into destination and writes pack artifacts.
+//
+// Continue is terminal. Further use of pending is undefined behavior.
+//
+// Artifacts are published under content-addressed final names derived from the
+// resulting pack hash. If those final names already exist, Continue treats that
+// as success and removes its temporary files.
 func (pending *Pending) Continue(destination *os.Root) (Result, error) {
-	if pending.finalized {
-		return Result{}, ErrAlreadyFinalized
-	}
-
 	pending.finalized = true
 
 	if pending.header.ObjectCount == 0 {
@@ -136,12 +140,11 @@ func (pending *Pending) Continue(destination *os.Root) (Result, error) {
 	return ingest(state)
 }
 
-// Discard consumes and verifies one zero-object pack stream without writing files.
+// Discard consumes and verifies one zero-object pack stream without writing
+// files.
+//
+// Discard is terminal. Further use of pending is undefined behavior.
 func (pending *Pending) Discard() (DiscardResult, error) {
-	if pending.finalized {
-		return DiscardResult{}, ErrAlreadyFinalized
-	}
-
 	pending.finalized = true
 
 	if pending.header.ObjectCount != 0 {
