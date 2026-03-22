@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"codeberg.org/lindenii/furgit/internal/compress/zlib"
-	"codeberg.org/lindenii/furgit/objectid"
 )
 
 const tempObjectFilePrefix = "tmp_obj_"
@@ -38,8 +37,6 @@ type streamWriter struct {
 
 	closed    bool
 	finalized bool
-	finalID   objectid.ObjectID
-	finalErr  error
 }
 
 // newStreamWriter creates a stream writer with a temp file rooted in objects/.

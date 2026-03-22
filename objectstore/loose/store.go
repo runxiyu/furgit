@@ -9,6 +9,10 @@ import (
 
 // Store reads loose Git objects from an objects directory root.
 //
+// Loose objects are zlib streams whose trailer uses Adler-32. Which reads
+// consume enough of the stream to reach and verify that trailer is documented
+// on the individual methods.
+//
 // Store owns root and closes it in Close.
 type Store struct {
 	// root is the objects directory capability used for all object file access.
@@ -32,6 +36,8 @@ func New(root *os.Root, algo objectid.Algorithm) (*Store, error) {
 }
 
 // Close releases resources associated with the backend.
+//
+// Repeated calls to Close are undefined behavior.
 func (store *Store) Close() error {
 	return store.root.Close()
 }

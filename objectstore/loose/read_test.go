@@ -11,6 +11,7 @@ import (
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
 	"codeberg.org/lindenii/furgit/objectstore/loose"
+	"codeberg.org/lindenii/furgit/objecttype"
 )
 
 func TestLooseStoreReadAgainstGit(t *testing.T) {
@@ -173,4 +174,38 @@ func TestLooseStoreNewValidation(t *testing.T) {
 	if err == nil {
 		t.Fatalf("loose.New(root, unknown) expected error")
 	}
+}
+
+func TestLooseStoreReadHeaderDoesNotVerifyAdler32(t *testing.T) {
+	t.Parallel()
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
+		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
+		store := openLooseStore(t, testRepo, algo)
+
+		content := []byte("header-only-check\n")
+		id, err := store.WriteBytesContent(objecttype.TypeBlob, content)
+		if err != nil {
+			t.Fatalf("WriteBytesContent: %v", err)
+		}
+
+		corruptLooseObjectTrailer(t, testRepo, id)
+
+		ty, size, err := store.ReadHeader(id)
+		if err != nil {
+			t.Fatalf("ReadHeader: %v", err)
+		}
+
+		if ty != objecttype.TypeBlob {
+			t.Fatalf("ReadHeader type = %v, want %v", ty, objecttype.TypeBlob)
+		}
+
+		if size != int64(len(content)) {
+			t.Fatalf("ReadHeader size = %d, want %d", size, len(content))
+		}
+
+		_, err = store.ReadBytesFull(id)
+		if err == nil {
+			t.Fatalf("ReadBytesFull on corrupted trailer succeeded")
+		}
+	})
 }

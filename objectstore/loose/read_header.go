@@ -9,6 +9,10 @@ import (
 )
 
 // ReadHeader reads an object's type and declared content length.
+//
+// It parses only enough of the zlib-decoded object to recover the object
+// header. It does not verify that the remaining object content is readable and
+// does not verify the zlib Adler-32 trailer.
 func (store *Store) ReadHeader(id objectid.ObjectID) (objecttype.Type, int64, error) {
 	file, err := store.openObject(id)
 	if err != nil {

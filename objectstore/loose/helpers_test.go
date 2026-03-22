@@ -2,6 +2,7 @@ package loose_test
 
 import (
 	"io"
+	"os"
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
@@ -64,4 +65,42 @@ func expectedRawObject(t *testing.T, testRepo *testgit.TestRepo, id objectid.Obj
 	copy(raw[len(header):], body)
 
 	return ty, body, raw
+}
+
+func corruptLooseObjectTrailer(t *testing.T, testRepo *testgit.TestRepo, id objectid.ObjectID) {
+	t.Helper()
+
+	root := testRepo.OpenObjectsRoot(t)
+
+	hex := id.String()
+	relPath := hex[:2] + "/" + hex[2:]
+
+	file, err := root.OpenFile(relPath, os.O_RDWR, 0)
+	if err != nil {
+		t.Fatalf("OpenFile(%q): %v", relPath, err)
+	}
+
+	defer func() { _ = file.Close() }()
+
+	info, err := file.Stat()
+	if err != nil {
+		t.Fatalf("Stat(%q): %v", relPath, err)
+	}
+
+	if info.Size() == 0 {
+		t.Fatalf("corrupt trailer on empty file %q", relPath)
+	}
+
+	last := make([]byte, 1)
+	_, err = file.ReadAt(last, info.Size()-1)
+	if err != nil {
+		t.Fatalf("ReadAt(%q): %v", relPath, err)
+	}
+
+	last[0] ^= 0xff
+
+	_, err = file.WriteAt(last, info.Size()-1)
+	if err != nil {
+		t.Fatalf("WriteAt(%q): %v", relPath, err)
+	}
 }

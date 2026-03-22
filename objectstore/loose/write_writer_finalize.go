@@ -9,17 +9,14 @@ import (
 )
 
 // Close flushes and closes the underlying zlib stream and temp file.
-// It is safe to call multiple times.
+//
+// Repeated calls to Close are undefined behavior.
 func (writer *streamWriter) Close() error {
-	if writer.closed {
-		return nil
-	}
-
-	writer.closed = true
-
 	errZlib := writer.zw.Close()
 	errSync := writer.file.Sync()
 	errFile := writer.file.Close()
+
+	writer.closed = true
 	writer.file = nil
 
 	return errors.Join(errZlib, errSync, errFile)
@@ -29,10 +26,6 @@ func (writer *streamWriter) Close() error {
 // Publication is no-clobber: it links tmpRelPath to the object path and treats
 // existing destination objects as success.
 func (writer *streamWriter) finalize() (objectid.ObjectID, error) {
-	if writer.finalized {
-		return writer.finalID, writer.finalErr
-	}
-
 	writer.finalized = true
 
 	var zero objectid.ObjectID
@@ -40,37 +33,27 @@ func (writer *streamWriter) finalize() (objectid.ObjectID, error) {
 	if !writer.closed {
 		err := writer.Close()
 		if err != nil {
-			writer.finalErr = err
-
 			return zero, err
 		}
 	}
 
 	if writer.fullMode && !writer.headerDone {
-		writer.finalErr = errors.New("objectstore/loose: missing full object header")
-
-		return zero, writer.finalErr
+		return zero, errors.New("objectstore/loose: missing full object header")
 	}
 
 	if writer.expectedContentLeft != 0 {
-		writer.finalErr = errors.New("objectstore/loose: object content shorter than declared size")
-
-		return zero, writer.finalErr
+		return zero, errors.New("objectstore/loose: object content shorter than declared size")
 	}
 
 	idBytes := writer.hash.Sum(nil)
 
 	id, err := objectid.FromBytes(writer.store.algo, idBytes)
 	if err != nil {
-		writer.finalErr = err
-
 		return zero, err
 	}
 
 	relPath, err := writer.store.objectPath(id)
 	if err != nil {
-		writer.finalErr = err
-
 		return zero, err
 	}
 
@@ -78,8 +61,6 @@ func (writer *streamWriter) finalize() (objectid.ObjectID, error) {
 
 	err = writer.store.root.MkdirAll(dir, 0o755)
 	if err != nil {
-		writer.finalErr = err
-
 		return zero, err
 	}
 
@@ -94,19 +75,15 @@ func (writer *streamWriter) finalize() (objectid.ObjectID, error) {
 	err = writer.store.root.Link(writer.tmpRelPath, relPath)
 	if err != nil {
 		if errors.Is(err, fs.ErrExist) {
-			writer.finalID = id
 			cleanup = false
 			_ = writer.store.root.Remove(writer.tmpRelPath)
 
 			return id, nil
 		}
 
-		writer.finalErr = err
-
 		return zero, err
 	}
 
-	writer.finalID = id
 	cleanup = false
 
 	return id, nil

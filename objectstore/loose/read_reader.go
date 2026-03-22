@@ -52,7 +52,13 @@ func (store *Store) openInflated(id objectid.ObjectID) (*os.File, io.ReadCloser,
 }
 
 // ReadReaderFull reads a full serialized object stream as "type size\0content".
+//
 // The caller must close the returned reader.
+//
+// Close releases resources only. It does not drain unread data for additional
+// validation. In particular, malformed trailing compressed data, trailing bytes
+// past the declared object size, and the zlib Adler-32 trailer may go
+// unverified unless the caller reads to io.EOF.
 func (store *Store) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) {
 	file, zr, err := store.openInflated(id)
 	if err != nil {
@@ -79,8 +85,15 @@ func (store *Store) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) 
 	}, nil
 }
 
-// ReadReaderContent reads an object's type, declared content length, and content stream.
+// ReadReaderContent reads an object's type, declared content length, and
+// content stream.
+//
 // The caller must close the returned reader.
+//
+// Close releases resources only. It does not drain unread data for additional
+// validation. In particular, malformed trailing compressed data, trailing bytes
+// past the declared object size, and the zlib Adler-32 trailer may go
+// unverified unless the caller reads to io.EOF.
 func (store *Store) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, int64, io.ReadCloser, error) {
 	file, zr, err := store.openInflated(id)
 	if err != nil {
