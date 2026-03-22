@@ -13,59 +13,82 @@ import (
 )
 
 //nolint:ireturn
-func openObjectStore(root *os.Root, algo objectid.Algorithm) (objectstore.Store, *objectloose.Store, error) {
-	objectsRoot, err := root.OpenRoot("objects")
+func openObjectStore(
+	root *os.Root,
+	algo objectid.Algorithm,
+) (
+	objects objectstore.Store,
+	objectsRoot *os.Root,
+	objectsPackRoot *os.Root,
+	objectsLooseForWritingOnly *objectloose.Store,
+	objectsWriteRoot *os.Root,
+	err error,
+) {
+	objectsRoot, err = root.OpenRoot("objects")
 	if err != nil {
-		return nil, nil, fmt.Errorf("repository: open objects: %w", err)
+		return nil, nil, nil, nil, nil, fmt.Errorf("repository: open objects: %w", err)
 	}
 
 	looseStore, err := objectloose.New(objectsRoot, algo)
 	if err != nil {
-		return nil, nil, err
+		_ = objectsRoot.Close()
+
+		return nil, nil, nil, nil, nil, err
 	}
 
 	backends := []objectstore.Store{looseStore}
+	objectsPackRoot, err = objectsRoot.OpenRoot("pack")
 
-	packRoot, err := objectsRoot.OpenRoot("pack")
 	if err == nil {
 		var packedStore *objectpacked.Store
 
 		packedStore, err = objectpacked.New(
-			packRoot,
+			objectsPackRoot,
 			algo,
 			objectpacked.Options{RefreshPolicy: objectpacked.RefreshPolicyNever},
 		)
 		if err != nil {
+			_ = objectsPackRoot.Close()
 			_ = looseStore.Close()
+			_ = objectsRoot.Close()
 
-			return nil, nil, err
+			return nil, nil, nil, nil, nil, err
 		}
 
 		backends = append(backends, packedStore)
 	} else if !errors.Is(err, os.ErrNotExist) {
 		_ = looseStore.Close()
+		_ = objectsRoot.Close()
 
-		return nil, nil, fmt.Errorf("repository: open objects/pack: %w", err)
+		return nil, nil, nil, nil, nil, fmt.Errorf("repository: open objects/pack: %w", err)
 	}
 
-	objectsChain := objectmix.New(backends...)
+	objects = objectmix.New(backends...)
 
-	objectsRootForWriting, err := root.OpenRoot("objects")
+	objectsWriteRoot, err = root.OpenRoot("objects")
 	if err != nil {
-		_ = objectsChain.Close()
+		_ = objects.Close()
+		if objectsPackRoot != nil {
+			_ = objectsPackRoot.Close()
+		}
+		_ = objectsRoot.Close()
 
-		return nil, nil, fmt.Errorf("repository: open objects for loose writing: %w", err)
+		return nil, nil, nil, nil, nil, fmt.Errorf("repository: open objects for loose writing: %w", err)
 	}
 
-	objectsLooseForWritingOnly, err := objectloose.New(objectsRootForWriting, algo)
+	objectsLooseForWritingOnly, err = objectloose.New(objectsWriteRoot, algo)
 	if err != nil {
-		_ = objectsRootForWriting.Close()
-		_ = objectsChain.Close()
+		_ = objects.Close()
+		_ = objectsWriteRoot.Close()
+		if objectsPackRoot != nil {
+			_ = objectsPackRoot.Close()
+		}
+		_ = objectsRoot.Close()
 
-		return nil, nil, err
+		return nil, nil, nil, nil, nil, err
 	}
 
-	return objectsChain, objectsLooseForWritingOnly, nil
+	return objects, objectsRoot, objectsPackRoot, objectsLooseForWritingOnly, objectsWriteRoot, nil
 }
 
 // Objects returns the configured object store.

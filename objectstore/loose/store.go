@@ -12,12 +12,10 @@ import (
 // Loose objects are zlib streams whose trailer uses Adler-32. Which reads
 // consume enough of the stream to reach and verify that trailer is documented
 // on the individual methods.
-//
-// Store owns root and closes it in Close.
 type Store struct {
 	// root is the objects directory capability used for all object file access.
 	// Object files are opened by relative paths like "<first2>/<rest>".
-	// Store owns this root.
+	// Store borrows this root.
 	root *os.Root
 	// algo is the expected object ID algorithm for lookups.
 	algo objectid.Algorithm
@@ -37,7 +35,7 @@ func New(root *os.Root, algo objectid.Algorithm) (*Store, error) {
 
 // Close releases resources associated with the backend.
 //
+// Store borrows its root, so Close does not close it.
+//
 // Repeated calls to Close are undefined behavior.
-func (store *Store) Close() error {
-	return store.root.Close()
-}
+func (store *Store) Close() error { return nil }

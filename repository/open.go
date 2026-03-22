@@ -28,13 +28,16 @@ func Open(root *os.Root) (repo *Repository, err error) {
 
 	repo.algo = algo
 
-	objects, objectsLooseForWritingOnly, err := openObjectStore(root, algo)
+	objects, objectsRoot, objectsPackRoot, objectsLooseForWritingOnly, objectsWriteRoot, err := openObjectStore(root, algo)
 	if err != nil {
 		return nil, err
 	}
 
 	repo.objects = objects
+	repo.objectsRoot = objectsRoot
+	repo.objectsPackRoot = objectsPackRoot
 	repo.objectsLooseForWritingOnly = objectsLooseForWritingOnly
+	repo.objectsWriteRoot = objectsWriteRoot
 
 	refs, err := openRefStore(root, algo, detectPackedRefsTimeout(cfg))
 	if err != nil {

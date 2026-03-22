@@ -14,6 +14,11 @@ import (
 
 // createQuarantineRoot creates one per-push quarantine directory beneath the
 // permanent objects root.
+//
+// It returns both the quarantine directory name relative to ObjectsRoot and an
+// opened root for that directory. Callers use the name for later promotion or
+// removal relative to ObjectsRoot, and use the opened root for capability-based
+// access within the quarantine itself.
 func (service *Service) createQuarantineRoot() (string, *os.Root, error) {
 	name := "tmp_objdir-incoming-" + rand.Text()
 

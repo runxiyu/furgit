@@ -28,5 +28,26 @@ func (repo *Repository) Close() error {
 		}
 	}
 
+	if repo.objectsWriteRoot != nil {
+		err := repo.objectsWriteRoot.Close()
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if repo.objectsPackRoot != nil {
+		err := repo.objectsPackRoot.Close()
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if repo.objectsRoot != nil {
+		err := repo.objectsRoot.Close()
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
 	return errors.Join(errs...)
 }

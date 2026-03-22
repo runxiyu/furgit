@@ -2,6 +2,8 @@
 package repository
 
 import (
+	"os"
+
 	"codeberg.org/lindenii/furgit/config"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
@@ -18,6 +20,9 @@ type Repository struct {
 	algo   objectid.Algorithm
 
 	objects                    objectstore.Store
+	objectsRoot                *os.Root
+	objectsPackRoot            *os.Root
 	objectsLooseForWritingOnly *objectloose.Store
+	objectsWriteRoot           *os.Root
 	refs                       refstore.ReadWriteStore
 }

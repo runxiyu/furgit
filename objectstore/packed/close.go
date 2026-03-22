@@ -2,10 +2,11 @@ package packed
 
 // Close releases mapped pack/index resources associated with the store.
 //
+// Store borrows its root, so Close does not close it.
+//
 // Repeated calls to Close are undefined behavior.
 func (store *Store) Close() error {
 	store.stateMu.Lock()
-	root := store.root
 	packs := store.packs
 	store.stateMu.Unlock()
 	store.idxMu.RLock()
@@ -31,11 +32,6 @@ func (store *Store) Close() error {
 	store.cacheMu.Lock()
 	store.deltaCache.clear()
 	store.cacheMu.Unlock()
-
-	err := root.Close()
-	if err != nil && closeErr == nil {
-		closeErr = err
-	}
 
 	return closeErr
 }

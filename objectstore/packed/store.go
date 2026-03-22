@@ -11,10 +11,8 @@ import (
 )
 
 // Store reads Git objects from pack/index files under an objects/pack root.
-//
-// Store owns root and closes it in Close.
 type Store struct {
-	// root is the objects/pack capability used for all file access.
+	// root is the borrowed objects/pack capability used for all file access.
 	root *os.Root
 	// algo is the expected object ID algorithm for lookups.
 	algo objectid.Algorithm
