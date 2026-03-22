@@ -30,6 +30,9 @@ type UpdateDecision struct {
 
 // HookRequest is the input presented to a receive-pack hook before quarantine
 // promotion and ref updates.
+//
+// Refs, ExistingObjects, and QuarantinedObjects are borrowed and are only
+// valid for the duration of the hook call.
 type HookRequest struct {
 	Refs               refstore.ReadingStore
 	ExistingObjects    objectstore.Store
@@ -43,7 +46,8 @@ type HookRequest struct {
 //
 // The hook runs after pack ingestion into quarantine and before quarantine
 // promotion or ref updates. The returned decisions must have the same length as
-// HookRequest.Updates.
+// HookRequest.Updates. Hook borrows the data and stores in HookRequest only for
+// the duration of the call.
 type Hook func(context.Context, HookRequest) ([]UpdateDecision, error)
 
 func translateHook(hook Hook) service.Hook {

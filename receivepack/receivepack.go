@@ -19,6 +19,9 @@ import (
 // feels a bit ugly.
 
 // ReceivePack serves one receive-pack session over r/w.
+//
+// ReceivePack borrows r, w, and all dependencies reachable through opts for
+// the duration of the call. It does not close any of them.
 func ReceivePack(
 	ctx context.Context,
 	w pktline.WriteFlusher,

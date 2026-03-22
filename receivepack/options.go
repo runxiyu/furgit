@@ -9,6 +9,12 @@ import (
 )
 
 // Options configures one receive-pack invocation.
+//
+// ReceivePack borrows all configured dependencies.
+//
+// Refs and ExistingObjects are required and must be non-nil.
+// ObjectsRoot is required if the invocation may need to ingest or promote a
+// pack.
 type Options struct {
 	// GitProtocol is the raw Git protocol version string from the transport,
 	// such as "version=1".
@@ -27,7 +33,8 @@ type Options struct {
 	// directories moved from quarantine into the permanent object store.
 	PromotedObjectPermissions *PromotedObjectPermissions
 	// Hook, when non-nil, runs after pack ingestion into quarantine and before
-	// quarantine promotion or ref updates.
+	// quarantine promotion or ref updates. Hook is borrowed for the duration of
+	// ReceivePack.
 	Hook Hook
 	// Agent is the receive-pack agent string advertised via capability.
 	//
