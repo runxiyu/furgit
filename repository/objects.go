@@ -37,8 +37,8 @@ func openObjectStore(
 	}
 
 	backends := []objectstore.Store{looseStore}
-	objectsPackRoot, err = objectsRoot.OpenRoot("pack")
 
+	objectsPackRoot, err = objectsRoot.OpenRoot("pack")
 	if err == nil {
 		var packedStore *objectpacked.Store
 
@@ -71,6 +71,7 @@ func openObjectStore(
 		if objectsPackRoot != nil {
 			_ = objectsPackRoot.Close()
 		}
+
 		_ = objectsRoot.Close()
 
 		return nil, nil, nil, nil, nil, fmt.Errorf("repository: open objects for loose writing: %w", err)
@@ -79,10 +80,12 @@ func openObjectStore(
 	objectsLooseForWritingOnly, err = objectloose.New(objectsWriteRoot, algo)
 	if err != nil {
 		_ = objects.Close()
+
 		_ = objectsWriteRoot.Close()
 		if objectsPackRoot != nil {
 			_ = objectsPackRoot.Close()
 		}
+
 		_ = objectsRoot.Close()
 
 		return nil, nil, nil, nil, nil, err

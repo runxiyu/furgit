@@ -92,6 +92,7 @@ func corruptLooseObjectTrailer(t *testing.T, testRepo *testgit.TestRepo, id obje
 	}
 
 	last := make([]byte, 1)
+
 	_, err = file.ReadAt(last, info.Size()-1)
 	if err != nil {
 		t.Fatalf("ReadAt(%q): %v", relPath, err)

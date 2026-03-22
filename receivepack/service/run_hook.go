@@ -38,6 +38,7 @@ func (service *Service) runHook(
 	utils.BestEffortFprintf(service.opts.Progress, "running hooks...\r")
 
 	quarantinedObjects := service.opts.ExistingObjects
+
 	var (
 		quarantineObjectsStore objectstore.Store
 		quarantineLooseRoot    *os.Root
@@ -56,6 +57,7 @@ func (service *Service) runHook(
 		quarantineLooseStore, err := loose.New(quarantineLooseRoot, service.opts.Algorithm)
 		if err != nil {
 			_ = quarantineLooseRoot.Close()
+
 			utils.BestEffortFprintf(service.opts.Progress, "running hooks: failed: %v.\n", err)
 
 			return nil, nil, nil, false, err.Error()
@@ -71,6 +73,7 @@ func (service *Service) runHook(
 				_ = quarantineLooseStore.Close()
 				_ = quarantinePackRoot.Close()
 				_ = quarantineLooseRoot.Close()
+
 				utils.BestEffortFprintf(service.opts.Progress, "running hooks: failed: %v.\n", packedErr)
 
 				return nil, nil, nil, false, packedErr.Error()
@@ -81,6 +84,7 @@ func (service *Service) runHook(
 		} else if !os.IsNotExist(err) {
 			_ = quarantineLooseStore.Close()
 			_ = quarantineLooseRoot.Close()
+
 			utils.BestEffortFprintf(service.opts.Progress, "running hooks: failed: %v.\n", err)
 
 			return nil, nil, nil, false, err.Error()

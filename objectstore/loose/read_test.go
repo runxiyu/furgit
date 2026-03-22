@@ -183,6 +183,7 @@ func TestLooseStoreReadHeaderDoesNotVerifyAdler32(t *testing.T) {
 		store := openLooseStore(t, testRepo, algo)
 
 		content := []byte("header-only-check\n")
+
 		id, err := store.WriteBytesContent(objecttype.TypeBlob, content)
 		if err != nil {
 			t.Fatalf("WriteBytesContent: %v", err)
