@@ -49,5 +49,12 @@ func (repo *Repository) Close() error {
 		}
 	}
 
+	if repo.refRoot != nil {
+		err := repo.refRoot.Close()
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
 	return errors.Join(errs...)
 }

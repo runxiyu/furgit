@@ -37,7 +37,11 @@ type Transaction interface {
 	VerifySymbolic(name, oldTarget string) error
 
 	// Commit validates and applies all queued operations atomically.
+	//
+	// Commit is terminal. Further use of the transaction is undefined behavior.
 	Commit() error
 	// Abort abandons the transaction and releases any resources it holds.
+	//
+	// Abort is terminal. Further use of the transaction is undefined behavior.
 	Abort() error
 }

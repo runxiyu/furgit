@@ -24,5 +24,6 @@ type Repository struct {
 	objectsPackRoot            *os.Root
 	objectsLooseForWritingOnly *objectloose.Store
 	objectsWriteRoot           *os.Root
+	refRoot                    *os.Root
 	refs                       refstore.ReadWriteStore
 }

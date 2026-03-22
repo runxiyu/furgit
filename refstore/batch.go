@@ -34,8 +34,12 @@ type Batch interface {
 
 	// Apply validates and applies queued operations, returning one result per
 	// queued operation in order. Fatal backend failures are returned separately.
+	//
+	// Apply is terminal. Further use of the batch is undefined behavior.
 	Apply() ([]BatchResult, error)
 	// Abort abandons the batch and releases any resources it holds.
+	//
+	// Abort is terminal. Further use of the batch is undefined behavior.
 	Abort() error
 }
 

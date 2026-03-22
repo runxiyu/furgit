@@ -25,5 +25,8 @@ type ReadingStore interface {
 	// The exact pattern language is backend-defined.
 	List(pattern string) ([]ref.Ref, error)
 	// Close releases resources associated with the store.
+	//
+	// Repeated calls to Close are undefined behavior unless the implementation
+	// explicitly documents otherwise.
 	Close() error
 }

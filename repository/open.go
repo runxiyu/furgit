@@ -1,6 +1,11 @@
 package repository
 
-import "os"
+import (
+	"fmt"
+	"os"
+
+	reffiles "codeberg.org/lindenii/furgit/refstore/files"
+)
 
 // Open opens a repository and wires object/ref stores from its on-disk format.
 //
@@ -39,12 +44,20 @@ func Open(root *os.Root) (repo *Repository, err error) {
 	repo.objectsLooseForWritingOnly = objectsLooseForWritingOnly
 	repo.objectsWriteRoot = objectsWriteRoot
 
-	refs, err := openRefStore(root, algo, detectPackedRefsTimeout(cfg))
+	refRoot, err := root.OpenRoot(".")
 	if err != nil {
+		return nil, fmt.Errorf("repository: open root for refs: %w", err)
+	}
+
+	refs, err := reffiles.New(refRoot, algo, detectPackedRefsTimeout(cfg))
+	if err != nil {
+		_ = refRoot.Close()
+
 		return nil, err
 	}
 
 	repo.refs = refs
+	repo.refRoot = refRoot
 
 	return repo, nil
 }

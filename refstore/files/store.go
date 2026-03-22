@@ -14,7 +14,8 @@ import (
 // Store reads and writes one Git files ref namespace rooted at one repository
 // gitdir plus its commondir.
 //
-// Store owns both roots and closes them in Close.
+// Store borrows gitRoot and owns commonRoot. Close releases only resources
+// opened by the store itself.
 type Store struct {
 	gitRoot    *os.Root
 	commonRoot *os.Root
