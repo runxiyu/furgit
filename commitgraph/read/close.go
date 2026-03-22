@@ -1,6 +1,8 @@
 package read
 
 // Close releases all mapped commit-graph files.
+//
+// Repeated calls to Close are undefined behavior.
 func (reader *Reader) Close() error {
 	var closeErr error
 

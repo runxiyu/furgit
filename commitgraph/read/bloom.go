@@ -38,20 +38,23 @@ func (reader *Reader) BloomVersion() uint8 {
 
 // BloomFilterAt returns one commit's changed-path Bloom filter.
 //
+// The returned filter borrows reader-owned mapped commit-graph data and is
+// only valid until the reader is closed.
+//
 // Returns BloomUnavailableError when this commit graph has no Bloom data.
-func (reader *Reader) BloomFilterAt(pos Position) (*bloom.Filter, error) {
+func (reader *Reader) BloomFilterAt(pos Position) (bloom.Filter, error) {
 	layer, err := reader.layerByPosition(pos)
 	if err != nil {
-		return nil, err
+		return bloom.Filter{}, err
 	}
 
 	if layer.chunkBloomIndex == nil || layer.chunkBloomData == nil || layer.bloomSettings == nil {
-		return nil, &BloomUnavailableError{Pos: pos}
+		return bloom.Filter{}, &BloomUnavailableError{Pos: pos}
 	}
 
 	start, end, err := bloomRange(layer, pos.Index)
 	if err != nil {
-		return nil, err
+		return bloom.Filter{}, err
 	}
 
 	filter := bloom.NewFilter(

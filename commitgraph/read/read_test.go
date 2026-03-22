@@ -282,7 +282,7 @@ func commitParents(tb testing.TB, reader *read.Reader, commit read.Commit) []obj
 	return out
 }
 
-func assertChangedPathsBloomPositive(tb testing.TB, testRepo *testgit.TestRepo, filter *bloom.Filter, commitID objectid.ObjectID) {
+func assertChangedPathsBloomPositive(tb testing.TB, testRepo *testgit.TestRepo, filter bloom.Filter, commitID objectid.ObjectID) {
 	tb.Helper()
 
 	changedPaths := testRepo.Run(tb, "diff-tree", "--no-commit-id", "--name-only", "-r", "--root", commitID.String())

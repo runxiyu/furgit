@@ -15,14 +15,12 @@ type Filter struct {
 }
 
 // NewFilter constructs one query-ready bloom filter from raw data/settings.
-func NewFilter(data []byte, settings Settings) *Filter {
-	out := &Filter{
+func NewFilter(data []byte, settings Settings) Filter {
+	return Filter{
 		Data:           data,
 		HashVersion:    settings.HashVersion,
 		NumHashes:      settings.NumHashes,
 		BitsPerEntry:   settings.BitsPerEntry,
 		MaxChangePaths: settings.MaxChangePaths,
 	}
-
-	return out
 }
