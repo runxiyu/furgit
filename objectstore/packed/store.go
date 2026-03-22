@@ -46,8 +46,6 @@ type Store struct {
 	packs map[string]*packFile
 	// deltaCache caches resolved base objects by pack location.
 	deltaCache *deltaCache
-	// closed reports whether Close has been called.
-	closed bool
 }
 
 var _ objectstore.Store = (*Store)(nil)

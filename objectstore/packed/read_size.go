@@ -9,6 +9,10 @@ import (
 )
 
 // ReadSize reads an object's declared content size.
+//
+// Like ReadHeader, it resolves header metadata only. It does not verify that
+// the full pack entry payload is readable and does not verify any zlib
+// Adler-32 trailer for compressed entry data.
 func (store *Store) ReadSize(id objectid.ObjectID) (int64, error) {
 	loc, err := store.lookup(id)
 	if err != nil {

@@ -1,16 +1,10 @@
 package packed
 
 // Close releases mapped pack/index resources associated with the store.
+//
+// Repeated calls to Close are undefined behavior.
 func (store *Store) Close() error {
 	store.stateMu.Lock()
-
-	if store.closed {
-		store.stateMu.Unlock()
-
-		return nil
-	}
-
-	store.closed = true
 	root := store.root
 	packs := store.packs
 	store.stateMu.Unlock()

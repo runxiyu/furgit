@@ -177,11 +177,6 @@ func TestPackedStoreNewValidation(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Close: %v", err)
 		}
-
-		err = store.Close()
-		if err != nil {
-			t.Fatalf("Close second: %v", err)
-		}
 	})
 }
 

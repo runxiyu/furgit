@@ -19,6 +19,9 @@ import (
 var ErrObjectNotFound = errors.New("objectstore: object not found")
 
 // Store reads Git objects by object ID.
+//
+// Unless an implementation explicitly documents otherwise, values returned by
+// Store methods are only valid until the store is closed.
 type Store interface {
 	// ReadBytesFull reads a full serialized object as "type size\0content".
 	//
@@ -39,6 +42,7 @@ type Store interface {
 	// ReadReaderFull reads a full serialized object stream as "type size\0content".
 	//
 	// Caller must close the returned reader.
+	// The returned reader is only valid until the store is closed.
 	//
 	// Any read-time integrity verification performed while producing the stream
 	// is implementation-defined.
@@ -48,6 +52,7 @@ type Store interface {
 	// and content stream.
 	//
 	// Caller must close the returned reader.
+	// The returned reader is only valid until the store is closed.
 	//
 	// Any read-time integrity verification performed while producing the stream
 	// is implementation-defined.
