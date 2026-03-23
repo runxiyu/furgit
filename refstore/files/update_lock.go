@@ -5,8 +5,8 @@ import (
 	"path"
 )
 
-func (tx *Transaction) createLock(name refPath) error {
-	root := tx.store.rootFor(name.root)
+func (executor *refUpdateExecutor) createUpdateLock(name refPath) error {
+	root := executor.store.rootFor(name.root)
 	dir := path.Dir(name.path)
 
 	if dir != "." {

@@ -46,8 +46,19 @@ type Batch interface {
 	Abort() error
 }
 
+// BatchStatus reports the outcome for one queued batch operation.
+type BatchStatus uint8
+
+const (
+	BatchStatusApplied BatchStatus = iota
+	BatchStatusRejected
+	BatchStatusFatal
+	BatchStatusNotAttempted
+)
+
 // BatchResult reports the outcome for one queued batch operation.
 type BatchResult struct {
-	Name  string
-	Error error
+	Name   string
+	Status BatchStatus
+	Error  error
 }

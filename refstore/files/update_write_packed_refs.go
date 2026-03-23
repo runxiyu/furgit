@@ -5,8 +5,8 @@ import (
 	"os"
 )
 
-func (tx *Transaction) applyPackedDeletes(prepared []preparedTxOp) error {
-	_, err := tx.store.commonRoot.Stat("packed-refs.lock")
+func (executor *refUpdateExecutor) applyPackedRefDeletes(prepared []preparedUpdate) error {
+	_, err := executor.store.commonRoot.Stat("packed-refs.lock")
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return nil
@@ -15,7 +15,7 @@ func (tx *Transaction) applyPackedDeletes(prepared []preparedTxOp) error {
 		return err
 	}
 
-	packed, err := tx.store.readPackedRefs()
+	packed, err := executor.store.readPackedRefs()
 	if err != nil {
 		return err
 	}
@@ -24,7 +24,7 @@ func (tx *Transaction) applyPackedDeletes(prepared []preparedTxOp) error {
 	needed := false
 
 	for _, item := range prepared {
-		if item.op.kind != txDelete && item.op.kind != txDeleteSymbolic {
+		if item.op.kind != updateDelete && item.op.kind != updateDeleteSymbolic {
 			continue
 		}
 
@@ -38,7 +38,7 @@ func (tx *Transaction) applyPackedDeletes(prepared []preparedTxOp) error {
 		return nil
 	}
 
-	lock, err := tx.store.commonRoot.OpenFile("packed-refs.new", os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+	lock, err := executor.store.commonRoot.OpenFile("packed-refs.new", os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (tx *Transaction) applyPackedDeletes(prepared []preparedTxOp) error {
 			return
 		}
 
-		_ = tx.store.commonRoot.Remove("packed-refs.new")
+		_ = executor.store.commonRoot.Remove("packed-refs.new")
 	}()
 
 	_, err = lock.WriteString("# pack-refs with: peeled fully-peeled sorted\n")
@@ -87,7 +87,7 @@ func (tx *Transaction) applyPackedDeletes(prepared []preparedTxOp) error {
 		return err
 	}
 
-	err = tx.store.commonRoot.Rename("packed-refs.new", "packed-refs")
+	err = executor.store.commonRoot.Rename("packed-refs.new", "packed-refs")
 	if err != nil {
 		return err
 	}

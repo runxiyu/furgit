@@ -6,7 +6,7 @@ import (
 
 type Transaction struct {
 	store *Store
-	ops   []txOp
+	ops   []queuedUpdate
 }
 
 var _ refstore.Transaction = (*Transaction)(nil)

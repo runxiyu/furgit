@@ -1,8 +1,9 @@
 package files
 
 import (
-	"fmt"
 	"strings"
+
+	"codeberg.org/lindenii/furgit/refstore"
 )
 
 func verifyRefnameAvailable(name string, existing map[string]struct{}, writes []string, deleted map[string]struct{}) error {
@@ -16,7 +17,7 @@ func verifyRefnameAvailable(name string, existing map[string]struct{}, writes []
 		}
 
 		if refnamesConflict(name, existingName) {
-			return fmt.Errorf("refstore/files: reference name conflict between %q and %q", name, existingName)
+			return wrapUpdateError(name, &refstore.NameConflictError{Other: existingName})
 		}
 	}
 
@@ -26,7 +27,7 @@ func verifyRefnameAvailable(name string, existing map[string]struct{}, writes []
 		}
 
 		if refnamesConflict(name, other) {
-			return fmt.Errorf("refstore/files: reference name conflict between %q and %q", name, other)
+			return wrapUpdateError(name, &refstore.NameConflictError{Other: other})
 		}
 	}
 

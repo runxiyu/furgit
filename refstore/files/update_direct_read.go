@@ -9,24 +9,24 @@ import (
 	"codeberg.org/lindenii/furgit/refstore"
 )
 
-func (tx *Transaction) directRead(name string) (directRef, error) {
-	loc := tx.store.loosePath(name)
+func (executor *refUpdateExecutor) directRead(name string) (directRefState, error) {
+	loc := executor.store.loosePath(name)
 	hasPacked := false
 
 	if loc.root == rootCommon && refname.ParseWorktree(name).Type == refname.WorktreeShared {
-		packed, packedErr := tx.store.readPackedRefs()
+		packed, packedErr := executor.store.readPackedRefs()
 		if packedErr != nil {
-			return directRef{}, packedErr
+			return directRefState{}, packedErr
 		}
 
 		_, hasPacked = packed.byName[name]
 	}
 
-	loose, err := tx.store.readLooseRef(name)
+	loose, err := executor.store.readLooseRef(name)
 	if err == nil {
 		switch loose := loose.(type) {
 		case ref.Detached:
-			return directRef{
+			return directRefState{
 				kind:     directDetached,
 				name:     name,
 				id:       loose.ID,
@@ -34,7 +34,7 @@ func (tx *Transaction) directRead(name string) (directRef, error) {
 				isPacked: hasPacked,
 			}, nil
 		case ref.Symbolic:
-			return directRef{
+			return directRefState{
 				kind:     directSymbolic,
 				name:     name,
 				target:   loose.Target,
@@ -42,26 +42,26 @@ func (tx *Transaction) directRead(name string) (directRef, error) {
 				isPacked: hasPacked,
 			}, nil
 		default:
-			return directRef{}, fmt.Errorf("refstore/files: unsupported reference type %T", loose)
+			return directRefState{}, fmt.Errorf("refstore/files: unsupported reference type %T", loose)
 		}
 	}
 
 	if !errors.Is(err, refstore.ErrReferenceNotFound) {
-		info, statErr := tx.store.rootFor(loc.root).Stat(loc.path)
+		info, statErr := executor.store.rootFor(loc.root).Stat(loc.path)
 		if statErr != nil || !info.IsDir() {
-			return directRef{}, err
+			return directRefState{}, err
 		}
 	}
 
 	if hasPacked {
-		packed, packedErr := tx.store.readPackedRefs()
+		packed, packedErr := executor.store.readPackedRefs()
 		if packedErr != nil {
-			return directRef{}, packedErr
+			return directRefState{}, packedErr
 		}
 
 		detached := packed.byName[name]
 
-		return directRef{
+		return directRefState{
 			kind:     directDetached,
 			name:     name,
 			id:       detached.ID,
@@ -69,7 +69,7 @@ func (tx *Transaction) directRead(name string) (directRef, error) {
 		}, nil
 	}
 
-	return directRef{
+	return directRefState{
 		kind: directMissing,
 		name: name,
 	}, nil

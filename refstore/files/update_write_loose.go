@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-func (tx *Transaction) writeLoose(item preparedTxOp) error {
-	root := tx.store.rootFor(item.target.loc.root)
+func (executor *refUpdateExecutor) writePreparedLooseUpdate(item preparedUpdate) error {
+	root := executor.store.rootFor(item.target.loc.root)
 	lockName := item.target.loc.path + ".lock"
 
 	lock, err := root.OpenFile(lockName, os.O_WRONLY|os.O_TRUNC, 0o644)
@@ -19,11 +19,11 @@ func (tx *Transaction) writeLoose(item preparedTxOp) error {
 	var content string
 
 	switch item.op.kind {
-	case txCreate, txUpdate:
+	case updateCreate, updateReplace:
 		content = item.op.newID.String() + "\n"
-	case txCreateSymbolic, txUpdateSymbolic:
+	case updateCreateSymbolic, updateReplaceSymbolic:
 		content = "ref: " + strings.TrimSpace(item.op.newTarget) + "\n"
-	case txDelete, txVerify, txDeleteSymbolic, txVerifySymbolic:
+	case updateDelete, updateVerify, updateDeleteSymbolic, updateVerifySymbolic:
 	default:
 		_ = lock.Close()
 
@@ -50,7 +50,7 @@ func (tx *Transaction) writeLoose(item preparedTxOp) error {
 		}
 	}
 
-	err = tx.removeEmptyDirTree(item.target.loc)
+	err = executor.removeEmptyDirTree(item.target.loc)
 	if err != nil {
 		return err
 	}

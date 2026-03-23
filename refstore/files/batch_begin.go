@@ -8,6 +8,6 @@ import "codeberg.org/lindenii/furgit/refstore"
 func (store *Store) BeginBatch() (refstore.Batch, error) {
 	return &Batch{
 		store: store,
-		ops:   make([]txOp, 0, 8),
+		ops:   make([]queuedUpdate, 0, 8),
 	}, nil
 }

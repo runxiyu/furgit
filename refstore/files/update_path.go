@@ -10,7 +10,7 @@ type refPath struct {
 	path string
 }
 
-func (tx *Transaction) targetKey(name refPath) string {
+func updateTargetKey(name refPath) string {
 	return fmt.Sprintf("%d:%s", name.root, name.path)
 }
 

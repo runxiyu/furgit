@@ -2,16 +2,16 @@ package files
 
 import "codeberg.org/lindenii/furgit/objectid"
 
-type directKind uint8
+type directRefKind uint8
 
 const (
-	directMissing directKind = iota
+	directMissing directRefKind = iota
 	directDetached
 	directSymbolic
 )
 
-type directRef struct {
-	kind     directKind
+type directRefState struct {
+	kind     directRefKind
 	name     string
 	id       objectid.ObjectID
 	target   string

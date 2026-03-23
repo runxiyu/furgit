@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (tx *Transaction) createPackedLock(timeout time.Duration) error {
+func (executor *refUpdateExecutor) createPackedRefsLock(timeout time.Duration) error {
 	const (
 		initialBackoffMs     = 1
 		backoffMaxMultiplier = 1000
@@ -17,7 +17,7 @@ func (tx *Transaction) createPackedLock(timeout time.Duration) error {
 	n := 1
 
 	for {
-		file, err := tx.store.commonRoot.OpenFile("packed-refs.lock", os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+		file, err := executor.store.commonRoot.OpenFile("packed-refs.lock", os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
 		if err == nil {
 			return file.Close()
 		}
@@ -31,7 +31,7 @@ func (tx *Transaction) createPackedLock(timeout time.Duration) error {
 		}
 
 		backoffMs := multiplier * initialBackoffMs
-		waitMs := (750 + tx.store.lockRand.Intn(500)) * backoffMs / 1000
+		waitMs := (750 + executor.store.lockRand.Intn(500)) * backoffMs / 1000
 		time.Sleep(time.Duration(waitMs) * time.Millisecond)
 
 		multiplier += 2*n + 1

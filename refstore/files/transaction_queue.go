@@ -1,7 +1,7 @@
 package files
 
-func (tx *Transaction) queue(op txOp) error {
-	err := tx.validateOp(op)
+func (tx *Transaction) queue(op queuedUpdate) error {
+	err := (&refUpdateExecutor{store: tx.store}).validateQueuedUpdate(op)
 	if err != nil {
 		return err
 	}

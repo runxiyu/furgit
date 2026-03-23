@@ -7,8 +7,8 @@ import (
 	"path"
 )
 
-func (tx *Transaction) removeEmptyDirTree(name refPath) error {
-	root := tx.store.rootFor(name.root)
+func (executor *refUpdateExecutor) removeEmptyDirTree(name refPath) error {
+	root := executor.store.rootFor(name.root)
 
 	info, err := root.Stat(name.path)
 	if err != nil {
@@ -23,11 +23,11 @@ func (tx *Transaction) removeEmptyDirTree(name refPath) error {
 		return nil
 	}
 
-	return tx.removeEmptyDirTreeRecursive(name)
+	return executor.removeEmptyDirTreeRecursive(name)
 }
 
-func (tx *Transaction) removeEmptyDirTreeRecursive(name refPath) error {
-	root := tx.store.rootFor(name.root)
+func (executor *refUpdateExecutor) removeEmptyDirTreeRecursive(name refPath) error {
+	root := executor.store.rootFor(name.root)
 
 	dir, err := root.Open(name.path)
 	if err != nil {
@@ -46,7 +46,7 @@ func (tx *Transaction) removeEmptyDirTreeRecursive(name refPath) error {
 			return fmt.Errorf("refstore/files: non-empty directory blocks reference %q", name.path)
 		}
 
-		err = tx.removeEmptyDirTreeRecursive(refPath{
+		err = executor.removeEmptyDirTreeRecursive(refPath{
 			root: name.root,
 			path: path.Join(name.path, entry.Name()),
 		})

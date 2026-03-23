@@ -1,10 +1,12 @@
 package files_test
 
 import (
+	"errors"
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/objectid"
+	"codeberg.org/lindenii/furgit/refstore"
 )
 
 func TestBatchApplyRejectsStaleDeleteAndAppliesIndependentDelete(t *testing.T) {
@@ -39,12 +41,17 @@ func TestBatchApplyRejectsStaleDeleteAndAppliesIndependentDelete(t *testing.T) {
 			t.Fatalf("len(results) = %d, want 2", len(results))
 		}
 
-		if results[0].Error == nil {
-			t.Fatal("stale delete unexpectedly succeeded")
+		if results[0].Status != refstore.BatchStatusRejected {
+			t.Fatalf("results[0].Status = %v, want rejected", results[0].Status)
 		}
 
-		if results[1].Error != nil {
-			t.Fatalf("valid delete failed: %v", results[1].Error)
+		if !errors.Is(results[0].Error, refstore.ErrReferenceNotFound) &&
+			errors.As(results[0].Error, new(*refstore.IncorrectOldValueError)) == false {
+			t.Fatalf("results[0].Error = %v, want stale-value rejection", results[0].Error)
+		}
+
+		if results[1].Status != refstore.BatchStatusApplied {
+			t.Fatalf("results[1].Status = %v, want applied", results[1].Status)
 		}
 
 		_, err = store.Resolve("refs/heads/main")
@@ -81,20 +88,28 @@ func TestBatchApplyRejectsDuplicateQueuedRef(t *testing.T) {
 		batch.Verify("refs/heads/main", commitID)
 
 		results, err := batch.Apply()
-		if err == nil {
-			t.Fatal("Apply unexpectedly succeeded")
+		if err != nil {
+			t.Fatalf("Apply: %v", err)
 		}
 
 		if len(results) != 2 {
 			t.Fatalf("len(results) = %d, want 2", len(results))
 		}
 
-		if results[1].Error == nil {
-			t.Fatal("duplicate ref operation did not report an error")
+		if results[0].Status != refstore.BatchStatusApplied {
+			t.Fatalf("results[0].Status = %v, want applied", results[0].Status)
+		}
+
+		if results[1].Status != refstore.BatchStatusRejected {
+			t.Fatalf("results[1].Status = %v, want rejected", results[1].Status)
+		}
+
+		if !errors.As(results[1].Error, new(*refstore.DuplicateUpdateError)) {
+			t.Fatalf("results[1].Error = %v, want duplicate update error", results[1].Error)
 		}
 
 		_, err = store.Resolve("refs/heads/main")
-		if err != nil {
+		if !errors.Is(err, refstore.ErrReferenceNotFound) {
 			t.Fatalf("Resolve(main): %v", err)
 		}
 	})

@@ -8,6 +8,6 @@ import "codeberg.org/lindenii/furgit/refstore"
 func (store *Store) BeginTransaction() (refstore.Transaction, error) {
 	return &Transaction{
 		store: store,
-		ops:   make([]txOp, 0, 8),
+		ops:   make([]queuedUpdate, 0, 8),
 	}, nil
 }

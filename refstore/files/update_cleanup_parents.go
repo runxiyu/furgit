@@ -6,13 +6,13 @@ import (
 	"path"
 )
 
-func (tx *Transaction) tryRemoveEmptyParents(name string) {
-	loc := tx.store.loosePath(name)
-	tx.tryRemoveEmptyParentPaths(loc.root, loc.path)
+func (executor *refUpdateExecutor) tryRemoveEmptyParents(name string) {
+	loc := executor.store.loosePath(name)
+	executor.tryRemoveEmptyParentPaths(loc.root, loc.path)
 }
 
-func (tx *Transaction) tryRemoveEmptyParentPaths(kind rootKind, name string) {
-	root := tx.store.rootFor(kind)
+func (executor *refUpdateExecutor) tryRemoveEmptyParentPaths(kind rootKind, name string) {
+	root := executor.store.rootFor(kind)
 	dir := path.Dir(name)
 
 	for dir != "." && dir != "/" {

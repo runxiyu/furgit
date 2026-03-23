@@ -1,9 +1,9 @@
 package files
 
-func (tx *Transaction) visibleNames() (map[string]struct{}, error) {
+func (executor *refUpdateExecutor) collectVisibleNames() (map[string]struct{}, error) {
 	names := make(map[string]struct{})
 
-	looseNames, err := tx.store.collectLooseRefNames()
+	looseNames, err := executor.store.collectLooseRefNames()
 	if err != nil {
 		return nil, err
 	}
@@ -12,7 +12,7 @@ func (tx *Transaction) visibleNames() (map[string]struct{}, error) {
 		names[name] = struct{}{}
 	}
 
-	packed, err := tx.store.readPackedRefs()
+	packed, err := executor.store.readPackedRefs()
 	if err != nil {
 		return nil, err
 	}
