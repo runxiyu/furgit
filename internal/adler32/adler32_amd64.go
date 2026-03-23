@@ -8,7 +8,7 @@ import (
 	"hash"
 	"hash/adler32"
 
-	"golang.org/x/sys/cpu"
+	"codeberg.org/lindenii/furgit/internal/cpu"
 )
 
 // Size of an Adler-32 checksum in bytes.
