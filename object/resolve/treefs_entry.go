@@ -1,9 +1,9 @@
 package resolve
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
-	"strings"
 
 	"codeberg.org/lindenii/furgit/object"
 	"codeberg.org/lindenii/furgit/objectid"
@@ -37,11 +37,19 @@ func (treeFS *TreeFS) resolvePath(op treeFSOp, name string) (treeEntryValue, err
 }
 
 func (treeFS *TreeFS) pathResolveError(op treeFSOp, name string, err error) error {
-	if err != nil && strings.Contains(err.Error(), "not found") {
+	if _, ok := errors.AsType[*PathNotFoundError](err); ok {
 		return treeFSPathError(op, name, fs.ErrNotExist)
 	}
 
-	if err != nil && strings.Contains(err.Error(), "is not a tree") {
+	if _, ok := errors.AsType[*PathNotTreeError](err); ok {
+		return treeFSPathError(op, name, fs.ErrInvalid)
+	}
+
+	if _, ok := errors.AsType[*PathEmptyError](err); ok {
+		return treeFSPathError(op, name, fs.ErrInvalid)
+	}
+
+	if _, ok := errors.AsType[*PathSegmentEmptyError](err); ok {
 		return treeFSPathError(op, name, fs.ErrInvalid)
 	}
 
