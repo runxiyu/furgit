@@ -8,6 +8,10 @@ import (
 	"codeberg.org/lindenii/furgit/object"
 )
 
+// Open opens name for reading.
+//
+// Directories are returned as fs.ReadDirFile values. Gitlink entries are not
+// readable through TreeFS.
 func (treeFS *TreeFS) Open(name string) (fs.File, error) {
 	entry, err := treeFS.resolvePath(treeFSOpOpen, name)
 	if err != nil {

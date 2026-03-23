@@ -2,6 +2,7 @@ package resolve
 
 import "io/fs"
 
+// ReadDir reads and returns all directory entries for name.
 func (treeFS *TreeFS) ReadDir(name string) ([]fs.DirEntry, error) {
 	file, err := treeFS.Open(name)
 	if err != nil {

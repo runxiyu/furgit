@@ -2,6 +2,7 @@ package resolve
 
 import "io/fs"
 
+// Sub returns a new TreeFS rooted at dir.
 func (treeFS *TreeFS) Sub(dir string) (fs.FS, error) {
 	entry, err := treeFS.resolvePath(treeFSOpSub, dir)
 	if err != nil {

@@ -7,6 +7,9 @@ import (
 	"codeberg.org/lindenii/furgit/object"
 )
 
+// ReadFile reads the blob contents at name.
+//
+// Directories and gitlink entries are not readable through TreeFS.
 func (treeFS *TreeFS) ReadFile(name string) ([]byte, error) {
 	entry, err := treeFS.resolvePath(treeFSOpReadFile, name)
 	if err != nil {
