@@ -14,7 +14,7 @@ func cpuid(eaxArg, ecxArg uint32) (eax, ebx, ecx, edx uint32)
 // xgetbv with ecx = 0 is implemented in cpu_amd64.s.
 func xgetbv() (eax, edx uint32)
 
-func init() {
+func init() { //nolint:gochecknoinits
 	maxID, _, _, _ := cpuid(0, 0)
 	if maxID < 7 {
 		return
@@ -23,6 +23,7 @@ func init() {
 	_, _, ecx1, _ := cpuid(1, 0)
 
 	osSupportsAVX := false
+
 	if ecx1&cpuidOSXSAVE != 0 {
 		eax, _ := xgetbv()
 		osSupportsAVX = eax&(1<<1) != 0 && eax&(1<<2) != 0

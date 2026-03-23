@@ -18,6 +18,7 @@ func (executor *refUpdateExecutor) resolvePreparedUpdates(ops []queuedUpdate) ([
 		}
 
 		targets[targetKey] = struct{}{}
+
 		prepared = append(prepared, preparedUpdate{op: op, target: target})
 	}
 

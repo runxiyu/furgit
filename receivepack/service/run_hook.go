@@ -48,6 +48,7 @@ func (service *Service) runHook(
 		err                    error
 	)
 
+	//nolint:nestif
 	if quarantineName != "" {
 		quarantineLooseRoot, err = service.opts.ObjectsRoot.OpenRoot(quarantineName)
 		if err != nil {

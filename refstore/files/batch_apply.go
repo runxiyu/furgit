@@ -50,6 +50,7 @@ func (batch *Batch) Apply() ([]refstore.BatchResult, error) {
 		}
 
 		seenTargets[targetKey] = struct{}{}
+
 		remainingIdx = append(remainingIdx, i)
 		remainingOps = append(remainingOps, op)
 	}
@@ -87,6 +88,7 @@ func (batch *Batch) Apply() ([]refstore.BatchResult, error) {
 			}
 
 			fatalName := batchResultName(err)
+
 			fatalMarked := false
 			for i, idx := range remainingIdx {
 				if !fatalMarked && remainingOps[i].name == fatalName && fatalName != "" {
@@ -107,6 +109,7 @@ func (batch *Batch) Apply() ([]refstore.BatchResult, error) {
 		err = executor.commitPreparedUpdates(prepared)
 		if err != nil {
 			fatalName := batchResultName(err)
+
 			fatalMarked := false
 			for i, idx := range remainingIdx {
 				if !fatalMarked && remainingOps[i].name == fatalName && fatalName != "" {

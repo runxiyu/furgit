@@ -12,6 +12,7 @@ func (executor *refUpdateExecutor) prepareUpdateLocks(prepared []preparedUpdate)
 
 	for _, lockKey := range lockNames {
 		lockPath := refPathFromKey(lockKey)
+
 		err := executor.createUpdateLock(lockPath)
 		if err != nil {
 			for _, item := range prepared {

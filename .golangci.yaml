@@ -21,6 +21,7 @@ linters:
     - godox            # TODO/etc comments are allowed in our codebase
     - funlen           # long functions are fine
     - wrapcheck        # rules around interface-return methods are a bit silly
+    - dogsled          # definitely not an issue, ignoring returns is normal
 
     - exhaustruct      # tmp: should fix... but too annoying at the moment
     - err113           # tmp: will enable when we properly use defined errors
