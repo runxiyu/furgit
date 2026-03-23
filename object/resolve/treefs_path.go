@@ -15,6 +15,7 @@ func treeFSSplitPath(name string) [][]byte {
 	}
 
 	parts := strings.Split(name, "/")
+
 	out := make([][]byte, len(parts))
 	for i, part := range parts {
 		out[i] = []byte(part)

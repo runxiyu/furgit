@@ -50,8 +50,10 @@ func treeFSEntryMode(mode object.FileMode) fs.FileMode {
 
 func (treeFS *TreeFS) statEntry(entry treeEntryValue) (*treeFSInfo, error) {
 	size := int64(0)
+
 	if entry.mode == object.FileModeRegular || entry.mode == object.FileModeExecutable || entry.mode == object.FileModeSymlink {
 		var err error
+
 		size, err = entry.blobSize(treeFS.resolver)
 		if err != nil {
 			return nil, err

@@ -24,6 +24,7 @@ func TestTreeFS(t *testing.T) {
 		repoData.SymbolicRef(t, "HEAD", "refs/heads/main")
 		_ = repoData.Run(t, "add", ".")
 		treeHex := repoData.Run(t, "write-tree")
+
 		treeID, err := objectid.ParseHex(algo, treeHex)
 		if err != nil {
 			t.Fatalf("ParseHex(write-tree): %v", err)
@@ -37,9 +38,11 @@ func TestTreeFS(t *testing.T) {
 		if err != nil {
 			t.Fatalf("repository.Open: %v", err)
 		}
+
 		defer func() { _ = repo.Close() }()
 
 		resolver := resolve.New(repo.Objects())
+
 		treeFS, err := resolver.TreeFS(commitID)
 		if err != nil {
 			t.Fatalf("resolver.TreeFS: %v", err)
