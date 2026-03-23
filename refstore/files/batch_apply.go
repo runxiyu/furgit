@@ -57,34 +57,14 @@ func (batch *Batch) Apply() ([]refstore.BatchResult, error) {
 
 	for len(remainingOps) > 0 {
 		prepared, err := executor.prepareUpdates(remainingOps)
-		if err != nil {
-			if isBatchRejected(err) {
-				name := batchResultName(err)
-				rejectedAt := -1
-
-				for i, op := range remainingOps {
-					if op.name == name {
-						rejectedAt = i
-
-						break
-					}
+		if err == nil {
+			err = executor.commitPreparedUpdates(prepared)
+			if err == nil {
+				for _, idx := range remainingIdx {
+					results[idx].Status = refstore.BatchStatusApplied
 				}
 
-				if rejectedAt < 0 {
-					for _, idx := range remainingIdx {
-						results[idx].Status = refstore.BatchStatusNotAttempted
-						results[idx].Error = batchResultError(err)
-					}
-
-					return results, err
-				}
-
-				results[remainingIdx[rejectedAt]].Status = refstore.BatchStatusRejected
-				results[remainingIdx[rejectedAt]].Error = batchResultError(err)
-				remainingIdx = append(remainingIdx[:rejectedAt], remainingIdx[rejectedAt+1:]...)
-				remainingOps = append(remainingOps[:rejectedAt], remainingOps[rejectedAt+1:]...)
-
-				continue
+				return results, nil
 			}
 
 			fatalName := batchResultName(err)
@@ -106,8 +86,7 @@ func (batch *Batch) Apply() ([]refstore.BatchResult, error) {
 			return results, err
 		}
 
-		err = executor.commitPreparedUpdates(prepared)
-		if err != nil {
+		if !isBatchRejected(err) {
 			fatalName := batchResultName(err)
 
 			fatalMarked := false
@@ -127,11 +106,30 @@ func (batch *Batch) Apply() ([]refstore.BatchResult, error) {
 			return results, err
 		}
 
-		for _, idx := range remainingIdx {
-			results[idx].Status = refstore.BatchStatusApplied
+		name := batchResultName(err)
+		rejectedAt := -1
+
+		for i, op := range remainingOps {
+			if op.name == name {
+				rejectedAt = i
+
+				break
+			}
 		}
 
-		return results, nil
+		if rejectedAt < 0 {
+			for _, idx := range remainingIdx {
+				results[idx].Status = refstore.BatchStatusNotAttempted
+				results[idx].Error = batchResultError(err)
+			}
+
+			return results, err
+		}
+
+		results[remainingIdx[rejectedAt]].Status = refstore.BatchStatusRejected
+		results[remainingIdx[rejectedAt]].Error = batchResultError(err)
+		remainingIdx = append(remainingIdx[:rejectedAt], remainingIdx[rejectedAt+1:]...)
+		remainingOps = append(remainingOps[:rejectedAt], remainingOps[rejectedAt+1:]...)
 	}
 
 	return results, nil
