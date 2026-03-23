@@ -113,10 +113,7 @@ func (dir *treeFSDir) ReadDir(n int) ([]fs.DirEntry, error) {
 		return out, nil
 	}
 
-	end := dir.offset + n
-	if end > len(dir.entries) {
-		end = len(dir.entries)
-	}
+	end := min(dir.offset+n, len(dir.entries))
 
 	out := append([]fs.DirEntry(nil), dir.entries[dir.offset:end]...)
 	dir.offset = end
