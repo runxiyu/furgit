@@ -79,7 +79,7 @@ Furgit is a low-level Git library in Go.
   * [ ] Describe
   * [ ] Revision syntax
   * [ ] Namespaces
-  * [ ] Repalce refs, grafts
+  * [ ] Replace refs, grafts
 * [X] Reference stores
   * [X] Chain lookup store
   * [X] Files reference store
@@ -109,7 +109,7 @@ Furgit is a low-level Git library in Go.
   * [ ] Git notes
   * [ ] Git attributes
   * [ ] Pseudorefs
-  * Integrity and maintainence
+  * Integrity and maintenance
     * [ ] Fsck
     * [ ] Repacking
     * [ ] Garbage collection
@@ -279,7 +279,7 @@ Mainly tests the packfile object reader.
 * Translated hare-git and put it into `internal/common/git` in Villosa
 * Extracted it out into this general-purpose library
 * "Fur" is "git" left-shifted by 1 on QWERTY
-* Some architectual elements inspired by [upstream Git](https://git-scm.com),
+* Some architectural elements inspired by [upstream Git](https://git-scm.com),
   OpenBSD's [Game of Trees](https://gameoftrees.org), and
   [9front Git](https://git.9front.org/plan9front/9front/HEAD/sys/src/cmd/git/f.html).
 
