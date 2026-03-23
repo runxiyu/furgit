@@ -15,7 +15,7 @@ import (
 func TestTreeFS(t *testing.T) {
 	t.Parallel()
 
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		t.Parallel()
 
 		repoData := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo})
