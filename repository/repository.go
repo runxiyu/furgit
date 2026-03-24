@@ -16,6 +16,10 @@ import (
 //
 // Open expects a root for the Git directory itself:
 // a bare repository root or a non-bare ".git" directory.
+//
+// Accessors such as Objects, Refs, Resolver, and LooseStoreForWriting return
+// views backed by resources owned by Repository. Those values borrow the
+// repository's stores and filesystem roots and must not be used after Close.
 type Repository struct {
 	config *config.Config
 	algo   objectid.Algorithm
