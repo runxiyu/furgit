@@ -42,7 +42,7 @@ serve different purposes:
 
 * `repo.Objects()` is the storage layer underneath resolution.
   * Use it when you need to read object headers, read raw object contents,
-    stream object data, or look up objects directly by ID.
+    stream object data, or otherwise look up objects directly by ID.
   * Most callers who want to work with Git objects as commits, trees, blobs, or
     tags should prefer the resolver instead.
   * However, checking an object ID's size and type are somewhat common
