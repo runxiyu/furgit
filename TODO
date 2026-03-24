@@ -1,5 +1,3 @@
-So the to-do list in README.md is more 
-
 * how to pass commit graph to hooks
 
 * Receive-pack hook shape redesign; separate post-ref and post-ingest hook
@@ -34,3 +32,6 @@ So the to-do list in README.md is more
   alternative protocols in the future, however for now it seems like a valid
   solution. When there is any sight of alternative, non-pack-based protocols in
   the future, we should think of another way.
+  go-git handles it in their object stores but the way they
+  implement it is extremely complex and not fit for furgit
+  architecture.
