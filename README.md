@@ -5,7 +5,7 @@
 
 Furgit is a low-level Git library in Go.
 
-## Project status
+## Status
 
 * Several years away from stable
 * Do not use in production
@@ -95,36 +95,6 @@ over the stores that `Repository` already exposes:
     `commitquery` over the existing and quarantined object stores. Some hooks
     are provided.
 
-## Benchmarks
-
-* See [gitbench](https://git.sr.ht/~runxiyu/gitbench).
-* `legacy` branch furgit is slightly faster due to buffer reuse and custom
-  ZLIB. These will be re-added.
-* Alpine edge, i5-10210U, `performance` governor, `linux.git`.
-* go-git may become much faster when
-  [#1894](https://github.com/go-git/go-git/pull/1894)
-  and such are fully in use.
-* These lone tests do not represent all workloads. Test your usage
-  pattern yourself (and contribute to gitbench).
-
-### Traversing all trees in `HEAD` and fetching each file size
-
-Mainly tests the packfile object reader.
-
-| Implementation | Total  | User   | System |
-| -              | -      | -      | -      |
-| Git            | 337 ms | 226 ms | 108 ms |
-| libgit2        | 391 ms | 269 ms | 120 ms |
-| Furgit         | 487 ms | 457 ms | 49 ms  |
-| go-git         | 37 s   | 35 s   | 2 s    |
-
-## Repos and mirrors
-
-* [Codeberg](https://codeberg.org/lindenii/furgit) (with the canonical issue tracker)
-* [SourceHut mirror](https://git.sr.ht/~runxiyu/furgit)
-* [tangled mirror](https://tangled.org/@runxiyu.tngl.sh/furgit)
-* [GitHub mirror](https://github.com/runxiyu/furgit)
-
 ## Community
 
 * [#lindenii](https://webirc.runxiyu.org/kiwiirc/#lindenii)
@@ -132,34 +102,13 @@ Mainly tests the packfile object reader.
 * [#lindenii](https://web.libera.chat/#lindenii)
   on [Libera.Chat](https://libera.chat)
 
-## History and lineage
+See the CONTRIBUTING document for bug reports and patch submissions.
 
-* Lindenii Forge
-* [hare-git](https://codeberg.org/lindenii/hare-git)
-* Faster Git library needed for
-  [Lindenii Villosa](https://codeberg.org/lindenii/villosa)
-  the next generation of Lindenii Forge
-* Translated hare-git and put it into `internal/common/git` in Villosa
-* Extracted it out into this general-purpose library
-* "Fur" is "git" left-shifted by 1 on QWERTY
-* Some architectural elements inspired by [upstream Git](https://git-scm.com),
-  OpenBSD's [Game of Trees](https://gameoftrees.org), and
-  [9front Git](https://git.9front.org/plan9front/9front/HEAD/sys/src/cmd/git/f.html).
+## Acknowledgements
 
-## Reporting bugs
-
-Bug reports ideally include a reproduction recipe: a Go program which starts
-out with an empty repository and calls Furgit and/or Git commands to trigger
-undesirable behavior.
-
-Please ask for help with writing your regression test before asking for your
-problem to be fixed. Time invested in writing a regression test saves time
-wasted on back-and-forth discussion about how the problem can be reproduced. A
-regression test will need to be written in any case to verify a fix and prevent
-the problem from resurfacing.
-
-If writing an automated test really turns out to be impossible, please explain
-in very clear terms how the problem can be reproduced.
+Partly inspired by [upstream Git](https://git-scm.com),
+OpenBSD's [Game of Trees](https://gameoftrees.org), and
+[9front Git](https://git.9front.org/plan9front/9front/HEAD/sys/src/cmd/git/f.html).
 
 ## License
 
@@ -176,51 +125,3 @@ under the GNU Affero General Public License, Version 3.0 only, a public
 acceptance by the Designated Proxy of any subsequent version of the GNU Affero
 General Public License shall permanently authorize the use of that accepted
 version for this Program.
-
-For the purposes of the Developer Certificate of Origin, the "open source
-license" refers to the GNU Affero General Public License, Version 3.0, with the
-above proxy designation pursuant to Section 14.
-
-All contributors are required to "sign-off" their commits (using `git commit
--s`) to indicate that they have agreed to the [Developer Certificate of
-Origin](https://developercertificate.org), reproduced below.
-
-```
-Developer Certificate of Origin
-Version 1.1
-
-Copyright (C) 2004, 2006 The Linux Foundation and its contributors.
-1 Letterman Drive
-Suite D4700
-San Francisco, CA, 94129
-
-Everyone is permitted to copy and distribute verbatim copies of this
-license document, but changing it is not allowed.
-
-
-Developer's Certificate of Origin 1.1
-
-By making a contribution to this project, I certify that:
-
-(a) The contribution was created in whole or in part by me and I
-    have the right to submit it under the open source license
-    indicated in the file; or
-
-(b) The contribution is based upon previous work that, to the best
-    of my knowledge, is covered under an appropriate open source
-    license and I have the right under that license to submit that
-    work with modifications, whether created in whole or in part
-    by me, under the same open source license (unless I am
-    permitted to submit under a different license), as indicated
-    in the file; or
-
-(c) The contribution was provided directly to me by some other
-    person who certified (a), (b) or (c) and I have not modified
-    it.
-
-(d) I understand and agree that this project and the contribution
-    are public and that a record of the contribution (including all
-    personal information I submit with it, including my sign-off) is
-    maintained indefinitely and may be redistributed consistent with
-    this project or the open source license(s) involved.
-```
