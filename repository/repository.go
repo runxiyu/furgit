@@ -12,7 +12,8 @@ import (
 	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 
-// Repository is a thin composition root for repository-local stores.
+// Repository represents a typical on-disk Git repository by composing
+// their stores together for access.
 //
 // Open expects a root for the Git directory itself:
 // a bare repository root or a non-bare ".git" directory.
