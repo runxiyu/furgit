@@ -50,7 +50,15 @@ func (err *PathNotTreeError) Error() string {
 //
 // parts must contain at least one path segment. Intermediate path segments
 // must resolve to tree entries. The final entry is returned without loading
-// its object.
+// its object. Path segments may not contain \x00.
+//
+// The path cannot be accurately represented as a string or a single []byte
+// because Git tree entry names may include slashes. While []string is
+// technically possible (since Go strings are not necessarily UTF-8), they
+// do often imply UTF-8 in practice, which would be undesirable.
+//
+// If your entry names are valid UTF-8 and uses / solely as segment separators,
+// it may be convenient to use TreeFS for an io/fs.FS-like interface.
 func (r *Resolver) Path(root objectid.ObjectID, parts [][]byte) (object.TreeEntry, error) {
 	if len(parts) == 0 {
 		return object.TreeEntry{}, &PathEmptyError{}
