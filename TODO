@@ -36,4 +36,9 @@
   implement it is extremely complex and not fit for furgit
   architecture.
 
-* The commit API around gpgsig is hard to use.
+* Digital signature API
+* Revision-ish entry points like if you get main or v1.0 we should
+  try to resolve that probably
+* Needs much better diff API
+* revwalk/log
+
