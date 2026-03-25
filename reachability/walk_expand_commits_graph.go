@@ -5,7 +5,7 @@ import (
 
 	commitgraphread "codeberg.org/lindenii/furgit/commitgraph/read"
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 func (walk *Walk) expandCommitsFromGraph(id objectid.ObjectID) ([]walkItem, bool, error) {

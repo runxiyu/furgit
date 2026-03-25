@@ -5,7 +5,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/internal/compress/zlib"
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // ReadHeader reads an object's type and declared content length.

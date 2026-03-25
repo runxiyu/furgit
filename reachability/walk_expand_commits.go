@@ -5,7 +5,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/object"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 func (walk *Walk) expandCommits(item walkItem) ([]walkItem, error) {

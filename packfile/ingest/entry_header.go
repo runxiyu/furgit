@@ -2,7 +2,7 @@ package ingest
 
 import (
 	"codeberg.org/lindenii/furgit/internal/intconv"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // encodePackEntryHeader encodes one non-delta packed entry header.

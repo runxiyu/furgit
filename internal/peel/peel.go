@@ -8,7 +8,7 @@ import (
 	"codeberg.org/lindenii/furgit/object"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // ToCommit peels annotated tags transitively until a commit is reached.

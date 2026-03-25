@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"strconv"
 
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // Parse parses a canonical loose-object header ("type size\\x00").

@@ -4,7 +4,7 @@ import (
 	"io"
 
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // ExactTreeReader returns a reader for the content of the tree at id,

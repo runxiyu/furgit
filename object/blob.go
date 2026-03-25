@@ -1,6 +1,6 @@
 package object
 
-import "codeberg.org/lindenii/furgit/objecttype"
+import objecttype "codeberg.org/lindenii/furgit/object/type"
 
 // Blob represents a Git blob object.
 //

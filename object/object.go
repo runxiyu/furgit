@@ -2,7 +2,7 @@
 // tag.
 package object
 
-import "codeberg.org/lindenii/furgit/objecttype"
+import objecttype "codeberg.org/lindenii/furgit/object/type"
 
 // Object is a Git object that can serialize itself.
 type Object interface {

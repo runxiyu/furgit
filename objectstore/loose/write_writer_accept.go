@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 
-	"codeberg.org/lindenii/furgit/objectheader"
+	objectheader "codeberg.org/lindenii/furgit/object/header"
 )
 
 // acceptFull validates and accounts raw full-object input.

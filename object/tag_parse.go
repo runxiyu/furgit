@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // ParseTag decodes a tag object body.

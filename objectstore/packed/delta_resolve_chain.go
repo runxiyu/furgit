@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	deltaapply "codeberg.org/lindenii/furgit/delta/apply"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // deltaResolveChain resolves one object chain into content bytes.

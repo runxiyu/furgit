@@ -2,7 +2,7 @@ package reachability
 
 import (
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 type walkItem struct {

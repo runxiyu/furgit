@@ -9,7 +9,7 @@ import (
 	"codeberg.org/lindenii/furgit/object"
 	"codeberg.org/lindenii/furgit/objectid"
 	"codeberg.org/lindenii/furgit/objectstore"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 func (query *Query) id(idx nodeIndex) objectid.ObjectID {

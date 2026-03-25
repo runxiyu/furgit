@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // ErrObjectNotFound indicates that an object does not exist in a backend.

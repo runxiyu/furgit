@@ -2,7 +2,7 @@ package packed
 
 import (
 	"codeberg.org/lindenii/furgit/internal/lru"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 const defaultDeltaCacheMaxBytes = 32 << 20

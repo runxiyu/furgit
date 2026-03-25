@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/objectheader"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objectheader "codeberg.org/lindenii/furgit/object/header"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // SerializeWithoutHeader renders the raw tag body bytes.

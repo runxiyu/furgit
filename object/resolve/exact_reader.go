@@ -5,7 +5,7 @@ import (
 	"io"
 
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // exactReader reads one object's content stream and verifies that its header

@@ -4,7 +4,7 @@ import (
 	"bytes"
 
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // WriteBytesFull writes a full serialized object as "type size\0content".

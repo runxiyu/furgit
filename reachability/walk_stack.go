@@ -1,6 +1,6 @@
 package reachability
 
-import "codeberg.org/lindenii/furgit/objecttype"
+import objecttype "codeberg.org/lindenii/furgit/object/type"
 
 func (walk *Walk) initialStack() []walkItem {
 	if len(walk.wants) == 0 {

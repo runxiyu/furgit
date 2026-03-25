@@ -1,6 +1,6 @@
 package packed
 
-import "codeberg.org/lindenii/furgit/objecttype"
+import objecttype "codeberg.org/lindenii/furgit/object/type"
 
 // deltaChain describes how to reconstruct one requested object.
 type deltaChain struct {

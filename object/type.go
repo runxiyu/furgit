@@ -1,6 +1,6 @@
 package object
 
-import "codeberg.org/lindenii/furgit/objecttype"
+import objecttype "codeberg.org/lindenii/furgit/object/type"
 
 // TypeFor returns the Git object type for T when T is one of the standard
 // parsed object types.

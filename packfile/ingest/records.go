@@ -2,7 +2,7 @@ package ingest
 
 import (
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // objectRecord stores metadata for one packed object entry.

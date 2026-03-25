@@ -1,6 +1,6 @@
 package memory
 
-import "codeberg.org/lindenii/furgit/objecttype"
+import objecttype "codeberg.org/lindenii/furgit/object/type"
 
 // storedObject is one in-memory object entry.
 type storedObject struct {

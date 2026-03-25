@@ -5,7 +5,7 @@ import (
 	"slices"
 
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // unresolvedThinBaseIDs returns sorted unique unresolved ref base IDs.

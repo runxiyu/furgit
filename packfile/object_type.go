@@ -1,6 +1,6 @@
 package packfile
 
-import "codeberg.org/lindenii/furgit/objecttype"
+import objecttype "codeberg.org/lindenii/furgit/object/type"
 
 // IsBaseObjectType reports whether ty is one of the four canonical object
 // types encoded directly in pack entries.

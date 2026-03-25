@@ -3,7 +3,7 @@ package objectheader
 import (
 	"strconv"
 
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // Append appends a canonical loose-object header ("type size\\x00") to dst.

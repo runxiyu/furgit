@@ -4,7 +4,7 @@ import (
 	"codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/object"
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 func (walk *Walk) validateCommitObject(id objectid.ObjectID) error {

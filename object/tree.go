@@ -6,7 +6,7 @@ import (
 	"sort"
 
 	"codeberg.org/lindenii/furgit/objectid"
-	"codeberg.org/lindenii/furgit/objecttype"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // FileMode represents the mode of a file in a Git tree.
