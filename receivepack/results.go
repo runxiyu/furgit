@@ -1,7 +1,7 @@
 package receivepack
 
 import (
-	protoreceive "codeberg.org/lindenii/furgit/protocol/v0v1/server/receivepack"
+	protoreceive "codeberg.org/lindenii/furgit/network/protocol/v0v1/server/receivepack"
 	"codeberg.org/lindenii/furgit/receivepack/service"
 )
 

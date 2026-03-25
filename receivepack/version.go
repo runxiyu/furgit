@@ -3,7 +3,7 @@ package receivepack
 import (
 	"strings"
 
-	common "codeberg.org/lindenii/furgit/protocol/v0v1/server"
+	common "codeberg.org/lindenii/furgit/network/protocol/v0v1/server"
 )
 
 func parseVersion(gitProtocol string) common.Version {

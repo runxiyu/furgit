@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
+	"codeberg.org/lindenii/furgit/network/protocol/pktline"
+	"codeberg.org/lindenii/furgit/network/protocol/sideband64k"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/protocol/pktline"
-	"codeberg.org/lindenii/furgit/protocol/sideband64k"
 	receivepack "codeberg.org/lindenii/furgit/receivepack"
 	receivepackhooks "codeberg.org/lindenii/furgit/receivepack/hooks"
 )
