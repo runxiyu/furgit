@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/objectstore/memory"
+	"codeberg.org/lindenii/furgit/object/store/memory"
 )
 
 type quarantineFixture struct {

@@ -1,18 +1,20 @@
-package chain
+package mix
 
 import (
 	"errors"
 	"fmt"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/objectstore"
+	"codeberg.org/lindenii/furgit/object/store"
 )
 
-// ReadSize reads object content length from the first backend that has it.
-func (chain *Chain) ReadSize(id objectid.ObjectID) (int64, error) {
-	for i, backend := range chain.backends {
+// ReadSize reads object content length from one backend that has it.
+func (mix *Mix) ReadSize(id objectid.ObjectID) (int64, error) {
+	for i, backend := 0, mix.firstBackend(); backend != nil; i, backend = i+1, mix.nextBackend(backend) {
 		size, err := backend.ReadSize(id)
 		if err == nil {
+			mix.touchBackend(backend)
+
 			return size, nil
 		}
 

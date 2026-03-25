@@ -6,7 +6,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/internal/intconv"
 	"codeberg.org/lindenii/furgit/internal/progress"
-	"codeberg.org/lindenii/furgit/objectstore"
+	"codeberg.org/lindenii/furgit/object/store"
 )
 
 // maybeFixThin appends missing bases and rewrites pack header/trailer when needed.

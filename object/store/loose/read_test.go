@@ -9,9 +9,9 @@ import (
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/store"
+	"codeberg.org/lindenii/furgit/object/store/loose"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
-	"codeberg.org/lindenii/furgit/objectstore"
-	"codeberg.org/lindenii/furgit/objectstore/loose"
 )
 
 func TestLooseStoreReadAgainstGit(t *testing.T) {

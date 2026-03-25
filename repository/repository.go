@@ -6,9 +6,9 @@ import (
 
 	"codeberg.org/lindenii/furgit/config"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/objectstore"
-	objectloose "codeberg.org/lindenii/furgit/objectstore/loose"
-	objectpacked "codeberg.org/lindenii/furgit/objectstore/packed"
+	"codeberg.org/lindenii/furgit/object/store"
+	objectloose "codeberg.org/lindenii/furgit/object/store/loose"
+	objectpacked "codeberg.org/lindenii/furgit/object/store/packed"
 	"codeberg.org/lindenii/furgit/refstore"
 )
 

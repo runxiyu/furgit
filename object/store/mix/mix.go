@@ -5,7 +5,7 @@ package mix
 import (
 	"sync"
 
-	"codeberg.org/lindenii/furgit/objectstore"
+	"codeberg.org/lindenii/furgit/object/store"
 )
 
 // Mix queries multiple object databases with an MRU backend preference.

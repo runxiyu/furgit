@@ -3,7 +3,7 @@ package reachability
 
 import (
 	commitgraphread "codeberg.org/lindenii/furgit/commitgraph/read"
-	"codeberg.org/lindenii/furgit/objectstore"
+	"codeberg.org/lindenii/furgit/object/store"
 )
 
 // Reachability provides graph traversal over objects in one object store.

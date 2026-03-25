@@ -1,6 +1,6 @@
 package chain
 
-import "codeberg.org/lindenii/furgit/objectstore"
+import "codeberg.org/lindenii/furgit/object/store"
 
 // New creates an ordered object database chain.
 //

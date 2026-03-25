@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/objectstore"
+	"codeberg.org/lindenii/furgit/object/store"
 	"codeberg.org/lindenii/furgit/packfile/ingest"
 	"codeberg.org/lindenii/furgit/repository"
 )

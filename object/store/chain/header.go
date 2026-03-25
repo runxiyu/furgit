@@ -1,21 +1,19 @@
-package mix
+package chain
 
 import (
 	"errors"
 	"fmt"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/store"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
-	"codeberg.org/lindenii/furgit/objectstore"
 )
 
-// ReadHeader reads object header data from one backend that has it.
-func (mix *Mix) ReadHeader(id objectid.ObjectID) (objecttype.Type, int64, error) {
-	for i, backend := 0, mix.firstBackend(); backend != nil; i, backend = i+1, mix.nextBackend(backend) {
+// ReadHeader reads object header data from the first backend that has it.
+func (chain *Chain) ReadHeader(id objectid.ObjectID) (objecttype.Type, int64, error) {
+	for i, backend := range chain.backends {
 		ty, size, err := backend.ReadHeader(id)
 		if err == nil {
-			mix.touchBackend(backend)
-
 			return ty, size, nil
 		}
 

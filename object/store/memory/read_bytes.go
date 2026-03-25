@@ -3,8 +3,8 @@ package memory
 import (
 	objectheader "codeberg.org/lindenii/furgit/object/header"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/store"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
-	"codeberg.org/lindenii/furgit/objectstore"
 )
 
 // ReadBytesFull reads one full object, including the object header.

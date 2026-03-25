@@ -9,7 +9,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/objectstore/memory"
+	"codeberg.org/lindenii/furgit/object/store/memory"
 	"codeberg.org/lindenii/furgit/receivepack/service"
 )
 

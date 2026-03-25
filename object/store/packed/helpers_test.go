@@ -10,8 +10,8 @@ import (
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	objectheader "codeberg.org/lindenii/furgit/object/header"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/store/packed"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
-	"codeberg.org/lindenii/furgit/objectstore/packed"
 )
 
 func openPackedStore(t *testing.T, testRepo *testgit.TestRepo, algo objectid.Algorithm) *packed.Store {

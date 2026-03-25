@@ -3,7 +3,7 @@
 package chain
 
 import (
-	"codeberg.org/lindenii/furgit/objectstore"
+	"codeberg.org/lindenii/furgit/object/store"
 )
 
 // Chain queries multiple object databases in order.

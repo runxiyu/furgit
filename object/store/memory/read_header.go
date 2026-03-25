@@ -2,8 +2,8 @@ package memory
 
 import (
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/store"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
-	"codeberg.org/lindenii/furgit/objectstore"
 )
 
 // ReadHeader reads one object header.

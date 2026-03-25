@@ -6,8 +6,8 @@ import (
 
 	giterrors "codeberg.org/lindenii/furgit/errors"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/store"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
-	"codeberg.org/lindenii/furgit/objectstore"
 )
 
 func validateDomain(domain Domain) error {

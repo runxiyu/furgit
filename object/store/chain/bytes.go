@@ -1,21 +1,19 @@
-package mix
+package chain
 
 import (
 	"errors"
 	"fmt"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/store"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
-	"codeberg.org/lindenii/furgit/objectstore"
 )
 
-// ReadBytesFull reads a full serialized object from one backend that has it.
-func (mix *Mix) ReadBytesFull(id objectid.ObjectID) ([]byte, error) {
-	for i, backend := 0, mix.firstBackend(); backend != nil; i, backend = i+1, mix.nextBackend(backend) {
+// ReadBytesFull reads a full serialized object from the first backend that has it.
+func (chain *Chain) ReadBytesFull(id objectid.ObjectID) ([]byte, error) {
+	for i, backend := range chain.backends {
 		full, err := backend.ReadBytesFull(id)
 		if err == nil {
-			mix.touchBackend(backend)
-
 			return full, nil
 		}
 
@@ -29,14 +27,11 @@ func (mix *Mix) ReadBytesFull(id objectid.ObjectID) ([]byte, error) {
 	return nil, objectstore.ErrObjectNotFound
 }
 
-// ReadBytesContent reads an object's type and content bytes from one backend
-// that has it.
-func (mix *Mix) ReadBytesContent(id objectid.ObjectID) (objecttype.Type, []byte, error) {
-	for i, backend := 0, mix.firstBackend(); backend != nil; i, backend = i+1, mix.nextBackend(backend) {
+// ReadBytesContent reads an object's type and content bytes from the first backend that has it.
+func (chain *Chain) ReadBytesContent(id objectid.ObjectID) (objecttype.Type, []byte, error) {
+	for i, backend := range chain.backends {
 		ty, content, err := backend.ReadBytesContent(id)
 		if err == nil {
-			mix.touchBackend(backend)
-
 			return ty, content, nil
 		}
 

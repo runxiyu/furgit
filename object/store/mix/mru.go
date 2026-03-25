@@ -1,6 +1,6 @@
 package mix
 
-import "codeberg.org/lindenii/furgit/objectstore"
+import "codeberg.org/lindenii/furgit/object/store"
 
 type backendNode struct {
 	backend objectstore.Store

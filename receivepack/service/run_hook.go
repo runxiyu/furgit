@@ -5,10 +5,10 @@ import (
 	"os"
 
 	"codeberg.org/lindenii/furgit/internal/utils"
-	"codeberg.org/lindenii/furgit/objectstore"
-	"codeberg.org/lindenii/furgit/objectstore/loose"
-	objectmix "codeberg.org/lindenii/furgit/objectstore/mix"
-	"codeberg.org/lindenii/furgit/objectstore/packed"
+	"codeberg.org/lindenii/furgit/object/store"
+	"codeberg.org/lindenii/furgit/object/store/loose"
+	objectmix "codeberg.org/lindenii/furgit/object/store/mix"
+	"codeberg.org/lindenii/furgit/object/store/packed"
 )
 
 func (service *Service) runHook(
