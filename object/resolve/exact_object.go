@@ -2,8 +2,8 @@ package resolve
 
 import (
 	"codeberg.org/lindenii/furgit/object"
-	"codeberg.org/lindenii/furgit/object/stored"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/stored"
 )
 
 // ExactObject reads, parses, and wraps the object at id without constraining

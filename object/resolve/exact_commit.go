@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/object"
-	"codeberg.org/lindenii/furgit/object/stored"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/stored"
 )
 
 // ExactCommit reads, parses, and wraps the commit at id.

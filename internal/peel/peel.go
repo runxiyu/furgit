@@ -7,8 +7,8 @@ import (
 	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/objectstore"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"codeberg.org/lindenii/furgit/objectstore"
 )
 
 // ToCommit peels annotated tags transitively until a commit is reached.

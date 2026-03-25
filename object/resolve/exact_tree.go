@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/object"
-	"codeberg.org/lindenii/furgit/object/stored"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/stored"
 )
 
 // ExactTree reads, parses, and wraps the tree at id.

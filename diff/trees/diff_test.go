@@ -8,8 +8,8 @@ import (
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/objectstore/loose"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"codeberg.org/lindenii/furgit/objectstore/loose"
 )
 
 func TestDiffComplexNestedChanges(t *testing.T) {

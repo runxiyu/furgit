@@ -8,8 +8,8 @@ import (
 	"codeberg.org/lindenii/furgit/internal/peel"
 	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/objectstore"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"codeberg.org/lindenii/furgit/objectstore"
 )
 
 func (query *Query) id(idx nodeIndex) objectid.ObjectID {

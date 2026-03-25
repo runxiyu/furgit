@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/objectstore"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"codeberg.org/lindenii/furgit/objectstore"
 )
 
 // ReadHeader reads object header data from the first backend that has it.

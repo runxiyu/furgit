@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/objectstore"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"codeberg.org/lindenii/furgit/objectstore"
 )
 
 // ReadBytesFull reads a full serialized object from the first backend that has it.

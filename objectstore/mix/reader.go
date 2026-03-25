@@ -6,8 +6,8 @@ import (
 	"io"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/objectstore"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"codeberg.org/lindenii/furgit/objectstore"
 )
 
 // ReadReaderFull reads a full serialized object stream from one backend that

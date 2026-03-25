@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/object"
-	"codeberg.org/lindenii/furgit/object/stored"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/stored"
 )
 
 // PeelToCommit peels tags until it reaches a commit.
