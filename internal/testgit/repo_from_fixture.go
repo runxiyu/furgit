@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // NewRepoFromFixture copies one existing repository fixture into a temp dir.

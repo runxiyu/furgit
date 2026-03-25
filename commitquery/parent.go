@@ -2,7 +2,7 @@ package commitquery
 
 import (
 	commitgraphread "codeberg.org/lindenii/furgit/commitgraph/read"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // parentRef references one commit parent.

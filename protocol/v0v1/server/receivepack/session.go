@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 	common "codeberg.org/lindenii/furgit/protocol/v0v1/server"
 )
 

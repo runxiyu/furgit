@@ -4,7 +4,7 @@ import (
 	"io"
 	"os"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 const (

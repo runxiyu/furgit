@@ -1,6 +1,6 @@
 package memory
 
-import "codeberg.org/lindenii/furgit/objectid"
+import objectid "codeberg.org/lindenii/furgit/object/id"
 
 // ReadSize reads one object size.
 func (store *Store) ReadSize(id objectid.ObjectID) (int64, error) {

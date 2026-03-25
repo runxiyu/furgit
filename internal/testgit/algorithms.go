@@ -3,7 +3,7 @@ package testgit
 import (
 	"testing"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // ForEachAlgorithm runs a subtest for every supported algorithm.

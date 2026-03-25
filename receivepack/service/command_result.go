@@ -1,6 +1,6 @@
 package service
 
-import "codeberg.org/lindenii/furgit/objectid"
+import objectid "codeberg.org/lindenii/furgit/object/id"
 
 // CommandResult is one per-command execution result.
 type CommandResult struct {

@@ -3,7 +3,7 @@ package resolve
 import (
 	"io"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // PeelToCommitReader returns a reader for the content of the peeled commit at

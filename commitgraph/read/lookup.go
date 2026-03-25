@@ -2,7 +2,7 @@ package read
 
 import (
 	"codeberg.org/lindenii/furgit/internal/intconv"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // Lookup resolves one object ID to one graph position.

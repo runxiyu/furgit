@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 
 	"codeberg.org/lindenii/furgit/internal/intconv"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 func layerLookup(layer *layer, oid objectid.ObjectID) (uint32, bool) {

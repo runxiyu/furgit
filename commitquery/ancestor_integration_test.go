@@ -7,7 +7,7 @@ import (
 	"codeberg.org/lindenii/furgit/commitquery"
 	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 func TestIsMatchesGitMergeBase(t *testing.T) {

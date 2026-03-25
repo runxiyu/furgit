@@ -3,7 +3,7 @@ package commitquery
 import (
 	"math"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // EffectiveGeneration returns one node's generation value.

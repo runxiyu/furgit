@@ -1,6 +1,6 @@
 package files
 
-import "codeberg.org/lindenii/furgit/objectid"
+import objectid "codeberg.org/lindenii/furgit/object/id"
 
 func (batch *Batch) Create(name string, newID objectid.ObjectID) {
 	batch.queue(queuedUpdate{name: name, kind: updateCreate, newID: newID})

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // ParseTree decodes a tree object body.

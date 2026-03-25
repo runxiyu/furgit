@@ -1,6 +1,6 @@
 package server
 
-import "codeberg.org/lindenii/furgit/objectid"
+import objectid "codeberg.org/lindenii/furgit/object/id"
 
 // AdvertisedRef is one ref entry in one v0/v1 server advertisement.
 type AdvertisedRef struct {

@@ -3,7 +3,7 @@ package packed
 import (
 	"errors"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/objectstore"
 )
 

@@ -3,7 +3,7 @@ package trees
 
 import (
 	"codeberg.org/lindenii/furgit/object"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // Diff compares two trees and returns recursive differences.

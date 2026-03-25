@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // RepoOptions controls git-init options for test repositories.

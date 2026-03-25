@@ -1,6 +1,6 @@
 package files
 
-import "codeberg.org/lindenii/furgit/objectid"
+import objectid "codeberg.org/lindenii/furgit/object/id"
 
 type directRefKind uint8
 

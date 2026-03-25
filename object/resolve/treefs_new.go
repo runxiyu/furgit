@@ -1,6 +1,6 @@
 package resolve
 
-import "codeberg.org/lindenii/furgit/objectid"
+import objectid "codeberg.org/lindenii/furgit/object/id"
 
 // TreeFS returns a new filesystem view rooted at root, which may be any
 // tree-ish object accepted by PeelToTreeID.

@@ -4,7 +4,7 @@ import (
 	"iter"
 
 	"codeberg.org/lindenii/furgit/internal/intconv"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // AllPositions iterates all commit positions in native layer order.

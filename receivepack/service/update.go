@@ -1,6 +1,6 @@
 package service
 
-import "codeberg.org/lindenii/furgit/objectid"
+import objectid "codeberg.org/lindenii/furgit/object/id"
 
 // PlannedUpdate is one ref update that would be applied once ref writing
 // exists.

@@ -6,7 +6,7 @@ import (
 	"codeberg.org/lindenii/furgit/commitgraph"
 	"codeberg.org/lindenii/furgit/commitgraph/bloom"
 	"codeberg.org/lindenii/furgit/internal/intconv"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx

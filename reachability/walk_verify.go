@@ -3,7 +3,7 @@ package reachability
 import (
 	"codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/object"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 

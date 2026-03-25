@@ -4,7 +4,7 @@ import (
 	"io/fs"
 
 	"codeberg.org/lindenii/furgit/object"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // TreeFS exposes one Git tree as an fs.FS.

@@ -8,7 +8,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/commitquery"
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 func TestQueryMatchesGitMergeBaseAll(t *testing.T) {

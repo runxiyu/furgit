@@ -1,6 +1,6 @@
 package read
 
-import "codeberg.org/lindenii/furgit/objectid"
+import objectid "codeberg.org/lindenii/furgit/object/id"
 
 // Reader provides read-only access to one mmap-backed commit-graph snapshot.
 //

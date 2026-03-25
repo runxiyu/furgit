@@ -2,7 +2,7 @@ package trees
 
 import (
 	"codeberg.org/lindenii/furgit/object"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 func diffRecursive(a, b *object.Tree, prefix []byte, readTree func(objectid.ObjectID) (*object.Tree, error), out *[]Entry) error {

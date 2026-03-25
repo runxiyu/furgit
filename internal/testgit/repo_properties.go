@@ -1,6 +1,6 @@
 package testgit
 
-import "codeberg.org/lindenii/furgit/objectid"
+import objectid "codeberg.org/lindenii/furgit/object/id"
 
 // Algorithm returns the object ID algorithm configured for this repository.
 func (testRepo *TestRepo) Algorithm() objectid.Algorithm {

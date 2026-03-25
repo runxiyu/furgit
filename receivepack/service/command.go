@@ -1,6 +1,6 @@
 package service
 
-import "codeberg.org/lindenii/furgit/objectid"
+import objectid "codeberg.org/lindenii/furgit/object/id"
 
 // Command is one protocol-independent requested ref update.
 type Command struct {

@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"codeberg.org/lindenii/furgit/internal/intconv"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 func openSingle(root *os.Root, algo objectid.Algorithm) (*Reader, error) {

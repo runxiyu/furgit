@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/config"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 func detectObjectAlgorithm(cfg *config.Config) (objectid.Algorithm, error) {

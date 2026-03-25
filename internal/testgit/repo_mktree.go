@@ -3,7 +3,7 @@ package testgit
 import (
 	"testing"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // Mktree creates a tree from textual mktree input and returns its ID.

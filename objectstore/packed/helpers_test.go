@@ -9,7 +9,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	objectheader "codeberg.org/lindenii/furgit/object/header"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/objectstore/packed"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )

@@ -1,6 +1,6 @@
 package refstore
 
-import "codeberg.org/lindenii/furgit/objectid"
+import objectid "codeberg.org/lindenii/furgit/object/id"
 
 // Transaction stages reference updates for one atomic commit.
 //

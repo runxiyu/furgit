@@ -6,7 +6,7 @@ import (
 	"syscall"
 
 	"codeberg.org/lindenii/furgit/internal/intconv"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // openIndex returns one opened and parsed index, caching it by pack basename.

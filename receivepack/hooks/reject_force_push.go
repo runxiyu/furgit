@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/commitquery"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 	objectmix "codeberg.org/lindenii/furgit/objectstore/mix"
 	receivepack "codeberg.org/lindenii/furgit/receivepack"
 	"codeberg.org/lindenii/furgit/refstore"

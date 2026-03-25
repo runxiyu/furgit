@@ -4,7 +4,7 @@ package loose
 import (
 	"os"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // Store reads loose Git objects from an objects directory root.

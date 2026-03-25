@@ -3,7 +3,7 @@ package commitquery
 import (
 	"slices"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // MergeBases reports all merge bases in Git's merge-base --all order.

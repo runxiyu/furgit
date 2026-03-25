@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	objectheader "codeberg.org/lindenii/furgit/object/header"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 

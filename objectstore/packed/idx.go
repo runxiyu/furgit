@@ -3,7 +3,7 @@ package packed
 import (
 	"os"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // idxFile stores one mapped and validated idx v2 file.

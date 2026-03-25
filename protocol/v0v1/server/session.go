@@ -3,7 +3,7 @@ package server
 import (
 	"io"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/protocol/pktline"
 	"codeberg.org/lindenii/furgit/protocol/sideband64k"
 )

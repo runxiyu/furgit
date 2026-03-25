@@ -2,7 +2,7 @@ package read
 
 import (
 	"codeberg.org/lindenii/furgit/internal/intconv"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // OIDAt returns object ID at one position.

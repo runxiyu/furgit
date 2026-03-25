@@ -1,6 +1,6 @@
 package files
 
-import "codeberg.org/lindenii/furgit/objectid"
+import objectid "codeberg.org/lindenii/furgit/object/id"
 
 func (tx *Transaction) Create(name string, newID objectid.ObjectID) error {
 	return tx.queue(queuedUpdate{name: name, kind: updateCreate, newID: newID})

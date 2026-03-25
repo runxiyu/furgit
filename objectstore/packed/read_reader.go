@@ -7,7 +7,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/internal/iolimit"
 	objectheader "codeberg.org/lindenii/furgit/object/header"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 	packfmt "codeberg.org/lindenii/furgit/packfile"
 )

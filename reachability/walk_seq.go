@@ -4,7 +4,7 @@ import (
 	"errors"
 	"iter"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // Seq returns the traversal sequence. It is single-use.

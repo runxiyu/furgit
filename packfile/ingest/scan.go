@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/internal/progress"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // streamPackAndScan copies src into temp .pack while scanning packed entries.

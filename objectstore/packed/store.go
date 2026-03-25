@@ -6,7 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/objectstore"
 )
 

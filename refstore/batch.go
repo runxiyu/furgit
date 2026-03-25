@@ -1,6 +1,6 @@
 package refstore
 
-import "codeberg.org/lindenii/furgit/objectid"
+import objectid "codeberg.org/lindenii/furgit/object/id"
 
 // Batch stages reference operations for one non-atomic apply.
 //

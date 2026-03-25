@@ -5,7 +5,7 @@ import (
 	"io"
 
 	"codeberg.org/lindenii/furgit/internal/intconv"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // rewritePackHeaderAndTrailer rewrites object count and trailer hash using ReadAt/WriteAt.

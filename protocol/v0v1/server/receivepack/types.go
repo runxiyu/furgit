@@ -1,6 +1,6 @@
 package receivepack
 
-import "codeberg.org/lindenii/furgit/objectid"
+import objectid "codeberg.org/lindenii/furgit/object/id"
 
 // Command is one requested reference update.
 type Command struct {

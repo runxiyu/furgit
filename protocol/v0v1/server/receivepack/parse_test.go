@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/protocol/pktline"
 	common "codeberg.org/lindenii/furgit/protocol/v0v1/server"
 	receivepack "codeberg.org/lindenii/furgit/protocol/v0v1/server/receivepack"

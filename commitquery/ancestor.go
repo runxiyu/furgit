@@ -1,6 +1,6 @@
 package commitquery
 
-import "codeberg.org/lindenii/furgit/objectid"
+import objectid "codeberg.org/lindenii/furgit/object/id"
 
 // IsAncestor reports whether ancestor is reachable from descendant through
 // commit parent edges.

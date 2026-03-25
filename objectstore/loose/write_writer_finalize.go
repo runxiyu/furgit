@@ -5,7 +5,7 @@ import (
 	"io/fs"
 	"path/filepath"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // Close flushes and closes the underlying zlib stream and temp file.

@@ -8,7 +8,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/config"
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 func openConfig(t *testing.T, testRepo *testgit.TestRepo) *os.File {

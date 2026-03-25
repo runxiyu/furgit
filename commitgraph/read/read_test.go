@@ -11,7 +11,7 @@ import (
 	"codeberg.org/lindenii/furgit/commitgraph/read"
 	"codeberg.org/lindenii/furgit/internal/intconv"
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 func fixtureRepoPath(t *testing.T, algo objectid.Algorithm, name string) string {

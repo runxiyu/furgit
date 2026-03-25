@@ -7,7 +7,7 @@ package stored
 
 import (
 	"codeberg.org/lindenii/furgit/object"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // Stored represents a stored object,

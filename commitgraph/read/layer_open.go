@@ -6,7 +6,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/commitgraph"
 	"codeberg.org/lindenii/furgit/internal/intconv"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 func openLayer(root *os.Root, relPath string, algo objectid.Algorithm) (*layer, error) {

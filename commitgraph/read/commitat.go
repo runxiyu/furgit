@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 
 	"codeberg.org/lindenii/furgit/internal/intconv"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // CommitAt returns decoded commit-graph metadata at one position.

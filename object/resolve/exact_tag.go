@@ -5,7 +5,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/object"
 	"codeberg.org/lindenii/furgit/object/stored"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // ExactTag reads, parses, and wraps the tag at id.

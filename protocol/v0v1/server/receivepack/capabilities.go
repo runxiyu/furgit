@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // Capabilities describes one receive-pack capability set.

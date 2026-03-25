@@ -2,7 +2,7 @@ package service
 
 import (
 	"codeberg.org/lindenii/furgit/internal/utils"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/refstore"
 )
 

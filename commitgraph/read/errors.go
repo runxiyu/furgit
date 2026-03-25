@@ -3,7 +3,7 @@ package read
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // NotFoundError reports a missing commit graph entry by object ID.

@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"codeberg.org/lindenii/furgit/internal/intconv"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 func openChain(root *os.Root, algo objectid.Algorithm) (*Reader, error) {

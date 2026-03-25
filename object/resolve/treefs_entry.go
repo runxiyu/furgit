@@ -6,7 +6,7 @@ import (
 	"io/fs"
 
 	"codeberg.org/lindenii/furgit/object"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 func (treeFS *TreeFS) resolvePath(op treeFSOp, name string) (treeEntryValue, error) {

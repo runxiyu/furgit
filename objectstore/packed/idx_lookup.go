@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // lookup resolves one object ID to its pack offset within this index.

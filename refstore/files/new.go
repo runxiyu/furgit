@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // New creates one files ref store rooted at one repository gitdir.

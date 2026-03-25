@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"codeberg.org/lindenii/furgit/config"
-	"codeberg.org/lindenii/furgit/objectid"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/objectstore"
 	objectloose "codeberg.org/lindenii/furgit/objectstore/loose"
 	objectpacked "codeberg.org/lindenii/furgit/objectstore/packed"
