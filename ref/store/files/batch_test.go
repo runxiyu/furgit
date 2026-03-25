@@ -45,8 +45,7 @@ func TestBatchApplyRejectsStaleDeleteAndAppliesIndependentDelete(t *testing.T) {
 			t.Fatalf("results[0].Status = %v, want rejected", results[0].Status)
 		}
 
-		if !errors.Is(results[0].Error, refstore.ErrReferenceNotFound) &&
-			errors.As(results[0].Error, new(*refstore.IncorrectOldValueError)) == false {
+		if _, ok := errors.AsType[*refstore.IncorrectOldValueError](results[0].Error); !errors.Is(results[0].Error, refstore.ErrReferenceNotFound) && !ok {
 			t.Fatalf("results[0].Error = %v, want stale-value rejection", results[0].Error)
 		}
 
@@ -104,7 +103,7 @@ func TestBatchApplyRejectsDuplicateQueuedRef(t *testing.T) {
 			t.Fatalf("results[1].Status = %v, want rejected", results[1].Status)
 		}
 
-		if !errors.As(results[1].Error, new(*refstore.DuplicateUpdateError)) {
+		if _, ok := errors.AsType[*refstore.DuplicateUpdateError](results[1].Error); !ok {
 			t.Fatalf("results[1].Error = %v, want duplicate update error", results[1].Error)
 		}
 

@@ -22,11 +22,6 @@ func (executor *refUpdateExecutor) tryRemoveEmptyParentPaths(kind rootKind, name
 				return
 			}
 
-			var pathErr *os.PathError
-			if errors.As(err, &pathErr) {
-				return
-			}
-
 			return
 		}
 

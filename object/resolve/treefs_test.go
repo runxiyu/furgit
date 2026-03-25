@@ -104,8 +104,7 @@ func TestTreeFS(t *testing.T) {
 			t.Fatal("ReadFile(dir) unexpectedly succeeded")
 		}
 
-		var pathErr *fs.PathError
-		if !errors.As(err, &pathErr) {
+		if _, ok := errors.AsType[*fs.PathError](err); !ok {
 			t.Fatalf("ReadFile(dir) err type = %T, want *fs.PathError", err)
 		}
 	})

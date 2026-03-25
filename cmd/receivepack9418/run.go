@@ -55,8 +55,8 @@ func run(listenAddr, repoPath string) error {
 				return nil
 			}
 
-			var nerr net.Error
-			if errors.As(err, &nerr) && nerr.Timeout() {
+			nerr, ok := errors.AsType[net.Error](err)
+			if ok && nerr.Timeout() {
 				log.Printf("receivepack9418: timeout accept error: %v", err)
 
 				continue
