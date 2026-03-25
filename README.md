@@ -15,7 +15,8 @@ Furgit is a low-level Git library in Go.
 ## Goals
 
 * General-purpose Git plumbing library for UNIX-like systems
-* Aim for clear architecture then high performance
+* Aim for extremely clear and modular architecture
+* Then aim for high performance
 * Expect familiarity with Git internals
 
 ## Finding your way around
