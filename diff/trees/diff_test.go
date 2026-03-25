@@ -8,7 +8,7 @@ import (
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/store/loose"
+	"codeberg.org/lindenii/furgit/object/storer/loose"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 

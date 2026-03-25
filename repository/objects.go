@@ -6,10 +6,10 @@ import (
 	"os"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/store"
-	objectloose "codeberg.org/lindenii/furgit/object/store/loose"
-	objectmix "codeberg.org/lindenii/furgit/object/store/mix"
-	objectpacked "codeberg.org/lindenii/furgit/object/store/packed"
+	"codeberg.org/lindenii/furgit/object/storer"
+	objectloose "codeberg.org/lindenii/furgit/object/storer/loose"
+	objectmix "codeberg.org/lindenii/furgit/object/storer/mix"
+	objectpacked "codeberg.org/lindenii/furgit/object/storer/packed"
 )
 
 //nolint:ireturn
@@ -17,7 +17,7 @@ func openObjectStore(
 	root *os.Root,
 	algo objectid.Algorithm,
 ) (
-	objects objectstore.Store,
+	objects objectstorer.Store,
 	objectsRoot *os.Root,
 	objectsPackRoot *os.Root,
 	objectsLoose *objectloose.Store,
@@ -36,7 +36,7 @@ func openObjectStore(
 		return nil, nil, nil, nil, nil, err
 	}
 
-	backends := []objectstore.Store{objectsLoose}
+	backends := []objectstorer.Store{objectsLoose}
 
 	objectsPackRoot, err = objectsRoot.OpenRoot("pack")
 	if err == nil {
@@ -73,6 +73,6 @@ func openObjectStore(
 // Close.
 //
 //nolint:ireturn
-func (repo *Repository) Objects() objectstore.Store {
+func (repo *Repository) Objects() objectstorer.Store {
 	return repo.objects
 }

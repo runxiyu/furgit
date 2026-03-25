@@ -1,7 +1,7 @@
 package repository
 
 import (
-	objectloose "codeberg.org/lindenii/furgit/object/store/loose"
+	objectloose "codeberg.org/lindenii/furgit/object/storer/loose"
 )
 
 // LooseStoreForWriting returns the repository's loose-object writer.

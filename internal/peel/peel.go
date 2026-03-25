@@ -7,16 +7,16 @@ import (
 	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/store"
+	"codeberg.org/lindenii/furgit/object/storer"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // ToCommit peels annotated tags transitively until a commit is reached.
-func ToCommit(store objectstore.Store, id objectid.ObjectID) (objectid.ObjectID, error) {
+func ToCommit(store objectstorer.Store, id objectid.ObjectID) (objectid.ObjectID, error) {
 	for {
 		ty, _, err := store.ReadHeader(id)
 		if err != nil {
-			if stderrors.Is(err, objectstore.ErrObjectNotFound) {
+			if stderrors.Is(err, objectstorer.ErrObjectNotFound) {
 				return objectid.ObjectID{}, &giterrors.ObjectMissingError{OID: id}
 			}
 
@@ -33,7 +33,7 @@ func ToCommit(store objectstore.Store, id objectid.ObjectID) (objectid.ObjectID,
 
 		_, content, err := store.ReadBytesContent(id)
 		if err != nil {
-			if stderrors.Is(err, objectstore.ErrObjectNotFound) {
+			if stderrors.Is(err, objectstorer.ErrObjectNotFound) {
 				return objectid.ObjectID{}, &giterrors.ObjectMissingError{OID: id}
 			}
 

@@ -4,7 +4,7 @@ import (
 	"os"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/store"
+	"codeberg.org/lindenii/furgit/object/storer"
 	"codeberg.org/lindenii/furgit/ref/store"
 )
 
@@ -25,7 +25,7 @@ type Options struct {
 	Refs refstore.ReadWriteStore
 	// ExistingObjects is the object store visible to the push before any newly
 	// uploaded quarantined objects are promoted.
-	ExistingObjects objectstore.Store
+	ExistingObjects objectstorer.Store
 	// ObjectsRoot is the permanent object storage root beneath which per-push
 	// quarantine directories are derived.
 	ObjectsRoot *os.Root

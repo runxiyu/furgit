@@ -6,7 +6,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/internal/intconv"
 	"codeberg.org/lindenii/furgit/internal/progress"
-	"codeberg.org/lindenii/furgit/object/store"
+	"codeberg.org/lindenii/furgit/object/storer"
 )
 
 // maybeFixThin appends missing bases and rewrites pack header/trailer when needed.
@@ -71,7 +71,7 @@ func maybeFixThin(state *ingestState) error {
 	for _, id := range baseIDs {
 		ty, content, err := state.opts.Base.ReadBytesContent(id)
 		if err != nil {
-			if errors.Is(err, objectstore.ErrObjectNotFound) {
+			if errors.Is(err, objectstorer.ErrObjectNotFound) {
 				continue
 			}
 

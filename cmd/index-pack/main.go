@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/store"
+	"codeberg.org/lindenii/furgit/object/storer"
 	"codeberg.org/lindenii/furgit/packfile/ingest"
 	"codeberg.org/lindenii/furgit/repository"
 )
@@ -36,7 +36,7 @@ func main() {
 func run(repoPath, destinationPath, objectFormat string, fixThin, writeRev bool) error {
 	var (
 		algo objectid.Algorithm
-		base objectstore.Store
+		base objectstorer.Store
 		repo *repository.Repository
 	)
 

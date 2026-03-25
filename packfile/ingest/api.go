@@ -8,7 +8,7 @@ import (
 	"os"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/store"
+	"codeberg.org/lindenii/furgit/object/storer"
 )
 
 // Options controls one pack ingest operation.
@@ -18,7 +18,7 @@ type Options struct {
 	// WriteRev writes a .rev alongside the .pack and .idx.
 	WriteRev bool
 	// Base supplies existing objects for thin-pack fixup.
-	Base objectstore.Store
+	Base objectstorer.Store
 	// Progress receives human-readable progress messages.
 	//
 	// When nil, no progress output is emitted.
