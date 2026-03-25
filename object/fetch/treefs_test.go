@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/fetch"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/tree"
 	"codeberg.org/lindenii/furgit/repository"
 )
