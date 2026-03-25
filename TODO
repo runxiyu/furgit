@@ -35,3 +35,5 @@
   go-git handles it in their object stores but the way they
   implement it is extremely complex and not fit for furgit
   architecture.
+
+* The commit API around gpgsig is hard to use.
