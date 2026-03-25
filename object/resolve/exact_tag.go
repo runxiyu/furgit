@@ -3,19 +3,19 @@ package resolve
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/stored"
+	"codeberg.org/lindenii/furgit/object/tag"
 )
 
 // ExactTag reads, parses, and wraps the tag at id.
-func (r *Resolver) ExactTag(id objectid.ObjectID) (*stored.Stored[*object.Tag], error) {
+func (r *Resolver) ExactTag(id objectid.ObjectID) (*stored.Stored[*tag.Tag], error) {
 	parsed, err := r.parseObject(id)
 	if err != nil {
 		return nil, err
 	}
 
-	tag, ok := parsed.(*object.Tag)
+	tag, ok := parsed.(*tag.Tag)
 	if !ok {
 		return nil, fmt.Errorf("object/resolve: expected tag object %s, got %v", id, parsed.ObjectType())
 	}

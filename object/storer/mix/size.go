@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/storer"
+	objectstorer "codeberg.org/lindenii/furgit/object/storer"
 )
 
 // ReadSize reads object content length from one backend that has it.

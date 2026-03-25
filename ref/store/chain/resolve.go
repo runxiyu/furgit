@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/ref"
-	"codeberg.org/lindenii/furgit/ref/store"
+	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 
 // Resolve resolves a reference from the first backend that has it.

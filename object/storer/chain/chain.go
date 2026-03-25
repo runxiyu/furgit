@@ -2,9 +2,7 @@
 // backends.
 package chain
 
-import (
-	"codeberg.org/lindenii/furgit/object/storer"
-)
+import objectstorer "codeberg.org/lindenii/furgit/object/storer"
 
 // Chain queries multiple object databases in order.
 //

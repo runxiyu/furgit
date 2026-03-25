@@ -3,7 +3,7 @@ package testgit
 import (
 	"testing"
 
-	"codeberg.org/lindenii/furgit/object/storer"
+	objectstorer "codeberg.org/lindenii/furgit/object/storer"
 	"codeberg.org/lindenii/furgit/repository"
 )
 

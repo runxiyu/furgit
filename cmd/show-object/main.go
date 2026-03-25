@@ -9,8 +9,12 @@ import (
 	"strings"
 
 	"codeberg.org/lindenii/furgit/object"
+	"codeberg.org/lindenii/furgit/object/blob"
+	"codeberg.org/lindenii/furgit/object/commit"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/stored"
+	"codeberg.org/lindenii/furgit/object/tag"
+	"codeberg.org/lindenii/furgit/object/tree"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 	"codeberg.org/lindenii/furgit/repository"
 )
@@ -97,18 +101,18 @@ func printStored(s *stored.Stored[object.Object]) {
 	fmt.Fprintf(&b, "type: %s\n", tyName)
 
 	switch obj := s.Object().(type) {
-	case *object.Blob:
+	case *blob.Blob:
 		blob := obj
 		fmt.Fprintf(&b, "size: %d\n", len(blob.Data))
 		fmt.Fprintf(&b, "data: %q\n", string(blob.Data))
-	case *object.Tree:
+	case *tree.Tree:
 		tree := obj
 		fmt.Fprintf(&b, "entries: %d\n", len(tree.Entries))
 
 		for _, entry := range tree.Entries {
 			fmt.Fprintf(&b, "%06o %s\t%s\n", entry.Mode, entry.ID, entry.Name)
 		}
-	case *object.Commit:
+	case *commit.Commit:
 		commit := obj
 		fmt.Fprintf(&b, "tree: %s\n", commit.Tree)
 
@@ -119,7 +123,7 @@ func printStored(s *stored.Stored[object.Object]) {
 		fmt.Fprintf(&b, "author: %s <%s>\n", commit.Author.Name, commit.Author.Email)
 		fmt.Fprintf(&b, "committer: %s <%s>\n", commit.Committer.Name, commit.Committer.Email)
 		fmt.Fprintf(&b, "message:\n%s\n", string(commit.Message))
-	case *object.Tag:
+	case *tag.Tag:
 		tag := obj
 
 		targetTy, ok := objecttype.Name(tag.TargetType)

@@ -1,12 +1,12 @@
-package object_test
+package tag_test
 
 import (
 	"bytes"
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/tag"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
@@ -19,29 +19,29 @@ func TestTagParseFromGit(t *testing.T) {
 
 		rawBody := testRepo.CatFile(t, "tag", tagID)
 
-		tag, err := object.ParseTag(rawBody, algo)
+		parsed, err := tag.Parse(rawBody, algo)
 		if err != nil {
 			t.Fatalf("ParseTag: %v", err)
 		}
 
-		if tag.Target != commitID {
-			t.Fatalf("tag target mismatch: got %s want %s", tag.Target, commitID)
+		if parsed.Target != commitID {
+			t.Fatalf("tag target mismatch: got %s want %s", parsed.Target, commitID)
 		}
 
-		if tag.TargetType != objecttype.TypeCommit {
-			t.Fatalf("tag target type = %v, want %v", tag.TargetType, objecttype.TypeCommit)
+		if parsed.TargetType != objecttype.TypeCommit {
+			t.Fatalf("tag target type = %v, want %v", parsed.TargetType, objecttype.TypeCommit)
 		}
 
-		if !bytes.Equal(tag.Name, []byte("v1")) {
-			t.Fatalf("tag name = %q, want %q", tag.Name, "v1")
+		if !bytes.Equal(parsed.Name, []byte("v1")) {
+			t.Fatalf("tag name = %q, want %q", parsed.Name, "v1")
 		}
 
-		if tag.Tagger == nil {
+		if parsed.Tagger == nil {
 			t.Fatalf("expected tagger")
 		}
 
-		if !bytes.Contains(tag.Message, []byte("tag message")) {
-			t.Fatalf("tag message mismatch: %q", tag.Message)
+		if !bytes.Contains(parsed.Message, []byte("tag message")) {
+			t.Fatalf("tag message mismatch: %q", parsed.Message)
 		}
 	})
 }

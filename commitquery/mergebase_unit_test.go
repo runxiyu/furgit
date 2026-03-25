@@ -10,9 +10,9 @@ import (
 	"codeberg.org/lindenii/furgit/commitquery"
 	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/storer/memory"
+	"codeberg.org/lindenii/furgit/object/tree"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
@@ -56,7 +56,7 @@ func containsID(set map[objectid.ObjectID]struct{}, id objectid.ObjectID) bool {
 }
 
 // mustSerializeTree serializes one tree or fails the test.
-func mustSerializeTree(tb testing.TB, tree *object.Tree) []byte {
+func mustSerializeTree(tb testing.TB, tree *tree.Tree) []byte {
 	tb.Helper()
 
 	body, err := tree.SerializeWithoutHeader()
@@ -74,8 +74,8 @@ func TestQueryLinearHistory(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
 		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
@@ -115,13 +115,13 @@ func TestQueryPeelsAnnotatedTags(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
 		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		leftTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		leftTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("left"),
 			ID:   blob,
 		}}}))
-		rightTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		rightTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("right"),
 			ID:   blob,
 		}}}))
@@ -149,28 +149,28 @@ func TestQueryCrissCrossReturnsAllBestCommonAncestors(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
 		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		rootTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		rootTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("root"),
 			ID:   blob,
 		}}}))
-		base1Tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		base1Tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("base1"),
 			ID:   blob,
 		}}}))
-		base2Tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		base2Tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("base2"),
 			ID:   blob,
 		}}}))
-		leftTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		leftTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("left"),
 			ID:   blob,
 		}}}))
-		rightTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		rightTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("right"),
 			ID:   blob,
 		}}}))
@@ -215,14 +215,14 @@ func TestQueryReturnsNoResultWhenNoCommonAncestorExists(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
 		leftBlob := store.AddObject(objecttype.TypeBlob, []byte("left\n"))
-		leftTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		leftTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("left"),
 			ID:   leftBlob,
 		}}}))
 		rightBlob := store.AddObject(objecttype.TypeBlob, []byte("right\n"))
-		rightTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		rightTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("right"),
 			ID:   rightBlob,
 		}}}))
@@ -257,8 +257,8 @@ func TestQueryRejectsNonCommitAfterPeel(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
 		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
@@ -289,8 +289,8 @@ func TestQueryAllIsRepeatable(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
 		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))

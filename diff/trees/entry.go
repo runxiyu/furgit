@@ -1,6 +1,6 @@
 package trees
 
-import "codeberg.org/lindenii/furgit/object"
+import "codeberg.org/lindenii/furgit/object/tree"
 
 // Entry is one recursive tree difference at a path.
 type Entry struct {
@@ -9,7 +9,7 @@ type Entry struct {
 	// Kind is the difference kind for this path.
 	Kind EntryKind
 	// Old is the old tree entry (nil when Kind is EntryKindAdded).
-	Old *object.TreeEntry
+	Old *tree.TreeEntry
 	// New is the new tree entry (nil when Kind is EntryKindDeleted).
-	New *object.TreeEntry
+	New *tree.TreeEntry
 }

@@ -1,6 +1,5 @@
-package object
-
-import objecttype "codeberg.org/lindenii/furgit/object/type"
+// Package blob provides representations, parsers, and serializers for blob objects.
+package blob
 
 // Blob represents a Git blob object.
 //
@@ -9,11 +8,4 @@ import objecttype "codeberg.org/lindenii/furgit/object/type"
 // or appropriate streaming write APIs.
 type Blob struct {
 	Data []byte
-}
-
-// ObjectType returns TypeBlob.
-func (blob *Blob) ObjectType() objecttype.Type {
-	_ = blob
-
-	return objecttype.TypeBlob
 }

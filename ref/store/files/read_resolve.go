@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"codeberg.org/lindenii/furgit/ref"
-	"codeberg.org/lindenii/furgit/ref/store"
+	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 
 // Resolve resolves one reference name from the files store visible namespace.

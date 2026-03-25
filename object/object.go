@@ -1,10 +1,9 @@
-// Package object parses and serializes objects such as blob, tree, commit, and
-// tag.
+// Package object provides shared object interfaces.
 package object
 
 import objecttype "codeberg.org/lindenii/furgit/object/type"
 
-// Object is a Git object that can serialize itself.
+// Object is a Git object.
 type Object interface {
 	ObjectType() objecttype.Type
 	SerializeWithoutHeader() ([]byte, error)

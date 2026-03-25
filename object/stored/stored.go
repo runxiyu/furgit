@@ -1,7 +1,7 @@
 // Package stored wraps parsed objects with their storage object IDs.
 //
 // Stored values are typically instantiated with pointer object types such as
-// *object.Blob, *object.Tree, *object.Commit, or *object.Tag, because those
+// *blob.Blob, *tree.Tree, *commit.Commit, or *tag.Tag, because those
 // pointer types satisfy object.Object.
 package stored
 

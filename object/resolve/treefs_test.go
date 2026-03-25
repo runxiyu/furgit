@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/resolve"
+	"codeberg.org/lindenii/furgit/object/tree"
 	"codeberg.org/lindenii/furgit/repository"
 )
 
@@ -71,13 +71,13 @@ func TestTreeFS(t *testing.T) {
 			t.Fatalf("Stat(plain.txt): %v", err)
 		}
 
-		entry, ok := info.Sys().(object.TreeEntry)
+		entry, ok := info.Sys().(tree.TreeEntry)
 		if !ok {
-			t.Fatalf("Stat(plain.txt).Sys() type = %T, want object.TreeEntry", info.Sys())
+			t.Fatalf("Stat(plain.txt).Sys() type = %T, want tree.TreeEntry", info.Sys())
 		}
 
-		if entry.Mode != object.FileModeRegular {
-			t.Fatalf("Stat(plain.txt).Sys().Mode = %o, want %o", entry.Mode, object.FileModeRegular)
+		if entry.Mode != tree.FileModeRegular {
+			t.Fatalf("Stat(plain.txt).Sys().Mode = %o, want %o", entry.Mode, tree.FileModeRegular)
 		}
 
 		subFS, err := treeFS.Sub("dir")

@@ -1,4 +1,4 @@
-package object
+package commit
 
 import (
 	"bytes"
@@ -6,10 +6,11 @@ import (
 	"fmt"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectsignature "codeberg.org/lindenii/furgit/object/signature"
 )
 
-// ParseCommit decodes a commit object body.
-func ParseCommit(body []byte, algo objectid.Algorithm) (*Commit, error) {
+// Parse decodes a commit object body.
+func Parse(body []byte, algo objectid.Algorithm) (*Commit, error) {
 	c := new(Commit)
 
 	i := 0
@@ -47,14 +48,14 @@ func ParseCommit(body []byte, algo objectid.Algorithm) (*Commit, error) {
 
 			c.Parents = append(c.Parents, id)
 		case "author":
-			idt, err := ParseSignature(value)
+			idt, err := objectsignature.Parse(value)
 			if err != nil {
 				return nil, fmt.Errorf("object: commit: author: %w", err)
 			}
 
 			c.Author = *idt
 		case "committer":
-			idt, err := ParseSignature(value)
+			idt, err := objectsignature.Parse(value)
 			if err != nil {
 				return nil, fmt.Errorf("object: commit: committer: %w", err)
 			}

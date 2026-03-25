@@ -5,7 +5,7 @@ import (
 	"io"
 	"io/fs"
 
-	"codeberg.org/lindenii/furgit/object"
+	"codeberg.org/lindenii/furgit/object/tree"
 )
 
 // Open opens name for reading.
@@ -57,7 +57,7 @@ func (treeFS *TreeFS) Open(name string) (fs.File, error) {
 		}, nil
 	}
 
-	if entry.mode == object.FileModeGitlink {
+	if entry.mode == tree.FileModeGitlink {
 		return nil, treeFSPathError(treeFSOpOpen, name, fmt.Errorf("object/resolve: gitlink entries are not readable as files"))
 	}
 

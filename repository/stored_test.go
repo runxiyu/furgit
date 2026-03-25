@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/tree"
 )
 
 func TestReadStoredTyped(t *testing.T) {
@@ -86,8 +86,8 @@ func TestResolverPath(t *testing.T) {
 			t.Fatalf("Path: %v", err)
 		}
 
-		if entry.Mode != object.FileModeRegular {
-			t.Fatalf("Path mode = %o, want %o", entry.Mode, object.FileModeRegular)
+		if entry.Mode != tree.FileModeRegular {
+			t.Fatalf("Path mode = %o, want %o", entry.Mode, tree.FileModeRegular)
 		}
 
 		if entry.ID != blobID {
@@ -169,8 +169,8 @@ func TestResolverPathDeepPath(t *testing.T) {
 			t.Fatalf("Path(deep): %v", err)
 		}
 
-		if entry.Mode != object.FileModeRegular {
-			t.Fatalf("Path(deep) mode = %o, want %o", entry.Mode, object.FileModeRegular)
+		if entry.Mode != tree.FileModeRegular {
+			t.Fatalf("Path(deep) mode = %o, want %o", entry.Mode, tree.FileModeRegular)
 		}
 
 		if entry.ID != leafBlobID {
@@ -212,11 +212,11 @@ func TestReadStoredTreeMixedModes(t *testing.T) {
 			t.Fatalf("ExactTree(root): %v", err)
 		}
 
-		expect := map[string]object.FileMode{
-			"normal.txt": object.FileModeRegular,
-			"run.sh":     object.FileModeExecutable,
-			"link.txt":   object.FileModeSymlink,
-			"dir":        object.FileModeDir,
+		expect := map[string]tree.FileMode{
+			"normal.txt": tree.FileModeRegular,
+			"run.sh":     tree.FileModeExecutable,
+			"link.txt":   tree.FileModeSymlink,
+			"dir":        tree.FileModeDir,
 		}
 
 		for name, wantMode := range expect {

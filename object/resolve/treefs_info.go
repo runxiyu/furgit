@@ -4,7 +4,7 @@ import (
 	"io/fs"
 	"time"
 
-	"codeberg.org/lindenii/furgit/object"
+	"codeberg.org/lindenii/furgit/object/tree"
 )
 
 type treeFSInfo struct {
@@ -31,17 +31,17 @@ func (info *treeFSInfo) Info() (fs.FileInfo, error) {
 	return info, nil
 }
 
-func treeFSEntryMode(mode object.FileMode) fs.FileMode {
+func treeFSEntryMode(mode tree.FileMode) fs.FileMode {
 	switch mode {
-	case object.FileModeDir:
+	case tree.FileModeDir:
 		return fs.ModeDir | 0o555
-	case object.FileModeRegular:
+	case tree.FileModeRegular:
 		return 0o444
-	case object.FileModeExecutable:
+	case tree.FileModeExecutable:
 		return 0o555
-	case object.FileModeSymlink:
+	case tree.FileModeSymlink:
 		return fs.ModeSymlink | 0o444
-	case object.FileModeGitlink:
+	case tree.FileModeGitlink:
 		return fs.ModeIrregular
 	default:
 		return fs.ModeIrregular
@@ -51,7 +51,7 @@ func treeFSEntryMode(mode object.FileMode) fs.FileMode {
 func (treeFS *TreeFS) statEntry(entry treeEntryValue) (*treeFSInfo, error) {
 	size := int64(0)
 
-	if entry.mode == object.FileModeRegular || entry.mode == object.FileModeExecutable || entry.mode == object.FileModeSymlink {
+	if entry.mode == tree.FileModeRegular || entry.mode == tree.FileModeExecutable || entry.mode == tree.FileModeSymlink {
 		var err error
 
 		size, err = entry.blobSize(treeFS.resolver)

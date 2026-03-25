@@ -5,9 +5,9 @@ import (
 	"io"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/storer"
+	objectstorer "codeberg.org/lindenii/furgit/object/storer"
 	"codeberg.org/lindenii/furgit/receivepack/service"
-	"codeberg.org/lindenii/furgit/ref/store"
+	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 
 type HookIO struct {

@@ -1,6 +1,6 @@
 package resolve
 
-import "codeberg.org/lindenii/furgit/object/storer"
+import objectstorer "codeberg.org/lindenii/furgit/object/storer"
 
 // Resolver resolves parsed and streamed objects from an object store.
 //

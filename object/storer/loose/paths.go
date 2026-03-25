@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/storer"
+	objectstorer "codeberg.org/lindenii/furgit/object/storer"
 )
 
 // objectPath returns the loose object path for id relative to the objects root.

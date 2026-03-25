@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/storer"
+	objectstorer "codeberg.org/lindenii/furgit/object/storer"
 )
 
 // lookup resolves one object ID to its pack location.

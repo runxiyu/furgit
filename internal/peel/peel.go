@@ -5,9 +5,9 @@ import (
 	stderrors "errors"
 
 	giterrors "codeberg.org/lindenii/furgit/errors"
-	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/storer"
+	objectstorer "codeberg.org/lindenii/furgit/object/storer"
+	"codeberg.org/lindenii/furgit/object/tag"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
@@ -40,7 +40,7 @@ func ToCommit(store objectstorer.Store, id objectid.ObjectID) (objectid.ObjectID
 			return objectid.ObjectID{}, err
 		}
 
-		tag, err := object.ParseTag(content, id.Algorithm())
+		tag, err := tag.Parse(content, id.Algorithm())
 		if err != nil {
 			return objectid.ObjectID{}, err
 		}

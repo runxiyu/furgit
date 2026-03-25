@@ -1,35 +1,34 @@
-package object_test
+package commit_test
 
 import (
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/object"
+	"codeberg.org/lindenii/furgit/object/commit"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
-func TestTagSerialize(t *testing.T) {
+func TestCommitSerialize(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		_, _, commitID := testRepo.MakeCommit(t, "subject\n\nbody")
-		tagID := testRepo.TagAnnotated(t, "v1", commitID, "tag message")
 
-		rawBody := testRepo.CatFile(t, "tag", tagID)
+		rawBody := testRepo.CatFile(t, "commit", commitID)
 
-		tag, err := object.ParseTag(rawBody, algo)
+		parsed, err := commit.Parse(rawBody, algo)
 		if err != nil {
-			t.Fatalf("ParseTag: %v", err)
+			t.Fatalf("ParseCommit: %v", err)
 		}
 
-		rawObj, err := tag.SerializeWithHeader()
+		rawObj, err := parsed.SerializeWithHeader()
 		if err != nil {
 			t.Fatalf("SerializeWithHeader: %v", err)
 		}
 
 		gotID := algo.Sum(rawObj)
-		if gotID != tagID {
-			t.Fatalf("tag id mismatch: got %s want %s", gotID, tagID)
+		if gotID != commitID {
+			t.Fatalf("commit id mismatch: got %s want %s", gotID, commitID)
 		}
 	})
 }

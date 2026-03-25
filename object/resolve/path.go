@@ -3,8 +3,8 @@ package resolve
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/tree"
 )
 
 // PathEmptyError indicates that Path received no segments.
@@ -59,24 +59,24 @@ func (err *PathNotTreeError) Error() string {
 //
 // If your entry names are valid UTF-8 and uses / solely as segment separators,
 // it may be convenient to use TreeFS for an io/fs.FS-like interface.
-func (r *Resolver) Path(root objectid.ObjectID, parts [][]byte) (object.TreeEntry, error) {
+func (r *Resolver) Path(root objectid.ObjectID, parts [][]byte) (tree.TreeEntry, error) {
 	if len(parts) == 0 {
-		return object.TreeEntry{}, &PathEmptyError{}
+		return tree.TreeEntry{}, &PathEmptyError{}
 	}
 
 	current, err := r.PeelToTree(root)
 	if err != nil {
-		return object.TreeEntry{}, err
+		return tree.TreeEntry{}, err
 	}
 
 	for i, part := range parts {
 		if len(part) == 0 {
-			return object.TreeEntry{}, &PathSegmentEmptyError{Index: i}
+			return tree.TreeEntry{}, &PathSegmentEmptyError{Index: i}
 		}
 
 		entry := current.Object().Entry(part)
 		if entry == nil {
-			return object.TreeEntry{}, &PathNotFoundError{
+			return tree.TreeEntry{}, &PathNotFoundError{
 				Index: i,
 				Name:  append([]byte(nil), part...),
 			}
@@ -86,8 +86,8 @@ func (r *Resolver) Path(root objectid.ObjectID, parts [][]byte) (object.TreeEntr
 			return *entry, nil
 		}
 
-		if entry.Mode != object.FileModeDir {
-			return object.TreeEntry{}, &PathNotTreeError{
+		if entry.Mode != tree.FileModeDir {
+			return tree.TreeEntry{}, &PathNotTreeError{
 				Index: i,
 				Name:  append([]byte(nil), part...),
 			}
@@ -95,9 +95,9 @@ func (r *Resolver) Path(root objectid.ObjectID, parts [][]byte) (object.TreeEntr
 
 		current, err = r.ExactTree(entry.ID)
 		if err != nil {
-			return object.TreeEntry{}, err
+			return tree.TreeEntry{}, err
 		}
 	}
 
-	return object.TreeEntry{}, &PathNotFoundError{Index: len(parts) - 1}
+	return tree.TreeEntry{}, &PathNotFoundError{Index: len(parts) - 1}
 }

@@ -1,4 +1,4 @@
-package object
+package tag
 
 import (
 	"bytes"
@@ -6,11 +6,12 @@ import (
 	"fmt"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectsignature "codeberg.org/lindenii/furgit/object/signature"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
-// ParseTag decodes a tag object body.
-func ParseTag(body []byte, algo objectid.Algorithm) (*Tag, error) {
+// Parse decodes a tag object body.
+func Parse(body []byte, algo objectid.Algorithm) (*Tag, error) {
 	t := new(Tag)
 	i := 0
 
@@ -54,7 +55,7 @@ func ParseTag(body []byte, algo objectid.Algorithm) (*Tag, error) {
 		case "tag":
 			t.Name = append([]byte(nil), value...)
 		case "tagger":
-			idt, err := ParseSignature(value)
+			idt, err := objectsignature.Parse(value)
 			if err != nil {
 				return nil, fmt.Errorf("object: tag: tagger: %w", err)
 			}

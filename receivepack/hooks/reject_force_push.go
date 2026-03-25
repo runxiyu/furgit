@@ -9,7 +9,7 @@ import (
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objectmix "codeberg.org/lindenii/furgit/object/storer/mix"
 	receivepack "codeberg.org/lindenii/furgit/receivepack"
-	"codeberg.org/lindenii/furgit/ref/store"
+	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 
 // RejectForcePush rejects updates whose new value is not a fast-forward of the

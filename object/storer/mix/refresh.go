@@ -3,7 +3,7 @@ package mix
 import (
 	"errors"
 
-	"codeberg.org/lindenii/furgit/object/storer"
+	objectstorer "codeberg.org/lindenii/furgit/object/storer"
 )
 
 // Refresh forwards refresh calls to refresh-capable backends.

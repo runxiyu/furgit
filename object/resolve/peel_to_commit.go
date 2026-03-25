@@ -3,13 +3,14 @@ package resolve
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/object"
+	"codeberg.org/lindenii/furgit/object/commit"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/stored"
+	"codeberg.org/lindenii/furgit/object/tag"
 )
 
 // PeelToCommit peels tags until it reaches a commit.
-func (r *Resolver) PeelToCommit(id objectid.ObjectID) (*stored.Stored[*object.Commit], error) {
+func (r *Resolver) PeelToCommit(id objectid.ObjectID) (*stored.Stored[*commit.Commit], error) {
 	for {
 		obj, err := r.ExactObject(id)
 		if err != nil {
@@ -17,9 +18,9 @@ func (r *Resolver) PeelToCommit(id objectid.ObjectID) (*stored.Stored[*object.Co
 		}
 
 		switch parsed := obj.Object().(type) {
-		case *object.Commit:
+		case *commit.Commit:
 			return stored.New(id, parsed), nil
-		case *object.Tag:
+		case *tag.Tag:
 			id = parsed.Target
 		default:
 			return nil, fmt.Errorf("object/resolve: expected commit-ish object %s, got %v", id, parsed.ObjectType())

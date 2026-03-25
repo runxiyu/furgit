@@ -6,10 +6,10 @@ import (
 
 	"codeberg.org/lindenii/furgit/config"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/storer"
+	objectstorer "codeberg.org/lindenii/furgit/object/storer"
 	objectloose "codeberg.org/lindenii/furgit/object/storer/loose"
 	objectpacked "codeberg.org/lindenii/furgit/object/storer/packed"
-	"codeberg.org/lindenii/furgit/ref/store"
+	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 
 // Repository is a thin composition root for repository-local stores.

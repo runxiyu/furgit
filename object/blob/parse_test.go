@@ -1,30 +1,30 @@
-package object_test
+package blob_test
 
 import (
+	"bytes"
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/object"
+	"codeberg.org/lindenii/furgit/object/blob"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
-func TestBlobSerialize(t *testing.T) {
+func TestBlobParseFromGit(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		body := []byte("hello\nblob\n")
-		wantID := testRepo.HashObject(t, "blob", body)
+		blobID := testRepo.HashObject(t, "blob", body)
 
-		blob := &object.Blob{Data: body}
+		rawBody := testRepo.CatFile(t, "blob", blobID)
 
-		rawObj, err := blob.SerializeWithHeader()
+		parsed, err := blob.Parse(rawBody)
 		if err != nil {
-			t.Fatalf("SerializeWithHeader: %v", err)
+			t.Fatalf("ParseBlob: %v", err)
 		}
 
-		gotID := algo.Sum(rawObj)
-		if gotID != wantID {
-			t.Fatalf("object id mismatch: got %s want %s", gotID, wantID)
+		if !bytes.Equal(parsed.Data, body) {
+			t.Fatalf("blob body mismatch")
 		}
 	})
 }

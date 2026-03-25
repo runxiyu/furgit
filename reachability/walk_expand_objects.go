@@ -4,7 +4,9 @@ import (
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/errors"
-	"codeberg.org/lindenii/furgit/object"
+	objectcommit "codeberg.org/lindenii/furgit/object/commit"
+	objecttag "codeberg.org/lindenii/furgit/object/tag"
+	objecttree "codeberg.org/lindenii/furgit/object/tree"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
@@ -27,7 +29,7 @@ func (walk *Walk) expandObjects(item walkItem) ([]walkItem, error) {
 			return nil, err
 		}
 
-		commit, err := object.ParseCommit(content, item.id.Algorithm())
+		commit, err := objectcommit.Parse(content, item.id.Algorithm())
 		if err != nil {
 			return nil, err
 		}
@@ -46,7 +48,7 @@ func (walk *Walk) expandObjects(item walkItem) ([]walkItem, error) {
 			return nil, err
 		}
 
-		tree, err := object.ParseTree(content, item.id.Algorithm())
+		tree, err := objecttree.Parse(content, item.id.Algorithm())
 		if err != nil {
 			return nil, err
 		}
@@ -54,11 +56,11 @@ func (walk *Walk) expandObjects(item walkItem) ([]walkItem, error) {
 		next := make([]walkItem, 0, len(tree.Entries))
 		for _, entry := range tree.Entries {
 			switch entry.Mode {
-			case object.FileModeGitlink:
+			case objecttree.FileModeGitlink:
 				continue
-			case object.FileModeDir:
+			case objecttree.FileModeDir:
 				next = append(next, walkItem{id: entry.ID, want: objecttype.TypeTree})
-			case object.FileModeRegular, object.FileModeExecutable, object.FileModeSymlink:
+			case objecttree.FileModeRegular, objecttree.FileModeExecutable, objecttree.FileModeSymlink:
 				next = append(next, walkItem{id: entry.ID, want: objecttype.TypeBlob})
 			}
 		}
@@ -70,7 +72,7 @@ func (walk *Walk) expandObjects(item walkItem) ([]walkItem, error) {
 			return nil, err
 		}
 
-		tag, err := object.ParseTag(content, item.id.Algorithm())
+		tag, err := objecttag.Parse(content, item.id.Algorithm())
 		if err != nil {
 			return nil, err
 		}

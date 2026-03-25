@@ -6,9 +6,9 @@ import (
 	commitgraphread "codeberg.org/lindenii/furgit/commitgraph/read"
 	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/internal/peel"
-	"codeberg.org/lindenii/furgit/object"
+	objectcommit "codeberg.org/lindenii/furgit/object/commit"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/storer"
+	objectstorer "codeberg.org/lindenii/furgit/object/storer"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
@@ -81,7 +81,7 @@ func (query *Query) loadByOID(idx nodeIndex) error {
 		return &giterrors.ObjectTypeError{OID: id, Got: ty, Want: objecttype.TypeCommit}
 	}
 
-	commitObj, err := object.ParseCommit(content, id.Algorithm())
+	commitObj, err := objectcommit.Parse(content, id.Algorithm())
 	if err != nil {
 		return err
 	}

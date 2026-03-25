@@ -9,9 +9,9 @@ import (
 
 	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/storer/memory"
+	"codeberg.org/lindenii/furgit/object/tree"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 	"codeberg.org/lindenii/furgit/reachability"
 )
@@ -84,8 +84,8 @@ func TestWalkDomainCommitsIncludesTagNodes(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := newCountingMemStore(algo)
 		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
@@ -119,8 +119,8 @@ func TestWalkExcludesHavesCompletely(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := newCountingMemStore(algo)
 		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
@@ -148,8 +148,8 @@ func TestWalkDomainCommitsRejectsNonCommitRootAfterPeel(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := newCountingMemStore(algo)
 		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
@@ -181,8 +181,8 @@ func TestWalkDomainCommitsHaveTagStopsTraversal(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := newCountingMemStore(algo)
 		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
@@ -224,15 +224,15 @@ func TestWalkDomainObjectsRecursesTreesAndSkipsBlobContentReads(t *testing.T) {
 		blob2 := store.AddObject(objecttype.TypeBlob, []byte("b2\n"))
 		gitlinkTarget := store.Algorithm().Sum([]byte("external-submodule"))
 
-		subtree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		subtree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("nested"),
 			ID:   blob2,
 		}}}))
-		rootTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{
-			{Mode: object.FileModeRegular, Name: []byte("a"), ID: blob1},
-			{Mode: object.FileModeDir, Name: []byte("dir"), ID: subtree},
-			{Mode: object.FileModeGitlink, Name: []byte("submodule"), ID: gitlinkTarget},
+		rootTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{
+			{Mode: tree.FileModeRegular, Name: []byte("a"), ID: blob1},
+			{Mode: tree.FileModeDir, Name: []byte("dir"), ID: subtree},
+			{Mode: tree.FileModeGitlink, Name: []byte("submodule"), ID: gitlinkTarget},
 		}}))
 		commit := store.AddObject(objecttype.TypeCommit, commitBody(rootTree))
 
@@ -265,8 +265,8 @@ func TestCheckConnectedReturnsConcreteMissingObject(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := newCountingMemStore(algo)
 		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+			Mode: tree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
@@ -307,7 +307,7 @@ func TestWalkInvalidDomainReturnsPlainError(t *testing.T) {
 	})
 }
 
-func mustSerializeTree(tb testing.TB, tree *object.Tree) []byte {
+func mustSerializeTree(tb testing.TB, tree *tree.Tree) []byte {
 	tb.Helper()
 
 	body, err := tree.SerializeWithoutHeader()

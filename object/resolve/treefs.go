@@ -3,8 +3,8 @@ package resolve
 import (
 	"io/fs"
 
-	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/tree"
 )
 
 // TreeFS exposes one Git tree as an fs.FS.
@@ -18,7 +18,7 @@ import (
 type TreeFS struct {
 	resolver  *Resolver
 	rootTree  objectid.ObjectID
-	rootEntry *object.TreeEntry
+	rootEntry *tree.TreeEntry
 }
 
 var (

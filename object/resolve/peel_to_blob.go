@@ -3,13 +3,14 @@ package resolve
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/object"
+	"codeberg.org/lindenii/furgit/object/blob"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/stored"
+	"codeberg.org/lindenii/furgit/object/tag"
 )
 
 // PeelToBlob peels tags until it reaches a blob.
-func (r *Resolver) PeelToBlob(id objectid.ObjectID) (*stored.Stored[*object.Blob], error) {
+func (r *Resolver) PeelToBlob(id objectid.ObjectID) (*stored.Stored[*blob.Blob], error) {
 	for {
 		obj, err := r.ExactObject(id)
 		if err != nil {
@@ -17,9 +18,9 @@ func (r *Resolver) PeelToBlob(id objectid.ObjectID) (*stored.Stored[*object.Blob
 		}
 
 		switch parsed := obj.Object().(type) {
-		case *object.Blob:
+		case *blob.Blob:
 			return stored.New(id, parsed), nil
-		case *object.Tag:
+		case *tag.Tag:
 			id = parsed.Target
 		default:
 			return nil, fmt.Errorf("object/resolve: expected blob-ish object %s, got %v", id, parsed.ObjectType())

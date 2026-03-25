@@ -1,7 +1,9 @@
-package object
+// Package tag provides representations, parsers, and serializers for tag objects.
+package tag
 
 import (
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectsignature "codeberg.org/lindenii/furgit/object/signature"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
@@ -10,13 +12,6 @@ type Tag struct {
 	Target     objectid.ObjectID
 	TargetType objecttype.Type
 	Name       []byte
-	Tagger     *Signature
+	Tagger     *objectsignature.Signature
 	Message    []byte
-}
-
-// ObjectType returns TypeTag.
-func (tag *Tag) ObjectType() objecttype.Type {
-	_ = tag
-
-	return objecttype.TypeTag
 }

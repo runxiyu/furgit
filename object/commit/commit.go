@@ -1,24 +1,18 @@
-package object
+// Package commit provides representations, parsers, and serializers for commit objects.
+package commit
 
 import (
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	objectsignature "codeberg.org/lindenii/furgit/object/signature"
 )
 
 // Commit represents a Git commit object.
 type Commit struct {
 	Tree         objectid.ObjectID
 	Parents      []objectid.ObjectID
-	Author       Signature
-	Committer    Signature
+	Author       objectsignature.Signature
+	Committer    objectsignature.Signature
 	Message      []byte
 	ChangeID     string
 	ExtraHeaders []ExtraHeader
-}
-
-// ObjectType returns TypeCommit.
-func (commit *Commit) ObjectType() objecttype.Type {
-	_ = commit
-
-	return objecttype.TypeCommit
 }

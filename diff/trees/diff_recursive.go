@@ -1,11 +1,11 @@
 package trees
 
 import (
-	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/tree"
 )
 
-func diffRecursive(a, b *object.Tree, prefix []byte, readTree func(objectid.ObjectID) (*object.Tree, error), out *[]Entry) error {
+func diffRecursive(a, b *tree.Tree, prefix []byte, readTree func(objectid.ObjectID) (*tree.Tree, error), out *[]Entry) error {
 	if a == nil && b == nil {
 		return nil
 	}
@@ -16,7 +16,7 @@ func diffRecursive(a, b *object.Tree, prefix []byte, readTree func(objectid.Obje
 			full := joinPath(prefix, entry.Name)
 
 			*out = append(*out, Entry{Path: full, Kind: EntryKindAdded, Old: nil, New: entry})
-			if entry.Mode != object.FileModeDir {
+			if entry.Mode != tree.FileModeDir {
 				continue
 			}
 
@@ -40,7 +40,7 @@ func diffRecursive(a, b *object.Tree, prefix []byte, readTree func(objectid.Obje
 			full := joinPath(prefix, entry.Name)
 
 			*out = append(*out, Entry{Path: full, Kind: EntryKindDeleted, Old: entry, New: nil})
-			if entry.Mode != object.FileModeDir {
+			if entry.Mode != tree.FileModeDir {
 				continue
 			}
 
@@ -65,18 +65,18 @@ func diffRecursive(a, b *object.Tree, prefix []byte, readTree func(objectid.Obje
 		left := &a.Entries[i]
 		right := &b.Entries[j]
 
-		cmp := object.TreeEntryNameCompare(
+		cmp := tree.TreeEntryNameCompare(
 			left.Name,
 			left.Mode,
 			right.Name,
-			right.Mode == object.FileModeDir,
+			right.Mode == tree.FileModeDir,
 		)
 		switch {
 		case cmp < 0:
 			full := joinPath(prefix, left.Name)
 
 			*out = append(*out, Entry{Path: full, Kind: EntryKindDeleted, Old: left, New: nil})
-			if left.Mode == object.FileModeDir {
+			if left.Mode == tree.FileModeDir {
 				sub, err := readTree(left.ID)
 				if err != nil {
 					return err
@@ -93,7 +93,7 @@ func diffRecursive(a, b *object.Tree, prefix []byte, readTree func(objectid.Obje
 			full := joinPath(prefix, right.Name)
 
 			*out = append(*out, Entry{Path: full, Kind: EntryKindAdded, Old: nil, New: right})
-			if right.Mode == object.FileModeDir {
+			if right.Mode == tree.FileModeDir {
 				sub, err := readTree(right.ID)
 				if err != nil {
 					return err
@@ -114,7 +114,7 @@ func diffRecursive(a, b *object.Tree, prefix []byte, readTree func(objectid.Obje
 				*out = append(*out, Entry{Path: full, Kind: EntryKindModified, Old: left, New: right})
 			}
 
-			if left.Mode == object.FileModeDir && right.Mode == object.FileModeDir && left.ID != right.ID {
+			if left.Mode == tree.FileModeDir && right.Mode == tree.FileModeDir && left.ID != right.ID {
 				leftSub, err := readTree(left.ID)
 				if err != nil {
 					return err
@@ -141,7 +141,7 @@ func diffRecursive(a, b *object.Tree, prefix []byte, readTree func(objectid.Obje
 		full := joinPath(prefix, left.Name)
 
 		*out = append(*out, Entry{Path: full, Kind: EntryKindDeleted, Old: left, New: nil})
-		if left.Mode == object.FileModeDir {
+		if left.Mode == tree.FileModeDir {
 			sub, err := readTree(left.ID)
 			if err != nil {
 				return err
@@ -159,7 +159,7 @@ func diffRecursive(a, b *object.Tree, prefix []byte, readTree func(objectid.Obje
 		full := joinPath(prefix, right.Name)
 
 		*out = append(*out, Entry{Path: full, Kind: EntryKindAdded, Old: nil, New: right})
-		if right.Mode == object.FileModeDir {
+		if right.Mode == tree.FileModeDir {
 			sub, err := readTree(right.ID)
 			if err != nil {
 				return err

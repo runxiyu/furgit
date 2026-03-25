@@ -8,8 +8,11 @@ import (
 	"testing"
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/object"
+	"codeberg.org/lindenii/furgit/object/blob"
+	"codeberg.org/lindenii/furgit/object/commit"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/tag"
+	"codeberg.org/lindenii/furgit/object/tree"
 	"codeberg.org/lindenii/furgit/repository"
 )
 
@@ -183,21 +186,21 @@ func traverseReachableIter(repo *repository.Repository, root objectid.ObjectID) 
 		total++
 
 		switch obj := stored.Object().(type) {
-		case *object.Commit:
+		case *commit.Commit:
 			stack = append(stack, obj.Tree)
 			stack = append(stack, obj.Parents...)
-		case *object.Tree:
+		case *tree.Tree:
 			for i := len(obj.Entries) - 1; i >= 0; i-- {
 				entry := obj.Entries[i]
-				if entry.Mode == object.FileModeGitlink {
+				if entry.Mode == tree.FileModeGitlink {
 					continue
 				}
 
 				stack = append(stack, entry.ID)
 			}
-		case *object.Tag:
+		case *tag.Tag:
 			stack = append(stack, obj.Target)
-		case *object.Blob:
+		case *blob.Blob:
 		default:
 			// Unknown parsed object variants are treated as leaves.
 		}

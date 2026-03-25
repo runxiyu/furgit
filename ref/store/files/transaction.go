@@ -1,7 +1,7 @@
 package files
 
 import (
-	"codeberg.org/lindenii/furgit/ref/store"
+	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 
 type Transaction struct {

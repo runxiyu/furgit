@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"codeberg.org/lindenii/furgit/internal/utils"
-	"codeberg.org/lindenii/furgit/object/storer"
+	objectstorer "codeberg.org/lindenii/furgit/object/storer"
 	"codeberg.org/lindenii/furgit/object/storer/loose"
 	objectmix "codeberg.org/lindenii/furgit/object/storer/mix"
 	"codeberg.org/lindenii/furgit/object/storer/packed"

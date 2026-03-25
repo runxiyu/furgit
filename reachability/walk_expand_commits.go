@@ -4,7 +4,8 @@ import (
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/errors"
-	"codeberg.org/lindenii/furgit/object"
+	objectcommit "codeberg.org/lindenii/furgit/object/commit"
+	objecttag "codeberg.org/lindenii/furgit/object/tag"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
@@ -39,7 +40,7 @@ func (walk *Walk) expandCommits(item walkItem) ([]walkItem, error) {
 			return nil, err
 		}
 
-		commit, err := object.ParseCommit(content, item.id.Algorithm())
+		commit, err := objectcommit.Parse(content, item.id.Algorithm())
 		if err != nil {
 			return nil, err
 		}
@@ -56,7 +57,7 @@ func (walk *Walk) expandCommits(item walkItem) ([]walkItem, error) {
 			return nil, err
 		}
 
-		tag, err := object.ParseTag(content, item.id.Algorithm())
+		tag, err := objecttag.Parse(content, item.id.Algorithm())
 		if err != nil {
 			return nil, err
 		}

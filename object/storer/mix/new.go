@@ -1,6 +1,6 @@
 package mix
 
-import "codeberg.org/lindenii/furgit/object/storer"
+import objectstorer "codeberg.org/lindenii/furgit/object/storer"
 
 // New creates a Mix from backends.
 //

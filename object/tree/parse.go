@@ -1,4 +1,4 @@
-package object
+package tree
 
 import (
 	"bytes"
@@ -8,8 +8,8 @@ import (
 	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
-// ParseTree decodes a tree object body.
-func ParseTree(body []byte, algo objectid.Algorithm) (*Tree, error) {
+// Parse decodes a tree object body.
+func Parse(body []byte, algo objectid.Algorithm) (*Tree, error) {
 	var entries []TreeEntry
 
 	i := 0

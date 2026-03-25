@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io/fs"
 
-	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/tree"
 )
 
 func (treeFS *TreeFS) resolvePath(op treeFSOp, name string) (treeEntryValue, error) {
@@ -17,7 +17,7 @@ func (treeFS *TreeFS) resolvePath(op treeFSOp, name string) (treeEntryValue, err
 	if name == "." {
 		return treeEntryValue{
 			name:      ".",
-			mode:      object.FileModeDir,
+			mode:      tree.FileModeDir,
 			treeID:    treeFS.rootTree,
 			treeEntry: treeFS.rootEntry,
 		}, nil
@@ -58,14 +58,14 @@ func (treeFS *TreeFS) pathResolveError(op treeFSOp, name string, err error) erro
 
 type treeEntryValue struct {
 	name      string
-	mode      object.FileMode
+	mode      tree.FileMode
 	objectID  objectid.ObjectID
 	treeID    objectid.ObjectID
-	treeEntry *object.TreeEntry
+	treeEntry *tree.TreeEntry
 }
 
 func (entry treeEntryValue) isDir() bool {
-	return entry.mode == object.FileModeDir
+	return entry.mode == tree.FileModeDir
 }
 
 func (entry treeEntryValue) blobSize(resolve *Resolver) (int64, error) {
@@ -82,7 +82,7 @@ func (entry treeEntryValue) subtreeID() (objectid.ObjectID, error) {
 		return entry.treeID, nil
 	}
 
-	if entry.mode != object.FileModeDir {
+	if entry.mode != tree.FileModeDir {
 		return objectid.ObjectID{}, fmt.Errorf("object/resolve: path %q is not a tree", entry.name)
 	}
 

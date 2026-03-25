@@ -1,27 +1,17 @@
-package object
+package signature
 
 import (
 	"bytes"
 	"errors"
 	"fmt"
 	"strconv"
-	"strings"
-	"time"
 
 	"codeberg.org/lindenii/furgit/internal/intconv"
 )
 
-// Signature represents a Git signature (author/committer/tagger).
-type Signature struct {
-	Name          []byte
-	Email         []byte
-	WhenUnix      int64
-	OffsetMinutes int32
-}
-
-// ParseSignature parses a canonical Git signature line:
+// Parse parses a canonical Git signature line:
 // "Name <email> 123456789 +0000".
-func ParseSignature(line []byte) (*Signature, error) {
+func Parse(line []byte) (*Signature, error) {
 	lt := bytes.IndexByte(line, '<')
 	if lt < 0 {
 		return nil, errors.New("object: signature: missing opening <")
@@ -104,37 +94,4 @@ func ParseSignature(line []byte) (*Signature, error) {
 		WhenUnix:      when,
 		OffsetMinutes: offset,
 	}, nil
-}
-
-// Serialize renders the signature in canonical Git format.
-func (signature Signature) Serialize() ([]byte, error) {
-	var b strings.Builder
-	b.Grow(len(signature.Name) + len(signature.Email) + 32)
-	b.Write(signature.Name)
-	b.WriteString(" <")
-	b.Write(signature.Email)
-	b.WriteString("> ")
-	b.WriteString(strconv.FormatInt(signature.WhenUnix, 10))
-	b.WriteByte(' ')
-
-	offset := signature.OffsetMinutes
-
-	sign := '+'
-	if offset < 0 {
-		sign = '-'
-		offset = -offset
-	}
-
-	hh := offset / 60
-	mm := offset % 60
-	fmt.Fprintf(&b, "%c%02d%02d", sign, hh, mm)
-
-	return []byte(b.String()), nil
-}
-
-// When returns a time.Time with the signature's timezone offset.
-func (signature Signature) When() time.Time {
-	loc := time.FixedZone("git", int(signature.OffsetMinutes)*60)
-
-	return time.Unix(signature.WhenUnix, 0).In(loc)
 }

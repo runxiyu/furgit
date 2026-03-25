@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/storer"
+	objectstorer "codeberg.org/lindenii/furgit/object/storer"
 )
 
 // Store reads Git objects from pack/index files under an objects/pack root.

@@ -1,4 +1,4 @@
-package object
+package tag
 
 import (
 	"bytes"

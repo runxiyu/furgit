@@ -4,7 +4,7 @@ package commitquery
 import (
 	commitgraphread "codeberg.org/lindenii/furgit/commitgraph/read"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/storer"
+	objectstorer "codeberg.org/lindenii/furgit/object/storer"
 )
 
 // Query owns the mutable node arena for commit-domain queries over one object

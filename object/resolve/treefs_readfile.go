@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"codeberg.org/lindenii/furgit/object"
+	"codeberg.org/lindenii/furgit/object/tree"
 )
 
 // ReadFile reads the blob contents at name.
@@ -20,7 +20,7 @@ func (treeFS *TreeFS) ReadFile(name string) ([]byte, error) {
 		return nil, treeFSPathError(treeFSOpReadFile, name, fmt.Errorf("is a directory"))
 	}
 
-	if entry.mode == object.FileModeGitlink {
+	if entry.mode == tree.FileModeGitlink {
 		return nil, treeFSPathError(treeFSOpReadFile, name, fmt.Errorf("object/resolve: gitlink entries are not readable as files"))
 	}
 

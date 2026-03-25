@@ -6,7 +6,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/ref"
 	"codeberg.org/lindenii/furgit/ref/refname"
-	"codeberg.org/lindenii/furgit/ref/store"
+	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 
 func (executor *refUpdateExecutor) directRead(name string) (directRefState, error) {

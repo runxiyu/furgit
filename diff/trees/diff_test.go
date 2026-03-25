@@ -6,9 +6,9 @@ import (
 
 	"codeberg.org/lindenii/furgit/diff/trees"
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/storer/loose"
+	"codeberg.org/lindenii/furgit/object/tree"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
@@ -174,10 +174,10 @@ func openLooseStore(t *testing.T, repo *testgit.TestRepo, algo objectid.Algorith
 	return store
 }
 
-func makeReadTree(t *testing.T, store *loose.Store, algo objectid.Algorithm) func(objectid.ObjectID) (*object.Tree, error) {
+func makeReadTree(t *testing.T, store *loose.Store, algo objectid.Algorithm) func(objectid.ObjectID) (*tree.Tree, error) {
 	t.Helper()
 
-	return func(id objectid.ObjectID) (*object.Tree, error) {
+	return func(id objectid.ObjectID) (*tree.Tree, error) {
 		ty, content, err := store.ReadBytesContent(id)
 		if err != nil {
 			return nil, err
@@ -187,11 +187,11 @@ func makeReadTree(t *testing.T, store *loose.Store, algo objectid.Algorithm) fun
 			return nil, errors.New("diff/trees test: object is not a tree")
 		}
 
-		return object.ParseTree(content, algo)
+		return tree.Parse(content, algo)
 	}
 }
 
-func mustReadTree(t *testing.T, readTree func(objectid.ObjectID) (*object.Tree, error), id objectid.ObjectID) *object.Tree {
+func mustReadTree(t *testing.T, readTree func(objectid.ObjectID) (*tree.Tree, error), id objectid.ObjectID) *tree.Tree {
 	t.Helper()
 
 	tree, err := readTree(id)

@@ -2,7 +2,7 @@ package reachability
 
 import (
 	"codeberg.org/lindenii/furgit/errors"
-	"codeberg.org/lindenii/furgit/object"
+	objectcommit "codeberg.org/lindenii/furgit/object/commit"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
@@ -22,7 +22,7 @@ func (walk *Walk) validateCommitObject(id objectid.ObjectID) error {
 		return err
 	}
 
-	_, err = object.ParseCommit(content, id.Algorithm())
+	_, err = objectcommit.Parse(content, id.Algorithm())
 
 	return err
 }

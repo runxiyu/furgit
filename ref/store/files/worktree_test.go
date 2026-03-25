@@ -7,7 +7,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/ref/store"
+	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 
 func TestFilesWorktreeRefsMatchGit(t *testing.T) {

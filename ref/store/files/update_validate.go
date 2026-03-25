@@ -6,7 +6,7 @@ import (
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/ref/refname"
-	"codeberg.org/lindenii/furgit/ref/store"
+	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 
 func (executor *refUpdateExecutor) validateQueuedUpdate(op queuedUpdate) error {

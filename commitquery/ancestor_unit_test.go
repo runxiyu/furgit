@@ -7,9 +7,9 @@ import (
 
 	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/storer/memory"
+	objecttree "codeberg.org/lindenii/furgit/object/tree"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 
 	"codeberg.org/lindenii/furgit/commitquery"
@@ -38,7 +38,7 @@ func ancestorTagBody(target objectid.ObjectID, targetType objecttype.Type) []byt
 }
 
 // mustSerializeAncestorTree serializes one tree or fails the test.
-func mustSerializeAncestorTree(tb testing.TB, tree *object.Tree) []byte {
+func mustSerializeAncestorTree(tb testing.TB, tree *objecttree.Tree) []byte {
 	tb.Helper()
 
 	body, err := tree.SerializeWithoutHeader()
@@ -55,16 +55,16 @@ func TestIs(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
 		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeAncestorTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		tree := store.AddObject(objecttype.TypeTree, mustSerializeAncestorTree(t, &objecttree.Tree{Entries: []objecttree.TreeEntry{{
+			Mode: objecttree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
 		c1 := store.AddObject(objecttype.TypeCommit, ancestorCommitBody(tree))
 		c2 := store.AddObject(objecttype.TypeCommit, ancestorCommitBody(tree, c1))
 		otherBlob := store.AddObject(objecttype.TypeBlob, []byte("other-blob\n"))
-		otherTree := store.AddObject(objecttype.TypeTree, mustSerializeAncestorTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		otherTree := store.AddObject(objecttype.TypeTree, mustSerializeAncestorTree(t, &objecttree.Tree{Entries: []objecttree.TreeEntry{{
+			Mode: objecttree.FileModeRegular,
 			Name: []byte("g"),
 			ID:   otherBlob,
 		}}}))
@@ -97,8 +97,8 @@ func TestIsRejectsNonCommitAfterPeel(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
 		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeAncestorTree(t, &object.Tree{Entries: []object.TreeEntry{{
-			Mode: object.FileModeRegular,
+		tree := store.AddObject(objecttype.TypeTree, mustSerializeAncestorTree(t, &objecttree.Tree{Entries: []objecttree.TreeEntry{{
+			Mode: objecttree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))

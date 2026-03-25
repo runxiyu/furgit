@@ -6,7 +6,7 @@ import (
 	"os"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/storer"
+	objectstorer "codeberg.org/lindenii/furgit/object/storer"
 	objectloose "codeberg.org/lindenii/furgit/object/storer/loose"
 	objectmix "codeberg.org/lindenii/furgit/object/storer/mix"
 	objectpacked "codeberg.org/lindenii/furgit/object/storer/packed"

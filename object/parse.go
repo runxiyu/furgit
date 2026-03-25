@@ -3,8 +3,12 @@ package object
 import (
 	"fmt"
 
+	"codeberg.org/lindenii/furgit/object/blob"
+	"codeberg.org/lindenii/furgit/object/commit"
 	objectheader "codeberg.org/lindenii/furgit/object/header"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/tag"
+	"codeberg.org/lindenii/furgit/object/tree"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
@@ -31,13 +35,13 @@ func ParseObjectWithHeader(raw []byte, algo objectid.Algorithm) (Object, error) 
 func ParseObjectWithoutHeader(ty objecttype.Type, body []byte, algo objectid.Algorithm) (Object, error) {
 	switch ty {
 	case objecttype.TypeBlob:
-		return ParseBlob(body)
+		return blob.Parse(body)
 	case objecttype.TypeTree:
-		return ParseTree(body, algo)
+		return tree.Parse(body, algo)
 	case objecttype.TypeCommit:
-		return ParseCommit(body, algo)
+		return commit.Parse(body, algo)
 	case objecttype.TypeTag:
-		return ParseTag(body, algo)
+		return tag.Parse(body, algo)
 	case objecttype.TypeInvalid, objecttype.TypeFuture, objecttype.TypeOfsDelta, objecttype.TypeRefDelta:
 		return nil, fmt.Errorf("object: unsupported object type %d", ty)
 	default:
