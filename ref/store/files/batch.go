@@ -1,6 +1,6 @@
 package files
 
-import "codeberg.org/lindenii/furgit/refstore"
+import "codeberg.org/lindenii/furgit/ref/store"
 
 type Batch struct {
 	store *Store

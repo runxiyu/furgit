@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	reffiles "codeberg.org/lindenii/furgit/refstore/files"
+	reffiles "codeberg.org/lindenii/furgit/ref/store/files"
 )
 
 // Open opens a repository and wires object/ref stores from its on-disk format.

@@ -5,7 +5,7 @@ import (
 
 	common "codeberg.org/lindenii/furgit/protocol/v0v1/server"
 	"codeberg.org/lindenii/furgit/ref"
-	"codeberg.org/lindenii/furgit/refstore"
+	"codeberg.org/lindenii/furgit/ref/store"
 )
 
 func advertisedRefs(opts Options) ([]common.AdvertisedRef, error) {

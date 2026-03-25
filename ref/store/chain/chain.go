@@ -2,7 +2,7 @@
 // of backends.
 package chain
 
-import "codeberg.org/lindenii/furgit/refstore"
+import "codeberg.org/lindenii/furgit/ref/store"
 
 // Chain queries multiple reference stores in order.
 //

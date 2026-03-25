@@ -9,7 +9,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/refstore/files"
+	"codeberg.org/lindenii/furgit/ref/store/files"
 )
 
 const testPackedRefsTimeout = time.Second

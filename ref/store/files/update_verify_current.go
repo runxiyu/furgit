@@ -3,7 +3,7 @@ package files
 import (
 	"strings"
 
-	"codeberg.org/lindenii/furgit/refstore"
+	"codeberg.org/lindenii/furgit/ref/store"
 )
 
 func (executor *refUpdateExecutor) verifyPreparedUpdateCurrent(item preparedUpdate) error {

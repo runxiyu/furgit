@@ -5,7 +5,7 @@ import (
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/store"
-	"codeberg.org/lindenii/furgit/refstore"
+	"codeberg.org/lindenii/furgit/ref/store"
 )
 
 // Options configures one receive-pack invocation.

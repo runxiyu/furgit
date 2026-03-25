@@ -8,7 +8,7 @@ import (
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/ref"
-	"codeberg.org/lindenii/furgit/refstore"
+	"codeberg.org/lindenii/furgit/ref/store"
 )
 
 func (store *Store) readLooseRef(name string) (ref.Ref, error) { //nolint:ireturn

@@ -1,6 +1,6 @@
 package files
 
-import "codeberg.org/lindenii/furgit/refstore"
+import "codeberg.org/lindenii/furgit/ref/store"
 
 func (batch *Batch) Apply() ([]refstore.BatchResult, error) {
 	results := make([]refstore.BatchResult, len(batch.ops))

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"codeberg.org/lindenii/furgit/refstore"
+	"codeberg.org/lindenii/furgit/ref/store"
 )
 
 func (executor *refUpdateExecutor) resolveOrdinaryTarget(name string, allowMissing bool) (resolvedUpdateTarget, error) {

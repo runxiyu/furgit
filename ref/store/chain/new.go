@@ -1,6 +1,6 @@
 package chain
 
-import "codeberg.org/lindenii/furgit/refstore"
+import "codeberg.org/lindenii/furgit/ref/store"
 
 // New creates an ordered reference store chain.
 //

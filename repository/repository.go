@@ -9,7 +9,7 @@ import (
 	"codeberg.org/lindenii/furgit/object/store"
 	objectloose "codeberg.org/lindenii/furgit/object/store/loose"
 	objectpacked "codeberg.org/lindenii/furgit/object/store/packed"
-	"codeberg.org/lindenii/furgit/refstore"
+	"codeberg.org/lindenii/furgit/ref/store"
 )
 
 // Repository is a thin composition root for repository-local stores.
