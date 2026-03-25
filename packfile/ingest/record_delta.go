@@ -3,8 +3,8 @@ package ingest
 import (
 	"fmt"
 
-	deltaapply "codeberg.org/lindenii/furgit/delta/apply"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
+	deltaapply "codeberg.org/lindenii/furgit/packfile/delta/apply"
 )
 
 // applyDeltaRecord applies one delta record onto base content.
