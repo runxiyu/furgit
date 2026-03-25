@@ -1,0 +1,29 @@
+package fetch
+
+import (
+	"fmt"
+
+	"codeberg.org/lindenii/furgit/object/blob"
+	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/stored"
+	"codeberg.org/lindenii/furgit/object/tag"
+)
+
+// PeelToBlob peels tags until it reaches a blob.
+func (r *Fetcher) PeelToBlob(id objectid.ObjectID) (*stored.Stored[*blob.Blob], error) {
+	for {
+		obj, err := r.ExactObject(id)
+		if err != nil {
+			return nil, err
+		}
+
+		switch parsed := obj.Object().(type) {
+		case *blob.Blob:
+			return stored.New(id, parsed), nil
+		case *tag.Tag:
+			id = parsed.Target
+		default:
+			return nil, fmt.Errorf("object/fetch: expected blob-ish object %s, got %v", id, parsed.ObjectType())
+		}
+	}
+}

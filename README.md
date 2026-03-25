@@ -31,7 +31,7 @@ bare repository or a `.git` directory. Then,
   * A common pattern is to resolve a ref first, then pass the resulting object
     ID to the resolver.
 
-* `repo.Resolver()` is the main object-facing API for most callers.
+* `repo.Fetcher()` is the main object-facing API for most callers.
   * Use it when you want commits, trees, blobs, or tags as typed values.
   * It also handles peeling through annotated tags, resolving objects to the
     type you actually want, and walking paths inside trees.
@@ -39,7 +39,7 @@ bare repository or a `.git` directory. Then,
   * If your goal is "show me this commit", "read this tree", "follow this tag",
     or "get me the file at this path", this is usually the right layer.
 
-* `repo.Objects()` is the storage layer underneath `Resolver`.
+* `repo.Objects()` is the storage layer underneath `Fetcher`.
   * Use it when you need to read object headers, read raw object contents,
     stream object data, or otherwise look up objects directly by ID.
   * Most callers who want to work with Git objects as commits, trees, blobs, or
@@ -60,7 +60,7 @@ Note that:
 As a rule of thumb:
 
 * If you have a ref name, start with `repo.Refs()`.
-* If you want typed objects or path-based access, use `repo.Resolver()`.
+* If you want typed objects or path-based access, use `repo.Fetcher()`.
 * If you need raw object lookup by ID, object headers, or object streams, use
   `repo.Objects()`.
 
