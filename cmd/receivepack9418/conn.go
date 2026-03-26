@@ -8,7 +8,7 @@ import (
 	"net"
 	"strings"
 
-	"codeberg.org/lindenii/furgit/receivepack"
+	"codeberg.org/lindenii/furgit/network/receivepack"
 )
 
 func (srv *server) handleConn(conn net.Conn) {

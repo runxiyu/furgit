@@ -7,7 +7,7 @@ import (
 	"codeberg.org/lindenii/furgit/network/protocol/pktline"
 	common "codeberg.org/lindenii/furgit/network/protocol/v0v1/server"
 	protoreceive "codeberg.org/lindenii/furgit/network/protocol/v0v1/server/receivepack"
-	"codeberg.org/lindenii/furgit/receivepack/service"
+	"codeberg.org/lindenii/furgit/network/receivepack/service"
 )
 
 // TODO: Some more designing to do. In particular, we'd like to have access to

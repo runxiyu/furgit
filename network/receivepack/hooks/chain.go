@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	receivepack "codeberg.org/lindenii/furgit/receivepack"
+	receivepack "codeberg.org/lindenii/furgit/network/receivepack"
 )
 
 // Chain combines hooks by running them in order and intersecting their

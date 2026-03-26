@@ -3,7 +3,7 @@ package receivepack
 import (
 	"io/fs"
 
-	"codeberg.org/lindenii/furgit/receivepack/service"
+	"codeberg.org/lindenii/furgit/network/receivepack/service"
 )
 
 // PromotedObjectPermissions configures the destination permissions applied to
