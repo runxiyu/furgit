@@ -3,8 +3,8 @@ package packed
 import (
 	"fmt"
 
-	objecttype "codeberg.org/lindenii/furgit/object/type"
 	deltaapply "codeberg.org/lindenii/furgit/format/packfile/delta/apply"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // deltaResolveChain resolves one object chain into content bytes.

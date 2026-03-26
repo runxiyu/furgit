@@ -12,9 +12,9 @@ import (
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/network/protocol/pktline"
 	"codeberg.org/lindenii/furgit/network/protocol/sideband64k"
-	objectid "codeberg.org/lindenii/furgit/object/id"
 	receivepack "codeberg.org/lindenii/furgit/network/receivepack"
 	receivepackhooks "codeberg.org/lindenii/furgit/network/receivepack/hooks"
+	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 func TestReceivePackDeleteOnlyAtomicDeleteSucceeds(t *testing.T) {

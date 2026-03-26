@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"io"
 
+	packfmt "codeberg.org/lindenii/furgit/format/packfile"
 	"codeberg.org/lindenii/furgit/internal/compress/zlib"
 	objectheader "codeberg.org/lindenii/furgit/object/header"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
-	packfmt "codeberg.org/lindenii/furgit/format/packfile"
 )
 
 // drainEntryPayload inflates one entry payload from stream and returns

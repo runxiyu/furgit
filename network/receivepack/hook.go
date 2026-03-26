@@ -4,9 +4,9 @@ import (
 	"context"
 	"io"
 
+	"codeberg.org/lindenii/furgit/network/receivepack/service"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objectstorer "codeberg.org/lindenii/furgit/object/storer"
-	"codeberg.org/lindenii/furgit/network/receivepack/service"
 	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 

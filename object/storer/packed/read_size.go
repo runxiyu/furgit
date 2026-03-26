@@ -3,9 +3,9 @@ package packed
 import (
 	"fmt"
 
+	packfmt "codeberg.org/lindenii/furgit/format/packfile"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
-	packfmt "codeberg.org/lindenii/furgit/format/packfile"
 )
 
 // ReadSize reads an object's declared content size.

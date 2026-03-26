@@ -3,8 +3,8 @@ package commitquery
 import (
 	stderrors "errors"
 
-	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	giterrors "codeberg.org/lindenii/furgit/errors"
+	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	"codeberg.org/lindenii/furgit/internal/peel"
 	objectcommit "codeberg.org/lindenii/furgit/object/commit"
 	objectid "codeberg.org/lindenii/furgit/object/id"

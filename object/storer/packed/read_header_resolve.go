@@ -3,8 +3,8 @@ package packed
 import (
 	"fmt"
 
-	objecttype "codeberg.org/lindenii/furgit/object/type"
 	packfmt "codeberg.org/lindenii/furgit/format/packfile"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // resolveHeaderAt resolves one object's canonical type and declared content size.
