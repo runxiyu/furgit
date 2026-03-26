@@ -66,3 +66,14 @@ func (queue *priorityQueue) PopNode() nodeIndex {
 
 	return idx
 }
+
+func (query *Query) queueHasNonStale(queue *priorityQueue) bool {
+	// TODO
+	for _, idx := range queue.items {
+		if !query.hasAnyMarks(idx, markStale) {
+			return true
+		}
+	}
+
+	return false
+}
