@@ -24,6 +24,7 @@ type algorithmDetails struct {
 	packHashID uint32
 	sum        func([]byte) ObjectID
 	new        func() hash.Hash
+	emptyTree  ObjectID
 }
 
 //nolint:gochecknoglobals
@@ -69,12 +70,15 @@ var (
 )
 
 func init() { //nolint:gochecknoinits
+	emptyTreeInput := []byte("tree 0\x00")
+
 	for algo := Algorithm(0); int(algo) < len(algorithmTable); algo++ {
-		info := algorithmTable[algo]
+		info := &algorithmTable[algo]
 		if info.name == "" {
 			continue
 		}
 
+		info.emptyTree = info.sum(emptyTreeInput)
 		algorithmByName[info.name] = algo
 		supportedAlgorithms = append(supportedAlgorithms, algo)
 	}
@@ -133,6 +137,12 @@ func (algo Algorithm) New() (hash.Hash, error) {
 	}
 
 	return newFn(), nil
+}
+
+// EmptyTree returns the object ID of an empty tree ("tree 0\x00") for this
+// algorithm.
+func (algo Algorithm) EmptyTree() ObjectID {
+	return algo.info().emptyTree
 }
 
 func (algo Algorithm) info() algorithmDetails {
