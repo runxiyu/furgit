@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/ref/refname"
+	"codeberg.org/lindenii/furgit/ref/name"
 	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 

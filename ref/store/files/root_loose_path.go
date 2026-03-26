@@ -3,7 +3,7 @@ package files
 import (
 	"path"
 
-	"codeberg.org/lindenii/furgit/ref/refname"
+	"codeberg.org/lindenii/furgit/ref/name"
 )
 
 func (store *Store) loosePath(name string) refPath {

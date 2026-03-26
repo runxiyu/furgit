@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/ref/refname"
+	"codeberg.org/lindenii/furgit/ref/name"
 )
 
 func TestValidateNameAgainstGit(t *testing.T) {
