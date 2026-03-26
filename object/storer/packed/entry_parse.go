@@ -6,7 +6,7 @@ import (
 	"codeberg.org/lindenii/furgit/internal/intconv"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
-	packfmt "codeberg.org/lindenii/furgit/packfile"
+	packfmt "codeberg.org/lindenii/furgit/format/packfile"
 )
 
 // entryMeta describes one parsed pack entry header.

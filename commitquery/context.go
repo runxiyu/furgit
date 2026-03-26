@@ -2,7 +2,7 @@
 package commitquery
 
 import (
-	commitgraphread "codeberg.org/lindenii/furgit/commitgraph/read"
+	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objectstorer "codeberg.org/lindenii/furgit/object/storer"
 )

@@ -13,7 +13,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/packfile/ingest"
+	"codeberg.org/lindenii/furgit/format/packfile/ingest"
 )
 
 type noExtraReadReader struct {

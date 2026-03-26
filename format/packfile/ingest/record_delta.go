@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	objecttype "codeberg.org/lindenii/furgit/object/type"
-	deltaapply "codeberg.org/lindenii/furgit/packfile/delta/apply"
+	deltaapply "codeberg.org/lindenii/furgit/format/packfile/delta/apply"
 )
 
 // applyDeltaRecord applies one delta record onto base content.

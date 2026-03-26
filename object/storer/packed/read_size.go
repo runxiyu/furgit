@@ -5,7 +5,7 @@ import (
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
-	packfmt "codeberg.org/lindenii/furgit/packfile"
+	packfmt "codeberg.org/lindenii/furgit/format/packfile"
 )
 
 // ReadSize reads an object's declared content size.

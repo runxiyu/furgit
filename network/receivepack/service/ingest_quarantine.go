@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"codeberg.org/lindenii/furgit/internal/utils"
-	"codeberg.org/lindenii/furgit/packfile/ingest"
+	"codeberg.org/lindenii/furgit/format/packfile/ingest"
 )
 
 func (service *Service) ingestQuarantine(

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	objecttype "codeberg.org/lindenii/furgit/object/type"
-	packfmt "codeberg.org/lindenii/furgit/packfile"
+	packfmt "codeberg.org/lindenii/furgit/format/packfile"
 )
 
 // resolveRecord resolves one record and returns canonical type/content.

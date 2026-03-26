@@ -3,7 +3,7 @@ package reachability
 import (
 	"errors"
 
-	commitgraphread "codeberg.org/lindenii/furgit/commitgraph/read"
+	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )

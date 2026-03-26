@@ -3,8 +3,8 @@ package read
 import (
 	"encoding/binary"
 
-	"codeberg.org/lindenii/furgit/commitgraph"
-	"codeberg.org/lindenii/furgit/commitgraph/bloom"
+	"codeberg.org/lindenii/furgit/format/commitgraph"
+	"codeberg.org/lindenii/furgit/format/commitgraph/bloom"
 	"codeberg.org/lindenii/furgit/internal/intconv"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 )

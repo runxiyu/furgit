@@ -4,7 +4,7 @@ import (
 	"os"
 	"syscall"
 
-	"codeberg.org/lindenii/furgit/commitgraph"
+	"codeberg.org/lindenii/furgit/format/commitgraph"
 	"codeberg.org/lindenii/furgit/internal/intconv"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 )

@@ -1,6 +1,6 @@
 package commitquery
 
-import commitgraphread "codeberg.org/lindenii/furgit/commitgraph/read"
+import commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 
 // resolveGraphPos resolves one commit-graph position to one internal query node.
 func (query *Query) resolveGraphPos(pos commitgraphread.Position) (nodeIndex, error) {

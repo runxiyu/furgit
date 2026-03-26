@@ -10,7 +10,7 @@ import (
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objectstorer "codeberg.org/lindenii/furgit/object/storer"
-	"codeberg.org/lindenii/furgit/packfile/ingest"
+	"codeberg.org/lindenii/furgit/format/packfile/ingest"
 	"codeberg.org/lindenii/furgit/repository"
 )
 

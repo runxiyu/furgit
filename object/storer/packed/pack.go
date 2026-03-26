@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"codeberg.org/lindenii/furgit/internal/intconv"
-	packfmt "codeberg.org/lindenii/furgit/packfile"
+	packfmt "codeberg.org/lindenii/furgit/format/packfile"
 )
 
 // packFile stores one mapped and validated .pack file.

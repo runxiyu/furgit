@@ -2,7 +2,7 @@
 package reachability
 
 import (
-	commitgraphread "codeberg.org/lindenii/furgit/commitgraph/read"
+	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	objectstorer "codeberg.org/lindenii/furgit/object/storer"
 )
 
