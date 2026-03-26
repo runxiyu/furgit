@@ -88,6 +88,16 @@ stores that `Repository` already exposes:
     `commitquery` over the existing and quarantined object stores. Some hooks
     are provided.
 
+## Alternatives
+
+Not endorsements.
+
+* [github.com/go-git/go-git](https://github.com/go-git/go-git) (by far the most mature)
+* [github.com/driusan/dgit](https://github.com/driusan/dgit)
+* [github.com/Nivl/git-go](https://github.com/Nivl/git-go)
+* [github.com/unkn0wn-root/git-go.git](https://github.com/unkn0wn-root/git-go.git)
+* [github.com/speedata/gogit](https://github.com/speedata/gogit)
+
 ## Community
 
 * [#lindenii](https://webirc.runxiyu.org/kiwiirc/#lindenii)
