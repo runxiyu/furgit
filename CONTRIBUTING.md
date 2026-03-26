@@ -33,6 +33,14 @@ Choose any one of:
 
 ## Submitting changes
 
+When fixing a bug, please write a regression test in a separate commit before
+your fix. Demonstrate that the regression test fails and that your fix lets it
+succeed. Obviously, the regression test must be reasonable, demonstrate a real
+issue (however minor), and must not itself contain hacks solely designed for
+the purposes of making the old code fail and the new one succeed.
+
+Choose any one of:
+
 * Open a [pull request on Codeberg](https://codeberg.org/lindenii/furgit/pulls)
 * [Send a patch](https://git-send-email.io) to
   [my public inbox](https://lists.sr.ht/~runxiyu/public-inbox)
