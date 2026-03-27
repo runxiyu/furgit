@@ -3,7 +3,7 @@ package testgit
 import (
 	"testing"
 
-	objectstorer "codeberg.org/lindenii/furgit/object/storer"
+	objectstore "codeberg.org/lindenii/furgit/object/store"
 	"codeberg.org/lindenii/furgit/repository"
 )
 
@@ -11,7 +11,7 @@ import (
 // the caller.
 //
 //nolint:ireturn
-func (testRepo *TestRepo) OpenObjectStore(tb testing.TB) objectstorer.Store {
+func (testRepo *TestRepo) OpenObjectStore(tb testing.TB) objectstore.Store {
 	tb.Helper()
 
 	root := testRepo.OpenGitRoot(tb)

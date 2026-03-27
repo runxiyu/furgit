@@ -5,7 +5,7 @@ import (
 	"io"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstorer "codeberg.org/lindenii/furgit/object/storer"
+	objectstore "codeberg.org/lindenii/furgit/object/store"
 	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 
@@ -31,8 +31,8 @@ type UpdateDecision struct {
 // valid for the duration of the hook call.
 type HookRequest struct {
 	Refs               refstore.ReadingStore
-	ExistingObjects    objectstorer.Store
-	QuarantinedObjects objectstorer.Store
+	ExistingObjects    objectstore.Store
+	QuarantinedObjects objectstore.Store
 	Updates            []RefUpdate
 	PushOptions        []string
 	IO                 HookIO

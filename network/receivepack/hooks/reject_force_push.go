@@ -8,7 +8,7 @@ import (
 	"codeberg.org/lindenii/furgit/commitquery"
 	receivepack "codeberg.org/lindenii/furgit/network/receivepack"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectmix "codeberg.org/lindenii/furgit/object/storer/mix"
+	objectmix "codeberg.org/lindenii/furgit/object/store/mix"
 	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 

@@ -1,3 +1,0 @@
-* Per delta-plan memo map
-* Internal handle/request context (might expose it externally later and add to global interface)
-* Audit on mutex

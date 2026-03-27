@@ -6,9 +6,9 @@ import (
 
 	"codeberg.org/lindenii/furgit/config"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstorer "codeberg.org/lindenii/furgit/object/storer"
-	objectloose "codeberg.org/lindenii/furgit/object/storer/loose"
-	objectpacked "codeberg.org/lindenii/furgit/object/storer/packed"
+	objectstore "codeberg.org/lindenii/furgit/object/store"
+	objectloose "codeberg.org/lindenii/furgit/object/store/loose"
+	objectpacked "codeberg.org/lindenii/furgit/object/store/packed"
 	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 
@@ -25,7 +25,7 @@ type Repository struct {
 	config *config.Config
 	algo   objectid.Algorithm
 
-	objects         objectstorer.Store
+	objects         objectstore.Store
 	objectsRoot     *os.Root
 	objectsPackRoot *os.Root
 	objectsLoose    *objectloose.Store

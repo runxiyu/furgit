@@ -5,10 +5,10 @@ import (
 	"os"
 
 	"codeberg.org/lindenii/furgit/internal/utils"
-	objectstorer "codeberg.org/lindenii/furgit/object/storer"
-	"codeberg.org/lindenii/furgit/object/storer/loose"
-	objectmix "codeberg.org/lindenii/furgit/object/storer/mix"
-	"codeberg.org/lindenii/furgit/object/storer/packed"
+	objectstore "codeberg.org/lindenii/furgit/object/store"
+	"codeberg.org/lindenii/furgit/object/store/loose"
+	objectmix "codeberg.org/lindenii/furgit/object/store/mix"
+	"codeberg.org/lindenii/furgit/object/store/packed"
 )
 
 func (service *Service) runHook(
@@ -40,7 +40,7 @@ func (service *Service) runHook(
 	quarantinedObjects := service.opts.ExistingObjects
 
 	var (
-		quarantineObjectsStore objectstorer.Store
+		quarantineObjectsStore objectstore.Store
 		quarantineLooseStore   *loose.Store
 		quarantinePackedStore  *packed.Store
 		quarantineLooseRoot    *os.Root

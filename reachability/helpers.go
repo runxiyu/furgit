@@ -6,7 +6,7 @@ import (
 
 	giterrors "codeberg.org/lindenii/furgit/errors"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstorer "codeberg.org/lindenii/furgit/object/storer"
+	objectstore "codeberg.org/lindenii/furgit/object/store"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
@@ -39,7 +39,7 @@ func (walk *Walk) readHeaderType(id objectid.ObjectID) (objecttype.Type, error) 
 func (r *Reachability) readHeaderType(id objectid.ObjectID) (objecttype.Type, error) {
 	ty, _, err := r.store.ReadHeader(id)
 	if err != nil {
-		if errors.Is(err, objectstorer.ErrObjectNotFound) {
+		if errors.Is(err, objectstore.ErrObjectNotFound) {
 			return objecttype.TypeInvalid, &giterrors.ObjectMissingError{OID: id}
 		}
 
@@ -61,7 +61,7 @@ func (walk *Walk) readBytesContent(id objectid.ObjectID) ([]byte, error) {
 func (r *Reachability) readBytesContent(id objectid.ObjectID) ([]byte, error) {
 	_, content, err := r.store.ReadBytesContent(id)
 	if err != nil {
-		if errors.Is(err, objectstorer.ErrObjectNotFound) {
+		if errors.Is(err, objectstore.ErrObjectNotFound) {
 			return nil, &giterrors.ObjectMissingError{OID: id}
 		}
 

@@ -8,7 +8,7 @@ import (
 	"codeberg.org/lindenii/furgit/internal/peel"
 	objectcommit "codeberg.org/lindenii/furgit/object/commit"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstorer "codeberg.org/lindenii/furgit/object/storer"
+	objectstore "codeberg.org/lindenii/furgit/object/store"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
@@ -70,7 +70,7 @@ func (query *Query) loadByOID(idx nodeIndex) error {
 
 	ty, content, err := query.store.ReadBytesContent(id)
 	if err != nil {
-		if stderrors.Is(err, objectstorer.ErrObjectNotFound) {
+		if stderrors.Is(err, objectstore.ErrObjectNotFound) {
 			return &giterrors.ObjectMissingError{OID: id}
 		}
 

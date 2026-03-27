@@ -4,13 +4,13 @@ package commitquery
 import (
 	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstorer "codeberg.org/lindenii/furgit/object/storer"
+	objectstore "codeberg.org/lindenii/furgit/object/store"
 )
 
 // Query owns the mutable node arena for commit-domain queries over one object
 // store.
 type Query struct {
-	store objectstorer.Store
+	store objectstore.Store
 	graph *commitgraphread.Reader
 
 	nodes []node
@@ -24,7 +24,7 @@ type Query struct {
 
 // New builds one reusable commit query arena over one object store and optional
 // commit-graph reader.
-func New(store objectstorer.Store, graph *commitgraphread.Reader) *Query {
+func New(store objectstore.Store, graph *commitgraphread.Reader) *Query {
 	return &Query{
 		store:      store,
 		graph:      graph,

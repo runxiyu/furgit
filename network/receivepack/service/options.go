@@ -6,7 +6,7 @@ import (
 	"os"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstorer "codeberg.org/lindenii/furgit/object/storer"
+	objectstore "codeberg.org/lindenii/furgit/object/store"
 	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 
@@ -26,7 +26,7 @@ type PromotedObjectPermissions struct {
 type Options struct {
 	Algorithm                 objectid.Algorithm
 	Refs                      refstore.ReadWriteStore
-	ExistingObjects           objectstorer.Store
+	ExistingObjects           objectstore.Store
 	ObjectsRoot               *os.Root
 	Progress                  io.Writer
 	ProgressFlush             func() error

@@ -10,7 +10,7 @@ import (
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/network/receivepack/service"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/storer/memory"
+	"codeberg.org/lindenii/furgit/object/store/memory"
 )
 
 func TestExecutePackExpectedWithoutObjectsRoot(t *testing.T) {
