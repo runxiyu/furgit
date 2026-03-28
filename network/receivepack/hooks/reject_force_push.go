@@ -22,6 +22,9 @@ func RejectForcePush() receivepack.Hook {
 		_ = ctx
 
 		objects := objectmix.New(req.QuarantinedObjects, req.ExistingObjects)
+		defer func() { _ = objects.Close() }()
+
+		queries := commitquery.New(objects, req.CommitGraph)
 
 		decisions := make([]receivepack.UpdateDecision, len(req.Updates))
 		for i := range decisions {
@@ -46,7 +49,7 @@ func RejectForcePush() receivepack.Hook {
 				continue
 			}
 
-			ok, err := commitquery.New(objects, req.CommitGraph).IsAncestor(current.ID, update.NewID)
+			ok, err := queries.IsAncestor(current.ID, update.NewID)
 			if err != nil {
 				return nil, fmt.Errorf("check fast-forward %s: %w", update.Name, err)
 			}
