@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"codeberg.org/lindenii/furgit/commitquery"
 	reffiles "codeberg.org/lindenii/furgit/ref/store/files"
 )
 
@@ -50,6 +51,7 @@ func Open(root *os.Root) (repo *Repository, err error) {
 	}
 
 	repo.commitGraph = commitGraph
+	repo.commitQueries = commitquery.New(objects, commitGraph)
 
 	refRoot, err := root.OpenRoot(".")
 	if err != nil {

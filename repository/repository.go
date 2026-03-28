@@ -4,6 +4,7 @@ package repository
 import (
 	"os"
 
+	"codeberg.org/lindenii/furgit/commitquery"
 	"codeberg.org/lindenii/furgit/config"
 	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	objectid "codeberg.org/lindenii/furgit/object/id"
@@ -20,8 +21,8 @@ import (
 // a bare repository root or a non-bare ".git" directory.
 //
 // Accessors such as [Repository.Objects], [Repository.CommitGraph],
-// [Repository.Refs], [Repository.Fetcher], and
-// [Repository.LooseStoreForWriting] return repository-backed views.
+// [Repository.CommitQueries], [Repository.Refs], [Repository.Fetcher],
+// and [Repository.LooseStoreForWriting] return repository-backed views.
 //
 // Labels: MT-Safe, Close-Caller.
 type Repository struct {
@@ -34,6 +35,7 @@ type Repository struct {
 	objectsLoose    *objectloose.Store
 	objectsPacked   *objectpacked.Store
 	commitGraph     *commitgraphread.Reader
+	commitQueries   *commitquery.Queries
 	refRoot         *os.Root
 	refs            refstore.ReadWriteStore
 }
