@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 
+	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objectstore "codeberg.org/lindenii/furgit/object/store"
 	refstore "codeberg.org/lindenii/furgit/ref/store"
@@ -27,6 +28,7 @@ type Options struct {
 	Algorithm                 objectid.Algorithm
 	Refs                      refstore.ReadWriteStore
 	ExistingObjects           objectstore.ReadingStore
+	CommitGraph               *commitgraphread.Reader
 	ObjectsRoot               *os.Root
 	Progress                  io.Writer
 	ProgressFlush             func() error

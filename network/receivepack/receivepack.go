@@ -111,6 +111,7 @@ func ReceivePack(
 		Algorithm:       opts.Algorithm,
 		Refs:            opts.Refs,
 		ExistingObjects: opts.ExistingObjects,
+		CommitGraph:     opts.CommitGraph,
 		ObjectsRoot:     opts.ObjectsRoot,
 		Progress:        progressWriter,
 		ProgressFlush:   progressFlush,

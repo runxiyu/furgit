@@ -3,6 +3,7 @@ package receivepack
 import (
 	"os"
 
+	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objectstore "codeberg.org/lindenii/furgit/object/store"
 	refstore "codeberg.org/lindenii/furgit/ref/store"
@@ -26,6 +27,9 @@ type Options struct {
 	// ExistingObjects is the object store visible to the push before any newly
 	// uploaded quarantined objects are promoted.
 	ExistingObjects objectstore.ReadingStore
+	// CommitGraph is an optional commit-graph snapshot corresponding to
+	// ExistingObjects.
+	CommitGraph *commitgraphread.Reader
 	// ObjectsRoot is the permanent object storage root beneath which per-push
 	// quarantine directories are derived.
 	ObjectsRoot *os.Root

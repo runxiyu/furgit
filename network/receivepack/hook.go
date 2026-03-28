@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 
+	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	"codeberg.org/lindenii/furgit/network/receivepack/service"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objectstore "codeberg.org/lindenii/furgit/object/store"
@@ -31,12 +32,13 @@ type UpdateDecision struct {
 // HookRequest is the input presented to a receive-pack hook before quarantine
 // promotion and ref updates.
 //
-// Refs, ExistingObjects, and QuarantinedObjects are borrowed and are only
-// valid for the duration of the hook call.
+// Refs, ExistingObjects, QuarantinedObjects, and CommitGraph are borrowed and
+// are only valid for the duration of the hook call.
 type HookRequest struct {
 	Refs               refstore.ReadingStore
 	ExistingObjects    objectstore.ReadingStore
 	QuarantinedObjects objectstore.ReadingStore
+	CommitGraph        *commitgraphread.Reader
 	Updates            []RefUpdate
 	PushOptions        []string
 	IO                 HookIO
@@ -69,6 +71,7 @@ func translateHook(hook Hook) service.Hook {
 			Refs:               req.Refs,
 			ExistingObjects:    req.ExistingObjects,
 			QuarantinedObjects: req.QuarantinedObjects,
+			CommitGraph:        req.CommitGraph,
 			Updates:            translatedUpdates,
 			PushOptions:        append([]string(nil), req.PushOptions...),
 			IO: HookIO{

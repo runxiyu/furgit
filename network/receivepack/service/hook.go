@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 
+	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objectstore "codeberg.org/lindenii/furgit/object/store"
 	refstore "codeberg.org/lindenii/furgit/ref/store"
@@ -27,12 +28,13 @@ type UpdateDecision struct {
 
 // HookRequest is the borrowed view passed to one Hook invocation.
 //
-// Refs, ExistingObjects, and QuarantinedObjects are borrowed and are only
-// valid for the duration of the hook call.
+// Refs, ExistingObjects, QuarantinedObjects, and CommitGraph are borrowed and
+// are only valid for the duration of the hook call.
 type HookRequest struct {
 	Refs               refstore.ReadingStore
 	ExistingObjects    objectstore.ReadingStore
 	QuarantinedObjects objectstore.ReadingStore
+	CommitGraph        *commitgraphread.Reader
 	Updates            []RefUpdate
 	PushOptions        []string
 	IO                 HookIO

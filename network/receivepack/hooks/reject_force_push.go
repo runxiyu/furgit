@@ -46,7 +46,7 @@ func RejectForcePush() receivepack.Hook {
 				continue
 			}
 
-			ok, err := commitquery.New(objects, nil).IsAncestor(current.ID, update.NewID)
+			ok, err := commitquery.New(objects, req.CommitGraph).IsAncestor(current.ID, update.NewID)
 			if err != nil {
 				return nil, fmt.Errorf("check fast-forward %s: %w", update.Name, err)
 			}

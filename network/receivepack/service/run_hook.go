@@ -122,6 +122,7 @@ func (service *Service) runHook(
 		Refs:               service.opts.Refs,
 		ExistingObjects:    service.opts.ExistingObjects,
 		QuarantinedObjects: quarantinedObjects,
+		CommitGraph:        service.opts.CommitGraph,
 		Updates:            buildHookUpdates(commands),
 		PushOptions:        append([]string(nil), req.PushOptions...),
 		IO:                 service.opts.HookIO,
