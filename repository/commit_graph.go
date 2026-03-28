@@ -20,7 +20,7 @@ func openCommitGraph(root *os.Root, algo objectid.Algorithm) (*commitgraphread.R
 		malformed.Reason == "missing commit-graph-chain" {
 		reader, err = commitgraphread.Open(root, algo, commitgraphread.OpenSingle)
 		if errors.Is(err, os.ErrNotExist) {
-			return nil, nil
+			return nil, nil //nolint:nilnil
 		}
 
 		return reader, err

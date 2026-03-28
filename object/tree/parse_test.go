@@ -79,6 +79,7 @@ func TestTreeInsertEntryCopiesName(t *testing.T) {
 	t.Parallel()
 
 	var tr tree.Tree
+
 	name := []byte("alpha")
 	entry := tree.TreeEntry{
 		Mode: tree.FileModeRegular,
@@ -86,7 +87,8 @@ func TestTreeInsertEntryCopiesName(t *testing.T) {
 		ID:   objectid.ObjectID{},
 	}
 
-	if err := tr.InsertEntry(entry); err != nil {
+	err := tr.InsertEntry(entry)
+	if err != nil {
 		t.Fatalf("InsertEntry: %v", err)
 	}
 
