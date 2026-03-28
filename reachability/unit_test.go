@@ -94,7 +94,7 @@ func TestWalkDomainCommitsIncludesTagNodes(t *testing.T) {
 		tag1 := store.AddObject(objecttype.TypeTag, tagBody(commit2, objecttype.TypeCommit))
 		tag2 := store.AddObject(objecttype.TypeTag, tagBody(tag1, objecttype.TypeTag))
 
-		r := reachability.New(store)
+		r := reachability.New(store, nil)
 		walk := r.Walk(reachability.DomainCommits, nil, map[objectid.ObjectID]struct{}{tag2: {}})
 
 		got := collectSeq(walk.Seq())
@@ -126,7 +126,7 @@ func TestWalkExcludesHavesCompletely(t *testing.T) {
 		}}}))
 		commit := store.AddObject(objecttype.TypeCommit, commitBody(tree))
 
-		r := reachability.New(store)
+		r := reachability.New(store, nil)
 		walk := r.Walk(reachability.DomainCommits, map[objectid.ObjectID]struct{}{commit: {}}, map[objectid.ObjectID]struct{}{commit: {}})
 
 		got := collectSeq(walk.Seq())
@@ -155,7 +155,7 @@ func TestWalkDomainCommitsRejectsNonCommitRootAfterPeel(t *testing.T) {
 		}}}))
 		tag := store.AddObject(objecttype.TypeTag, tagBody(tree, objecttype.TypeTree))
 
-		r := reachability.New(store)
+		r := reachability.New(store, nil)
 		walk := r.Walk(reachability.DomainCommits, nil, map[objectid.ObjectID]struct{}{tag: {}})
 		_ = collectSeq(walk.Seq())
 
@@ -191,7 +191,7 @@ func TestWalkDomainCommitsHaveTagStopsTraversal(t *testing.T) {
 		tag1 := store.AddObject(objecttype.TypeTag, tagBody(commit2, objecttype.TypeCommit))
 		tag2 := store.AddObject(objecttype.TypeTag, tagBody(tag1, objecttype.TypeTag))
 
-		r := reachability.New(store)
+		r := reachability.New(store, nil)
 		walk := r.Walk(
 			reachability.DomainCommits,
 			map[objectid.ObjectID]struct{}{tag1: {}},
@@ -236,7 +236,7 @@ func TestWalkDomainObjectsRecursesTreesAndSkipsBlobContentReads(t *testing.T) {
 		}}))
 		commit := store.AddObject(objecttype.TypeCommit, commitBody(rootTree))
 
-		r := reachability.New(store)
+		r := reachability.New(store, nil)
 		walk := r.Walk(reachability.DomainObjects, nil, map[objectid.ObjectID]struct{}{commit: {}})
 
 		got := collectSeq(walk.Seq())
@@ -273,7 +273,7 @@ func TestCheckConnectedReturnsConcreteMissingObject(t *testing.T) {
 		missingParent := store.Algorithm().Sum([]byte("missing-parent"))
 		commit := store.AddObject(objecttype.TypeCommit, commitBody(tree, missingParent))
 
-		r := reachability.New(store)
+		r := reachability.New(store, nil)
 
 		err := r.CheckConnected(reachability.DomainCommits, nil, map[objectid.ObjectID]struct{}{commit: {}})
 		if err == nil {
@@ -295,7 +295,7 @@ func TestWalkInvalidDomainReturnsPlainError(t *testing.T) {
 	t.Parallel()
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
-		r := reachability.New(newCountingMemStore(algo))
+		r := reachability.New(newCountingMemStore(algo), nil)
 		walk := r.Walk(reachability.Domain(99), nil, nil)
 
 		_ = collectSeq(walk.Seq())

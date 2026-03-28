@@ -249,7 +249,7 @@ func TestWalkOnPackedOnlyRepo(t *testing.T) {
 func openReachabilityFromTestRepo(t *testing.T, testRepo *testgit.TestRepo) *reachability.Reachability {
 	t.Helper()
 
-	return reachability.New(testRepo.OpenObjectStore(t))
+	return reachability.New(testRepo.OpenObjectStore(t), nil)
 }
 
 func oidSetFromSeq(seq func(func(objectid.ObjectID) bool)) map[objectid.ObjectID]struct{} {
