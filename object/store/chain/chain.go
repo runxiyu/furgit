@@ -6,7 +6,7 @@ import objectstore "codeberg.org/lindenii/furgit/object/store"
 
 // Chain queries multiple object databases in order.
 //
-// Chain borrows its backend stores.
+// Labels: Close-Caller.
 type Chain struct {
 	backends []objectstore.ReadingStore
 }
