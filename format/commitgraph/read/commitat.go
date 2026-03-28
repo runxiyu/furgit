@@ -8,6 +8,8 @@ import (
 )
 
 // CommitAt returns decoded commit-graph metadata at one position.
+//
+// Labels: Life-Independent.
 func (reader *Reader) CommitAt(pos Position) (Commit, error) {
 	layer, err := reader.layerByPosition(pos)
 	if err != nil {
