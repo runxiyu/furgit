@@ -22,6 +22,7 @@ func RejectForcePush() receivepack.Hook {
 		_ = ctx
 
 		objects := objectmix.New(req.QuarantinedObjects, req.ExistingObjects)
+
 		defer func() { _ = objects.Close() }()
 
 		queries := commitquery.New(objects, req.CommitGraph)
