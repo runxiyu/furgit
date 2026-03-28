@@ -9,6 +9,8 @@ import objectid "codeberg.org/lindenii/furgit/object/id"
 //
 // A batch borrows its underlying store and is invalid after that store is
 // closed.
+//
+// Labels: MT-Unsafe.
 type Batch interface {
 	// Create creates one detached reference, requiring that the logical
 	// reference does not already exist.
@@ -38,11 +40,11 @@ type Batch interface {
 	// Apply validates and applies queued operations, returning one result per
 	// queued operation in order. Fatal backend failures are returned separately.
 	//
-	// Apply is terminal. Further use of the batch is undefined behavior.
+	// Apply invalidates the receiver.
 	Apply() ([]BatchResult, error)
 	// Abort abandons the batch and releases any resources it holds.
 	//
-	// Abort is terminal. Further use of the batch is undefined behavior.
+	// Abort invalidates the receiver.
 	Abort() error
 }
 

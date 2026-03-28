@@ -13,6 +13,8 @@ import objectid "codeberg.org/lindenii/furgit/object/id"
 //
 // Symbolic methods operate on the named reference directly, without
 // dereferencing symbolic refs.
+//
+// Labels: MT-Unsafe.
 type Transaction interface {
 	// Create creates one detached reference, requiring that the logical
 	// reference does not already exist.
@@ -41,10 +43,10 @@ type Transaction interface {
 
 	// Commit validates and applies all queued operations atomically.
 	//
-	// Commit is terminal. Further use of the transaction is undefined behavior.
+	// Commit invalidates the receiver.
 	Commit() error
 	// Abort abandons the transaction and releases any resources it holds.
 	//
-	// Abort is terminal. Further use of the transaction is undefined behavior.
+	// Abort invalidates the receiver.
 	Abort() error
 }

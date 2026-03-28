@@ -7,5 +7,7 @@ package refstore
 // atomically within that backend.
 type TransactionalStore interface {
 	// BeginTransaction creates one new mutable transaction.
+	//
+	// Labels: Life-Parent.
 	BeginTransaction() (Transaction, error)
 }
