@@ -13,15 +13,16 @@ import (
 )
 
 // Repository represents a typical on-disk Git repository by composing
-// their stores together for access.
+// its stores together for access.
 //
 // Open expects a root for the Git directory itself:
 // a bare repository root or a non-bare ".git" directory.
 //
-// Accessors such as Objects, Refs, Resolver, and LooseStoreForWriting return
-// views backed by resources owned by Repository. Those values borrow the
-// repository's stores and filesystem roots, must not be used after repositor yClose,
-// and must not be closed manually.
+// Accessors such as [Repository.Objects], [Repository.Refs],
+// [Repository.Fetcher], and [Repository.LooseStoreForWriting] return
+// repository-backed views.
+//
+// Labels: MT-Safe, Close-Caller.
 type Repository struct {
 	config *config.Config
 	algo   objectid.Algorithm

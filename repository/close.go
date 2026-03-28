@@ -2,8 +2,9 @@ package repository
 
 import "errors"
 
-// Close closes owned stores and filesystem roots.
-// The behavior of the repo after Close is undefined.
+// Close closes repository-owned stores and filesystem roots.
+//
+// Labels: MT-Unsafe.
 func (repo *Repository) Close() error {
 	var errs []error
 

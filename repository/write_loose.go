@@ -6,9 +6,7 @@ import (
 
 // LooseStoreForWriting returns the repository's loose-object writer.
 //
-// The returned store is owned by Repository and borrows repository-managed
-// resources. Callers must not close it directly, and it must not be used after
-// Close.
+// Labels: Life-Parent, Close-No.
 func (repo *Repository) LooseStoreForWriting() *objectloose.Store {
 	return repo.objectsLoose
 }

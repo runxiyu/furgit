@@ -9,7 +9,7 @@ import (
 
 // Open opens a repository and wires object/ref stores from its on-disk format.
 //
-// Open borrows root and does not close it.
+// Labels: Deps-Borrowed.
 func Open(root *os.Root) (repo *Repository, err error) {
 	repo = &Repository{}
 
