@@ -7,7 +7,7 @@ import (
 )
 
 // EffectiveGeneration returns one node's generation value.
-func (query *Query) effectiveGeneration(idx nodeIndex) uint64 {
+func (query *query) effectiveGeneration(idx nodeIndex) uint64 {
 	if !query.nodes[idx].hasGeneration {
 		return generationInfinity
 	}
@@ -19,7 +19,7 @@ const (
 	generationInfinity = uint64(math.MaxUint64)
 )
 
-func compareByGeneration(query *Query) func(nodeIndex, nodeIndex) int {
+func compareByGeneration(query *query) func(nodeIndex, nodeIndex) int {
 	return func(left, right nodeIndex) int {
 		leftGeneration := query.effectiveGeneration(left)
 		rightGeneration := query.effectiveGeneration(right)

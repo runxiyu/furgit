@@ -3,7 +3,7 @@ package commitquery
 import "fmt"
 
 // populateNode fills one node's metadata and resolves its parents.
-func (query *Query) populateNode(idx nodeIndex, commit commitData) error {
+func (query *query) populateNode(idx nodeIndex, commit commitData) error {
 	if query.nodes[idx].loaded {
 		if query.nodes[idx].id != commit.ID {
 			return fmt.Errorf("commitquery: node identity mismatch: have %s, got %s", query.nodes[idx].id, commit.ID)

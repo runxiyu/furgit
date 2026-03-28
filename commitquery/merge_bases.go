@@ -9,7 +9,7 @@ import (
 // MergeBases reports all merge bases in Git's merge-base --all order.
 //
 // Both inputs are peeled through annotated tags before commit traversal.
-func (query *Query) MergeBases(left, right objectid.ObjectID) ([]objectid.ObjectID, error) {
+func (query *query) MergeBases(left, right objectid.ObjectID) ([]objectid.ObjectID, error) {
 	leftIdx, err := query.resolveCommitish(left)
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func (query *Query) MergeBases(left, right objectid.ObjectID) ([]objectid.Object
 }
 
 // MergeBase reports one merge base between left and right, if any.
-func (query *Query) MergeBase(left, right objectid.ObjectID) (objectid.ObjectID, bool, error) {
+func (query *query) MergeBase(left, right objectid.ObjectID) (objectid.ObjectID, bool, error) {
 	bases, err := query.MergeBases(left, right)
 	if err != nil {
 		return objectid.ObjectID{}, false, err
@@ -58,7 +58,7 @@ func (query *Query) MergeBase(left, right objectid.ObjectID) (objectid.ObjectID,
 	return bases[0], true, nil
 }
 
-func (query *Query) mergeBases(left, right nodeIndex) ([]nodeIndex, error) {
+func (query *query) mergeBases(left, right nodeIndex) ([]nodeIndex, error) {
 	if left == right {
 		return []nodeIndex{left}, nil
 	}

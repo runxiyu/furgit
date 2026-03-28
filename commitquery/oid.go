@@ -12,15 +12,15 @@ import (
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
-func (query *Query) id(idx nodeIndex) objectid.ObjectID {
+func (query *query) id(idx nodeIndex) objectid.ObjectID {
 	return query.nodes[idx].id
 }
 
-func (query *Query) commitTime(idx nodeIndex) int64 {
+func (query *query) commitTime(idx nodeIndex) int64 {
 	return query.nodes[idx].commitTime
 }
 
-func (query *Query) resolveOID(id objectid.ObjectID) (nodeIndex, error) {
+func (query *query) resolveOID(id objectid.ObjectID) (nodeIndex, error) {
 	idx, ok := query.byOID[id]
 	if ok {
 		err := query.ensureLoaded(idx)
@@ -44,7 +44,7 @@ func (query *Query) resolveOID(id objectid.ObjectID) (nodeIndex, error) {
 	return idx, nil
 }
 
-func (query *Query) resolveCommitish(id objectid.ObjectID) (nodeIndex, error) {
+func (query *query) resolveCommitish(id objectid.ObjectID) (nodeIndex, error) {
 	commitID, err := peel.ToCommit(query.store, id)
 	if err != nil {
 		return 0, err
@@ -54,7 +54,7 @@ func (query *Query) resolveCommitish(id objectid.ObjectID) (nodeIndex, error) {
 }
 
 // loadByOID populates one node from an object ID.
-func (query *Query) loadByOID(idx nodeIndex) error {
+func (query *query) loadByOID(idx nodeIndex) error {
 	id := query.nodes[idx].id
 
 	if query.graph != nil {

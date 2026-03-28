@@ -5,7 +5,7 @@ import (
 )
 
 // removeRedundant removes redundant merge-base candidates.
-func removeRedundant(query *Query, candidates []nodeIndex) ([]nodeIndex, error) {
+func removeRedundant(query *query, candidates []nodeIndex) ([]nodeIndex, error) {
 	for _, idx := range candidates {
 		if query.effectiveGeneration(idx) != generationInfinity {
 			return removeRedundantWithGen(query, candidates), nil
@@ -15,7 +15,7 @@ func removeRedundant(query *Query, candidates []nodeIndex) ([]nodeIndex, error) 
 	return removeRedundantNoGen(query, candidates)
 }
 
-func removeRedundantNoGen(query *Query, candidates []nodeIndex) ([]nodeIndex, error) {
+func removeRedundantNoGen(query *query, candidates []nodeIndex) ([]nodeIndex, error) {
 	redundant := make([]bool, len(candidates))
 	work := make([]nodeIndex, 0, len(candidates)-1)
 	filledIndex := make([]int, 0, len(candidates)-1)
@@ -72,7 +72,7 @@ func removeRedundantNoGen(query *Query, candidates []nodeIndex) ([]nodeIndex, er
 	return out, nil
 }
 
-func removeRedundantWithGen(query *Query, candidates []nodeIndex) []nodeIndex {
+func removeRedundantWithGen(query *query, candidates []nodeIndex) []nodeIndex {
 	sorted := append([]nodeIndex(nil), candidates...)
 	slices.SortFunc(sorted, compareByGeneration(query))
 

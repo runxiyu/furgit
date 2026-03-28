@@ -1,7 +1,7 @@
 package commitquery
 
 // ensureLoaded completes one node's metadata load if it has not been loaded yet.
-func (query *Query) ensureLoaded(idx nodeIndex) error {
+func (query *query) ensureLoaded(idx nodeIndex) error {
 	if query.nodes[idx].loaded {
 		return nil
 	}

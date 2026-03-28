@@ -6,7 +6,7 @@ import objectid "codeberg.org/lindenii/furgit/object/id"
 // commit parent edges.
 //
 // Both inputs are peeled through annotated tags before commit traversal.
-func (query *Query) IsAncestor(ancestor, descendant objectid.ObjectID) (bool, error) {
+func (query *query) IsAncestor(ancestor, descendant objectid.ObjectID) (bool, error) {
 	ancestorIdx, err := query.resolveCommitish(ancestor)
 	if err != nil {
 		return false, err
@@ -20,7 +20,7 @@ func (query *Query) IsAncestor(ancestor, descendant objectid.ObjectID) (bool, er
 	return query.isAncestor(ancestorIdx, descendantIdx)
 }
 
-func (query *Query) isAncestor(ancestor, descendant nodeIndex) (bool, error) {
+func (query *query) isAncestor(ancestor, descendant nodeIndex) (bool, error) {
 	if ancestor == descendant {
 		return true, nil
 	}

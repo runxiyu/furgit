@@ -3,7 +3,7 @@ package commitquery
 import commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 
 // resolveGraphPos resolves one commit-graph position to one internal query node.
-func (query *Query) resolveGraphPos(pos commitgraphread.Position) (nodeIndex, error) {
+func (query *query) resolveGraphPos(pos commitgraphread.Position) (nodeIndex, error) {
 	idx, ok := query.byGraphPos[pos]
 	if ok {
 		err := query.ensureLoaded(idx)
@@ -40,13 +40,13 @@ func (query *Query) resolveGraphPos(pos commitgraphread.Position) (nodeIndex, er
 }
 
 // loadByGraphPos populates one node from a commit-graph position.
-func (query *Query) loadByGraphPos(idx nodeIndex) error {
+func (query *query) loadByGraphPos(idx nodeIndex) error {
 	pos := query.nodes[idx].graphPos
 
 	return query.loadCommitAtGraphPos(idx, pos)
 }
 
-func (query *Query) loadCommitAtGraphPos(idx nodeIndex, pos commitgraphread.Position) error {
+func (query *query) loadCommitAtGraphPos(idx nodeIndex, pos commitgraphread.Position) error {
 	commit, err := query.graph.CommitAt(pos)
 	if err != nil {
 		return err

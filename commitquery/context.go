@@ -7,9 +7,7 @@ import (
 	objectstore "codeberg.org/lindenii/furgit/object/store"
 )
 
-// Query owns the mutable node arena for commit-domain queries over one object
-// store.
-type Query struct {
+type query struct {
 	store objectstore.ReadingStore
 	graph *commitgraphread.Reader
 
@@ -22,13 +20,19 @@ type Query struct {
 	touched   []nodeIndex
 }
 
-// New builds one reusable commit query arena over one object store and optional
-// commit-graph reader.
-func New(store objectstore.ReadingStore, graph *commitgraphread.Reader) *Query {
-	return &Query{
+func newQuery(store objectstore.ReadingStore, graph *commitgraphread.Reader) *query {
+	return &query{
 		store:      store,
 		graph:      graph,
 		byOID:      make(map[objectid.ObjectID]nodeIndex),
 		byGraphPos: make(map[commitgraphread.Position]nodeIndex),
 	}
+}
+
+func (query *query) resetForReuse() {
+	for _, idx := range query.touched {
+		query.nodes[idx].marks = 0
+	}
+
+	query.touched = query.touched[:0]
 }

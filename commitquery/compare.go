@@ -3,7 +3,7 @@ package commitquery
 import objectid "codeberg.org/lindenii/furgit/object/id"
 
 // Compare compares two internal nodes using merge-base queue ordering.
-func (query *Query) compare(left, right nodeIndex) int {
+func (query *query) compare(left, right nodeIndex) int {
 	leftGeneration := query.effectiveGeneration(left)
 	rightGeneration := query.effectiveGeneration(right)
 

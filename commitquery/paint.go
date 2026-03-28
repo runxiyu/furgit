@@ -1,6 +1,6 @@
 package commitquery
 
-func (query *Query) paintDownToCommon(left nodeIndex, rights []nodeIndex, minGeneration uint64) error {
+func (query *query) paintDownToCommon(left nodeIndex, rights []nodeIndex, minGeneration uint64) error {
 	query.beginMarkPhase()
 
 	query.setMarks(left, markLeft)

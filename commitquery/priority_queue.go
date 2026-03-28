@@ -4,12 +4,12 @@ import "container/heap"
 
 // priorityQueue orders internal nodes using one query context's comparator.
 type priorityQueue struct {
-	query *Query
+	query *query
 	items []nodeIndex
 }
 
 // newPriorityQueue builds one empty priority queue over one query context.
-func newPriorityQueue(query *Query) *priorityQueue {
+func newPriorityQueue(query *query) *priorityQueue {
 	queue := &priorityQueue{query: query}
 	heap.Init(queue)
 
@@ -67,7 +67,7 @@ func (queue *priorityQueue) PopNode() nodeIndex {
 	return idx
 }
 
-func (query *Query) queueHasNonStale(queue *priorityQueue) bool {
+func (query *query) queueHasNonStale(queue *priorityQueue) bool {
 	// TODO
 	for _, idx := range queue.items {
 		if !query.hasAnyMarks(idx, markStale) {

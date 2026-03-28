@@ -28,7 +28,7 @@ type node struct {
 }
 
 // newNode allocates one empty internal node.
-func (query *Query) newNode(id objectid.ObjectID) nodeIndex {
+func (query *query) newNode(id objectid.ObjectID) nodeIndex {
 	count := len(query.nodes)
 
 	idx := nodeIndex(count)

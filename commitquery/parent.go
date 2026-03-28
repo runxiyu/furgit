@@ -13,12 +13,12 @@ type parentRef struct {
 }
 
 // Parents returns resolved parent node indices for one internal node.
-func (query *Query) parents(idx nodeIndex) []nodeIndex {
+func (query *query) parents(idx nodeIndex) []nodeIndex {
 	return query.nodes[idx].parents
 }
 
 // resolveParent resolves one parent descriptor to one internal node.
-func (query *Query) resolveParent(parent parentRef) (nodeIndex, error) {
+func (query *query) resolveParent(parent parentRef) (nodeIndex, error) {
 	if parent.HasGraphPos {
 		return query.resolveGraphPos(parent.GraphPos)
 	}
