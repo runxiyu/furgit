@@ -42,6 +42,8 @@ func (reader *Reader) BloomVersion() uint8 {
 // only valid until the reader is closed.
 //
 // Returns BloomUnavailableError when this commit graph has no Bloom data.
+//
+// Labels: Life-Parent.
 func (reader *Reader) BloomFilterAt(pos Position) (bloom.Filter, error) {
 	layer, err := reader.layerByPosition(pos)
 	if err != nil {

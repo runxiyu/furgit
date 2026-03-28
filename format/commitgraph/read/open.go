@@ -9,7 +9,7 @@ import (
 
 // Open opens commit-graph data from one objects root.
 //
-// Open borrows root during construction and does not close it.
+// Labels: Deps-Borrowed.
 func Open(root *os.Root, algo objectid.Algorithm, mode OpenMode) (*Reader, error) {
 	if algo.Size() == 0 {
 		return nil, objectid.ErrInvalidAlgorithm
