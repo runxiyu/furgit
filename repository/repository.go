@@ -21,8 +21,9 @@ import (
 // a bare repository root or a non-bare ".git" directory.
 //
 // Accessors such as [Repository.Objects], [Repository.CommitGraph],
-// [Repository.CommitQueries], [Repository.Refs], [Repository.Fetcher],
-// and [Repository.LooseStoreForWriting] return repository-backed views.
+// [Repository.CommitQueries], [Repository.Reachability], [Repository.Refs],
+// [Repository.Fetcher], and [Repository.LooseStoreForWriting] return
+// repository-backed views.
 //
 // Labels: MT-Safe, Close-Caller.
 type Repository struct {

@@ -8,7 +8,7 @@ import (
 
 // Reachability provides graph traversal over objects in one object store.
 //
-// Labels: MT-Unsafe.
+// Labels: MT-Safe.
 type Reachability struct {
 	store objectstore.ReadingStore
 	graph *commitgraphread.Reader
