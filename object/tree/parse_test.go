@@ -74,3 +74,34 @@ func TestTreeParseFromGit(t *testing.T) {
 		}
 	})
 }
+
+func TestTreeInsertEntryCopiesName(t *testing.T) {
+	t.Parallel()
+
+	var tr tree.Tree
+	name := []byte("alpha")
+	entry := tree.TreeEntry{
+		Mode: tree.FileModeRegular,
+		Name: name,
+		ID:   objectid.ObjectID{},
+	}
+
+	if err := tr.InsertEntry(entry); err != nil {
+		t.Fatalf("InsertEntry: %v", err)
+	}
+
+	name[0] = 'b'
+
+	got := tr.Entry([]byte("alpha"))
+	if got == nil {
+		t.Fatalf("Entry(alpha) returned nil")
+	}
+
+	if !bytes.Equal(got.Name, []byte("alpha")) {
+		t.Fatalf("stored name = %q, want %q", got.Name, []byte("alpha"))
+	}
+
+	if tr.Entry([]byte("blpha")) != nil {
+		t.Fatalf("mutating caller name should not affect stored entry")
+	}
+}

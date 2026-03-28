@@ -8,7 +8,7 @@ import (
 	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
-// Parse decodes a tree object body.
+// Parse decodes a tree object body into a fully materialized Tree.
 func Parse(body []byte, algo objectid.Algorithm) (*Tree, error) {
 	var entries []TreeEntry
 

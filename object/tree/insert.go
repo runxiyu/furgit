@@ -6,10 +6,14 @@ import (
 )
 
 // InsertEntry inserts a tree entry while preserving Git ordering.
+//
+// InsertEntry copies newEntry.Name.
 func (tree *Tree) InsertEntry(newEntry TreeEntry) error {
 	if tree.entry(newEntry.Name, true) != nil || tree.entry(newEntry.Name, false) != nil {
 		return fmt.Errorf("object: tree: entry %q already exists", newEntry.Name)
 	}
+
+	newEntry.Name = append([]byte(nil), newEntry.Name...)
 
 	newIsTree := newEntry.Mode == FileModeDir
 	insertAt := sort.Search(len(tree.Entries), func(i int) bool {

@@ -9,6 +9,8 @@ import (
 // TreeEntry represents a single entry in a tree.
 type TreeEntry struct {
 	Mode FileMode
+	// Name is part of the tree ordering. Mutating it after insertion may break
+	// Tree ordering and lookup behavior.
 	Name []byte
 	ID   objectid.ObjectID
 }
