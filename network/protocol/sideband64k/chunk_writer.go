@@ -62,3 +62,8 @@ func (cw *ChunkWriter) ReadFrom(r io.Reader) (int64, error) {
 		}
 	}
 }
+
+// Flush flushes buffered output in the underlying transport.
+func (cw *ChunkWriter) Flush() error {
+	return cw.enc.Flush()
+}

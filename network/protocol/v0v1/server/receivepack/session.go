@@ -2,7 +2,6 @@ package receivepack
 
 import (
 	"fmt"
-	"io"
 	"strings"
 
 	"codeberg.org/lindenii/furgit/common/iowrap"
@@ -181,7 +180,7 @@ func (session *Session) WriteError(p []byte) error {
 // ErrorWriter returns one chunking writer for sideband error output.
 //
 // When side-band-64k was not negotiated, writes are discarded.
-func (session *Session) ErrorWriter() io.Writer {
+func (session *Session) ErrorWriter() iowrap.WriteFlusher {
 	return session.base.ErrorWriter()
 }
 

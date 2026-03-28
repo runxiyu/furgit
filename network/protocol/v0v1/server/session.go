@@ -97,19 +97,6 @@ func (session *Session) Flush() error {
 	return session.enc.Flush()
 }
 
-type flushWriter struct {
-	writer io.Writer
-	flush  func() error
-}
-
-func (w flushWriter) Write(p []byte) (int, error) {
-	return w.writer.Write(p)
-}
-
-func (w flushWriter) Flush() error {
-	return w.flush()
-}
-
 // ProgressWriter returns one chunking writer for sideband progress output.
 //
 // When side-band-64k was not negotiated, writes are discarded.
@@ -118,18 +105,15 @@ func (session *Session) ProgressWriter() iowrap.WriteFlusher {
 		return iowrap.NopFlush(io.Discard)
 	}
 
-	return flushWriter{
-		writer: sideband64k.NewChunkWriter(session.sideband, sideband64k.BandProgress),
-		flush:  session.sideband.Flush,
-	}
+	return sideband64k.NewChunkWriter(session.sideband, sideband64k.BandProgress)
 }
 
 // ErrorWriter returns one chunking writer for sideband error output.
 //
 // When side-band-64k was not negotiated, writes are discarded.
-func (session *Session) ErrorWriter() io.Writer {
+func (session *Session) ErrorWriter() iowrap.WriteFlusher {
 	if !session.useSideBand {
-		return io.Discard
+		return iowrap.NopFlush(io.Discard)
 	}
 
 	return sideband64k.NewChunkWriter(session.sideband, sideband64k.BandError)
@@ -139,7 +123,7 @@ func (session *Session) ErrorWriter() io.Writer {
 //
 // When side-band-64k is enabled, writes are chunked into band-1 sideband
 // frames. Otherwise writes are chunked into direct pkt-line data frames.
-func (session *Session) PrimaryDataWriter() io.Writer {
+func (session *Session) PrimaryDataWriter() iowrap.WriteFlusher {
 	if session.useSideBand {
 		return sideband64k.NewChunkWriter(session.sideband, sideband64k.BandData)
 	}
