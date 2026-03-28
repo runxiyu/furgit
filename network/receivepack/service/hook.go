@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"io"
 
 	"codeberg.org/lindenii/furgit/common/iowrap"
 	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
@@ -13,7 +12,7 @@ import (
 
 type HookIO struct {
 	Progress iowrap.WriteFlusher
-	Error    io.Writer
+	Error    iowrap.WriteFlusher
 }
 
 type RefUpdate struct {

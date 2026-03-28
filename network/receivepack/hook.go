@@ -2,7 +2,6 @@ package receivepack
 
 import (
 	"context"
-	"io"
 
 	"codeberg.org/lindenii/furgit/common/iowrap"
 	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
@@ -14,7 +13,7 @@ import (
 
 type HookIO struct {
 	Progress iowrap.WriteFlusher
-	Error    io.Writer
+	Error    iowrap.WriteFlusher
 }
 
 // RefUpdate is one requested reference update presented to a receive-pack hook.
