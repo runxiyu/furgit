@@ -5,6 +5,8 @@ import (
 )
 
 // Store is one in-memory object store.
+//
+// Labels: Close-Caller.
 type Store struct {
 	algo    objectid.Algorithm
 	objects map[objectid.ObjectID]storedObject
