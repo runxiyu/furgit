@@ -12,10 +12,7 @@ import (
 //
 // Labels: Deps-Borrowed.
 func New(store objectstore.ReadingStore, graph *commitgraphread.Reader) *Queries {
-	maxIdle := runtime.GOMAXPROCS(0)
-	if maxIdle < 1 {
-		maxIdle = 1
-	}
+	maxIdle := max(runtime.GOMAXPROCS(0), 1)
 
 	return &Queries{
 		store:   store,
