@@ -6,7 +6,7 @@ import refstore "codeberg.org/lindenii/furgit/ref/store"
 
 // Chain queries multiple reference stores in order.
 //
-// Chain borrows its backend stores.
+// Labels: Close-Caller.
 type Chain struct {
 	backends []refstore.ReadingStore
 }
