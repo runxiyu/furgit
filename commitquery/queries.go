@@ -21,3 +21,6 @@ type Queries struct {
 	idle    []*query
 	maxIdle int
 }
+
+// TODO: Research a shared arena, or perhaps worker-reconciliation
+// schemes if a complete shared arena proves to be too contentious.
