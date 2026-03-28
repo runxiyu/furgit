@@ -2,6 +2,7 @@ package files
 
 import refstore "codeberg.org/lindenii/furgit/ref/store"
 
+// Apply validates and applies the queued updates.
 func (batch *Batch) Apply() ([]refstore.BatchResult, error) {
 	results := make([]refstore.BatchResult, len(batch.ops))
 	remainingIdx := make([]int, 0, len(batch.ops))

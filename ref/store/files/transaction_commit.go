@@ -1,5 +1,6 @@
 package files
 
+// Commit validates and applies the queued updates atomically.
 func (tx *Transaction) Commit() error {
 	executor := &refUpdateExecutor{store: tx.store}
 

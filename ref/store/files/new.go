@@ -9,6 +9,8 @@ import (
 )
 
 // New creates one files ref store rooted at one repository gitdir.
+//
+// Labels: Deps-Borrowed.
 func New(root *os.Root, algo objectid.Algorithm, packedRefsTimeout time.Duration) (*Store, error) {
 	if algo.Size() == 0 {
 		return nil, objectid.ErrInvalidAlgorithm
