@@ -9,7 +9,7 @@ import (
 
 // Open opens a repository and wires object/ref stores from its on-disk format.
 //
-// Open borrows root during construction and does not close it.
+// Open borrows root and does not close it.
 func Open(root *os.Root) (repo *Repository, err error) {
 	repo = &Repository{}
 

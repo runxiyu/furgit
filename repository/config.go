@@ -7,6 +7,8 @@ import (
 	"codeberg.org/lindenii/furgit/config"
 )
 
+// parseRepositoryConfig loads the configuration of the repository through
+// finding the config file in the repo root, and parses the config.
 func parseRepositoryConfig(root *os.Root) (*config.Config, error) {
 	configFile, err := root.Open("config")
 	if err != nil {

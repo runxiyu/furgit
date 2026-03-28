@@ -1,4 +1,4 @@
-// Package repository wires object and ref storage for one Git repository.
+// Package repository opens stores and other objects to access a typical on-disk repo.
 package repository
 
 import (
@@ -20,7 +20,8 @@ import (
 //
 // Accessors such as Objects, Refs, Resolver, and LooseStoreForWriting return
 // views backed by resources owned by Repository. Those values borrow the
-// repository's stores and filesystem roots and must not be used after Close.
+// repository's stores and filesystem roots, must not be used after repositor yClose,
+// and must not be closed manually.
 type Repository struct {
 	config *config.Config
 	algo   objectid.Algorithm

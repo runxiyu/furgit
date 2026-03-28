@@ -12,6 +12,15 @@ import (
 	objectpacked "codeberg.org/lindenii/furgit/object/store/packed"
 )
 
+// openObjectStore opens the roots and object stores of both
+// the loose and packed stores for a particular repo root and
+// object ID hashing algorithm.
+//
+// Since real object store implementations do not take ownership of
+// the roots given to them, and since composite object stores do not
+// take ownership of the object stores that they consist of, all
+// of them are returned and should be closed by the caller.
+//
 //nolint:ireturn
 func openObjectStore(
 	root *os.Root,

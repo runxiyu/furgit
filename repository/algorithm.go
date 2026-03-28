@@ -7,6 +7,8 @@ import (
 	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
+// detectObjectAlgorithm uses a repository's configuration to detect
+// the expected Object ID hashing algorithm.
 func detectObjectAlgorithm(cfg *config.Config) (objectid.Algorithm, error) {
 	algoName := cfg.Lookup("extensions", "", "objectformat").Value
 	if algoName == "" {
