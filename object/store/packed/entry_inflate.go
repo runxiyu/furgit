@@ -7,6 +7,7 @@ import (
 	"math"
 
 	"codeberg.org/lindenii/furgit/internal/compress/zlib"
+	"codeberg.org/lindenii/furgit/internal/iolimit"
 )
 
 // zlibReaderAt opens a zlib reader starting at data offset within pack.
@@ -36,10 +37,18 @@ func inflateAt(pack *packFile, offset int, expectedSize int64) ([]byte, error) {
 			)
 		}
 
+		reader := iolimit.ExpectLengthReader(reader, expectedSize)
 		body := make([]byte, int(expectedSize))
 
 		_, err := io.ReadFull(reader, body)
 		if err != nil {
+			return nil, err
+		}
+
+		var probe [1]byte
+
+		_, err = reader.Read(probe[:])
+		if err != nil && err != io.EOF {
 			return nil, err
 		}
 

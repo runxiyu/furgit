@@ -29,6 +29,9 @@ func (store *Store) readBytesParsed(id objectid.ObjectID) ([]byte, objecttype.Ty
 }
 
 // ReadBytesFull reads a full serialized object as "type size\0content".
+//
+// It inflates and parses the full loose object, including consuming the zlib
+// stream through its Adler-32 trailer.
 func (store *Store) ReadBytesFull(id objectid.ObjectID) ([]byte, error) {
 	raw, _, _, err := store.readBytesParsed(id)
 	if err != nil {
@@ -39,6 +42,9 @@ func (store *Store) ReadBytesFull(id objectid.ObjectID) ([]byte, error) {
 }
 
 // ReadBytesContent reads an object's type and content bytes.
+//
+// Like ReadBytesFull, it inflates and parses the full loose object, including
+// consuming the zlib stream through its Adler-32 trailer.
 func (store *Store) ReadBytesContent(id objectid.ObjectID) (objecttype.Type, []byte, error) {
 	_, ty, content, err := store.readBytesParsed(id)
 	if err != nil {
