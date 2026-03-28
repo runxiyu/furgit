@@ -9,6 +9,8 @@ import (
 
 // Execute validates one receive-pack request, optionally ingests its pack into
 // quarantine, runs the optional hook, and applies allowed ref updates.
+//
+// Labels: Deps-Borrowed.
 func (service *Service) Execute(ctx context.Context, req *Request) (*Result, error) {
 	result := &Result{
 		Commands: make([]CommandResult, 0, len(req.Commands)),

@@ -26,10 +26,9 @@ type UpdateDecision struct {
 	Message string
 }
 
-// HookRequest is the borrowed view passed to one Hook invocation.
+// HookRequest is the view passed to one Hook invocation.
 //
-// Refs, ExistingObjects, QuarantinedObjects, and CommitGraph are borrowed and
-// are only valid for the duration of the hook call.
+// Labels: Life-Call.
 type HookRequest struct {
 	Refs               refstore.ReadingStore
 	ExistingObjects    objectstore.ReadingStore
@@ -42,6 +41,5 @@ type HookRequest struct {
 
 // Hook is an optional per-request validation hook.
 //
-// Hook borrows the data and stores in HookRequest only for the duration of the
-// call.
+// The returned decisions must have the same length as HookRequest.Updates.
 type Hook func(context.Context, HookRequest) ([]UpdateDecision, error)
