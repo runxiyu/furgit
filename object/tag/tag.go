@@ -7,7 +7,9 @@ import (
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
-// Tag represents a Git annotated tag object.
+// Tag represents a fully materialized Git annotated tag object.
+//
+// Labels: MT-Unsafe.
 type Tag struct {
 	Target     objectid.ObjectID
 	TargetType objecttype.Type

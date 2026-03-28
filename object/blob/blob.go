@@ -3,9 +3,12 @@ package blob
 
 // Blob represents a Git blob object.
 //
-// This Blob object is fully materialized in memory.
-// Consider using objectstore/Store.ReadReaderContent,
+// Blob is fully materialized in memory.
+//
+// Consider using objectstore.ReadingStore.ReadReaderContent,
 // or appropriate streaming write APIs.
+//
+// Labels: MT-Unsafe.
 type Blob struct {
 	Data []byte
 }
