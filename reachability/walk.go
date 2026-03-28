@@ -5,6 +5,8 @@ import (
 )
 
 // Walk is one single-use iterator traversal.
+//
+// Labels: MT-Unsafe.
 type Walk struct {
 	reachability *Reachability
 	domain       Domain
@@ -20,6 +22,10 @@ type Walk struct {
 //
 // In DomainCommits, when a commit-graph reader is attached, parent expansion
 // may use commit-graph metadata for speed.
+//
+// Walk retains haves and wants as provided.
+//
+// Labels: Life-Parent.
 func (r *Reachability) Walk(domain Domain, haves, wants map[objectid.ObjectID]struct{}) *Walk {
 	walk := &Walk{
 		reachability: r,

@@ -8,6 +8,8 @@ import (
 )
 
 // Seq returns the traversal sequence. It is single-use.
+//
+// Labels: Life-Parent.
 func (walk *Walk) Seq() iter.Seq[objectid.ObjectID] {
 	if walk.seqUsed {
 		return func(yield func(objectid.ObjectID) bool) {

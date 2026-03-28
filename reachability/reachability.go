@@ -8,19 +8,23 @@ import (
 
 // Reachability provides graph traversal over objects in one object store.
 //
-// It is not safe for concurrent use.
+// Labels: MT-Unsafe.
 type Reachability struct {
 	store objectstore.ReadingStore
 	graph *commitgraphread.Reader
 }
 
 // New builds a Reachability  over one object store.
+//
+// Labels: Deps-Borrowed.
 func New(store objectstore.ReadingStore) *Reachability {
 	return &Reachability{store: store}
 }
 
 // NewWithCommitGraph builds a Reachability over one object store with an
 // optional commit-graph reader for faster commit-domain traversal.
+//
+// Labels: Deps-Borrowed.
 func NewWithCommitGraph(store objectstore.ReadingStore, graph *commitgraphread.Reader) *Reachability {
 	return &Reachability{store: store, graph: graph}
 }
