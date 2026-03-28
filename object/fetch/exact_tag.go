@@ -9,6 +9,8 @@ import (
 )
 
 // ExactTag reads, parses, and wraps the tag at id.
+//
+// Labels: Life-Parent.
 func (r *Fetcher) ExactTag(id objectid.ObjectID) (*stored.Stored[*tag.Tag], error) {
 	parsed, err := r.parseObject(id)
 	if err != nil {

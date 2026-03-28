@@ -24,7 +24,7 @@ func (treeFS *TreeFS) ReadFile(name string) ([]byte, error) {
 		return nil, treeFSPathError(treeFSOpReadFile, name, fmt.Errorf("object/fetch: gitlink entries are not readable as files"))
 	}
 
-	reader, _, err := treeFS.resolver.ExactBlobReader(entry.objectID)
+	reader, _, err := treeFS.fetcher.ExactBlobReader(entry.objectID)
 	if err != nil {
 		return nil, treeFSPathError(treeFSOpReadFile, name, err)
 	}

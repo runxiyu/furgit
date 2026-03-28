@@ -9,6 +9,8 @@ import (
 )
 
 // ExactTree reads, parses, and wraps the tree at id.
+//
+// Labels: Life-Parent.
 func (r *Fetcher) ExactTree(id objectid.ObjectID) (*stored.Stored[*tree.Tree], error) {
 	parsed, err := r.parseObject(id)
 	if err != nil {

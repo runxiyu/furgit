@@ -29,7 +29,7 @@ func (treeFS *TreeFS) Open(name string) (fs.File, error) {
 			return nil, treeFSPathError(treeFSOpOpen, name, err)
 		}
 
-		tree, err := treeFS.resolver.ExactTree(treeID)
+		tree, err := treeFS.fetcher.ExactTree(treeID)
 		if err != nil {
 			return nil, treeFSPathError(treeFSOpOpen, name, err)
 		}
@@ -61,7 +61,7 @@ func (treeFS *TreeFS) Open(name string) (fs.File, error) {
 		return nil, treeFSPathError(treeFSOpOpen, name, fmt.Errorf("object/fetch: gitlink entries are not readable as files"))
 	}
 
-	reader, _, err := treeFS.resolver.ExactBlobReader(entry.objectID)
+	reader, _, err := treeFS.fetcher.ExactBlobReader(entry.objectID)
 	if err != nil {
 		return nil, treeFSPathError(treeFSOpOpen, name, err)
 	}

@@ -7,6 +7,8 @@ import (
 )
 
 // PeelToTag returns the tag at id without further peeling.
+//
+// Labels: Life-Parent.
 func (r *Fetcher) PeelToTag(id objectid.ObjectID) (*stored.Stored[*tag.Tag], error) {
 	return r.ExactTag(id)
 }

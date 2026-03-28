@@ -23,7 +23,7 @@ func (treeFS *TreeFS) resolvePath(op treeFSOp, name string) (treeEntryValue, err
 		}, nil
 	}
 
-	entry, err := treeFS.resolver.Path(treeFS.rootTree, treeFSSplitPath(name))
+	entry, err := treeFS.fetcher.Path(treeFS.rootTree, treeFSSplitPath(name))
 	if err != nil {
 		return treeEntryValue{}, treeFS.pathResolveError(op, name, err)
 	}
@@ -68,8 +68,8 @@ func (entry treeEntryValue) isDir() bool {
 	return entry.mode == tree.FileModeDir
 }
 
-func (entry treeEntryValue) blobSize(resolve *Fetcher) (int64, error) {
-	_, size, err := resolve.store.ReadHeader(entry.objectID)
+func (entry treeEntryValue) blobSize(fetcher *Fetcher) (int64, error) {
+	_, size, err := fetcher.store.ReadHeader(entry.objectID)
 	if err != nil {
 		return 0, err
 	}

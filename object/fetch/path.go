@@ -59,6 +59,8 @@ func (err *PathNotTreeError) Error() string {
 //
 // If your entry names are valid UTF-8 and uses / solely as segment separators,
 // it may be convenient to use TreeFS for an io/fs.FS-like interface.
+//
+// Labels: Life-Parent.
 func (r *Fetcher) Path(root objectid.ObjectID, parts [][]byte) (tree.TreeEntry, error) {
 	if len(parts) == 0 {
 		return tree.TreeEntry{}, &PathEmptyError{}

@@ -8,6 +8,8 @@ import (
 
 // ExactObject reads, parses, and wraps the object at id without constraining
 // its concrete object kind.
+//
+// Labels: Life-Parent.
 func (r *Fetcher) ExactObject(id objectid.ObjectID) (*stored.Stored[object.Object], error) {
 	parsed, err := r.parseObject(id)
 	if err != nil {

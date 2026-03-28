@@ -15,7 +15,7 @@ func (treeFS *TreeFS) Sub(dir string) (fs.FS, error) {
 	}
 
 	return &TreeFS{
-		resolver:  treeFS.resolver,
+		fetcher:   treeFS.fetcher,
 		rootTree:  treeID,
 		rootEntry: entry.treeEntry,
 	}, nil

@@ -9,6 +9,8 @@ import (
 )
 
 // ExactBlob reads, parses, and wraps the blob at id.
+//
+// Labels: Life-Parent.
 func (r *Fetcher) ExactBlob(id objectid.ObjectID) (*stored.Stored[*blob.Blob], error) {
 	parsed, err := r.parseObject(id)
 	if err != nil {

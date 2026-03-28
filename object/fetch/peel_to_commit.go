@@ -10,6 +10,8 @@ import (
 )
 
 // PeelToCommit peels tags until it reaches a commit.
+//
+// Labels: Life-Parent.
 func (r *Fetcher) PeelToCommit(id objectid.ObjectID) (*stored.Stored[*commit.Commit], error) {
 	for {
 		obj, err := r.ExactObject(id)

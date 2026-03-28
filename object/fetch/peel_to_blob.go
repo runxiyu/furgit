@@ -10,6 +10,8 @@ import (
 )
 
 // PeelToBlob peels tags until it reaches a blob.
+//
+// Labels: Life-Parent.
 func (r *Fetcher) PeelToBlob(id objectid.ObjectID) (*stored.Stored[*blob.Blob], error) {
 	for {
 		obj, err := r.ExactObject(id)

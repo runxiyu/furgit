@@ -12,6 +12,8 @@ import (
 
 // PeelToTree peels tags until it reaches a tree or commit. If it reaches a
 // commit, it returns the commit's root tree.
+//
+// Labels: Life-Parent.
 func (r *Fetcher) PeelToTree(id objectid.ObjectID) (*stored.Stored[*tree.Tree], error) {
 	for {
 		obj, err := r.ExactObject(id)

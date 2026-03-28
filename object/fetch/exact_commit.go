@@ -9,6 +9,8 @@ import (
 )
 
 // ExactCommit reads, parses, and wraps the commit at id.
+//
+// Labels: Life-Parent.
 func (r *Fetcher) ExactCommit(id objectid.ObjectID) (*stored.Stored[*commit.Commit], error) {
 	parsed, err := r.parseObject(id)
 	if err != nil {

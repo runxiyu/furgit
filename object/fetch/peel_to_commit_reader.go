@@ -10,6 +10,8 @@ import (
 // id, together with its content size in bytes.
 //
 // Usage of this method is unusual.
+//
+// Labels: Life-Parent, Close-Caller.
 func (r *Fetcher) PeelToCommitReader(id objectid.ObjectID) (io.ReadCloser, int64, error) {
 	commitID, err := r.PeelToCommitID(id)
 	if err != nil {

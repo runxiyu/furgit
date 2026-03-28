@@ -41,11 +41,11 @@ func TestTreeFS(t *testing.T) {
 
 		defer func() { _ = repo.Close() }()
 
-		resolver := fetch.New(repo.Objects())
+		fetcher := fetch.New(repo.Objects())
 
-		treeFS, err := resolver.TreeFS(commitID)
+		treeFS, err := fetcher.TreeFS(commitID)
 		if err != nil {
-			t.Fatalf("resolver.TreeFS: %v", err)
+			t.Fatalf("fetcher.TreeFS: %v", err)
 		}
 
 		content, err := treeFS.ReadFile("plain.txt")
