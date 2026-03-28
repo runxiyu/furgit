@@ -40,7 +40,7 @@ func (service *Service) runHook(
 	quarantinedObjects := service.opts.ExistingObjects
 
 	var (
-		quarantineObjectsStore objectstore.Store
+		quarantineObjectsStore objectstore.ReadingStore
 		quarantineLooseStore   *loose.Store
 		quarantinePackedStore  *packed.Store
 		quarantineLooseRoot    *os.Root

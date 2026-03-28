@@ -25,7 +25,7 @@ type Repository struct {
 	config *config.Config
 	algo   objectid.Algorithm
 
-	objects         objectstore.Store
+	objects         objectstore.ReadingStore
 	objectsRoot     *os.Root
 	objectsPackRoot *os.Root
 	objectsLoose    *objectloose.Store

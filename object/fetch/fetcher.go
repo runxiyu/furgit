@@ -6,12 +6,12 @@ import objectstore "codeberg.org/lindenii/furgit/object/store"
 //
 // A Fetcher does not take ownership of the store and does not close it.
 type Fetcher struct {
-	store objectstore.Store
+	store objectstore.ReadingStore
 }
 
 // New returns a Fetcher that reads objects from store.
 //
 // The returned Fetcher does not take ownership of store.
-func New(store objectstore.Store) *Fetcher {
+func New(store objectstore.ReadingStore) *Fetcher {
 	return &Fetcher{store: store}
 }

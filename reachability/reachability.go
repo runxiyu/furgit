@@ -10,17 +10,17 @@ import (
 //
 // It is not safe for concurrent use.
 type Reachability struct {
-	store objectstore.Store
+	store objectstore.ReadingStore
 	graph *commitgraphread.Reader
 }
 
 // New builds a Reachability  over one object store.
-func New(store objectstore.Store) *Reachability {
+func New(store objectstore.ReadingStore) *Reachability {
 	return &Reachability{store: store}
 }
 
 // NewWithCommitGraph builds a Reachability over one object store with an
 // optional commit-graph reader for faster commit-domain traversal.
-func NewWithCommitGraph(store objectstore.Store, graph *commitgraphread.Reader) *Reachability {
+func NewWithCommitGraph(store objectstore.ReadingStore, graph *commitgraphread.Reader) *Reachability {
 	return &Reachability{store: store, graph: graph}
 }

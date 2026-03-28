@@ -26,7 +26,7 @@ type PromotedObjectPermissions struct {
 type Options struct {
 	Algorithm                 objectid.Algorithm
 	Refs                      refstore.ReadWriteStore
-	ExistingObjects           objectstore.Store
+	ExistingObjects           objectstore.ReadingStore
 	ObjectsRoot               *os.Root
 	Progress                  io.Writer
 	ProgressFlush             func() error

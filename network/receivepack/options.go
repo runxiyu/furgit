@@ -25,7 +25,7 @@ type Options struct {
 	Refs refstore.ReadWriteStore
 	// ExistingObjects is the object store visible to the push before any newly
 	// uploaded quarantined objects are promoted.
-	ExistingObjects objectstore.Store
+	ExistingObjects objectstore.ReadingStore
 	// ObjectsRoot is the permanent object storage root beneath which per-push
 	// quarantine directories are derived.
 	ObjectsRoot *os.Root

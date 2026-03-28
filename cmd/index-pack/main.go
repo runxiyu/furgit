@@ -36,7 +36,7 @@ func main() {
 func run(repoPath, destinationPath, objectFormat string, fixThin, writeRev bool) error {
 	var (
 		algo objectid.Algorithm
-		base objectstore.Store
+		base objectstore.ReadingStore
 		repo *repository.Repository
 	)
 

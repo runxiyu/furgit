@@ -31,8 +31,8 @@ type UpdateDecision struct {
 // valid for the duration of the hook call.
 type HookRequest struct {
 	Refs               refstore.ReadingStore
-	ExistingObjects    objectstore.Store
-	QuarantinedObjects objectstore.Store
+	ExistingObjects    objectstore.ReadingStore
+	QuarantinedObjects objectstore.ReadingStore
 	Updates            []RefUpdate
 	PushOptions        []string
 	IO                 HookIO

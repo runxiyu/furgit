@@ -10,7 +10,7 @@ import (
 // Query owns the mutable node arena for commit-domain queries over one object
 // store.
 type Query struct {
-	store objectstore.Store
+	store objectstore.ReadingStore
 	graph *commitgraphread.Reader
 
 	nodes []node
@@ -24,7 +24,7 @@ type Query struct {
 
 // New builds one reusable commit query arena over one object store and optional
 // commit-graph reader.
-func New(store objectstore.Store, graph *commitgraphread.Reader) *Query {
+func New(store objectstore.ReadingStore, graph *commitgraphread.Reader) *Query {
 	return &Query{
 		store:      store,
 		graph:      graph,
