@@ -5,6 +5,7 @@ import (
 	"io"
 	"strings"
 
+	"codeberg.org/lindenii/furgit/common/iowrap"
 	common "codeberg.org/lindenii/furgit/network/protocol/v0v1/server"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 )
@@ -168,7 +169,7 @@ func (session *Session) WriteProgress(p []byte) error {
 // ProgressWriter returns one chunking writer for sideband progress output.
 //
 // When side-band-64k was not negotiated, writes are discarded.
-func (session *Session) ProgressWriter() io.Writer {
+func (session *Session) ProgressWriter() iowrap.WriteFlusher {
 	return session.base.ProgressWriter()
 }
 

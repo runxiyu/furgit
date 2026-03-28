@@ -32,7 +32,7 @@ func (meter *Meter) render(now time.Time, eol string) {
 
 	utils.BestEffortFprintf(meter.writer, "%s", line)
 
-	if meter.flush != nil {
-		_ = meter.flush()
+	if meter.writer != nil {
+		_ = meter.writer.Flush()
 	}
 }

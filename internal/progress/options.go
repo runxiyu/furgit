@@ -1,14 +1,14 @@
 package progress
 
 import (
-	"io"
 	"time"
+
+	"codeberg.org/lindenii/furgit/common/iowrap"
 )
 
 // Options configures one progress meter.
 type Options struct {
-	Writer io.Writer
-	Flush  func() error
+	Writer iowrap.WriteFlusher
 
 	Title string
 	Total uint64

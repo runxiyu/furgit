@@ -4,7 +4,7 @@ import (
 	"context"
 	"io"
 
-	"codeberg.org/lindenii/furgit/network/protocol/pktline"
+	"codeberg.org/lindenii/furgit/common/iowrap"
 	common "codeberg.org/lindenii/furgit/network/protocol/v0v1/server"
 	protoreceive "codeberg.org/lindenii/furgit/network/protocol/v0v1/server/receivepack"
 	"codeberg.org/lindenii/furgit/network/receivepack/service"
@@ -23,7 +23,7 @@ import (
 // Labels: Deps-Borrowed.
 func ReceivePack(
 	ctx context.Context,
-	w pktline.WriteFlusher,
+	w iowrap.WriteFlusher,
 	r io.Reader,
 	opts Options,
 ) error {
@@ -89,12 +89,10 @@ func ReceivePack(
 		return err
 	}
 
-	progressWriter := protoSession.ProgressWriter()
-	progressFlush := base.FlushIO
+	progress := protoSession.ProgressWriter()
 
 	if req.Capabilities.Quiet {
-		progressWriter = io.Discard
-		progressFlush = nil
+		progress = iowrap.NopFlush(io.Discard)
 	}
 
 	serviceReq := &service.Request{
@@ -112,14 +110,13 @@ func ReceivePack(
 		ExistingObjects: opts.ExistingObjects,
 		CommitGraph:     opts.CommitGraph,
 		ObjectsRoot:     opts.ObjectsRoot,
-		Progress:        progressWriter,
-		ProgressFlush:   progressFlush,
+		Progress:        progress,
 		PromotedObjectPermissions: translatePromotedObjectPermissions(
 			opts.PromotedObjectPermissions,
 		),
 		Hook: translateHook(opts.Hook),
 		HookIO: service.HookIO{
-			Progress: progressWriter,
+			Progress: progress,
 			Error:    protoSession.ErrorWriter(),
 		},
 	})

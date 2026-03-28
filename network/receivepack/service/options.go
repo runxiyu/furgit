@@ -1,10 +1,10 @@
 package service
 
 import (
-	"io"
 	"io/fs"
 	"os"
 
+	"codeberg.org/lindenii/furgit/common/iowrap"
 	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objectstore "codeberg.org/lindenii/furgit/object/store"
@@ -22,16 +22,15 @@ type PromotedObjectPermissions struct {
 //
 // Refs and ExistingObjects are required and must be non-nil.
 // ObjectsRoot is required if Execute may need to ingest or promote a pack.
-// Progress, ProgressFlush, Hook, and HookIO are optional; when provided they
-// are also borrowed for the duration of Execute.
+// Progress, Hook, and HookIO are optional; when provided they are also
+// borrowed for the duration of Execute.
 type Options struct {
 	Algorithm                 objectid.Algorithm
 	Refs                      refstore.ReadWriteStore
 	ExistingObjects           objectstore.ReadingStore
 	CommitGraph               *commitgraphread.Reader
 	ObjectsRoot               *os.Root
-	Progress                  io.Writer
-	ProgressFlush             func() error
+	Progress                  iowrap.WriteFlusher
 	PromotedObjectPermissions *PromotedObjectPermissions
 	Hook                      Hook
 	HookIO                    HookIO

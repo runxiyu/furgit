@@ -3,6 +3,7 @@ package sideband64k
 import (
 	"fmt"
 
+	"codeberg.org/lindenii/furgit/common/iowrap"
 	"codeberg.org/lindenii/furgit/network/protocol/pktline"
 )
 
@@ -15,7 +16,7 @@ type Encoder struct {
 }
 
 // NewEncoder creates an encoder over w.
-func NewEncoder(w pktline.WriteFlusher) *Encoder {
+func NewEncoder(w iowrap.WriteFlusher) *Encoder {
 	return &Encoder{
 		enc:     pktline.NewEncoder(w),
 		maxData: DataMax,

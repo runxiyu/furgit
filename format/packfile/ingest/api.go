@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 
+	"codeberg.org/lindenii/furgit/common/iowrap"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objectstore "codeberg.org/lindenii/furgit/object/store"
 )
@@ -22,11 +23,7 @@ type Options struct {
 	// Progress receives human-readable progress messages.
 	//
 	// When nil, no progress output is emitted.
-	Progress io.Writer
-	// ProgressFlush flushes transport output after progress writes.
-	//
-	// When nil, no explicit flush is attempted.
-	ProgressFlush func() error
+	Progress iowrap.WriteFlusher
 	// RequireTrailingEOF requires the source to hit EOF after the pack trailer.
 	//
 	// This is suitable for exact pack-file readers, but should be disabled for

@@ -60,7 +60,6 @@ func maybeFixThin(state *ingestState) error {
 	total := len(baseIDs)
 	meter := progress.New(progress.Options{
 		Writer: state.opts.Progress,
-		Flush:  state.opts.ProgressFlush,
 		Title:  "fixing thin pack",
 		Total:  uint64(total),
 	})

@@ -26,7 +26,6 @@ func resolveAll(state *ingestState) error {
 
 	meter := progress.New(progress.Options{
 		Writer: state.opts.Progress,
-		Flush:  state.opts.ProgressFlush,
 		Title:  "resolving deltas",
 		Total:  uint64(pending),
 	})

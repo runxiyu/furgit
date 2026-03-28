@@ -3,6 +3,7 @@ package server
 import (
 	"io"
 
+	"codeberg.org/lindenii/furgit/common/iowrap"
 	"codeberg.org/lindenii/furgit/network/protocol/pktline"
 	"codeberg.org/lindenii/furgit/network/protocol/sideband64k"
 	objectid "codeberg.org/lindenii/furgit/object/id"
@@ -26,7 +27,7 @@ type Session struct {
 }
 
 // NewSession creates one v0/v1 server session over r and w.
-func NewSession(r io.Reader, w pktline.WriteFlusher, opts Options) *Session {
+func NewSession(r io.Reader, w iowrap.WriteFlusher, opts Options) *Session {
 	return &Session{
 		dec:      pktline.NewDecoder(r, pktline.ReadOptions{}),
 		enc:      pktline.NewEncoder(w),
@@ -96,15 +97,31 @@ func (session *Session) FlushIO() error {
 	return session.enc.FlushIO()
 }
 
+type flushWriter struct {
+	writer io.Writer
+	flush  func() error
+}
+
+func (w flushWriter) Write(p []byte) (int, error) {
+	return w.writer.Write(p)
+}
+
+func (w flushWriter) Flush() error {
+	return w.flush()
+}
+
 // ProgressWriter returns one chunking writer for sideband progress output.
 //
 // When side-band-64k was not negotiated, writes are discarded.
-func (session *Session) ProgressWriter() io.Writer {
+func (session *Session) ProgressWriter() iowrap.WriteFlusher {
 	if !session.useSideBand {
-		return io.Discard
+		return iowrap.NopFlush(io.Discard)
 	}
 
-	return sideband64k.NewChunkWriter(session.sideband, sideband64k.BandProgress)
+	return flushWriter{
+		writer: sideband64k.NewChunkWriter(session.sideband, sideband64k.BandProgress),
+		flush:  session.sideband.FlushIO,
+	}
 }
 
 // ErrorWriter returns one chunking writer for sideband error output.

@@ -8,7 +8,6 @@ func New(opts Options) *Meter {
 
 	return &Meter{
 		writer:         opts.Writer,
-		flush:          opts.Flush,
 		title:          opts.Title,
 		total:          opts.Total,
 		delay:          max(opts.Delay, time.Duration(0)),

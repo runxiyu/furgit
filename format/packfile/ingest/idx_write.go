@@ -83,7 +83,6 @@ func writeIdx(state *ingestState) error {
 
 	oidMeter := progress.New(progress.Options{
 		Writer: state.opts.Progress,
-		Flush:  state.opts.ProgressFlush,
 		Title:  "writing index object ids",
 		Total:  uint64(len(order)),
 	})
@@ -108,7 +107,6 @@ func writeIdx(state *ingestState) error {
 
 	crcMeter := progress.New(progress.Options{
 		Writer: state.opts.Progress,
-		Flush:  state.opts.ProgressFlush,
 		Title:  "writing index crc32",
 		Total:  uint64(len(order)),
 	})
@@ -134,7 +132,6 @@ func writeIdx(state *ingestState) error {
 	largeOffsets := make([]uint64, 0)
 	offsetMeter := progress.New(progress.Options{
 		Writer: state.opts.Progress,
-		Flush:  state.opts.ProgressFlush,
 		Title:  "writing index offsets",
 		Total:  uint64(len(order)),
 	})
@@ -178,7 +175,6 @@ func writeIdx(state *ingestState) error {
 
 	largeOffsetMeter := progress.New(progress.Options{
 		Writer: state.opts.Progress,
-		Flush:  state.opts.ProgressFlush,
 		Title:  "writing index large offsets",
 		Total:  total,
 	})

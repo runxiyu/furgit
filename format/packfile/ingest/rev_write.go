@@ -61,7 +61,6 @@ func writeRev(state *ingestState) error {
 
 	entriesMeter := progress.New(progress.Options{
 		Writer: state.opts.Progress,
-		Flush:  state.opts.ProgressFlush,
 		Title:  "writing reverse index entries",
 		Total:  uint64(len(packOrder)),
 	})

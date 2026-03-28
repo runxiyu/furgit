@@ -37,7 +37,6 @@ func streamPackAndScan(state *ingestState) error {
 	total := state.objectCountHeader
 	meter := progress.New(progress.Options{
 		Writer:     state.opts.Progress,
-		Flush:      state.opts.ProgressFlush,
 		Title:      "receiving objects",
 		Total:      uint64(total),
 		Throughput: true,

@@ -3,26 +3,20 @@ package pktline
 import (
 	"fmt"
 	"io"
-)
 
-// WriteFlusher is the output transport contract required by Encoder.
-//
-// Write emits framed bytes and Flush pushes buffered transport state.
-type WriteFlusher interface {
-	io.Writer
-	Flush() error
-}
+	"codeberg.org/lindenii/furgit/common/iowrap"
+)
 
 // Encoder writes pkt-line frames to a flush-capable output transport.
 //
 // It writes exactly one frame per method call and does not auto-chunk data.
 type Encoder struct {
-	w       WriteFlusher
+	w       iowrap.WriteFlusher
 	maxData int
 }
 
 // NewEncoder creates an encoder over w.
-func NewEncoder(w WriteFlusher) *Encoder {
+func NewEncoder(w iowrap.WriteFlusher) *Encoder {
 	return &Encoder{
 		w:       w,
 		maxData: LargePacketDataMax,

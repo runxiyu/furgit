@@ -50,11 +50,10 @@ func (service *Service) ingestQuarantine(
 		req.Pack,
 		service.opts.Algorithm,
 		ingest.Options{
-			FixThin:       true,
-			WriteRev:      true,
-			Base:          service.opts.ExistingObjects,
-			Progress:      service.opts.Progress,
-			ProgressFlush: service.opts.ProgressFlush,
+			FixThin:  true,
+			WriteRev: true,
+			Base:     service.opts.ExistingObjects,
+			Progress: service.opts.Progress,
 		},
 	)
 	if err != nil {

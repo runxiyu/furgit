@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 
+	"codeberg.org/lindenii/furgit/common/iowrap"
 	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	"codeberg.org/lindenii/furgit/network/receivepack/service"
 	objectid "codeberg.org/lindenii/furgit/object/id"
@@ -12,7 +13,7 @@ import (
 )
 
 type HookIO struct {
-	Progress io.Writer
+	Progress iowrap.WriteFlusher
 	Error    io.Writer
 }
 

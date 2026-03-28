@@ -1,14 +1,14 @@
 package progress
 
 import (
-	"io"
 	"time"
+
+	"codeberg.org/lindenii/furgit/common/iowrap"
 )
 
 // Meter renders one in-place progress line.
 type Meter struct {
-	writer io.Writer
-	flush  func() error
+	writer iowrap.WriteFlusher
 
 	title      string
 	total      uint64
