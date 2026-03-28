@@ -23,13 +23,13 @@ Furgit is a low-level Git library in Go.
 
 If you are working with a normal on-disk repository, start with
 `repository.Open(...)`. It opens the repository and wires together the refs
-storage, object storage, and resolver. Note that it requires either a
+storage, object storage, and fetcher. Note that it requires either a
 bare repository or a `.git` directory. Then,
 
 * `repo.Refs()` is for branch names, tags, `HEAD`, and ref updates.
   * Use it when you are starting from names rather than object IDs.
   * A common pattern is to resolve a ref first, then pass the resulting object
-    ID to the resolver.
+    ID to the fetcher.
 
 * `repo.Fetcher()` is the main object-facing API for most callers.
   * Use it when you want commits, trees, blobs, or tags as typed values.
@@ -43,7 +43,7 @@ bare repository or a `.git` directory. Then,
   * Use it when you need to read object headers, read raw object contents,
     stream object data, or otherwise look up objects directly by ID.
   * Most callers who want to work with Git objects as commits, trees, blobs, or
-    tags should prefer the resolver instead.
+    tags should prefer the fetcher instead.
   * However, checking an object ID's size and type are somewhat common
     operations that should be done here.
 

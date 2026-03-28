@@ -24,7 +24,7 @@ func TestReadStoredTyped(t *testing.T) {
 
 		repo := repoHarness.OpenRepository(t)
 
-		blob, err := repo.Resolver().ExactBlob(blobID)
+		blob, err := repo.Fetcher().ExactBlob(blobID)
 		if err != nil {
 			t.Fatalf("ExactBlob: %v", err)
 		}
@@ -37,7 +37,7 @@ func TestReadStoredTyped(t *testing.T) {
 			t.Fatalf("blob body = %q, want %q", blob.Object().Data, "commit-body\n")
 		}
 
-		tree, err := repo.Resolver().ExactTree(treeID)
+		tree, err := repo.Fetcher().ExactTree(treeID)
 		if err != nil {
 			t.Fatalf("ExactTree: %v", err)
 		}
@@ -50,7 +50,7 @@ func TestReadStoredTyped(t *testing.T) {
 			t.Fatalf("tree entries = %d, want 1", len(tree.Object().Entries))
 		}
 
-		commit, err := repo.Resolver().ExactCommit(commitID)
+		commit, err := repo.Fetcher().ExactCommit(commitID)
 		if err != nil {
 			t.Fatalf("ExactCommit: %v", err)
 		}
@@ -81,7 +81,7 @@ func TestResolverPath(t *testing.T) {
 
 		repo := repoHarness.OpenRepository(t)
 
-		entry, err := repo.Resolver().Path(rootTreeID, [][]byte{[]byte("dir"), []byte("leaf.txt")})
+		entry, err := repo.Fetcher().Path(rootTreeID, [][]byte{[]byte("dir"), []byte("leaf.txt")})
 		if err != nil {
 			t.Fatalf("Path: %v", err)
 		}
@@ -112,7 +112,7 @@ func TestResolverPathErrors(t *testing.T) {
 
 			repo := repoHarness.OpenRepository(t)
 
-			_, err := repo.Resolver().Path(rootTreeID, [][]byte{[]byte("missing")})
+			_, err := repo.Fetcher().Path(rootTreeID, [][]byte{[]byte("missing")})
 			if err == nil || !strings.Contains(err.Error(), "not found") {
 				t.Fatalf("Path missing: err = %v, want not found error", err)
 			}
@@ -130,7 +130,7 @@ func TestResolverPathErrors(t *testing.T) {
 
 			repo := repoHarness.OpenRepository(t)
 
-			_, err := repo.Resolver().Path(rootTreeID, [][]byte{[]byte("dir"), []byte("leaf")})
+			_, err := repo.Fetcher().Path(rootTreeID, [][]byte{[]byte("dir"), []byte("leaf")})
 			if err == nil || !strings.Contains(err.Error(), "is not a tree") {
 				t.Fatalf("Path non-tree: err = %v, want non-tree error", err)
 			}
@@ -164,7 +164,7 @@ func TestResolverPathDeepPath(t *testing.T) {
 
 		repo := repoHarness.OpenRepository(t)
 
-		entry, err := repo.Resolver().Path(currentTree, parts)
+		entry, err := repo.Fetcher().Path(currentTree, parts)
 		if err != nil {
 			t.Fatalf("Path(deep): %v", err)
 		}
@@ -207,7 +207,7 @@ func TestReadStoredTreeMixedModes(t *testing.T) {
 
 		repo := repoHarness.OpenRepository(t)
 
-		rootTree, err := repo.Resolver().ExactTree(rootTreeID)
+		rootTree, err := repo.Fetcher().ExactTree(rootTreeID)
 		if err != nil {
 			t.Fatalf("ExactTree(root): %v", err)
 		}

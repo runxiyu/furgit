@@ -178,7 +178,7 @@ func traverseReachableIter(repo *repository.Repository, root objectid.ObjectID) 
 
 		visited[id] = struct{}{}
 
-		stored, err := repo.Resolver().ExactObject(id)
+		stored, err := repo.Fetcher().ExactObject(id)
 		if err != nil {
 			return 0, err
 		}

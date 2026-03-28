@@ -55,7 +55,7 @@ func run(repoPath, name *string) error {
 		return fmt.Errorf("resolve %q: %w", *name, err)
 	}
 
-	s, err := repo.Resolver().ExactObject(id)
+	s, err := repo.Fetcher().ExactObject(id)
 	if err != nil {
 		_ = repo.Close()
 
