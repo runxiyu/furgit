@@ -22,6 +22,13 @@ func (repo *Repository) Close() error {
 		}
 	}
 
+	if repo.commitGraph != nil {
+		err := repo.commitGraph.Close()
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
 	if repo.objectsPacked != nil {
 		err := repo.objectsPacked.Close()
 		if err != nil {

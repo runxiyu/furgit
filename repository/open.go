@@ -44,6 +44,13 @@ func Open(root *os.Root) (repo *Repository, err error) {
 	repo.objectsLoose = objectsLoose
 	repo.objectsPacked = objectsPacked
 
+	commitGraph, err := openCommitGraph(objectsRoot, algo)
+	if err != nil {
+		return nil, err
+	}
+
+	repo.commitGraph = commitGraph
+
 	refRoot, err := root.OpenRoot(".")
 	if err != nil {
 		return nil, fmt.Errorf("repository: open root for refs: %w", err)
