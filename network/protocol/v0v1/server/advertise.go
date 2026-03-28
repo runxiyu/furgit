@@ -27,7 +27,7 @@ func (session *Session) AdvertiseRefs(ad Advertisement, capabilityTokens []strin
 			return err
 		}
 
-		return session.WriteFlush()
+		return session.WriteFlushPacket()
 	}
 
 	for i, entry := range refs {
@@ -51,5 +51,5 @@ func (session *Session) AdvertiseRefs(ad Advertisement, capabilityTokens []strin
 		}
 	}
 
-	return session.WriteFlush()
+	return session.WriteFlushPacket()
 }

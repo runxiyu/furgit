@@ -25,9 +25,9 @@ func TestEncoderBufferedFlushAndFFlush(t *testing.T) {
 		t.Fatalf("unexpected immediate output: %q", out.String())
 	}
 
-	err = enc.FlushIO()
+	err = enc.Flush()
 	if err != nil {
-		t.Fatalf("FlushIO: %v", err)
+		t.Fatalf("Flush: %v", err)
 	}
 
 	if out.String() != "0005x" {
@@ -39,9 +39,9 @@ func TestEncoderBufferedFlushAndFFlush(t *testing.T) {
 
 	enc = pktline.NewEncoder(bw)
 
-	err = enc.WriteFlushAndFlushIO()
+	err = enc.WriteFlushPacketAndFlush()
 	if err != nil {
-		t.Fatalf("WriteFlushAndFlushIO: %v", err)
+		t.Fatalf("WriteFlushPacketAndFlush: %v", err)
 	}
 
 	if out.String() != "0000" {

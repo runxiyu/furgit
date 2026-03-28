@@ -19,9 +19,9 @@ func TestEncoderHandlesPartialWrites(t *testing.T) {
 		t.Fatalf("WriteProgress: %v", err)
 	}
 
-	err = enc.WriteFlushAndFlushIO()
+	err = enc.WriteFlushPacketAndFlush()
 	if err != nil {
-		t.Fatalf("WriteFlushAndFlushIO: %v", err)
+		t.Fatalf("WriteFlushPacketAndFlush: %v", err)
 	}
 
 	if got, want := dst.buf.String(), "0008\x02abc0000"; got != want {

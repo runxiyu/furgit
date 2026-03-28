@@ -31,24 +31,24 @@ func TestEncoderWritesFrames(t *testing.T) {
 		t.Fatalf("WriteError: %v", err)
 	}
 
-	err = enc.WriteFlush()
+	err = enc.WriteFlushPacket()
 	if err != nil {
-		t.Fatalf("WriteFlush: %v", err)
+		t.Fatalf("WriteFlushPacket: %v", err)
 	}
 
-	err = enc.WriteDelim()
+	err = enc.WriteDelimPacket()
 	if err != nil {
-		t.Fatalf("WriteDelim: %v", err)
+		t.Fatalf("WriteDelimPacket: %v", err)
 	}
 
-	err = enc.WriteResponseEnd()
+	err = enc.WriteResponseEndPacket()
 	if err != nil {
-		t.Fatalf("WriteResponseEnd: %v", err)
+		t.Fatalf("WriteResponseEndPacket: %v", err)
 	}
 
-	err = enc.FlushIO()
+	err = enc.Flush()
 	if err != nil {
-		t.Fatalf("FlushIO: %v", err)
+		t.Fatalf("Flush: %v", err)
 	}
 
 	want := "0007\x01hi0007\x02ok0007\x03no000000010002"

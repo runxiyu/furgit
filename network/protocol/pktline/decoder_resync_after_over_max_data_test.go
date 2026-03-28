@@ -27,9 +27,9 @@ func TestDecoderResyncAfterOverMaxData(t *testing.T) {
 		t.Fatalf("WriteData #2: %v", err)
 	}
 
-	err = enc.FlushIO()
+	err = enc.Flush()
 	if err != nil {
-		t.Fatalf("FlushIO: %v", err)
+		t.Fatalf("Flush: %v", err)
 	}
 
 	dec := pktline.NewDecoder(bytes.NewReader(b.Bytes()), pktline.ReadOptions{})

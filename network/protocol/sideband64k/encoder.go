@@ -69,29 +69,29 @@ func (e *Encoder) WriteError(p []byte) error {
 	return e.WriteBand(BandError, p)
 }
 
-// WriteFlush writes control frame 0000 (flush-pkt).
-func (e *Encoder) WriteFlush() error {
-	return e.enc.WriteFlush()
+// WriteFlushPacket writes control frame 0000 (flush-pkt).
+func (e *Encoder) WriteFlushPacket() error {
+	return e.enc.WriteFlushPacket()
 }
 
-// WriteDelim writes control frame 0001 (delim-pkt).
-func (e *Encoder) WriteDelim() error {
-	return e.enc.WriteDelim()
+// WriteDelimPacket writes control frame 0001 (delim-pkt).
+func (e *Encoder) WriteDelimPacket() error {
+	return e.enc.WriteDelimPacket()
 }
 
-// WriteResponseEnd writes control frame 0002 (response-end-pkt).
-func (e *Encoder) WriteResponseEnd() error {
-	return e.enc.WriteResponseEnd()
+// WriteResponseEndPacket writes control frame 0002 (response-end-pkt).
+func (e *Encoder) WriteResponseEndPacket() error {
+	return e.enc.WriteResponseEndPacket()
 }
 
-// FlushIO flushes buffered output in the underlying transport.
-func (e *Encoder) FlushIO() error {
-	return e.enc.FlushIO()
+// Flush flushes buffered output in the underlying transport.
+func (e *Encoder) Flush() error {
+	return e.enc.Flush()
 }
 
-// WriteFlushAndFlushIO writes a flush-pkt (0000) then flushes transport I/O.
-func (e *Encoder) WriteFlushAndFlushIO() error {
-	return e.enc.WriteFlushAndFlushIO()
+// WriteFlushPacketAndFlush writes a flush-pkt (0000) then flushes transport I/O.
+func (e *Encoder) WriteFlushPacketAndFlush() error {
+	return e.enc.WriteFlushPacketAndFlush()
 }
 
 func (e *Encoder) effectiveMaxData() int {

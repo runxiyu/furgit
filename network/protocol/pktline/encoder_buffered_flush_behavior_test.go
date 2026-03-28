@@ -21,18 +21,18 @@ func TestEncoderBufferedFlushBehavior(t *testing.T) {
 		t.Fatalf("WriteData: %v", err)
 	}
 
-	err = enc.WriteFlush()
+	err = enc.WriteFlushPacket()
 	if err != nil {
-		t.Fatalf("WriteFlush: %v", err)
+		t.Fatalf("WriteFlushPacket: %v", err)
 	}
 
 	if out.Len() != 0 {
-		t.Fatalf("WriteFlush should not flush I/O, got %q", out.String())
+		t.Fatalf("WriteFlushPacket should not flush I/O, got %q", out.String())
 	}
 
-	err = enc.FlushIO()
+	err = enc.Flush()
 	if err != nil {
-		t.Fatalf("FlushIO: %v", err)
+		t.Fatalf("Flush: %v", err)
 	}
 
 	if got, want := out.String(), "0009hello0000"; got != want {
@@ -48,18 +48,18 @@ func TestEncoderBufferedFlushBehavior(t *testing.T) {
 		t.Fatalf("WriteData: %v", err)
 	}
 
-	err = enc.WriteFlush()
+	err = enc.WriteFlushPacket()
 	if err != nil {
-		t.Fatalf("WriteFlush: %v", err)
+		t.Fatalf("WriteFlushPacket: %v", err)
 	}
 
 	if out.Len() != 0 {
-		t.Fatalf("WriteFlush should not flush I/O, got %q", out.String())
+		t.Fatalf("WriteFlushPacket should not flush I/O, got %q", out.String())
 	}
 
-	err = enc.FlushIO()
+	err = enc.Flush()
 	if err != nil {
-		t.Fatalf("FlushIO: %v", err)
+		t.Fatalf("Flush: %v", err)
 	}
 
 	if got, want := out.String(), "0006ok0000"; got != want {
@@ -75,9 +75,9 @@ func TestEncoderBufferedFlushBehavior(t *testing.T) {
 		t.Fatalf("WriteData: %v", err)
 	}
 
-	err = enc.WriteFlushAndFlushIO()
+	err = enc.WriteFlushPacketAndFlush()
 	if err != nil {
-		t.Fatalf("WriteFlushAndFlushIO: %v", err)
+		t.Fatalf("WriteFlushPacketAndFlush: %v", err)
 	}
 
 	if got, want := out.String(), "0006yo0000"; got != want {

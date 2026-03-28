@@ -65,9 +65,9 @@ func TestWriteReportStatusUsesSideBand64KWhenNegotiated(t *testing.T) {
 			t.Fatalf("WriteData(request): %v", err)
 		}
 
-		err = requestEnc.WriteFlush()
+		err = requestEnc.WriteFlushPacket()
 		if err != nil {
-			t.Fatalf("WriteFlush(request): %v", err)
+			t.Fatalf("WriteFlushPacket(request): %v", err)
 		}
 
 		var out bufferWriteFlusher
@@ -249,9 +249,9 @@ func TestProgressWriterUsesSideBand64KWhenNegotiated(t *testing.T) {
 			t.Fatalf("WriteData(request): %v", err)
 		}
 
-		err = requestEnc.WriteFlush()
+		err = requestEnc.WriteFlushPacket()
 		if err != nil {
-			t.Fatalf("WriteFlush(request): %v", err)
+			t.Fatalf("WriteFlushPacket(request): %v", err)
 		}
 
 		var out bufferWriteFlusher

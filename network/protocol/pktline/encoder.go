@@ -87,36 +87,36 @@ func (e *Encoder) WriteString(s string) (int, error) {
 	return len(s), nil
 }
 
-// WriteFlush writes control frame 0000 (flush-pkt).
-func (e *Encoder) WriteFlush() error {
+// WriteFlushPacket writes control frame 0000 (flush-pkt).
+func (e *Encoder) WriteFlushPacket() error {
 	return e.writeControl(0)
 }
 
-// WriteDelim writes control frame 0001 (delim-pkt).
-func (e *Encoder) WriteDelim() error {
+// WriteDelimPacket writes control frame 0001 (delim-pkt).
+func (e *Encoder) WriteDelimPacket() error {
 	return e.writeControl(1)
 }
 
-// WriteResponseEnd writes control frame 0002 (response-end-pkt).
-func (e *Encoder) WriteResponseEnd() error {
+// WriteResponseEndPacket writes control frame 0002 (response-end-pkt).
+func (e *Encoder) WriteResponseEndPacket() error {
 	return e.writeControl(2)
 }
 
-// FlushIO flushes buffered output in the underlying transport.
+// Flush flushes buffered output in the underlying transport.
 //
-// FlushIO does not emit any pkt-line control frame.
-func (e *Encoder) FlushIO() error {
+// Flush does not emit any pkt-line control frame.
+func (e *Encoder) Flush() error {
 	return e.w.Flush()
 }
 
-// WriteFlushAndFlushIO writes a flush-pkt (0000) then flushes transport I/O.
-func (e *Encoder) WriteFlushAndFlushIO() error {
-	err := e.WriteFlush()
+// WriteFlushPacketAndFlush writes a flush-pkt (0000) then flushes transport I/O.
+func (e *Encoder) WriteFlushPacketAndFlush() error {
+	err := e.WriteFlushPacket()
 	if err != nil {
 		return err
 	}
 
-	return e.FlushIO()
+	return e.Flush()
 }
 
 func (e *Encoder) writeControl(n int) error {

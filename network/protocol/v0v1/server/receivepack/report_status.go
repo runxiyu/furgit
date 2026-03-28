@@ -31,7 +31,7 @@ func (session *Session) WriteReportStatus(result ReportStatusResult) error {
 			}
 		}
 
-		return session.base.WriteFlush()
+		return session.base.WriteFlushPacket()
 	}
 
 	buf, err := pktline.AppendData(nil, fmt.Appendf(nil, "unpack %s\n", unpackResult))
@@ -60,7 +60,7 @@ func (session *Session) WriteReportStatus(result ReportStatusResult) error {
 		return err
 	}
 
-	return session.base.WriteFlush()
+	return session.base.WriteFlushPacket()
 }
 
 // WriteReportStatusV2 writes one report-status-v2 response.
@@ -120,7 +120,7 @@ func (session *Session) WriteReportStatusV2(result ReportStatusResult) error {
 			}
 		}
 
-		return session.base.WriteFlush()
+		return session.base.WriteFlushPacket()
 	}
 
 	buf, err := pktline.AppendData(nil, fmt.Appendf(nil, "unpack %s\n", unpackResult))
@@ -181,5 +181,5 @@ func (session *Session) WriteReportStatusV2(result ReportStatusResult) error {
 		return err
 	}
 
-	return session.base.WriteFlush()
+	return session.base.WriteFlushPacket()
 }

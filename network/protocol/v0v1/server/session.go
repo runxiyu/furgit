@@ -79,22 +79,22 @@ func (session *Session) WriteError(p []byte) error {
 	return session.sideband.WriteError(p)
 }
 
-// WriteFlush writes one trailing flush packet.
-func (session *Session) WriteFlush() error {
+// WriteFlushPacket writes one trailing flush packet.
+func (session *Session) WriteFlushPacket() error {
 	if session.useSideBand {
-		return session.sideband.WriteFlush()
+		return session.sideband.WriteFlushPacket()
 	}
 
-	return session.enc.WriteFlush()
+	return session.enc.WriteFlushPacket()
 }
 
-// FlushIO flushes buffered transport output without emitting pkt-line frames.
-func (session *Session) FlushIO() error {
+// Flush flushes buffered transport output without emitting pkt-line frames.
+func (session *Session) Flush() error {
 	if session.useSideBand {
-		return session.sideband.FlushIO()
+		return session.sideband.Flush()
 	}
 
-	return session.enc.FlushIO()
+	return session.enc.Flush()
 }
 
 type flushWriter struct {
@@ -120,7 +120,7 @@ func (session *Session) ProgressWriter() iowrap.WriteFlusher {
 
 	return flushWriter{
 		writer: sideband64k.NewChunkWriter(session.sideband, sideband64k.BandProgress),
-		flush:  session.sideband.FlushIO,
+		flush:  session.sideband.Flush,
 	}
 }
 

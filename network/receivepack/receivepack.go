@@ -79,7 +79,7 @@ func ReceivePack(
 		return err
 	}
 
-	err = base.FlushIO()
+	err = base.Flush()
 	if err != nil {
 		return err
 	}
@@ -140,5 +140,5 @@ func ReceivePack(
 		}
 	}
 
-	return base.FlushIO()
+	return base.Flush()
 }

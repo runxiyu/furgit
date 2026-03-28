@@ -40,9 +40,9 @@ func TestReadRequestParsesCommandsAndPushOptions(t *testing.T) {
 			t.Fatalf("WriteData(second): %v", err)
 		}
 
-		err = enc.WriteFlush()
+		err = enc.WriteFlushPacket()
 		if err != nil {
-			t.Fatalf("WriteFlush(commands): %v", err)
+			t.Fatalf("WriteFlushPacket(commands): %v", err)
 		}
 
 		err = enc.WriteData([]byte("ci.skip\n"))
@@ -50,9 +50,9 @@ func TestReadRequestParsesCommandsAndPushOptions(t *testing.T) {
 			t.Fatalf("WriteData(push-option): %v", err)
 		}
 
-		err = enc.WriteFlush()
+		err = enc.WriteFlushPacket()
 		if err != nil {
-			t.Fatalf("WriteFlush(push-options): %v", err)
+			t.Fatalf("WriteFlushPacket(push-options): %v", err)
 		}
 
 		base := common.NewSession(strings.NewReader(wire.String()), &bufferWriteFlusher{}, common.Options{
@@ -111,9 +111,9 @@ func TestReadRequestDeleteOnlyDoesNotExpectPack(t *testing.T) {
 			t.Fatalf("WriteData: %v", err)
 		}
 
-		err = enc.WriteFlush()
+		err = enc.WriteFlushPacket()
 		if err != nil {
-			t.Fatalf("WriteFlush: %v", err)
+			t.Fatalf("WriteFlushPacket: %v", err)
 		}
 
 		base := common.NewSession(strings.NewReader(wire.String()), &bufferWriteFlusher{}, common.Options{
@@ -159,9 +159,9 @@ func TestReadRequestRejectsUnsupportedCapability(t *testing.T) {
 			t.Fatalf("WriteData: %v", err)
 		}
 
-		err = enc.WriteFlush()
+		err = enc.WriteFlushPacket()
 		if err != nil {
-			t.Fatalf("WriteFlush: %v", err)
+			t.Fatalf("WriteFlushPacket: %v", err)
 		}
 
 		base := common.NewSession(strings.NewReader(wire.String()), &bufferWriteFlusher{}, common.Options{
@@ -222,9 +222,9 @@ func TestReadRequestParsesPushCertificate(t *testing.T) {
 			}
 		}
 
-		err = enc.WriteFlush()
+		err = enc.WriteFlushPacket()
 		if err != nil {
-			t.Fatalf("WriteFlush: %v", err)
+			t.Fatalf("WriteFlushPacket: %v", err)
 		}
 
 		base := common.NewSession(strings.NewReader(wire.String()), &bufferWriteFlusher{}, common.Options{
