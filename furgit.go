@@ -12,7 +12,8 @@
 //
 // Concurrency labels:
 //
-//   - MT-Safe: safe for concurrent use.
+//   - MT-Safe: safe for concurrent use, excluding Close unless documented
+//     otherwise.
 //   - MT-ReadSafe: safe for concurrent read-only use.
 //   - MT-Unsafe: not safe for concurrent use without external synchronization.
 //
