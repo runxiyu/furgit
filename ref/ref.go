@@ -3,7 +3,7 @@ package ref
 
 // Ref is a Git reference.
 //
-// Implementations must be in this package.
+// Consider casting to [Detached] or [Symbolic].
 type Ref interface {
 	isRef()
 	Name() string
