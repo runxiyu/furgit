@@ -1,5 +1,7 @@
 package commitquery
 
+import "codeberg.org/lindenii/furgit/internal/priorityqueue"
+
 func (query *query) paintDownToCommon(left nodeIndex, rights []nodeIndex, minGeneration uint64) error {
 	query.beginMarkPhase()
 
@@ -11,18 +13,20 @@ func (query *query) paintDownToCommon(left nodeIndex, rights []nodeIndex, minGen
 		return nil
 	}
 
-	queue := newPriorityQueue(query)
-	queue.PushNode(left)
+	queue := priorityqueue.New(func(left, right nodeIndex) bool {
+		return query.compare(left, right) > 0
+	})
+	queue.Push(left)
 
 	for _, right := range rights {
 		query.setMarks(right, markRight)
-		queue.PushNode(right)
+		queue.Push(right)
 	}
 
 	lastGeneration := generationInfinity
 
 	for queue.Len() > 0 {
-		idx, ok := queue.PopNode()
+		idx, ok := queue.Pop()
 		if !ok {
 			break
 		}
@@ -54,7 +58,7 @@ func (query *query) paintDownToCommon(left nodeIndex, rights []nodeIndex, minGen
 			}
 
 			query.setMarks(parent, flags)
-			queue.PushNode(parent)
+			queue.Push(parent)
 		}
 	}
 
