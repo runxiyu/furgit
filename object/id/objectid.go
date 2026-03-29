@@ -1,4 +1,3 @@
-// Package objectid provides utilities around object IDs and hash algorithms.
 package objectid
 
 import (

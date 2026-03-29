@@ -1,4 +1,4 @@
-// Package signature provides routines and representations that implement author/committer/tagger signatures.
+// Package signature provides Git author, committer, and tagger signatures.
 package signature
 
 // Signature represents a Git signature (author/committer/tagger).
