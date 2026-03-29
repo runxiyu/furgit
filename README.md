@@ -23,8 +23,9 @@ Furgit is a low-level Git library in Go.
 
 If you are working with a normal on-disk repository, start with
 `repository.Open(...)`. It opens the repository and wires together the refs
-storage, object storage, and fetcher. Note that it requires either a
-bare repository or a `.git` directory. Then,
+storage, object storage, fetcher, (optional) commit-graph, commit queries, and
+reachability helpers. Note that it requires either a bare repository or a
+`.git` directory. Then,
 
 * `repo.Refs()` is for branch names, tags, `HEAD`, and ref updates.
   * Use it when you are starting from names rather than object IDs.
@@ -47,6 +48,18 @@ bare repository or a `.git` directory. Then,
   * However, checking an object ID's size and type are somewhat common
     operations that should be done here.
 
+* `repo.CommitQueries()` is the main graph-query API.
+  * Use it when you need ancestor checks or merge-base computation.
+
+* `repo.Reachability()` is the graph-traversal API.
+  * Use it when you need to walk reachable commits or objects, or to perform
+    connectivity checks.
+
+* `repo.CommitGraph()` exposes the low-level commit-graph reader.
+  * Not all repositories have commit graphs, so it may be nil.
+  * Most callers should prefer `repo.CommitQueries()` or `repo.Reachability()`
+    unless they specifically need direct commit-graph access.
+
 Note that:
 
 * `object` contains parsed Git object values such as blobs, trees, commits, and
@@ -63,30 +76,22 @@ As a rule of thumb:
 * If you want typed objects or path-based access, use `repo.Fetcher()`.
 * If you need raw object lookup by ID, object headers, or object streams, use
   `repo.Objects()`.
+* If you need ancestor checks or merge bases, use `repo.CommitQueries()`.
+* If you need commit or object graph traversal, use `repo.Reachability()`.
 
-Some useful operations are separate and are meant to be constructed over the
-stores that `Repository` already exposes:
-
-* To check whether one revision is an ancestor of another, or to compute merge
-  bases, construct a `commitquery.Query` over `repo.Objects()`. If you already
-  have a commit-graph reader, pass it in as well for performance.
-
-* To walk commits or all reachable objects from a set of starting points,
-  construct a `reachability.Reachability` over `repo.Objects()`. This is useful
-  for tasks such as connectivity checks and computing the object set that a
-  fetch or push needs to account for.
+Some operations remain available if you want to work below those accessors:
 
 * To accept pushes on the server side, construct `network/receivepack` or
   `network/receivepack/service` with the repository's ref store, object store,
-  and object ID algorithm.
+  commit-graph reader, and object ID algorithm.
   * Push handling also needs the repository's object storage root so incoming
     objects can be quarantined and later promoted.
   * `Repository` does not currently expose that root directly (we'll consider
     possible solutions sometime later), so a push server usually keeps the
     repository path or object root handle alongside the `Repository` value.
-  * Hook-based checks are just Go functions; then, a fast-forward check can use
-    `commitquery` over the existing and quarantined object stores. Some hooks
-    are provided.
+  * Hook-based checks are just Go functions; for example, a fast-forward check
+    can use `commitquery.Queries` over the existing and quarantined object
+    stores. Some hooks are provided.
 
 ## Alternatives
 
