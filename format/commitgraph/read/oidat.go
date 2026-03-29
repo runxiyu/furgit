@@ -7,7 +7,7 @@ import (
 
 // OIDAt returns object ID at one position.
 //
-// Labels: Life-Independent.
+// Labels: MT-Safe, Life-Independent.
 func (reader *Reader) OIDAt(pos Position) (objectid.ObjectID, error) {
 	layer, err := reader.layerByPosition(pos)
 	if err != nil {

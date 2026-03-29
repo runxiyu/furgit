@@ -4,7 +4,7 @@ import objectid "codeberg.org/lindenii/furgit/object/id"
 
 // Reader provides read-only access to one mmap-backed commit-graph snapshot.
 //
-// Labels: MT-ReadSafe, Close-Caller.
+// Labels: MT-Safe, Close-Caller.
 type Reader struct {
 	algo        objectid.Algorithm
 	hashVersion uint8

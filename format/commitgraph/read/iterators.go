@@ -9,7 +9,7 @@ import (
 
 // AllPositions iterates all commit positions in native layer order.
 //
-// Labels: Life-Parent.
+// Labels: MT-Safe, Life-Parent.
 func (reader *Reader) AllPositions() iter.Seq[Position] {
 	return func(yield func(Position) bool) {
 		for layerIdx := range reader.layers {
@@ -31,7 +31,7 @@ func (reader *Reader) AllPositions() iter.Seq[Position] {
 
 // AllOIDs iterates all commit object IDs in native layer order.
 //
-// Labels: Life-Parent.
+// Labels: MT-Safe, Life-Parent.
 func (reader *Reader) AllOIDs() iter.Seq[objectid.ObjectID] {
 	return func(yield func(objectid.ObjectID) bool) {
 		positions := reader.AllPositions()

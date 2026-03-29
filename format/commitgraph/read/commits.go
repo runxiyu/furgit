@@ -15,6 +15,8 @@ type Commit struct {
 }
 
 // NumCommits returns total commits across loaded layers.
+//
+// Labels: MT-Safe.
 func (reader *Reader) NumCommits() uint32 {
 	return reader.total
 }

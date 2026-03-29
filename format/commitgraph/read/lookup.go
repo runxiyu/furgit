@@ -6,6 +6,8 @@ import (
 )
 
 // Lookup resolves one object ID to one graph position.
+//
+// Labels: MT-Safe.
 func (reader *Reader) Lookup(oid objectid.ObjectID) (Position, error) {
 	if oid.Algorithm() != reader.algo {
 		return Position{}, &NotFoundError{OID: oid}
