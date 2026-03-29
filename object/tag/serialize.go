@@ -18,7 +18,7 @@ func (tag *Tag) SerializeWithoutHeader() ([]byte, error) {
 	var buf bytes.Buffer
 	fmt.Fprintf(&buf, "object %s\n", tag.Target.String())
 
-	tyName, ok := objecttype.Name(tag.TargetType)
+	tyName, ok := tag.TargetType.Name()
 	if !ok {
 		return nil, fmt.Errorf("object: tag: invalid target type %d", tag.TargetType)
 	}

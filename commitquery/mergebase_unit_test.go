@@ -30,7 +30,7 @@ func commitBody(tree objectid.ObjectID, parents ...objectid.ObjectID) []byte {
 
 // tagBody serializes one minimal annotated tag body.
 func tagBody(target objectid.ObjectID, targetType objecttype.Type) []byte {
-	targetName, ok := objecttype.Name(targetType)
+	targetName, ok := targetType.Name()
 	if !ok {
 		panic("invalid tag target type")
 	}

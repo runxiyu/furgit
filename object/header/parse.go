@@ -23,7 +23,7 @@ func Parse(data []byte) (objecttype.Type, int64, int, bool) {
 
 	nul := space + 1 + nulRel
 
-	ty, ok := objecttype.ParseName(string(data[:space]))
+	ty, ok := objecttype.Parse(string(data[:space]))
 	if !ok {
 		return objecttype.TypeInvalid, 0, 0, false
 	}

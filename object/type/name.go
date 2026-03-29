@@ -7,8 +7,8 @@ const (
 	typeNameTag    = "tag"
 )
 
-// ParseName parses a canonical Git object type name.
-func ParseName(name string) (Type, bool) {
+// Parse parses a canonical Git object type name.
+func Parse(name string) (Type, bool) {
 	switch name {
 	case typeNameBlob:
 		return TypeBlob, true
@@ -24,7 +24,7 @@ func ParseName(name string) (Type, bool) {
 }
 
 // Name returns the canonical Git object type name.
-func Name(ty Type) (string, bool) {
+func (ty Type) Name() (string, bool) {
 	switch ty {
 	case TypeBlob:
 		return typeNameBlob, true

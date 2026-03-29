@@ -11,10 +11,10 @@ import (
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
-// ParseObjectWithoutHeader parses a typed object body.
+// ParseWithoutHeader parses a typed object body.
 //
 //nolint:ireturn
-func ParseObjectWithoutHeader(ty objecttype.Type, body []byte, algo objectid.Algorithm) (Object, error) {
+func ParseWithoutHeader(ty objecttype.Type, body []byte, algo objectid.Algorithm) (Object, error) {
 	switch ty {
 	case objecttype.TypeBlob:
 		return blob.Parse(body)

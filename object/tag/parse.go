@@ -45,7 +45,7 @@ func Parse(body []byte, algo objectid.Algorithm) (*Tag, error) {
 			t.Target = id
 			haveTarget = true
 		case "type":
-			ty, ok := objecttype.ParseName(string(value))
+			ty, ok := objecttype.Parse(string(value))
 			if !ok {
 				return nil, errors.New("object: tag: unknown target type")
 			}

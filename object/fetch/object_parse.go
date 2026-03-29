@@ -5,7 +5,6 @@ import (
 
 	"codeberg.org/lindenii/furgit/object"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 func (r *Fetcher) parseObject(id objectid.ObjectID) (object.Object, error) {
@@ -14,9 +13,9 @@ func (r *Fetcher) parseObject(id objectid.ObjectID) (object.Object, error) {
 		return nil, err
 	}
 
-	parsed, err := object.ParseObjectWithoutHeader(ty, content, id.Algorithm())
+	parsed, err := object.ParseWithoutHeader(ty, content, id.Algorithm())
 	if err != nil {
-		tyName, ok := objecttype.Name(ty)
+		tyName, ok := ty.Name()
 		if !ok {
 			tyName = fmt.Sprintf("type %d", ty)
 		}

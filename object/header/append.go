@@ -12,7 +12,7 @@ func Append(dst []byte, ty objecttype.Type, size int64) ([]byte, bool) {
 		return nil, false
 	}
 
-	tyName, ok := objecttype.Name(ty)
+	tyName, ok := ty.Name()
 	if !ok {
 		return nil, false
 	}

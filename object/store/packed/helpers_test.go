@@ -50,7 +50,7 @@ func expectedRawObject(t *testing.T, testRepo *testgit.TestRepo, id objectid.Obj
 
 	typeName := testRepo.Run(t, "cat-file", "-t", id.String())
 
-	ty, ok := objecttype.ParseName(typeName)
+	ty, ok := objecttype.Parse(typeName)
 	if !ok {
 		t.Fatalf("ParseName(%q) failed", typeName)
 	}

@@ -17,12 +17,12 @@ type ObjectTypeError struct {
 
 // Error implements error.
 func (e *ObjectTypeError) Error() string {
-	gotName, gotOK := objecttype.Name(e.Got)
+	gotName, gotOK := e.Got.Name()
 	if !gotOK {
 		gotName = fmt.Sprintf("type(%d)", e.Got)
 	}
 
-	wantName, wantOK := objecttype.Name(e.Want)
+	wantName, wantOK := e.Want.Name()
 	if !wantOK {
 		wantName = fmt.Sprintf("type(%d)", e.Want)
 	}

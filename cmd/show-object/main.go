@@ -15,7 +15,6 @@ import (
 	"codeberg.org/lindenii/furgit/object/stored"
 	"codeberg.org/lindenii/furgit/object/tag"
 	"codeberg.org/lindenii/furgit/object/tree"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
 	"codeberg.org/lindenii/furgit/repository"
 )
 
@@ -92,7 +91,7 @@ func printStored(s *stored.Stored[object.Object]) {
 	id := s.ID()
 	ty := s.Object().ObjectType()
 
-	tyName, ok := objecttype.Name(ty)
+	tyName, ok := ty.Name()
 	if !ok {
 		tyName = fmt.Sprintf("type %d", ty)
 	}
@@ -126,7 +125,7 @@ func printStored(s *stored.Stored[object.Object]) {
 	case *tag.Tag:
 		tag := obj
 
-		targetTy, ok := objecttype.Name(tag.TargetType)
+		targetTy, ok := tag.TargetType.Name()
 		if !ok {
 			targetTy = fmt.Sprintf("type %d", tag.TargetType)
 		}
