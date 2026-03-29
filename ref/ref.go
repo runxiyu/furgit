@@ -1,4 +1,3 @@
-// Package ref provides general, detached, and symbolic references.
 package ref
 
 // Ref is a Git reference.
