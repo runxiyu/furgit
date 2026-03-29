@@ -1,4 +1,10 @@
-// Package repository opens stores and other objects to access a typical on-disk repo.
+// Package repository opens a typical on-disk Git repository and exposes its
+// main stores and helpers.
+//
+// Start with [Open] when working with a bare repository root or a non-bare
+// ".git" directory. [Repository] then provides access to ref storage, object
+// storage, typed object fetching, commit queries, reachability helpers, and
+// optional commit-graph access.
 package repository
 
 import (
@@ -14,16 +20,11 @@ import (
 	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 
-// Repository represents a typical on-disk Git repository by composing
-// its stores together for access.
+// Repository represents a typical on-disk Git repository by composing its
+// stores and helpers together for access.
 //
 // Open expects a root for the Git directory itself:
 // a bare repository root or a non-bare ".git" directory.
-//
-// Accessors such as [Repository.Objects], [Repository.CommitGraph],
-// [Repository.CommitQueries], [Repository.Reachability], [Repository.Refs],
-// [Repository.Fetcher], and [Repository.LooseStoreForWriting] return
-// repository-backed views.
 //
 // Labels: MT-Safe, Close-Caller.
 type Repository struct {

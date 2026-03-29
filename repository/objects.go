@@ -77,6 +77,10 @@ func openObjectStore(
 
 // Objects returns the configured object store.
 //
+// Use Objects for direct object-ID lookups, object headers, sizes, raw object
+// bytes, or streamed object contents. Callers who want typed object values
+// should usually prefer [Repository.Fetcher].
+//
 // Labels: Life-Parent, Close-No.
 //
 //nolint:ireturn

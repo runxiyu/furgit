@@ -8,7 +8,11 @@ import (
 	reffiles "codeberg.org/lindenii/furgit/ref/store/files"
 )
 
-// Open opens a repository and wires object/ref stores from its on-disk format.
+// Open opens a repository and wires its stores and helpers from the on-disk
+// repository format.
+//
+// root must refer to the Git directory itself:
+// a bare repository root or a non-bare ".git" directory.
 //
 // Labels: Deps-Borrowed.
 func Open(root *os.Root) (repo *Repository, err error) {
