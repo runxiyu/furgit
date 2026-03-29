@@ -21,7 +21,9 @@
 //
 //   - Deps-Owned: the receiver takes ownership of all supplied dependencies
 //     where ownership is a reasonable concept.
-//   - Deps-Borrowed: the receiver borrows supplied dependencies.
+//   - Deps-Borrowed: the value borrows supplied dependencies. Also Life-Parent
+//     in most cases, unless those dependencies are not retained past
+//     construction.
 //   - Deps-Mixed: some supplied dependencies are owned and others are borrowed.
 //
 // Lifetime labels:
