@@ -9,9 +9,10 @@
 // operation, such as commit traversal, reachability analysis, and
 // recursive peeling, is built over those interfaces.
 //
-// While the [repository] package is where most users should begin, it only
-// exists as one convenient composition of those pieces for the standard
-// on-disk repository layout. Nothing should depend on it.
+// While the [codeberg.org/lindenii/furgit/repository] package is where
+// most users should begin, it only exists as one convenient composition of
+// those pieces for the standard on-disk repository layout. Nothing should
+// depend on it.
 //
 // # Contract labels
 //
