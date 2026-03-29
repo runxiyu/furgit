@@ -2,6 +2,7 @@ package commitquery
 
 import "codeberg.org/lindenii/furgit/internal/priorityqueue"
 
+// paintDownToCommon propagates left and right marks downward until common nodes.
 func (query *query) paintDownToCommon(left nodeIndex, rights []nodeIndex, minGeneration uint64) error {
 	query.beginMarkPhase()
 

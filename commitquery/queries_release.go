@@ -1,5 +1,6 @@
 package commitquery
 
+// release resets one worker and returns it to the idle pool if there is room.
 func (queries *Queries) release(q *query) {
 	q.resetForReuse()
 

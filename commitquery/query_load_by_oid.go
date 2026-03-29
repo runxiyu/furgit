@@ -10,19 +10,6 @@ import (
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
-// ensureLoaded completes one node's metadata load if it has not been loaded yet.
-func (query *query) ensureLoaded(idx nodeIndex) error {
-	if query.nodes[idx].loaded {
-		return nil
-	}
-
-	if query.nodes[idx].hasGraphPos {
-		return query.loadByGraphPos(idx)
-	}
-
-	return query.loadByOID(idx)
-}
-
 // loadByOID populates one node from an object ID.
 func (query *query) loadByOID(idx nodeIndex) error {
 	id := query.nodes[idx].id

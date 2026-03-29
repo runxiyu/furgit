@@ -1,8 +1,6 @@
 package commitquery
 
-import (
-	"slices"
-)
+import "slices"
 
 // removeRedundant removes redundant merge-base candidates.
 func removeRedundant(query *query, candidates []nodeIndex) ([]nodeIndex, error) {
@@ -15,6 +13,7 @@ func removeRedundant(query *query, candidates []nodeIndex) ([]nodeIndex, error) 
 	return removeRedundantNoGen(query, candidates)
 }
 
+// removeRedundantNoGen removes redundant candidates without generation data.
 func removeRedundantNoGen(query *query, candidates []nodeIndex) ([]nodeIndex, error) {
 	redundant := make([]bool, len(candidates))
 	work := make([]nodeIndex, 0, len(candidates)-1)
@@ -72,6 +71,7 @@ func removeRedundantNoGen(query *query, candidates []nodeIndex) ([]nodeIndex, er
 	return out, nil
 }
 
+// removeRedundantWithGen removes redundant candidates using generation data.
 func removeRedundantWithGen(query *query, candidates []nodeIndex) []nodeIndex {
 	sorted := append([]nodeIndex(nil), candidates...)
 	slices.SortFunc(sorted, query.compareByGeneration())

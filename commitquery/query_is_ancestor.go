@@ -20,6 +20,7 @@ func (query *query) IsAncestor(ancestor, descendant objectid.ObjectID) (bool, er
 	return query.isAncestor(ancestorIdx, descendantIdx)
 }
 
+// isAncestor answers one ancestry query between two resolved internal nodes.
 func (query *query) isAncestor(ancestor, descendant nodeIndex) (bool, error) {
 	if ancestor == descendant {
 		return true, nil

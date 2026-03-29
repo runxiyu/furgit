@@ -6,7 +6,7 @@ import (
 	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
-// EffectiveGeneration returns one node's generation value.
+// effectiveGeneration returns one node's generation value.
 func (query *query) effectiveGeneration(idx nodeIndex) uint64 {
 	if !query.nodes[idx].hasGeneration {
 		return generationInfinity
@@ -15,10 +15,12 @@ func (query *query) effectiveGeneration(idx nodeIndex) uint64 {
 	return query.nodes[idx].generation
 }
 
+// generationInfinity sorts nodes without a known generation last.
 const (
 	generationInfinity = uint64(math.MaxUint64)
 )
 
+// compareByGeneration builds one comparator ordered by generation first.
 func (query *query) compareByGeneration() func(nodeIndex, nodeIndex) int {
 	return func(left, right nodeIndex) int {
 		leftGeneration := query.effectiveGeneration(left)

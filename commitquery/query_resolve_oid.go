@@ -1,10 +1,8 @@
 package commitquery
 
-import (
-	"codeberg.org/lindenii/furgit/internal/peel"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-)
+import objectid "codeberg.org/lindenii/furgit/object/id"
 
+// resolveOID resolves one commit object ID to one internal query node.
 func (query *query) resolveOID(id objectid.ObjectID) (nodeIndex, error) {
 	idx, ok := query.byOID[id]
 	if ok {
@@ -27,13 +25,4 @@ func (query *query) resolveOID(id objectid.ObjectID) (nodeIndex, error) {
 	}
 
 	return idx, nil
-}
-
-func (query *query) resolveCommitish(id objectid.ObjectID) (nodeIndex, error) {
-	commitID, err := peel.ToCommit(query.store, id)
-	if err != nil {
-		return 0, err
-	}
-
-	return query.resolveOID(commitID)
 }

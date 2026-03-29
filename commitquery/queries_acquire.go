@@ -1,5 +1,6 @@
 package commitquery
 
+// acquire removes one worker from the idle pool or allocates one new worker.
 func (queries *Queries) acquire() *query {
 	queries.mu.Lock()
 	defer queries.mu.Unlock()
