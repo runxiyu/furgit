@@ -1,11 +1,11 @@
 package fetch
 
 import (
-	"fmt"
-
+	giterrors "codeberg.org/lindenii/furgit/errors"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/stored"
 	"codeberg.org/lindenii/furgit/object/tag"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // ExactTag reads, parses, and wraps the tag at id.
@@ -19,7 +19,7 @@ func (r *Fetcher) ExactTag(id objectid.ObjectID) (*stored.Stored[*tag.Tag], erro
 
 	tag, ok := parsed.(*tag.Tag)
 	if !ok {
-		return nil, fmt.Errorf("object/fetch: expected tag object %s, got %v", id, parsed.ObjectType())
+		return nil, &giterrors.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: objecttype.TypeTag}
 	}
 
 	return stored.New(id, tag), nil

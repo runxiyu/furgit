@@ -1,11 +1,11 @@
 package fetch
 
 import (
-	"fmt"
-
+	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/object/blob"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/stored"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // ExactBlob reads, parses, and wraps the blob at id.
@@ -19,7 +19,7 @@ func (r *Fetcher) ExactBlob(id objectid.ObjectID) (*stored.Stored[*blob.Blob], e
 
 	blob, ok := parsed.(*blob.Blob)
 	if !ok {
-		return nil, fmt.Errorf("object/fetch: expected blob object %s, got %v", id, parsed.ObjectType())
+		return nil, &giterrors.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: objecttype.TypeBlob}
 	}
 
 	return stored.New(id, blob), nil

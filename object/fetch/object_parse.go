@@ -10,7 +10,7 @@ import (
 func (r *Fetcher) parseObject(id objectid.ObjectID) (object.Object, error) {
 	ty, content, err := r.store.ReadBytesContent(id)
 	if err != nil {
-		return nil, err
+		return nil, wrapObjectReadError(id, err)
 	}
 
 	parsed, err := object.ParseWithoutHeader(ty, content, id.Algorithm())

@@ -12,5 +12,5 @@ import (
 //
 // Labels: Life-Parent, Close-Caller.
 func (r *Fetcher) ExactBlobReader(id objectid.ObjectID) (io.ReadCloser, int64, error) {
-	return r.exactReader(id, objecttype.TypeBlob, "blob")
+	return r.exactReader(id, objecttype.TypeBlob)
 }

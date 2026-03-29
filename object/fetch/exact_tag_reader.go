@@ -14,5 +14,5 @@ import (
 //
 // Labels: Life-Parent, Close-Caller.
 func (r *Fetcher) ExactTagReader(id objectid.ObjectID) (io.ReadCloser, int64, error) {
-	return r.exactReader(id, objecttype.TypeTag, "tag")
+	return r.exactReader(id, objecttype.TypeTag)
 }

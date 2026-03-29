@@ -1,11 +1,11 @@
 package fetch
 
 import (
-	"fmt"
-
+	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/object/commit"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/stored"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // ExactCommit reads, parses, and wraps the commit at id.
@@ -19,7 +19,7 @@ func (r *Fetcher) ExactCommit(id objectid.ObjectID) (*stored.Stored[*commit.Comm
 
 	commit, ok := parsed.(*commit.Commit)
 	if !ok {
-		return nil, fmt.Errorf("object/fetch: expected commit object %s, got %v", id, parsed.ObjectType())
+		return nil, &giterrors.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: objecttype.TypeCommit}
 	}
 
 	return stored.New(id, commit), nil

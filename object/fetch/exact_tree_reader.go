@@ -14,5 +14,5 @@ import (
 //
 // Labels: Life-Parent, Close-Caller.
 func (r *Fetcher) ExactTreeReader(id objectid.ObjectID) (io.ReadCloser, int64, error) {
-	return r.exactReader(id, objecttype.TypeTree, "tree")
+	return r.exactReader(id, objecttype.TypeTree)
 }

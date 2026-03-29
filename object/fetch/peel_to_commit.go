@@ -1,12 +1,12 @@
 package fetch
 
 import (
-	"fmt"
-
+	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/object/commit"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/stored"
 	"codeberg.org/lindenii/furgit/object/tag"
+	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 // PeelToCommit peels tags until it reaches a commit.
@@ -25,7 +25,7 @@ func (r *Fetcher) PeelToCommit(id objectid.ObjectID) (*stored.Stored[*commit.Com
 		case *tag.Tag:
 			id = parsed.Target
 		default:
-			return nil, fmt.Errorf("object/fetch: expected commit-ish object %s, got %v", id, parsed.ObjectType())
+			return nil, &giterrors.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: objecttype.TypeCommit}
 		}
 	}
 }

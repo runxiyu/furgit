@@ -1,8 +1,7 @@
 package fetch
 
 import (
-	"fmt"
-
+	giterrors "codeberg.org/lindenii/furgit/errors"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
@@ -12,7 +11,7 @@ func (r *Fetcher) PeelToBlobID(id objectid.ObjectID) (objectid.ObjectID, error) 
 	for {
 		ty, _, err := r.store.ReadHeader(id)
 		if err != nil {
-			return objectid.ObjectID{}, err
+			return objectid.ObjectID{}, wrapObjectReadError(id, err)
 		}
 
 		switch ty {
@@ -31,9 +30,9 @@ func (r *Fetcher) PeelToBlobID(id objectid.ObjectID) (objectid.ObjectID, error) 
 			objecttype.TypeFuture,
 			objecttype.TypeOfsDelta,
 			objecttype.TypeRefDelta:
-			return objectid.ObjectID{}, fmt.Errorf("object/fetch: expected blob-ish object %s, got %v", id, ty)
+			return objectid.ObjectID{}, &giterrors.ObjectTypeError{OID: id, Got: ty, Want: objecttype.TypeBlob}
 		default:
-			return objectid.ObjectID{}, fmt.Errorf("object/fetch: expected blob-ish object %s, got %v", id, ty)
+			return objectid.ObjectID{}, &giterrors.ObjectTypeError{OID: id, Got: ty, Want: objecttype.TypeBlob}
 		}
 	}
 }
