@@ -11,7 +11,7 @@ import (
 
 // SerializeWithoutHeader renders the raw tag body bytes.
 func (tag *Tag) SerializeWithoutHeader() ([]byte, error) {
-	if tag.Target.Size() == 0 {
+	if tag.Target.Algorithm().Size() == 0 {
 		return nil, errors.New("object: tag: missing target id")
 	}
 

@@ -236,7 +236,7 @@ func TestFilesPackedRefsReadSemanticsMatchGit(t *testing.T) {
 				t.Fatalf("Resolve(tag) type = %T, want ref.Detached", tagRef)
 			}
 
-			if tagDet.ID.Size() == 0 {
+			if tagDet.ID.Algorithm().Size() == 0 {
 				t.Fatal("Resolve(tag) returned zero object id")
 			}
 		})

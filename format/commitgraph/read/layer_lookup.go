@@ -9,7 +9,7 @@ import (
 )
 
 func layerLookup(layer *layer, oid objectid.ObjectID) (uint32, bool) {
-	hashSize := oid.Size()
+	hashSize := oid.Algorithm().Size()
 	first := int(oid.RawBytes()[0])
 
 	var lo uint32

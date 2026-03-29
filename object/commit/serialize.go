@@ -13,7 +13,7 @@ import (
 func (commit *Commit) SerializeWithoutHeader() ([]byte, error) {
 	var buf bytes.Buffer
 
-	if commit.Tree.Size() == 0 {
+	if commit.Tree.Algorithm().Size() == 0 {
 		return nil, errors.New("object: commit: missing tree id")
 	}
 

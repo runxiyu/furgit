@@ -21,7 +21,7 @@ func (executor *refUpdateExecutor) validateQueuedUpdate(op queuedUpdate) error {
 			return wrapUpdateError(op.name, &refstore.InvalidNameError{Err: err})
 		}
 
-		if op.newID.Size() == 0 {
+		if op.newID.Algorithm().Size() == 0 {
 			return wrapUpdateError(op.name, &refstore.InvalidValueError{Err: objectid.ErrInvalidAlgorithm})
 		}
 	case updateDelete, updateVerify:
@@ -30,7 +30,7 @@ func (executor *refUpdateExecutor) validateQueuedUpdate(op queuedUpdate) error {
 			return wrapUpdateError(op.name, &refstore.InvalidNameError{Err: err})
 		}
 
-		if op.oldID.Size() == 0 {
+		if op.oldID.Algorithm().Size() == 0 {
 			return wrapUpdateError(op.name, &refstore.InvalidValueError{Err: objectid.ErrInvalidAlgorithm})
 		}
 	case updateCreateSymbolic, updateReplaceSymbolic:

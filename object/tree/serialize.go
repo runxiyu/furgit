@@ -14,7 +14,7 @@ func (tree *Tree) SerializeWithoutHeader() ([]byte, error) {
 
 	for _, entry := range tree.Entries {
 		mode := strconv.FormatUint(uint64(entry.Mode), 8)
-		bodyLen += len(mode) + 1 + len(entry.Name) + 1 + entry.ID.Size()
+		bodyLen += len(mode) + 1 + len(entry.Name) + 1 + entry.ID.Algorithm().Size()
 	}
 
 	body := make([]byte, bodyLen)

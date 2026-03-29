@@ -44,7 +44,7 @@ func TestParseHexRoundtrip(t *testing.T) {
 				t.Fatalf("String() = %q, want %q", got, hex)
 			}
 
-			if got := id.Size(); got != algo.Size() {
+			if got := id.Algorithm().Size(); got != algo.Size() {
 				t.Fatalf("Size() = %d, want %d", got, algo.Size())
 			}
 
@@ -148,8 +148,8 @@ func TestRawBytesAliasesStorage(t *testing.T) {
 		}
 
 		b := id.RawBytes()
-		if len(b) != id.Size() {
-			t.Fatalf("RawBytes len = %d, want %d", len(b), id.Size())
+		if len(b) != id.Algorithm().Size() {
+			t.Fatalf("RawBytes len = %d, want %d", len(b), id.Algorithm().Size())
 		}
 
 		if cap(b) != len(b) {
@@ -169,12 +169,12 @@ func TestAlgorithmSum(t *testing.T) {
 	t.Parallel()
 
 	id1 := objectid.AlgorithmSHA1.Sum([]byte("hello"))
-	if id1.Algorithm() != objectid.AlgorithmSHA1 || id1.Size() != objectid.AlgorithmSHA1.Size() {
+	if id1.Algorithm() != objectid.AlgorithmSHA1 || id1.Algorithm().Size() != objectid.AlgorithmSHA1.Size() {
 		t.Fatalf("sha1 sum produced invalid object id")
 	}
 
 	id2 := objectid.AlgorithmSHA256.Sum([]byte("hello"))
-	if id2.Algorithm() != objectid.AlgorithmSHA256 || id2.Size() != objectid.AlgorithmSHA256.Size() {
+	if id2.Algorithm() != objectid.AlgorithmSHA256 || id2.Algorithm().Size() != objectid.AlgorithmSHA256.Size() {
 		t.Fatalf("sha256 sum produced invalid object id")
 	}
 
