@@ -8,7 +8,7 @@ import "codeberg.org/lindenii/furgit/object/fetch"
 // need to peel through annotated tags, or when you want path-based access
 // within trees.
 //
-// Labels: Life-Parent, Close-No.
+// Labels: Life-Parent.
 func (repo *Repository) Fetcher() *fetch.Fetcher {
 	return repo.fetcher
 }

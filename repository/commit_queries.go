@@ -7,7 +7,7 @@ import "codeberg.org/lindenii/furgit/commitquery"
 //
 // Use CommitQueries for ancestor checks and merge-base computation.
 //
-// Labels: Life-Parent, Close-No.
+// Labels: Life-Parent.
 func (repo *Repository) CommitQueries() *commitquery.Queries {
 	return repo.commitQueries
 }

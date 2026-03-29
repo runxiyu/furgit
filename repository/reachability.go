@@ -8,7 +8,7 @@ import "codeberg.org/lindenii/furgit/reachability"
 // Use Reachability to walk reachable commits or objects and to perform
 // connectivity checks.
 //
-// Labels: Life-Parent, Close-No.
+// Labels: Life-Parent.
 func (repo *Repository) Reachability() *reachability.Reachability {
 	return reachability.New(repo.objects, repo.commitGraph)
 }
