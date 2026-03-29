@@ -37,3 +37,5 @@
 * Needs much better diff API
 * revwalk/log
 
+
+* Does Close belong in interfaces at all?
