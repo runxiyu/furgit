@@ -9,9 +9,10 @@ import (
 var algorithmTable = [...]algorithmDetails{
 	AlgorithmUnknown: {},
 	AlgorithmSHA1: {
-		name:       "sha1",
-		size:       sha1.Size,
-		packHashID: 1,
+		name:                "sha1",
+		size:                sha1.Size,
+		packHashID:          1,
+		signatureHeaderName: "gpgsig",
 		sum: func(data []byte) ObjectID {
 			sum := sha1.Sum(data) //#nosec G401
 
@@ -24,9 +25,10 @@ var algorithmTable = [...]algorithmDetails{
 		new: sha1.New,
 	},
 	AlgorithmSHA256: {
-		name:       "sha256",
-		size:       sha256.Size,
-		packHashID: 2,
+		name:                "sha256",
+		size:                sha256.Size,
+		packHashID:          2,
+		signatureHeaderName: "gpgsig-sha256",
 		sum: func(data []byte) ObjectID {
 			sum := sha256.Sum256(data)
 
@@ -44,6 +46,8 @@ var (
 	//nolint:gochecknoglobals
 	algorithmByName = map[string]Algorithm{}
 	//nolint:gochecknoglobals
+	algorithmBySignatureHeaderName = map[string]Algorithm{}
+	//nolint:gochecknoglobals
 	supportedAlgorithms []Algorithm
 )
 
@@ -58,6 +62,9 @@ func init() { //nolint:gochecknoinits
 
 		info.emptyTree = info.sum(emptyTreeInput)
 		algorithmByName[info.name] = algo
+		if info.signatureHeaderName != "" {
+			algorithmBySignatureHeaderName[info.signatureHeaderName] = algo
+		}
 		supportedAlgorithms = append(supportedAlgorithms, algo)
 	}
 }
