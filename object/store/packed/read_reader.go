@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 
-	packfmt "codeberg.org/lindenii/furgit/format/packfile"
 	"codeberg.org/lindenii/furgit/internal/iolimit"
 	objectheader "codeberg.org/lindenii/furgit/object/header"
 	objectid "codeberg.org/lindenii/furgit/object/id"
@@ -30,7 +29,7 @@ func (store *Store) ReadReaderContent(id objectid.ObjectID) (objecttype.Type, in
 		return objecttype.TypeInvalid, 0, nil, err
 	}
 
-	if packfmt.IsBaseObjectType(meta.ty) {
+	if meta.ty.IsBaseObject() {
 		zr, err := zlibReaderAt(pack, meta.dataOffset)
 		if err != nil {
 			return objecttype.TypeInvalid, 0, nil, err
@@ -67,7 +66,7 @@ func (store *Store) ReadReaderFull(id objectid.ObjectID) (io.ReadCloser, error) 
 		return nil, err
 	}
 
-	if packfmt.IsBaseObjectType(meta.ty) {
+	if meta.ty.IsBaseObject() {
 		header, ok := objectheader.Encode(meta.ty, meta.size)
 		if !ok {
 			return nil, fmt.Errorf("objectstore/packed: failed to encode object header for type %d", meta.ty)

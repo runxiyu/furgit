@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 
-	packfmt "codeberg.org/lindenii/furgit/format/packfile"
 	"codeberg.org/lindenii/furgit/internal/compress/zlib"
 	objectheader "codeberg.org/lindenii/furgit/object/header"
 	objectid "codeberg.org/lindenii/furgit/object/id"
@@ -25,7 +24,7 @@ func drainEntryPayload(state *ingestState, record objectRecord) (int64, objectid
 
 	var total int64
 
-	if packfmt.IsBaseObjectType(record.packedType) {
+	if record.packedType.IsBaseObject() {
 		header, ok := objectheader.Encode(record.packedType, record.declaredSize)
 		if !ok {
 			return 0, zero, &MalformedPackEntryError{Offset: record.offset, Reason: "encode object header"}

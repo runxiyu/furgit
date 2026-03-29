@@ -3,7 +3,6 @@ package packed
 import (
 	"fmt"
 
-	packfmt "codeberg.org/lindenii/furgit/format/packfile"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
@@ -38,7 +37,7 @@ func (store *Store) deltaResolveChainStart(chain deltaChain) (objecttype.Type, [
 		return objecttype.TypeInvalid, nil, 0, err
 	}
 
-	if !packfmt.IsBaseObjectType(meta.ty) {
+	if !meta.ty.IsBaseObject() {
 		return objecttype.TypeInvalid, nil, 0, fmt.Errorf("objectstore/packed: delta chain base is not a base object")
 	}
 

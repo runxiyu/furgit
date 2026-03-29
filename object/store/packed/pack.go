@@ -47,7 +47,7 @@ func openPackFile(name string, file *os.File, size int64) (*packFile, error) {
 	}
 
 	version := binary.BigEndian.Uint32(data[4:8])
-	if !packfmt.VersionSupported(version) {
+	if !packfmt.SupportedVersion(version) {
 		_ = syscall.Munmap(data)
 
 		return nil, fmt.Errorf("objectstore/packed: pack %q unsupported version %d", name, version)

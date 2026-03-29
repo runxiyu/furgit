@@ -3,7 +3,6 @@ package ingest
 import (
 	"fmt"
 
-	packfmt "codeberg.org/lindenii/furgit/format/packfile"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
@@ -54,7 +53,7 @@ func scanOneEntry(state *ingestState, startOffset uint64) (uint64, error) {
 
 	record.crc32 = crc
 
-	if packfmt.IsBaseObjectType(record.packedType) {
+	if record.packedType.IsBaseObject() {
 		record.objectID = oid
 		record.realType = record.packedType
 		record.resolved = true

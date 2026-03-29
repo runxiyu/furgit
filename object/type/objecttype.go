@@ -14,3 +14,16 @@ const (
 	TypeOfsDelta Type = 6
 	TypeRefDelta Type = 7
 )
+
+// IsBaseObject reports whether ty is one of the four canonical Git object
+// types encoded directly in pack entries.
+func (ty Type) IsBaseObject() bool {
+	switch ty {
+	case TypeCommit, TypeTree, TypeBlob, TypeTag:
+		return true
+	case TypeInvalid, TypeFuture, TypeOfsDelta, TypeRefDelta:
+		return false
+	default:
+		return false
+	}
+}

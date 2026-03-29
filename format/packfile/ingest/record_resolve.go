@@ -3,7 +3,6 @@ package ingest
 import (
 	"fmt"
 
-	packfmt "codeberg.org/lindenii/furgit/format/packfile"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
@@ -25,7 +24,7 @@ func resolveRecord(state *ingestState, idx int, visiting map[int]struct{}) (obje
 		return ty, content, nil
 	}
 
-	if packfmt.IsBaseObjectType(record.packedType) {
+	if record.packedType.IsBaseObject() {
 		ty, content, err := readBaseRecordContent(state, idx)
 		if err != nil {
 			return objecttype.TypeInvalid, nil, err

@@ -3,7 +3,6 @@ package packed
 import (
 	"fmt"
 
-	packfmt "codeberg.org/lindenii/furgit/format/packfile"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
@@ -26,7 +25,7 @@ func (store *Store) resolveHeaderAt(start location) (objecttype.Type, int64, err
 		}
 
 		if declaredSize < 0 {
-			if packfmt.IsBaseObjectType(meta.ty) {
+			if meta.ty.IsBaseObject() {
 				declaredSize = meta.size
 			} else {
 				size, err := deltaDeclaredSizeAt(pack, meta.dataOffset)
@@ -38,7 +37,7 @@ func (store *Store) resolveHeaderAt(start location) (objecttype.Type, int64, err
 			}
 		}
 
-		if packfmt.IsBaseObjectType(meta.ty) {
+		if meta.ty.IsBaseObject() {
 			return meta.ty, declaredSize, nil
 		}
 

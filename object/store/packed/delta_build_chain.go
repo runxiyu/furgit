@@ -3,7 +3,6 @@ package packed
 import (
 	"fmt"
 
-	packfmt "codeberg.org/lindenii/furgit/format/packfile"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
@@ -26,7 +25,7 @@ func (store *Store) deltaBuildChain(start location) (deltaChain, error) {
 			return deltaChain{}, err
 		}
 
-		if packfmt.IsBaseObjectType(meta.ty) {
+		if meta.ty.IsBaseObject() {
 			chain.baseLoc = current
 			chain.baseType = meta.ty
 

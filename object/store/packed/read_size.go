@@ -3,7 +3,6 @@ package packed
 import (
 	"fmt"
 
-	packfmt "codeberg.org/lindenii/furgit/format/packfile"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
@@ -29,7 +28,7 @@ func (store *Store) resolveSizeAt(start location) (int64, error) {
 		return 0, err
 	}
 
-	if packfmt.IsBaseObjectType(meta.ty) {
+	if meta.ty.IsBaseObject() {
 		return meta.size, nil
 	}
 

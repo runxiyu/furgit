@@ -36,7 +36,7 @@ func parseAndValidatePackHeader(hdr [packHeaderSize]byte) (HeaderInfo, error) {
 	}
 
 	version := binary.BigEndian.Uint32(hdr[4:8])
-	if !packfile.VersionSupported(version) {
+	if !packfile.SupportedVersion(version) {
 		return HeaderInfo{}, &InvalidPackHeaderError{
 			Reason: fmt.Sprintf("unsupported version %d", version),
 		}

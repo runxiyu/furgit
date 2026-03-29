@@ -1,9 +1,6 @@
 package packed
 
-import (
-	packfmt "codeberg.org/lindenii/furgit/format/packfile"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
-)
+import objecttype "codeberg.org/lindenii/furgit/object/type"
 
 // deltaResolveContent resolves one object's content bytes from its pack location.
 func (store *Store) deltaResolveContent(start location) (objecttype.Type, []byte, error) {
@@ -18,7 +15,7 @@ func (store *Store) deltaResolveContent(start location) (objecttype.Type, []byte
 	}
 
 	declaredSize := meta.size
-	if !packfmt.IsBaseObjectType(meta.ty) {
+	if !meta.ty.IsBaseObject() {
 		declaredSize, err = deltaDeclaredSizeAt(pack, meta.dataOffset)
 		if err != nil {
 			return objecttype.TypeInvalid, nil, err
