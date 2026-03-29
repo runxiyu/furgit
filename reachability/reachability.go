@@ -17,7 +17,7 @@ type Reachability struct {
 // New builds a Reachability over one object store with an optional
 // commit-graph reader for faster commit-domain traversal.
 //
-// Labels: Deps-Borrowed.
+// Labels: Deps-Borrowed, Life-Parent.
 func New(store objectstore.ReadingStore, graph *commitgraphread.Reader) *Reachability {
 	return &Reachability{store: store, graph: graph}
 }

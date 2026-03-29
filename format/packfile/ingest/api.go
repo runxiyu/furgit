@@ -81,7 +81,7 @@ type Pending struct {
 
 // Ingest reads and validates one PACK header, returning one pending operation.
 //
-// Labels: Deps-Borrowed.
+// Labels: Deps-Borrowed, Life-Parent.
 func Ingest(
 	src io.Reader,
 	algo objectid.Algorithm,

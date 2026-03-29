@@ -10,7 +10,7 @@ import (
 // New builds one concurrent-safe commit query service over one object store
 // and optional commit-graph reader.
 //
-// Labels: Deps-Borrowed.
+// Labels: Deps-Borrowed, Life-Parent.
 func New(store objectstore.ReadingStore, graph *commitgraphread.Reader) *Queries {
 	maxIdle := max(runtime.GOMAXPROCS(0), 1)
 

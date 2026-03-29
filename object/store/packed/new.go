@@ -9,7 +9,7 @@ import (
 
 // New creates a packed-object store rooted at an objects/pack directory.
 //
-// Labels: Deps-Borrowed.
+// Labels: Deps-Borrowed, Life-Parent.
 func New(root *os.Root, algo objectid.Algorithm, opts Options) (*Store, error) {
 	if algo.Size() == 0 {
 		return nil, objectid.ErrInvalidAlgorithm

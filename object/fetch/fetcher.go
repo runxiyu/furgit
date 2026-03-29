@@ -11,7 +11,7 @@ type Fetcher struct {
 
 // New returns a Fetcher that reads objects from store.
 //
-// Labels: Deps-Borrowed.
+// Labels: Deps-Borrowed, Life-Parent.
 func New(store objectstore.ReadingStore) *Fetcher {
 	return &Fetcher{store: store}
 }

@@ -7,7 +7,7 @@ type Service struct {
 
 // New creates one receive-pack service.
 //
-// Labels: Deps-Borrowed.
+// Labels: Deps-Borrowed, Life-Parent.
 func New(opts Options) *Service {
 	return &Service{opts: opts}
 }

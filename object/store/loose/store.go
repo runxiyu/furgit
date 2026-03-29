@@ -25,7 +25,7 @@ type Store struct {
 
 // New creates a loose-object store rooted at an objects directory for algo.
 //
-// Labels: Deps-Borrowed.
+// Labels: Deps-Borrowed, Life-Parent.
 func New(root *os.Root, algo objectid.Algorithm) (*Store, error) {
 	if algo.Size() == 0 {
 		return nil, objectid.ErrInvalidAlgorithm
