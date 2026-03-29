@@ -81,7 +81,7 @@ func openObjectStore(
 // bytes, or streamed object contents. Callers who want typed object values
 // should usually prefer [Repository.Fetcher].
 //
-// Labels: Life-Parent, Close-No.
+// Labels: Life-Parent.
 //
 //nolint:ireturn
 func (repo *Repository) Objects() objectstore.ReadingStore {

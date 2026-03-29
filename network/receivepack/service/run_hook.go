@@ -96,10 +96,6 @@ func (service *Service) runHook(
 		}
 
 		defer func() {
-			if quarantineObjectsStore != nil {
-				_ = quarantineObjectsStore.Close()
-			}
-
 			if quarantinePackedStore != nil {
 				_ = quarantinePackedStore.Close()
 			}

@@ -60,6 +60,3 @@ Unstructured ones
   try to resolve that probably
 * Needs much better diff API
 * revwalk/log
-
-
-* Does Close belong in interfaces at all?

@@ -52,9 +52,4 @@ type ReadingStore interface {
 	//
 	// Backends without dynamic discovery should do nothing and return nil.
 	Refresh() error
-
-	// Close releases resources associated with the backend.
-	//
-	// Labels: MT-Unsafe.
-	Close() error
 }

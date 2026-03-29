@@ -31,10 +31,4 @@ type ReadingStore interface {
 	//
 	// Labels: Life-Parent.
 	List(pattern string) ([]ref.Ref, error)
-	// Close releases resources associated with the store.
-	//
-	// Transactions and batches borrowing the store are invalid after Close.
-	//
-	// Labels: MT-Unsafe.
-	Close() error
 }

@@ -8,20 +8,6 @@ import "errors"
 func (repo *Repository) Close() error {
 	var errs []error
 
-	if repo.refs != nil {
-		err := repo.refs.Close()
-		if err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	if repo.objects != nil {
-		err := repo.objects.Close()
-		if err != nil {
-			errs = append(errs, err)
-		}
-	}
-
 	if repo.commitGraph != nil {
 		err := repo.commitGraph.Close()
 		if err != nil {

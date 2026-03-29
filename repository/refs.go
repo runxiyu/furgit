@@ -8,7 +8,7 @@ import refstore "codeberg.org/lindenii/furgit/ref/store"
 // A common pattern is to resolve a reference first and then pass the resulting
 // object ID to [Repository.Fetcher] or [Repository.Objects].
 //
-// Labels: Life-Parent, Close-No.
+// Labels: Life-Parent.
 //
 //nolint:ireturn
 func (repo *Repository) Refs() refstore.ReadWriteStore {
