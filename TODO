@@ -1,3 +1,27 @@
+Missing operations that git.sr.ht needs
+=======================================
+
+* Repository init
+* Clone/fetch (but that's handled by the CLI)
+* Resolving revisions
+* Better diffing; patch generation
+* Log and revision walking, optionally filtered by path
+* Config writing
+
+Missing operations that tangled needs
+=====================================
+
+* Repository init
+* Clone/fetch (but that's handled by the CLI)
+* Resolving revisions
+* Better diffing; patch generation
+* Submodule config (but we should make the CLI handle these)
+* Potentially, convenience APIs for branch/tag refs
+* Log and revision walking, optionally filtered by path
+
+Unstructured ones
+=================
+
 * Receive-pack hook shape redesign; separate post-ref and post-ingest hook
   types.
 * Completely redo error handling.
