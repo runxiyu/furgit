@@ -17,15 +17,15 @@
   * [X] Commits
   * [X] Annotated tags
   * [X] Stored objects
-* Further cryptography
-  * [ ] OpenPGP signatures
-  * [ ] SSH signatures
+* Signed objects
+  * [X] Signed object payload/signature extraction
+  * [ ] Signature verification
 * [X] Reading object stores
   * [X] Pluggable interface
   * [X] Chain lookup store
-  * [X] Bundle store
-  * [X] MRU lookup store
+  * [X] Mix lookup store
   * [X] Reading loose objects
+  * [ ] Reading from bundles
   * [ ] Promisor remotes
   * [ ] Alternates
   * [X] Reading packed objects
@@ -88,7 +88,7 @@
   * [ ] Fast import/export
   * [ ] Git notes
   * [ ] Git attributes
-  * [ ] Pseudorefs
+  * [ ] Full pseudoref support
   * Integrity and maintenance
     * [ ] Fsck
     * [ ] Repacking
@@ -189,6 +189,7 @@
   * [ ] Worktree
     * [ ] Common directory
     * [ ] Worktree-specific references
+      * [X] Worktree-specific reference name validation
 * Research
   * [ ] Dynamic packfiles
     * [ ] Compaction; page-sized hole punching
