@@ -25,6 +25,7 @@ func Parse(body []byte) (*Commit, error) {
 
 		rel := bytes.IndexByte(body[i:], '\n')
 		next := len(body)
+
 		lineEnd := len(body)
 		if rel >= 0 {
 			lineEnd = i + rel
@@ -63,6 +64,7 @@ func Parse(body []byte) (*Commit, error) {
 		for i < len(body) {
 			rel := bytes.IndexByte(body[i:], '\n')
 			next = len(body)
+
 			lineEnd = len(body)
 			if rel >= 0 {
 				lineEnd = i + rel
@@ -70,6 +72,7 @@ func Parse(body []byte) (*Commit, error) {
 			}
 
 			contStart := i
+
 			cont := body[contStart:lineEnd]
 			if len(cont) == 0 || cont[0] != ' ' {
 				break

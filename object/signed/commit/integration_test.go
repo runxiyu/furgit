@@ -21,6 +21,7 @@ func setupSSHSignedCommit(
 	testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo})
 
 	signDir := t.TempDir()
+
 	signRoot, err := os.OpenRoot(signDir)
 	if err != nil {
 		t.Fatalf("os.OpenRoot(%q): %v", signDir, err)
@@ -40,6 +41,7 @@ func setupSSHSignedCommit(
 		"-C", "runxiyu@umich.edu",
 		"-f", privateKeyPath,
 	) //#nosec G204
+
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("ssh-keygen generate failed: %v\n%s", err, out)
@@ -102,6 +104,7 @@ func TestSSHSignedCommitIntegration(t *testing.T) {
 			"-s", signaturePath,
 		) //#nosec G204
 		cmd.Stdin = bytes.NewReader(payload)
+
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			t.Fatalf("ssh-keygen verify failed: %v\n%s", err, out)
@@ -126,6 +129,7 @@ func TestSSHSignedCommitIntegrationRejectsTamperedPayload(t *testing.T) {
 			"-s", signaturePath,
 		) //#nosec G204
 		cmd.Stdin = bytes.NewReader(payload)
+
 		out, err := cmd.CombinedOutput()
 		if err == nil {
 			t.Fatalf("ssh-keygen verify unexpectedly succeeded:\n%s", out)

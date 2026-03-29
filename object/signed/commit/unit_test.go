@@ -40,6 +40,7 @@ func TestParseUpstreamMultiplySignedCommit(t *testing.T) {
 	}
 
 	gotPayload := string(commit.AppendPayload(nil))
+
 	wantPayload := "" +
 		"tree 0cfbf08886fca9a91cb753ec8734c84fcbe52c9f\n" +
 		"parent 9da738312d24ef0a29be2c8c2b6fc5cf7085a293\n" +
@@ -86,6 +87,7 @@ func TestParseUpstreamMultiplySignedCommit(t *testing.T) {
 	}
 
 	gotAlgorithms := commit.Algorithms()
+
 	wantAlgorithms := []objectid.Algorithm{
 		objectid.AlgorithmSHA1,
 		objectid.AlgorithmSHA256,
@@ -111,6 +113,7 @@ func TestParseStripsUnknownGpgsigHeadersFromPayload(t *testing.T) {
 	}
 
 	gotPayload := string(commit.AppendPayload(nil))
+
 	wantPayload := "" +
 		"tree deadbeef\n" +
 		"\n" +
@@ -142,6 +145,7 @@ func TestParseAllowsDuplicateSignatureHeaders(t *testing.T) {
 	}
 
 	gotPayload := string(commit.AppendPayload(nil))
+
 	wantPayload := "" +
 		"tree deadbeef\n" +
 		"\n" +
