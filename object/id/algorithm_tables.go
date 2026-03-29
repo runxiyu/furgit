@@ -1,7 +1,7 @@
 package objectid
 
 import (
-	"crypto/sha1"
+	"crypto/sha1" //#nosec:G505
 	"crypto/sha256"
 )
 
