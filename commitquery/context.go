@@ -1,4 +1,3 @@
-// Package commitquery answers commit ancestry and merge-base queries.
 package commitquery
 
 import (
