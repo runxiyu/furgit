@@ -8,6 +8,10 @@ import (
 )
 
 func main() {
+	os.Exit(runMain())
+}
+
+func runMain() int {
 	listenAddr := flag.String("listen", ":9418", "listen address")
 	repoPath := flag.String("repo", "", "path to git dir (.git or bare repo root)")
 	cpuProfilePath := flag.String("cpuprofile", "", "write CPU profile to file")
@@ -18,7 +22,7 @@ func main() {
 	if *repoPath == "" {
 		log.Print("must provide -repo <path-to-git-dir>")
 
-		os.Exit(2)
+		return 2
 	}
 
 	if *cpuProfilePath != "" {
@@ -26,7 +30,7 @@ func main() {
 		if err != nil {
 			log.Printf("cpuprofile: %v", err)
 
-			os.Exit(1)
+			return 1
 		}
 
 		defer func() {
@@ -50,8 +54,8 @@ func main() {
 	if err != nil {
 		log.Printf("run: %v", err)
 
-		os.Exit(1)
+		return 1
 	}
 
-	os.Exit(0)
+	return 0
 }
