@@ -19,7 +19,7 @@ func TestReadRequestParsesCommandsAndPushOptions(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
 		t.Parallel()
 
-		oldZero := objectid.Zero(algo).String()
+		oldZero := algo.Zero().String()
 		oneID := mustHexID(t, algo, "1")
 
 		var wire bufferWriteFlusher
@@ -105,7 +105,7 @@ func TestReadRequestDeleteOnlyDoesNotExpectPack(t *testing.T) {
 		enc := pktline.NewEncoder(&wire)
 
 		err := enc.WriteData([]byte(
-			oneID.String() + " " + objectid.Zero(algo).String() + " refs/heads/old\x00delete-refs object-format=" + algo.String() + "\n",
+			oneID.String() + " " + algo.Zero().String() + " refs/heads/old\x00delete-refs object-format=" + algo.String() + "\n",
 		))
 		if err != nil {
 			t.Fatalf("WriteData: %v", err)
@@ -153,7 +153,7 @@ func TestReadRequestRejectsUnsupportedCapability(t *testing.T) {
 		enc := pktline.NewEncoder(&wire)
 
 		err := enc.WriteData([]byte(
-			objectid.Zero(algo).String() + " " + oneID.String() + " refs/heads/main\x00atomic object-format=" + algo.String() + "\n",
+			algo.Zero().String() + " " + oneID.String() + " refs/heads/main\x00atomic object-format=" + algo.String() + "\n",
 		))
 		if err != nil {
 			t.Fatalf("WriteData: %v", err)
@@ -209,7 +209,7 @@ func TestReadRequestParsesPushCertificate(t *testing.T) {
 			"nonce nonce\n",
 			"push-option ci.skip\n",
 			"\n",
-			objectid.Zero(algo).String() + " " + oneID.String() + " refs/heads/main\n",
+			algo.Zero().String() + " " + oneID.String() + " refs/heads/main\n",
 			"-----BEGIN PGP SIGNATURE-----\n",
 			"abcdef\n",
 			"push-cert-end\n",

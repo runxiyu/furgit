@@ -36,7 +36,7 @@ func TestReceivePackDeleteOnlyAtomicDeleteSucceeds(t *testing.T) {
 		)
 
 		input.WriteString(pktlineData(
-			commitID.String() + " " + objectid.Zero(algo).String() + " refs/heads/main\x00report-status atomic delete-refs object-format=" + algo.String() + "\n",
+			commitID.String() + " " + algo.Zero().String() + " refs/heads/main\x00report-status atomic delete-refs object-format=" + algo.String() + "\n",
 		))
 		input.WriteString("0000")
 
@@ -83,10 +83,10 @@ func TestReceivePackDeleteOnlyNonAtomicAppliesIndependentDeletes(t *testing.T) {
 		)
 
 		input.WriteString(pktlineData(
-			staleID.String() + " " + objectid.Zero(algo).String() + " refs/heads/main\x00report-status delete-refs object-format=" + algo.String() + "\n",
+			staleID.String() + " " + algo.Zero().String() + " refs/heads/main\x00report-status delete-refs object-format=" + algo.String() + "\n",
 		))
 		input.WriteString(pktlineData(
-			commitID.String() + " " + objectid.Zero(algo).String() + " refs/heads/topic\n",
+			commitID.String() + " " + algo.Zero().String() + " refs/heads/topic\n",
 		))
 		input.WriteString("0000")
 
@@ -138,10 +138,10 @@ func TestReceivePackDeleteOnlyAtomicFailureLeavesAllRefsUntouched(t *testing.T) 
 		)
 
 		input.WriteString(pktlineData(
-			staleID.String() + " " + objectid.Zero(algo).String() + " refs/heads/main\x00report-status atomic delete-refs object-format=" + algo.String() + "\n",
+			staleID.String() + " " + algo.Zero().String() + " refs/heads/main\x00report-status atomic delete-refs object-format=" + algo.String() + "\n",
 		))
 		input.WriteString(pktlineData(
-			commitID.String() + " " + objectid.Zero(algo).String() + " refs/heads/topic\n",
+			commitID.String() + " " + algo.Zero().String() + " refs/heads/topic\n",
 		))
 		input.WriteString("0000")
 
@@ -242,7 +242,7 @@ func TestReceivePackWithoutReportStatusWritesNoStatusPayload(t *testing.T) {
 		)
 
 		input.WriteString(pktlineData(
-			commitID.String() + " " + objectid.Zero(algo).String() + " refs/heads/main\x00delete-refs atomic object-format=" + algo.String() + "\n",
+			commitID.String() + " " + algo.Zero().String() + " refs/heads/main\x00delete-refs atomic object-format=" + algo.String() + "\n",
 		))
 		input.WriteString("0000")
 
@@ -281,7 +281,7 @@ func testReceivePackProtocolFallback(t *testing.T, gitProtocol string) {
 		)
 
 		input.WriteString(pktlineData(
-			commitID.String() + " " + objectid.Zero(algo).String() + " refs/heads/main\x00report-status atomic delete-refs object-format=" + algo.String() + "\n",
+			commitID.String() + " " + algo.Zero().String() + " refs/heads/main\x00report-status atomic delete-refs object-format=" + algo.String() + "\n",
 		))
 		input.WriteString("0000")
 
@@ -365,7 +365,7 @@ func TestReceivePackPackCreatePromotesObjectsAndUpdatesRef(t *testing.T) {
 		)
 
 		input.WriteString(pktlineData(
-			objectid.Zero(algo).String() + " " + commitID.String() + " refs/heads/main\x00report-status-v2 atomic object-format=" + algo.String() + "\n",
+			algo.Zero().String() + " " + commitID.String() + " refs/heads/main\x00report-status-v2 atomic object-format=" + algo.String() + "\n",
 		))
 		input.WriteString("0000")
 
@@ -437,7 +437,7 @@ func TestReceivePackHookSeesQuarantinedObjectsAndCanRejectBeforePromotion(t *tes
 		)
 
 		input.WriteString(pktlineData(
-			objectid.Zero(algo).String() + " " + commitID.String() + " refs/heads/main\x00report-status-v2 atomic object-format=" + algo.String() + "\n",
+			algo.Zero().String() + " " + commitID.String() + " refs/heads/main\x00report-status-v2 atomic object-format=" + algo.String() + "\n",
 		))
 		input.WriteString("0000")
 
@@ -519,10 +519,10 @@ func TestReceivePackHookCanRejectSubsetOfNonAtomicDeleteOnlyPush(t *testing.T) {
 		)
 
 		input.WriteString(pktlineData(
-			commitID.String() + " " + objectid.Zero(algo).String() + " refs/heads/main\x00report-status delete-refs object-format=" + algo.String() + "\n",
+			commitID.String() + " " + algo.Zero().String() + " refs/heads/main\x00report-status delete-refs object-format=" + algo.String() + "\n",
 		))
 		input.WriteString(pktlineData(
-			commitID.String() + " " + objectid.Zero(algo).String() + " refs/heads/topic\n",
+			commitID.String() + " " + algo.Zero().String() + " refs/heads/topic\n",
 		))
 		input.WriteString("0000")
 
@@ -577,7 +577,7 @@ func TestReceivePackHookProgressUsesSideBand64K(t *testing.T) {
 		)
 
 		input.WriteString(pktlineData(
-			commitID.String() + " " + objectid.Zero(algo).String() + " refs/heads/main\x00report-status side-band-64k atomic delete-refs object-format=" + algo.String() + "\n",
+			commitID.String() + " " + algo.Zero().String() + " refs/heads/main\x00report-status side-band-64k atomic delete-refs object-format=" + algo.String() + "\n",
 		))
 		input.WriteString("0000")
 
@@ -725,7 +725,7 @@ func TestReceivePackReportStatusV2IncludesRefDetails(t *testing.T) {
 		)
 
 		input.WriteString(pktlineData(
-			commitID.String() + " " + objectid.Zero(algo).String() + " refs/heads/main\x00report-status-v2 atomic delete-refs object-format=" + algo.String() + "\n",
+			commitID.String() + " " + algo.Zero().String() + " refs/heads/main\x00report-status-v2 atomic delete-refs object-format=" + algo.String() + "\n",
 		))
 		input.WriteString("0000")
 
@@ -747,7 +747,7 @@ func TestReceivePackReportStatusV2IncludesRefDetails(t *testing.T) {
 			t.Fatalf("missing option old-oid in %q", got)
 		}
 
-		if !strings.Contains(got, "option new-oid "+objectid.Zero(algo).String()+"\n") {
+		if !strings.Contains(got, "option new-oid "+algo.Zero().String()+"\n") {
 			t.Fatalf("missing option new-oid in %q", got)
 		}
 	})

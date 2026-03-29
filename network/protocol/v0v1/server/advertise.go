@@ -3,8 +3,6 @@ package server
 import (
 	"fmt"
 	"strings"
-
-	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
 // AdvertiseRefs writes one server ref advertisement.
@@ -20,7 +18,7 @@ func (session *Session) AdvertiseRefs(ad Advertisement, capabilityTokens []strin
 
 	refs := sortAdvertisedRefs(ad.Refs)
 	if len(refs) == 0 {
-		line := fmt.Sprintf("%s capabilities^{}\x00%s\n", objectid.Zero(session.opts.Algorithm), capList)
+		line := fmt.Sprintf("%s capabilities^{}\x00%s\n", session.opts.Algorithm.Zero(), capList)
 
 		err := session.enc.WriteData([]byte(line))
 		if err != nil {

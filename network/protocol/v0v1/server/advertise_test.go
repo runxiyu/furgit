@@ -93,7 +93,7 @@ func TestAdvertiseRefsWritesNoRefsCapabilitiesLine(t *testing.T) {
 
 		got := out.String()
 
-		want := objectid.Zero(algo).String() + " capabilities^{}\x00report-status object-format=" + algo.String() + "\n"
+		want := algo.Zero().String() + " capabilities^{}\x00report-status object-format=" + algo.String() + "\n"
 		if !strings.Contains(got, want) {
 			t.Fatalf("unexpected no-refs advertisement %q", got)
 		}

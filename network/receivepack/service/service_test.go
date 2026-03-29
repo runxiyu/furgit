@@ -29,8 +29,8 @@ func TestExecutePackExpectedWithoutObjectsRoot(t *testing.T) {
 		result, err := svc.Execute(context.Background(), &service.Request{
 			Commands: []service.Command{{
 				Name:  "refs/heads/main",
-				OldID: objectid.Zero(algo),
-				NewID: objectid.Zero(algo),
+				OldID: algo.Zero(),
+				NewID: algo.Zero(),
 			}},
 			PackExpected: true,
 			Pack:         strings.NewReader("not a pack"),
@@ -73,8 +73,8 @@ func TestExecuteRemovesDerivedQuarantineAfterIngestFailure(t *testing.T) {
 		result, err := svc.Execute(context.Background(), &service.Request{
 			Commands: []service.Command{{
 				Name:  "refs/heads/main",
-				OldID: objectid.Zero(algo),
-				NewID: objectid.Zero(algo),
+				OldID: algo.Zero(),
+				NewID: algo.Zero(),
 			}},
 			PackExpected: true,
 			Pack:         strings.NewReader("not a pack"),

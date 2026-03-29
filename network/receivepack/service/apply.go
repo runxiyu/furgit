@@ -2,7 +2,6 @@ package service
 
 import (
 	"codeberg.org/lindenii/furgit/internal/utils"
-	objectid "codeberg.org/lindenii/furgit/object/id"
 	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 
@@ -101,7 +100,7 @@ func queueWriteTransaction(tx refstore.Transaction, command Command) error {
 		return tx.Delete(command.Name, command.OldID)
 	}
 
-	if command.OldID == objectid.Zero(command.OldID.Algorithm()) {
+	if command.OldID == command.OldID.Algorithm().Zero() {
 		return tx.Create(command.Name, command.NewID)
 	}
 
@@ -115,7 +114,7 @@ func queueWriteBatch(batch refstore.Batch, command Command) {
 		return
 	}
 
-	if command.OldID == objectid.Zero(command.OldID.Algorithm()) {
+	if command.OldID == command.OldID.Algorithm().Zero() {
 		batch.Create(command.Name, command.NewID)
 
 		return

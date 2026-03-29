@@ -22,7 +22,7 @@ func fillCommandErrors(result *Result, commands []Command, errText string) {
 }
 
 func isDelete(command Command) bool {
-	return command.NewID == objectid.Zero(command.NewID.Algorithm())
+	return command.NewID == command.NewID.Algorithm().Zero()
 }
 
 func objectIDPointer(id objectid.ObjectID) *objectid.ObjectID {

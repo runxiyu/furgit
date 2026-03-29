@@ -208,7 +208,7 @@ func parseObjectID(algo objectid.Algorithm, s string) (objectid.ObjectID, error)
 }
 
 func commandIsDelete(cmd Command) bool {
-	return cmd.NewID == objectid.Zero(cmd.NewID.Algorithm())
+	return cmd.NewID == cmd.NewID.Algorithm().Zero()
 }
 
 func deleteOnly(commands []Command) bool {

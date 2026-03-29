@@ -7,7 +7,6 @@ import (
 
 	"codeberg.org/lindenii/furgit/commitquery"
 	receivepack "codeberg.org/lindenii/furgit/network/receivepack"
-	objectid "codeberg.org/lindenii/furgit/object/id"
 	objectmix "codeberg.org/lindenii/furgit/object/store/mix"
 	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
@@ -33,7 +32,7 @@ func RejectForcePush() receivepack.Hook {
 		}
 
 		for i, update := range req.Updates {
-			if update.OldID == objectid.Zero(update.OldID.Algorithm()) || update.NewID == objectid.Zero(update.NewID.Algorithm()) {
+			if update.OldID == update.OldID.Algorithm().Zero() || update.NewID == update.NewID.Algorithm().Zero() {
 				continue
 			}
 

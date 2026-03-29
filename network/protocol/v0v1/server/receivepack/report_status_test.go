@@ -59,7 +59,7 @@ func TestWriteReportStatusUsesSideBand64KWhenNegotiated(t *testing.T) {
 		requestEnc := pktline.NewEncoder(&requestWire)
 
 		err := requestEnc.WriteData([]byte(
-			objectid.Zero(algo).String() + " " + mustHexID(t, algo, "1").String() + " refs/heads/main\x00report-status side-band-64k object-format=" + algo.String() + "\n",
+			algo.Zero().String() + " " + mustHexID(t, algo, "1").String() + " refs/heads/main\x00report-status side-band-64k object-format=" + algo.String() + "\n",
 		))
 		if err != nil {
 			t.Fatalf("WriteData(request): %v", err)
@@ -243,7 +243,7 @@ func TestProgressWriterUsesSideBand64KWhenNegotiated(t *testing.T) {
 		requestEnc := pktline.NewEncoder(&requestWire)
 
 		err := requestEnc.WriteData([]byte(
-			objectid.Zero(algo).String() + " " + mustHexID(t, algo, "1").String() + " refs/heads/main\x00report-status side-band-64k object-format=" + algo.String() + "\n",
+			algo.Zero().String() + " " + mustHexID(t, algo, "1").String() + " refs/heads/main\x00report-status side-band-64k object-format=" + algo.String() + "\n",
 		))
 		if err != nil {
 			t.Fatalf("WriteData(request): %v", err)
