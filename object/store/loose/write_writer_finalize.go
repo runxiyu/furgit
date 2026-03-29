@@ -9,8 +9,6 @@ import (
 )
 
 // Close flushes and closes the underlying zlib stream and temp file.
-//
-// Repeated calls to Close are undefined behavior.
 func (writer *streamWriter) Close() error {
 	errZlib := writer.zw.Close()
 	errSync := writer.file.Sync()

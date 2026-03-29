@@ -1,8 +1,6 @@
 package read
 
 // Close releases all mapped commit-graph files.
-//
-// Labels: Close-UB.
 func (reader *Reader) Close() error {
 	var closeErr error
 

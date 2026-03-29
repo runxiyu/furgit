@@ -34,7 +34,5 @@ type ReadingStore interface {
 	// Close releases resources associated with the store.
 	//
 	// Transactions and batches borrowing the store are invalid after Close.
-	//
-	// Labels: Close-UB.
 	Close() error
 }

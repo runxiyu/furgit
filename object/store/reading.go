@@ -54,7 +54,5 @@ type ReadingStore interface {
 	Refresh() error
 
 	// Close releases resources associated with the backend.
-	//
-	// Labels: Close-UB.
 	Close() error
 }

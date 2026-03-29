@@ -40,7 +40,8 @@
 //   - Close-Caller: the caller must close the returned value.
 //   - Close-No: the caller must not close the returned value directly.
 //   - Close-Idem: repeated Close calls are safe.
-//   - Close-UB: repeated Close calls are undefined behavior.
+//
+// Unless Close-Idem is specified, repeated Close calls are undefined behavior.
 //
 // Unless a doc comment explicitly states otherwise, these labels describe the
 // API contract only. They do not imply any specific implementation strategy.
