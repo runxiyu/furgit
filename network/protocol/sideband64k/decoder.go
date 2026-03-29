@@ -28,6 +28,8 @@ type Decoder struct {
 }
 
 // NewDecoder creates a decoder over r.
+//
+// Labels: Deps-Borrowed.
 func NewDecoder(r io.Reader, opts ReadOptions) *Decoder {
 	d := &Decoder{
 		dec:     pktline.NewDecoder(r, pktline.ReadOptions{}),
