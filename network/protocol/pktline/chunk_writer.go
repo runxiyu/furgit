@@ -9,6 +9,8 @@ type ChunkWriter struct {
 }
 
 // NewChunkWriter creates a chunking adapter over enc.
+//
+// Labels: Deps-Borrowed.
 func NewChunkWriter(enc *Encoder) *ChunkWriter {
 	return &ChunkWriter{enc: enc}
 }

@@ -16,6 +16,8 @@ type Encoder struct {
 }
 
 // NewEncoder creates an encoder over w.
+//
+// Labels: Deps-Borrowed.
 func NewEncoder(w iowrap.WriteFlusher) *Encoder {
 	return &Encoder{
 		w:       w,

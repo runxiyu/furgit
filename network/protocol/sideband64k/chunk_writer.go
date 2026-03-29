@@ -12,6 +12,8 @@ type ChunkWriter struct {
 }
 
 // NewChunkWriter creates a chunking adapter over enc for one band.
+//
+// Labels: Deps-Borrowed.
 func NewChunkWriter(enc *Encoder, band Band) *ChunkWriter {
 	return &ChunkWriter{enc: enc, band: band}
 }
