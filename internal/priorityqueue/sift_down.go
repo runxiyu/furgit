@@ -8,6 +8,7 @@ func (queue *Queue[T]) siftDown(idx int) {
 		}
 
 		best := left
+
 		right := left + 1
 		if right < len(queue.items) && queue.less(queue.items[right], queue.items[left]) {
 			best = right

@@ -19,6 +19,7 @@ func TestQueueAscending(t *testing.T) {
 	}
 
 	var got []int
+
 	for queue.Len() > 0 {
 		value, ok := queue.Pop()
 		if !ok {
