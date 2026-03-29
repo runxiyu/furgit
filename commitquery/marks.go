@@ -87,3 +87,16 @@ func (query *query) collectMarkedResults() []nodeIndex {
 
 	return out
 }
+
+type markBits uint8
+
+const (
+	markLeft markBits = 1 << iota
+	markRight
+	markStale
+	markResult
+)
+
+const (
+	allMarks = markLeft | markRight | markStale | markResult
+)

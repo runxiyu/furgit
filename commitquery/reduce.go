@@ -74,7 +74,7 @@ func removeRedundantNoGen(query *query, candidates []nodeIndex) ([]nodeIndex, er
 
 func removeRedundantWithGen(query *query, candidates []nodeIndex) []nodeIndex {
 	sorted := append([]nodeIndex(nil), candidates...)
-	slices.SortFunc(sorted, compareByGeneration(query))
+	slices.SortFunc(sorted, query.compareByGeneration())
 
 	minGeneration := query.effectiveGeneration(sorted[0])
 	minGenPos := 0
@@ -97,7 +97,7 @@ func removeRedundantWithGen(query *query, candidates []nodeIndex) []nodeIndex {
 		}
 	}
 
-	slices.SortFunc(walkStart, compareByGeneration(query))
+	slices.SortFunc(walkStart, query.compareByGeneration())
 
 	for _, idx := range walkStart {
 		query.clearMarks(idx, markStale)

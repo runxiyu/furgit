@@ -19,7 +19,7 @@ const (
 	generationInfinity = uint64(math.MaxUint64)
 )
 
-func compareByGeneration(query *query) func(nodeIndex, nodeIndex) int {
+func (query *query) compareByGeneration() func(nodeIndex, nodeIndex) int {
 	return func(left, right nodeIndex) int {
 		leftGeneration := query.effectiveGeneration(left)
 		rightGeneration := query.effectiveGeneration(right)

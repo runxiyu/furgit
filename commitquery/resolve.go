@@ -1,0 +1,39 @@
+package commitquery
+
+import (
+	"codeberg.org/lindenii/furgit/internal/peel"
+	objectid "codeberg.org/lindenii/furgit/object/id"
+)
+
+func (query *query) resolveOID(id objectid.ObjectID) (nodeIndex, error) {
+	idx, ok := query.byOID[id]
+	if ok {
+		err := query.ensureLoaded(idx)
+		if err != nil {
+			return 0, err
+		}
+
+		return idx, nil
+	}
+
+	idx = query.newNode(id)
+	query.byOID[id] = idx
+
+	err := query.loadByOID(idx)
+	if err != nil {
+		delete(query.byOID, id)
+
+		return 0, err
+	}
+
+	return idx, nil
+}
+
+func (query *query) resolveCommitish(id objectid.ObjectID) (nodeIndex, error) {
+	commitID, err := peel.ToCommit(query.store, id)
+	if err != nil {
+		return 0, err
+	}
+
+	return query.resolveOID(commitID)
+}
