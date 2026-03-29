@@ -9,8 +9,6 @@ import (
 )
 
 // HashVersion returns the commit-graph hash version.
-//
-// Labels: MT-Safe.
 func (reader *Reader) HashVersion() uint8 {
 	return reader.hashVersion
 }

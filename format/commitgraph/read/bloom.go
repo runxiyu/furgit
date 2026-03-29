@@ -8,8 +8,6 @@ import (
 )
 
 // HasBloom reports whether any layer has changed-path Bloom data.
-//
-// Labels: MT-Safe.
 func (reader *Reader) HasBloom() bool {
 	for i := range reader.layers {
 		layer := &reader.layers[i]
@@ -22,8 +20,6 @@ func (reader *Reader) HasBloom() bool {
 }
 
 // BloomVersion returns the changed-path Bloom hash version, or 0 if absent.
-//
-// Labels: MT-Safe.
 func (reader *Reader) BloomVersion() uint8 {
 	for i := len(reader.layers) - 1; i >= 0; i-- {
 		layer := &reader.layers[i]
@@ -47,7 +43,7 @@ func (reader *Reader) BloomVersion() uint8 {
 //
 // Returns BloomUnavailableError when this commit graph has no Bloom data.
 //
-// Labels: MT-Safe, Life-Parent.
+// Labels: Life-Parent.
 func (reader *Reader) BloomFilterAt(pos Position) (bloom.Filter, error) {
 	layer, err := reader.layerByPosition(pos)
 	if err != nil {

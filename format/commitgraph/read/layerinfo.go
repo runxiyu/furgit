@@ -9,7 +9,7 @@ type LayerInfo struct {
 
 // Layers returns loaded layer metadata in native chain order.
 //
-// Labels: MT-Safe, Life-Independent.
+// Labels: Life-Independent.
 func (reader *Reader) Layers() []LayerInfo {
 	out := make([]LayerInfo, 0, len(reader.layers))
 	for i := range reader.layers {
