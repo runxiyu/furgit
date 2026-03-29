@@ -38,4 +38,6 @@ func New(root *os.Root, algo objectid.Algorithm) (*Store, error) {
 }
 
 // Close releases resources associated with the backend.
+//
+// Labels: MT-Unsafe.
 func (store *Store) Close() error { return nil }

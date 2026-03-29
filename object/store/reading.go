@@ -54,5 +54,7 @@ type ReadingStore interface {
 	Refresh() error
 
 	// Close releases resources associated with the backend.
+	//
+	// Labels: MT-Unsafe.
 	Close() error
 }

@@ -21,6 +21,8 @@ func New(algo objectid.Algorithm) *Store {
 }
 
 // Close closes the in-memory store.
+//
+// Labels: MT-Unsafe.
 func (store *Store) Close() error {
 	return nil
 }

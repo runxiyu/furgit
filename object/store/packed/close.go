@@ -1,6 +1,8 @@
 package packed
 
 // Close releases mapped pack/index resources associated with the store.
+//
+// Labels: MT-Unsafe.
 func (store *Store) Close() error {
 	store.stateMu.Lock()
 	packs := store.packs

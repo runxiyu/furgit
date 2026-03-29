@@ -1,6 +1,8 @@
 package read
 
 // Close releases all mapped commit-graph files.
+//
+// Labels: MT-Unsafe.
 func (reader *Reader) Close() error {
 	var closeErr error
 
