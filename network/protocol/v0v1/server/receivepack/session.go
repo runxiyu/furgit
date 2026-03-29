@@ -168,6 +168,8 @@ func (session *Session) WriteProgress(p []byte) error {
 // ProgressWriter returns one chunking writer for sideband progress output.
 //
 // When side-band-64k was not negotiated, writes are discarded.
+//
+// Labels: Life-Parent, Close-No.
 func (session *Session) ProgressWriter() iowrap.WriteFlusher {
 	return session.base.ProgressWriter()
 }
@@ -180,6 +182,8 @@ func (session *Session) WriteError(p []byte) error {
 // ErrorWriter returns one chunking writer for sideband error output.
 //
 // When side-band-64k was not negotiated, writes are discarded.
+//
+// Labels: Life-Parent, Close-No.
 func (session *Session) ErrorWriter() iowrap.WriteFlusher {
 	return session.base.ErrorWriter()
 }

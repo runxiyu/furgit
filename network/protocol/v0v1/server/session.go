@@ -100,6 +100,8 @@ func (session *Session) Flush() error {
 // ProgressWriter returns one chunking writer for sideband progress output.
 //
 // When side-band-64k was not negotiated, writes are discarded.
+//
+// Labels: Life-Parent, Close-No.
 func (session *Session) ProgressWriter() iowrap.WriteFlusher {
 	if !session.useSideBand {
 		return iowrap.NopFlush(io.Discard)
@@ -111,6 +113,8 @@ func (session *Session) ProgressWriter() iowrap.WriteFlusher {
 // ErrorWriter returns one chunking writer for sideband error output.
 //
 // When side-band-64k was not negotiated, writes are discarded.
+//
+// Labels: Life-Parent, Close-No.
 func (session *Session) ErrorWriter() iowrap.WriteFlusher {
 	if !session.useSideBand {
 		return iowrap.NopFlush(io.Discard)
@@ -123,6 +127,8 @@ func (session *Session) ErrorWriter() iowrap.WriteFlusher {
 //
 // When side-band-64k is enabled, writes are chunked into band-1 sideband
 // frames. Otherwise writes are chunked into direct pkt-line data frames.
+//
+// Labels: Life-Parent, Close-No.
 func (session *Session) PrimaryDataWriter() iowrap.WriteFlusher {
 	if session.useSideBand {
 		return sideband64k.NewChunkWriter(session.sideband, sideband64k.BandData)
