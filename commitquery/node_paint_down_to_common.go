@@ -21,8 +21,15 @@ func (query *query) paintDownToCommon(left nodeIndex, rights []nodeIndex, minGen
 
 	lastGeneration := generationInfinity
 
-	for query.queueHasNonStale(queue) {
-		idx := queue.PopNode()
+	for queue.Len() > 0 {
+		idx, ok := queue.PopNode()
+		if !ok {
+			break
+		}
+
+		if query.hasAnyMarks(idx, markStale) {
+			continue
+		}
 
 		generation := query.effectiveGeneration(idx)
 		if generation > lastGeneration {
