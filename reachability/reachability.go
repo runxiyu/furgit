@@ -1,4 +1,3 @@
-// Package reachability traverses the object graph to test relationships and emit object lists.
 package reachability
 
 import (
