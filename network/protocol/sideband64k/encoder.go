@@ -17,7 +17,7 @@ type Encoder struct {
 
 // NewEncoder creates an encoder over w.
 //
-// Labels: Deps-Borrowed.
+// Labels: Deps-Borrowed, Life-Parent.
 func NewEncoder(w iowrap.WriteFlusher) *Encoder {
 	return &Encoder{
 		enc:     pktline.NewEncoder(w),

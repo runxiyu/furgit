@@ -28,7 +28,7 @@ type Session struct {
 
 // NewSession creates one v0/v1 server session over r and w.
 //
-// Labels: Deps-Borrowed.
+// Labels: Deps-Borrowed, Life-Parent.
 func NewSession(r io.Reader, w iowrap.WriteFlusher, opts Options) *Session {
 	return &Session{
 		dec:      pktline.NewDecoder(r, pktline.ReadOptions{}),

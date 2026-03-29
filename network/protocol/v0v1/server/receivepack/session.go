@@ -18,7 +18,7 @@ type Session struct {
 
 // NewSession creates one receive-pack session over one common server session.
 //
-// Labels: Deps-Borrowed.
+// Labels: Deps-Borrowed, Life-Parent.
 func NewSession(base *common.Session, supported Capabilities) *Session {
 	return &Session{
 		base:      base,
