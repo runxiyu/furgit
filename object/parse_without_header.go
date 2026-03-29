@@ -5,29 +5,11 @@ import (
 
 	"codeberg.org/lindenii/furgit/object/blob"
 	"codeberg.org/lindenii/furgit/object/commit"
-	objectheader "codeberg.org/lindenii/furgit/object/header"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/tag"
 	"codeberg.org/lindenii/furgit/object/tree"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
-
-// ParseObjectWithHeader parses a loose object in "type size\x00body" format.
-//
-//nolint:ireturn
-func ParseObjectWithHeader(raw []byte, algo objectid.Algorithm) (Object, error) {
-	ty, size, headerLen, ok := objectheader.Parse(raw)
-	if !ok {
-		return nil, fmt.Errorf("object: malformed object header")
-	}
-
-	body := raw[headerLen:]
-	if int64(len(body)) != size {
-		return nil, fmt.Errorf("object: size mismatch: header says %d bytes, body has %d", size, len(body))
-	}
-
-	return ParseObjectWithoutHeader(ty, body, algo)
-}
 
 // ParseObjectWithoutHeader parses a typed object body.
 //
