@@ -17,6 +17,8 @@ type ReadOptions struct {
 //
 // It preserves frame boundaries and supports one-frame lookahead via
 // PeekFrame.
+//
+// Labels: MT-Unsafe.
 type Decoder struct {
 	dec     *pktline.Decoder
 	maxData int

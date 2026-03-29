@@ -6,6 +6,8 @@ import "io"
 // for one fixed band.
 //
 // It never writes control packets automatically.
+//
+// Labels: MT-Unsafe.
 type ChunkWriter struct {
 	enc  *Encoder
 	band Band

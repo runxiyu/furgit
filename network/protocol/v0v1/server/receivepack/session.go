@@ -10,6 +10,8 @@ import (
 )
 
 // Session is one stateful server-side receive-pack protocol session.
+//
+// Labels: MT-Unsafe.
 type Session struct {
 	base       *common.Session
 	supported  Capabilities
@@ -171,7 +173,7 @@ func (session *Session) WriteProgress(p []byte) error {
 //
 // When side-band-64k was not negotiated, writes are discarded.
 //
-// Labels: Life-Parent, Close-No.
+// Labels: Life-Parent.
 func (session *Session) ProgressWriter() iowrap.WriteFlusher {
 	return session.base.ProgressWriter()
 }
@@ -185,7 +187,7 @@ func (session *Session) WriteError(p []byte) error {
 //
 // When side-band-64k was not negotiated, writes are discarded.
 //
-// Labels: Life-Parent, Close-No.
+// Labels: Life-Parent.
 func (session *Session) ErrorWriter() iowrap.WriteFlusher {
 	return session.base.ErrorWriter()
 }

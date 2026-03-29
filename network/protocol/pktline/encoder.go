@@ -10,6 +10,8 @@ import (
 // Encoder writes pkt-line frames to a flush-capable output transport.
 //
 // It writes exactly one frame per method call and does not auto-chunk data.
+//
+// Labels: MT-Unsafe.
 type Encoder struct {
 	w       iowrap.WriteFlusher
 	maxData int

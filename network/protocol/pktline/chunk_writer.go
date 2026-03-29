@@ -4,6 +4,8 @@ import "io"
 
 // ChunkWriter packetizes arbitrary stream bytes into data pkt-lines.
 // It never writes control packets automatically.
+//
+// Labels: MT-Unsafe.
 type ChunkWriter struct {
 	enc *Encoder
 }

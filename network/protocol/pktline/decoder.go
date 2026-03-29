@@ -17,6 +17,8 @@ type ReadOptions struct {
 // It is advisable to supply a buffered reader.
 //
 // It preserves frame boundaries and supports one-frame lookahead via PeekFrame.
+//
+// Labels: MT-Unsafe.
 type Decoder struct {
 	r       io.Reader
 	maxData int

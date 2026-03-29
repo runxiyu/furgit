@@ -18,6 +18,8 @@ type Options struct {
 }
 
 // Session is one stateful server-side v0/v1 server protocol session.
+//
+// Labels: MT-Unsafe.
 type Session struct {
 	dec         *pktline.Decoder
 	enc         *pktline.Encoder
@@ -103,7 +105,7 @@ func (session *Session) Flush() error {
 //
 // When side-band-64k was not negotiated, writes are discarded.
 //
-// Labels: Life-Parent, Close-No.
+// Labels: Life-Parent.
 func (session *Session) ProgressWriter() iowrap.WriteFlusher {
 	if !session.useSideBand {
 		return iowrap.NopFlush(io.Discard)
@@ -116,7 +118,7 @@ func (session *Session) ProgressWriter() iowrap.WriteFlusher {
 //
 // When side-band-64k was not negotiated, writes are discarded.
 //
-// Labels: Life-Parent, Close-No.
+// Labels: Life-Parent.
 func (session *Session) ErrorWriter() iowrap.WriteFlusher {
 	if !session.useSideBand {
 		return iowrap.NopFlush(io.Discard)
@@ -130,7 +132,7 @@ func (session *Session) ErrorWriter() iowrap.WriteFlusher {
 // When side-band-64k is enabled, writes are chunked into band-1 sideband
 // frames. Otherwise writes are chunked into direct pkt-line data frames.
 //
-// Labels: Life-Parent, Close-No.
+// Labels: Life-Parent.
 func (session *Session) PrimaryDataWriter() iowrap.WriteFlusher {
 	if session.useSideBand {
 		return sideband64k.NewChunkWriter(session.sideband, sideband64k.BandData)

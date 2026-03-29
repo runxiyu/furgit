@@ -10,6 +10,8 @@ import (
 // Encoder writes side-band-64k frames to a flush-capable output transport.
 //
 // It writes exactly one frame per method call and does not auto-chunk data.
+//
+// Labels: MT-Unsafe.
 type Encoder struct {
 	enc     *pktline.Encoder
 	maxData int
