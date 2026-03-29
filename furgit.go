@@ -1,5 +1,18 @@
 // Package furgit provides low-level Git operations.
 //
+// Git libraries often center on a repository type that owns objects, refs,
+// worktree state, and configuration behind a single facade. Furgit inverts
+// that: objects are plain values, stored objects are separate types that
+// associate objects with their object IDs, object storage and ref storage
+// are sets of narrow interfaces consisting only of things that are truly
+// reasonable for all implementations to satisfy, and every higher-level
+// operation, such as commit traversal, reachability analysis, and
+// recursive peeling, is built over those interfaces.
+//
+// While the [repository] package is where most users should begin, it only
+// exists as one convenient composition of those pieces for the standard
+// on-disk repository layout. Nothing should depend on it.
+//
 // # Contract labels
 //
 // Many furgit APIs document concurrency, dependency ownership, value lifetime,
