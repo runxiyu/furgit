@@ -8,6 +8,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/commitquery"
 	"codeberg.org/lindenii/furgit/internal/testgit"
+	"codeberg.org/lindenii/furgit/object/fetch"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
@@ -34,7 +35,7 @@ func TestQueryMatchesGitMergeBaseAll(t *testing.T) {
 
 		store := testRepo.OpenObjectStore(t)
 
-		query := commitquery.New(store, nil)
+		query := commitquery.New(fetch.New(store), nil)
 
 		all, err := query.MergeBases(left, tag)
 		if err != nil {
@@ -77,7 +78,7 @@ func TestQueryCrissCrossMatchesGitMergeBaseAll(t *testing.T) {
 
 		store := testRepo.OpenObjectStore(t)
 
-		query := commitquery.New(store, nil)
+		query := commitquery.New(fetch.New(store), nil)
 
 		all, err := query.MergeBases(left, right)
 		if err != nil {
@@ -138,7 +139,7 @@ func TestQueryMatchesGitMergeBaseAllWithCommitGraph(t *testing.T) {
 		store := testRepo.OpenObjectStore(t)
 		graph := testRepo.OpenCommitGraph(t)
 
-		query := commitquery.New(store, graph)
+		query := commitquery.New(fetch.New(store), graph)
 
 		all, err := query.MergeBases(left, right)
 		if err != nil {
@@ -200,7 +201,7 @@ func TestBaseMatchesGitMergeBaseWithoutAll(t *testing.T) {
 
 		store := testRepo.OpenObjectStore(t)
 
-		query := commitquery.New(store, nil)
+		query := commitquery.New(fetch.New(store), nil)
 
 		got, ok, err := query.MergeBase(left, right)
 		if err != nil {
@@ -222,7 +223,7 @@ func TestBaseMatchesGitMergeBaseWithoutAll(t *testing.T) {
 
 		graph := testRepo.OpenCommitGraph(t)
 
-		got, ok, err = commitquery.New(store, graph).MergeBase(left, right)
+		got, ok, err = commitquery.New(fetch.New(store), graph).MergeBase(left, right)
 		if err != nil {
 			t.Fatalf("Base(left, right) with commit-graph: %v", err)
 		}

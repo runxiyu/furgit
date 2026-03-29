@@ -7,6 +7,7 @@ import (
 
 	"codeberg.org/lindenii/furgit/commitquery"
 	receivepack "codeberg.org/lindenii/furgit/network/receivepack"
+	"codeberg.org/lindenii/furgit/object/fetch"
 	objectmix "codeberg.org/lindenii/furgit/object/store/mix"
 	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
@@ -24,7 +25,7 @@ func RejectForcePush() receivepack.Hook {
 
 		defer func() { _ = objects.Close() }()
 
-		queries := commitquery.New(objects, req.CommitGraph)
+		queries := commitquery.New(fetch.New(objects), req.CommitGraph)
 
 		decisions := make([]receivepack.UpdateDecision, len(req.Updates))
 		for i := range decisions {

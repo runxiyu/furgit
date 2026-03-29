@@ -13,6 +13,7 @@ import (
 	"codeberg.org/lindenii/furgit/commitquery"
 	"codeberg.org/lindenii/furgit/config"
 	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
+	"codeberg.org/lindenii/furgit/object/fetch"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objectstore "codeberg.org/lindenii/furgit/object/store"
 	objectloose "codeberg.org/lindenii/furgit/object/store/loose"
@@ -32,6 +33,7 @@ type Repository struct {
 	algo   objectid.Algorithm
 
 	objects         objectstore.ReadingStore
+	fetcher         *fetch.Fetcher
 	objectsRoot     *os.Root
 	objectsPackRoot *os.Root
 	objectsLoose    *objectloose.Store

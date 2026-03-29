@@ -7,6 +7,7 @@ import (
 
 	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/internal/testgit"
+	"codeberg.org/lindenii/furgit/object/fetch"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/store/memory"
 	objecttree "codeberg.org/lindenii/furgit/object/tree"
@@ -71,7 +72,7 @@ func TestIs(t *testing.T) {
 		c3 := store.AddObject(objecttype.TypeCommit, ancestorCommitBody(otherTree))
 		tag := store.AddObject(objecttype.TypeTag, ancestorTagBody(c2, objecttype.TypeCommit))
 
-		ok, err := commitquery.New(store, nil).IsAncestor(c1, tag)
+		ok, err := commitquery.New(fetch.New(store), nil).IsAncestor(c1, tag)
 		if err != nil {
 			t.Fatalf("Is(c1, tag): %v", err)
 		}
@@ -80,7 +81,7 @@ func TestIs(t *testing.T) {
 			t.Fatal("expected c1 to be ancestor of tag->c2")
 		}
 
-		ok, err = commitquery.New(store, nil).IsAncestor(c3, c2)
+		ok, err = commitquery.New(fetch.New(store), nil).IsAncestor(c3, c2)
 		if err != nil {
 			t.Fatalf("Is(c3, c2): %v", err)
 		}
@@ -105,7 +106,7 @@ func TestIsRejectsNonCommitAfterPeel(t *testing.T) {
 		commit := store.AddObject(objecttype.TypeCommit, ancestorCommitBody(tree))
 		tagToTree := store.AddObject(objecttype.TypeTag, ancestorTagBody(tree, objecttype.TypeTree))
 
-		_, err := commitquery.New(store, nil).IsAncestor(commit, tagToTree)
+		_, err := commitquery.New(fetch.New(store), nil).IsAncestor(commit, tagToTree)
 		if err == nil {
 			t.Fatal("expected error")
 		}

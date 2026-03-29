@@ -7,7 +7,7 @@ func (queries *Queries) acquire() *query {
 
 	count := len(queries.idle)
 	if count == 0 {
-		return newQuery(queries.store, queries.graph)
+		return newQuery(queries.fetcher, queries.graph)
 	}
 
 	q := queries.idle[count-1]

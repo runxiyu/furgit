@@ -10,6 +10,7 @@ import (
 	"codeberg.org/lindenii/furgit/commitquery"
 	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/internal/testgit"
+	"codeberg.org/lindenii/furgit/object/fetch"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/store/memory"
 	"codeberg.org/lindenii/furgit/object/tree"
@@ -83,7 +84,7 @@ func TestQueryLinearHistory(t *testing.T) {
 		left := store.AddObject(objecttype.TypeCommit, commitBody(tree, base))
 		right := store.AddObject(objecttype.TypeCommit, commitBody(tree, left))
 
-		query := commitquery.New(store, nil)
+		query := commitquery.New(fetch.New(store), nil)
 
 		got, err := query.MergeBases(left, right)
 		if err != nil {
@@ -130,7 +131,7 @@ func TestQueryPeelsAnnotatedTags(t *testing.T) {
 		right := store.AddObject(objecttype.TypeCommit, commitBody(rightTree, base))
 		tag := store.AddObject(objecttype.TypeTag, tagBody(right, objecttype.TypeCommit))
 
-		query := commitquery.New(store, nil)
+		query := commitquery.New(fetch.New(store), nil)
 
 		got, err := query.MergeBases(left, tag)
 		if err != nil {
@@ -180,7 +181,7 @@ func TestQueryCrissCrossReturnsAllBestCommonAncestors(t *testing.T) {
 		left := store.AddObject(objecttype.TypeCommit, commitBody(leftTree, base1, base2))
 		right := store.AddObject(objecttype.TypeCommit, commitBody(rightTree, base2, base1))
 
-		query := commitquery.New(store, nil)
+		query := commitquery.New(fetch.New(store), nil)
 
 		all, err := query.MergeBases(left, right)
 		if err != nil {
@@ -229,7 +230,7 @@ func TestQueryReturnsNoResultWhenNoCommonAncestorExists(t *testing.T) {
 		left := store.AddObject(objecttype.TypeCommit, commitBody(leftTree))
 		right := store.AddObject(objecttype.TypeCommit, commitBody(rightTree))
 
-		query := commitquery.New(store, nil)
+		query := commitquery.New(fetch.New(store), nil)
 
 		got, err := query.MergeBases(left, right)
 		if err != nil {
@@ -265,7 +266,7 @@ func TestQueryRejectsNonCommitAfterPeel(t *testing.T) {
 		commit := store.AddObject(objecttype.TypeCommit, commitBody(tree))
 		tagToTree := store.AddObject(objecttype.TypeTag, tagBody(tree, objecttype.TypeTree))
 
-		query := commitquery.New(store, nil)
+		query := commitquery.New(fetch.New(store), nil)
 
 		_, err := query.MergeBases(commit, tagToTree)
 		if err == nil {
@@ -298,7 +299,7 @@ func TestQueryAllIsRepeatable(t *testing.T) {
 		left := store.AddObject(objecttype.TypeCommit, commitBody(tree, base))
 		right := store.AddObject(objecttype.TypeCommit, commitBody(tree, left))
 
-		query := commitquery.New(store, nil)
+		query := commitquery.New(fetch.New(store), nil)
 
 		first, err := query.MergeBases(left, right)
 		if err != nil {

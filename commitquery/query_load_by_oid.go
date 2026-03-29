@@ -5,7 +5,7 @@ import (
 
 	giterrors "codeberg.org/lindenii/furgit/errors"
 	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
-	objectcommit "codeberg.org/lindenii/furgit/object/commit"
+	"codeberg.org/lindenii/furgit/object/commit"
 	objectstore "codeberg.org/lindenii/furgit/object/store"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
@@ -25,7 +25,7 @@ func (query *query) loadByOID(idx nodeIndex) error {
 		}
 	}
 
-	ty, content, err := query.store.ReadBytesContent(id)
+	obj, err := query.fetcher.ExactObject(id)
 	if err != nil {
 		if stderrors.Is(err, objectstore.ErrObjectNotFound) {
 			return &giterrors.ObjectMissingError{OID: id}
@@ -34,13 +34,13 @@ func (query *query) loadByOID(idx nodeIndex) error {
 		return err
 	}
 
-	if ty != objecttype.TypeCommit {
-		return &giterrors.ObjectTypeError{OID: id, Got: ty, Want: objecttype.TypeCommit}
-	}
-
-	commitObj, err := objectcommit.Parse(content, id.Algorithm())
-	if err != nil {
-		return err
+	commitObj, ok := obj.Object().(*commit.Commit)
+	if !ok {
+		return &giterrors.ObjectTypeError{
+			OID:  id,
+			Got:  obj.Object().ObjectType(),
+			Want: objecttype.TypeCommit,
+		}
 	}
 
 	parents := make([]parentRef, 0, len(commitObj.Parents))

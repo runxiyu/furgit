@@ -4,18 +4,18 @@ import (
 	"sync"
 
 	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
-	objectstore "codeberg.org/lindenii/furgit/object/store"
+	objectfetch "codeberg.org/lindenii/furgit/object/fetch"
 )
 
-// Queries provides commit-domain queries over one object store
+// Queries provides commit-domain queries over one object fetcher
 // and optional commit-graph reader.
 //
 // Queries reuses internal mutable query workers across operations.
 //
 // Labels: MT-Safe.
 type Queries struct {
-	store objectstore.ReadingStore
-	graph *commitgraphread.Reader
+	fetcher *objectfetch.Fetcher
+	graph   *commitgraphread.Reader
 
 	mu      sync.Mutex
 	idle    []*query

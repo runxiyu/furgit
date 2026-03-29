@@ -4,18 +4,18 @@ import (
 	"runtime"
 
 	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
-	objectstore "codeberg.org/lindenii/furgit/object/store"
+	objectfetch "codeberg.org/lindenii/furgit/object/fetch"
 )
 
-// New builds one concurrent-safe commit query service over one object store
+// New builds one concurrent-safe commit query service over one object fetcher
 // and optional commit-graph reader.
 //
 // Labels: Deps-Borrowed, Life-Parent.
-func New(store objectstore.ReadingStore, graph *commitgraphread.Reader) *Queries {
+func New(fetcher *objectfetch.Fetcher, graph *commitgraphread.Reader) *Queries {
 	maxIdle := max(runtime.GOMAXPROCS(0), 1)
 
 	return &Queries{
-		store:   store,
+		fetcher: fetcher,
 		graph:   graph,
 		maxIdle: maxIdle,
 	}

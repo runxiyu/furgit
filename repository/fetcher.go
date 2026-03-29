@@ -10,5 +10,5 @@ import "codeberg.org/lindenii/furgit/object/fetch"
 //
 // Labels: Life-Parent, Close-No.
 func (repo *Repository) Fetcher() *fetch.Fetcher {
-	return fetch.New(repo.objects)
+	return repo.fetcher
 }

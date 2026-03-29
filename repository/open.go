@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"codeberg.org/lindenii/furgit/commitquery"
+	"codeberg.org/lindenii/furgit/object/fetch"
 	reffiles "codeberg.org/lindenii/furgit/ref/store/files"
 )
 
@@ -44,6 +45,7 @@ func Open(root *os.Root) (repo *Repository, err error) {
 	}
 
 	repo.objects = objects
+	repo.fetcher = fetch.New(objects)
 	repo.objectsRoot = objectsRoot
 	repo.objectsPackRoot = objectsPackRoot
 	repo.objectsLoose = objectsLoose
@@ -55,7 +57,7 @@ func Open(root *os.Root) (repo *Repository, err error) {
 	}
 
 	repo.commitGraph = commitGraph
-	repo.commitQueries = commitquery.New(objects, commitGraph)
+	repo.commitQueries = commitquery.New(repo.fetcher, commitGraph)
 
 	refRoot, err := root.OpenRoot(".")
 	if err != nil {
