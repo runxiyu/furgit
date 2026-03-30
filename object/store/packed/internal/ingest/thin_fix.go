@@ -25,7 +25,7 @@ func maybeFixThin(state *ingestState) error {
 		return &ThinPackUnresolvedError{Count: len(state.unresolvedRefDeltas)}
 	}
 
-	if state.opts.Base == nil {
+	if state.opts.ThinBase == nil {
 		return &ThinPackUnresolvedError{Count: len(state.unresolvedRefDeltas)}
 	}
 
@@ -68,7 +68,7 @@ func maybeFixThin(state *ingestState) error {
 	var appended uint64
 
 	for _, id := range baseIDs {
-		ty, content, err := state.opts.Base.ReadBytesContent(id)
+		ty, content, err := state.opts.ThinBase.ReadBytesContent(id)
 		if err != nil {
 			if errors.Is(err, objectstore.ErrObjectNotFound) {
 				continue

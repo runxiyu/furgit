@@ -11,8 +11,8 @@ type Options struct {
 	FixThin bool
 	// WriteRev writes a .rev alongside the .pack and .idx.
 	WriteRev bool
-	// Base supplies existing objects for thin-pack fixup.
-	Base objectstore.Reader
+	// ThinBase supplies existing objects for thin-pack fixup.
+	ThinBase objectstore.Reader
 	// Progress receives human-readable progress messages.
 	//
 	// When nil, no progress output is emitted.
