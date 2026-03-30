@@ -66,7 +66,6 @@ func (service *Service) runHook(
 			return nil, nil, nil, false, err.Error()
 		}
 
-		quarantineObjectsStore = quarantineLooseStore
 		quarantinedObjects = quarantineLooseStore
 
 		quarantinePackRoot, err = quarantineLooseRoot.OpenRoot("pack")
