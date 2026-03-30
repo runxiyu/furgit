@@ -15,6 +15,7 @@ func (service *Service) Execute(ctx context.Context, req *Request) (*Result, err
 	result := &Result{
 		Commands: make([]CommandResult, 0, len(req.Commands)),
 	}
+
 	var err error
 
 	quarantine, ok := service.ingestQuarantine(result, req.Commands, req)
@@ -88,7 +89,6 @@ func (service *Service) Execute(ctx context.Context, req *Request) (*Result, err
 			return result, nil
 		}
 
-		quarantine = nil
 		utils.BestEffortFprintf(service.opts.Progress, "promoting quarantine: done.\n")
 	}
 

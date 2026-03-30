@@ -1,6 +1,6 @@
 package objectstore
 
-// WriterQuarantine represents one quarantined write that accepts both object-
+// Quarantine represents one quarantined write that accepts both object-
 // wise and pack-wise writes.
 type Quarantine interface {
 	BaseQuarantine
@@ -13,7 +13,7 @@ type QuarantineOptions struct {
 	Pack   PackQuarantineOptions
 }
 
-// WriterQuarantiner creates coordinated quarantines that support both object-
+// Quarantiner creates coordinated quarantines that support both object-
 // wise and pack-wise writes.
 type Quarantiner interface {
 	BeginQuarantine(opts QuarantineOptions) (Quarantine, error)

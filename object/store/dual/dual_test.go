@@ -76,6 +76,7 @@ func fixtureOID(t *testing.T, algo objectid.Algorithm, key string) objectid.Obje
 	t.Helper()
 
 	meta := fixtureMetadata(t, algo)
+
 	hex, ok := meta[key]
 	if !ok {
 		t.Fatalf("missing fixture metadata key %q", key)
@@ -93,12 +94,14 @@ func newDualStore(t *testing.T, repo *testgit.TestRepo, algo objectid.Algorithm)
 	t.Helper()
 
 	objectsRoot := repo.OpenObjectsRoot(t)
+
 	looseStore, err := loose.New(objectsRoot, algo)
 	if err != nil {
 		t.Fatalf("loose.New: %v", err)
 	}
 
 	packRoot := repo.OpenPackRoot(t)
+
 	packedStore, err := packed.New(packRoot, algo, packed.Options{WriteRev: true})
 	if err != nil {
 		t.Fatalf("packed.New: %v", err)
@@ -110,7 +113,7 @@ func newDualStore(t *testing.T, repo *testgit.TestRepo, algo objectid.Algorithm)
 func TestDualReadsWritesAndQuarantine(t *testing.T) {
 	t.Parallel()
 
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		head := fixtureOID(t, algo, "head")
 		packBytes := fixtureBytes(t, algo, "nonthin.pack")
 
@@ -138,6 +141,7 @@ func TestDualReadsWritesAndQuarantine(t *testing.T) {
 		}
 
 		looseContent := []byte("dual quarantine loose object\n")
+
 		looseID, err := objectQ.WriteBytesContent(objecttype.TypeBlob, looseContent)
 		if err != nil {
 			t.Fatalf("quarantine.WriteBytesContent: %v", err)
@@ -212,14 +216,18 @@ func TestDualReadsWritesAndQuarantine(t *testing.T) {
 func TestDualQuarantineDiscardDropsBothHalves(t *testing.T) {
 	t.Parallel()
 
-	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) {
+	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		head := fixtureOID(t, algo, "head")
 		packBytes := fixtureBytes(t, algo, "nonthin.pack")
 
 		repo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		store := newDualStore(t, repo, algo)
 
-		quarantiner := any(store).(objectstore.Quarantiner)
+		quarantiner, ok := any(store).(objectstore.Quarantiner)
+		if !ok {
+			t.Fatal("expected objectstore.Quarantiner")
+		}
+
 		quarantine, err := quarantiner.BeginQuarantine(objectstore.QuarantineOptions{})
 		if err != nil {
 			t.Fatalf("BeginQuarantine: %v", err)
