@@ -10,8 +10,13 @@ import (
 var _ objectstore.PackWriter = (*Store)(nil)
 
 // WritePack ingests one pack stream into the packed store.
-func (store *Store) WritePack(src io.Reader, _ objectstore.PackWriteOptions) error {
-	_, err := ingest.WritePack(store.root, store.algo, src, ingest.Options{})
+func (store *Store) WritePack(src io.Reader, opts objectstore.PackWriteOptions) error {
+	_, err := ingest.WritePack(store.root, store.algo, src, ingest.Options{
+		WriteRev:           store.opts.WriteRev,
+		Base:               opts.ThinBase,
+		Progress:           opts.Progress,
+		RequireTrailingEOF: opts.RequireTrailingEOF,
+	})
 
 	return err
 }
