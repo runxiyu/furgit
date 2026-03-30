@@ -42,7 +42,7 @@ func promoteLooseQuarantine(parent *Store, tempName string, tempRoot *os.Root) e
 			return fmt.Errorf("objectstore/loose: quarantine contains unexpected file %q", entry.Name())
 		}
 
-		if len(entry.Name()) == 2 && isHexString(entry.Name()) {
+		if len(entry.Name()) != 2 || !isHexString(entry.Name()) {
 			return fmt.Errorf("objectstore/loose: quarantine contains invalid shard %q", entry.Name())
 		}
 
