@@ -10,3 +10,15 @@ const (
 	FileModeSymlink    FileMode = 0o120000
 	FileModeGitlink    FileMode = 0o160000
 )
+
+// IsBlobLike reports whether mode names one blob-like tree entry kind.
+//
+// Blob-like entries store blob object IDs as their targets.
+func (mode FileMode) IsBlobLike() bool {
+	switch mode {
+	case FileModeRegular, FileModeExecutable, FileModeSymlink:
+		return true
+	default:
+		return false
+	}
+}
