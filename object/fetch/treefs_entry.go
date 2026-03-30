@@ -23,7 +23,7 @@ func (treeFS *TreeFS) resolvePath(op treeFSOp, name string) (treeEntryValue, err
 		}, nil
 	}
 
-	entry, err := treeFS.fetcher.Path(treeFS.rootTree, treeFSSplitPath(name))
+	entry, err := treeFS.fetcher.Path(treeFS.rootTree, tree.SplitPath([]byte(name)))
 	if err != nil {
 		return treeEntryValue{}, treeFS.pathResolveError(op, name, err)
 	}
