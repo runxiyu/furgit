@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
