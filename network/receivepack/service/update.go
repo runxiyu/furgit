@@ -2,8 +2,7 @@ package service
 
 import objectid "codeberg.org/lindenii/furgit/object/id"
 
-// PlannedUpdate is one ref update that would be applied once ref writing
-// exists.
+// PlannedUpdate is one requested ref update planned for this execution.
 type PlannedUpdate struct {
 	Name   string
 	OldID  objectid.ObjectID

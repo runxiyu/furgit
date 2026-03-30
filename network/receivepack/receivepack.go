@@ -99,7 +99,6 @@ func ReceivePack(
 		Commands:     translateCommands(req.Commands),
 		PushOptions:  append([]string(nil), req.PushOptions...),
 		Atomic:       req.Capabilities.Atomic,
-		DeleteOnly:   req.DeleteOnly,
 		PackExpected: req.PackExpected,
 		Pack:         r,
 	}

@@ -10,7 +10,6 @@ type Request struct {
 	Commands     []Command
 	PushOptions  []string
 	Atomic       bool
-	DeleteOnly   bool
 	PackExpected bool
 	Pack         io.Reader
 }
