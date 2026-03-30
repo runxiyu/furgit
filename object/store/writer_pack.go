@@ -45,7 +45,7 @@ type PackWriter interface {
 
 // PackQuarantine represents one quarantined pack-wise write.
 type PackQuarantine interface {
-	Quarantine
+	BaseQuarantine
 	PackWriter
 }
 

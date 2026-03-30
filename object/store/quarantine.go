@@ -1,17 +1,20 @@
 package objectstore
 
-// Quarantine is one quarantined write. It is intended to be embedded.
+// WriterQuarantine represents one quarantined write that accepts both object-
+// wise and pack-wise writes.
 type Quarantine interface {
-	// Reader exposes the objects written into this quarantine.
-	Reader
+	BaseQuarantine
+	Writer
+}
 
-	// Promote publishes quarantined writes into their final destination.
-	//
-	// Promote invalidates the receiver.
-	Promote() error
+// QuarantineOptions controls the options for one coordinated quarantine creation.
+type QuarantineOptions struct {
+	Object ObjectQuarantineOptions
+	Pack   PackQuarantineOptions
+}
 
-	// Discard abandons quarantined writes.
-	//
-	// Discard invalidates the receiver.
-	Discard() error
+// WriterQuarantiner creates coordinated quarantines that support both object-
+// wise and pack-wise writes.
+type Quarantiner interface {
+	BeginQuarantine(opts QuarantineOptions) (Quarantine, error)
 }

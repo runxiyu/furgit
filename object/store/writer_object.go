@@ -24,7 +24,7 @@ type ObjectWriter interface {
 
 // ObjectQuarantine represents one quarantined object-wise write.
 type ObjectQuarantine interface {
-	Quarantine
+	BaseQuarantine
 	ObjectWriter
 }
 

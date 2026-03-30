@@ -5,7 +5,7 @@ import objectstore "codeberg.org/lindenii/furgit/object/store"
 // BeginQuarantine creates one coordinated dual quarantine spanning both stores.
 //
 // Labels: Deps-Borrowed, Life-Parent, Close-No.
-func (dual *Dual) BeginQuarantine(opts objectstore.QuarantineOptions) (objectstore.WriterQuarantine, error) {
+func (dual *Dual) BeginQuarantine(opts objectstore.QuarantineOptions) (objectstore.Quarantine, error) {
 	objectQ, err := dual.object.BeginObjectQuarantine(opts.Object)
 	if err != nil {
 		return nil, err

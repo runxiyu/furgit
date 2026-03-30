@@ -117,9 +117,9 @@ func TestDualReadsWritesAndQuarantine(t *testing.T) {
 		repo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		store := newDualStore(t, repo, algo)
 
-		quarantiner, ok := any(store).(objectstore.WriterQuarantiner)
+		quarantiner, ok := any(store).(objectstore.Quarantiner)
 		if !ok {
-			t.Fatal("dual does not implement WriterQuarantiner")
+			t.Fatal("dual does not implement Quarantiner")
 		}
 
 		quarantine, err := quarantiner.BeginQuarantine(objectstore.QuarantineOptions{})
@@ -219,7 +219,7 @@ func TestDualQuarantineDiscardDropsBothHalves(t *testing.T) {
 		repo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		store := newDualStore(t, repo, algo)
 
-		quarantiner := any(store).(objectstore.WriterQuarantiner)
+		quarantiner := any(store).(objectstore.Quarantiner)
 		quarantine, err := quarantiner.BeginQuarantine(objectstore.QuarantineOptions{})
 		if err != nil {
 			t.Fatalf("BeginQuarantine: %v", err)

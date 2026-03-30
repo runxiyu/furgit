@@ -27,8 +27,7 @@ type Dual struct {
 }
 
 var (
-	_ objectstore.Reader            = (*Dual)(nil)
-	_ objectstore.ObjectWriter      = (*Dual)(nil)
-	_ objectstore.PackWriter        = (*Dual)(nil)
-	_ objectstore.WriterQuarantiner = (*Dual)(nil)
+	_ objectstore.Reader      = (*Dual)(nil)
+	_ objectstore.Writer      = (*Dual)(nil)
+	_ objectstore.Quarantiner = (*Dual)(nil)
 )

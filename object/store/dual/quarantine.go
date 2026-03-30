@@ -19,7 +19,7 @@ type quarantine struct {
 var (
 	_ objectstore.ObjectQuarantine = (*quarantine)(nil)
 	_ objectstore.PackQuarantine   = (*quarantine)(nil)
-	_ objectstore.WriterQuarantine = (*quarantine)(nil)
+	_ objectstore.Quarantine       = (*quarantine)(nil)
 )
 
 func newQuarantine(
