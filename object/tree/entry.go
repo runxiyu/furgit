@@ -2,6 +2,7 @@ package tree
 
 import (
 	"bytes"
+	"slices"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
 )
@@ -16,26 +17,25 @@ type TreeEntry struct {
 }
 
 func (tree *Tree) entry(name []byte, searchIsTree bool) *TreeEntry {
-	low, high := 0, len(tree.Entries)-1
-	for low <= high {
-		mid := low + (high-low)/2
-		entry := &tree.Entries[mid]
-
-		cmp := TreeEntryNameCompare(entry.Name, entry.Mode, name, searchIsTree)
-		if cmp == 0 {
-			if bytes.Equal(entry.Name, name) {
-				return entry
-			}
-
-			return nil
-		}
-
-		if cmp < 0 {
-			low = mid + 1
-		} else {
-			high = mid - 1
-		}
+	index, ok := slices.BinarySearchFunc(tree.Entries, treeEntrySearch{
+		name:   name,
+		isTree: searchIsTree,
+	}, func(entry TreeEntry, search treeEntrySearch) int {
+		return TreeEntryNameCompare(entry.Name, entry.Mode, search.name, search.isTree)
+	})
+	if !ok {
+		return nil
 	}
 
-	return nil
+	entry := &tree.Entries[index]
+	if !bytes.Equal(entry.Name, name) {
+		return nil
+	}
+
+	return entry
+}
+
+type treeEntrySearch struct {
+	name   []byte
+	isTree bool
 }

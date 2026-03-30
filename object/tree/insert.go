@@ -2,7 +2,7 @@ package tree
 
 import (
 	"fmt"
-	"sort"
+	"slices"
 )
 
 // InsertEntry inserts a tree entry while preserving Git ordering.
@@ -15,13 +15,13 @@ func (tree *Tree) InsertEntry(newEntry TreeEntry) error {
 
 	newEntry.Name = append([]byte(nil), newEntry.Name...)
 
-	newIsTree := newEntry.Mode == FileModeDir
-	insertAt := sort.Search(len(tree.Entries), func(i int) bool {
-		return TreeEntryNameCompare(tree.Entries[i].Name, tree.Entries[i].Mode, newEntry.Name, newIsTree) >= 0
+	insertAt, _ := slices.BinarySearchFunc(tree.Entries, treeEntrySearch{
+		name:   newEntry.Name,
+		isTree: newEntry.Mode == FileModeDir,
+	}, func(entry TreeEntry, search treeEntrySearch) int {
+		return TreeEntryNameCompare(entry.Name, entry.Mode, search.name, search.isTree)
 	})
-	tree.Entries = append(tree.Entries, TreeEntry{})
-	copy(tree.Entries[insertAt+1:], tree.Entries[insertAt:])
-	tree.Entries[insertAt] = newEntry
+	tree.Entries = slices.Insert(tree.Entries, insertAt, newEntry)
 
 	return nil
 }

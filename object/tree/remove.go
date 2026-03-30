@@ -3,6 +3,7 @@ package tree
 import (
 	"bytes"
 	"fmt"
+	"slices"
 )
 
 // RemoveEntry removes a tree entry by name.
@@ -11,13 +12,12 @@ func (tree *Tree) RemoveEntry(name []byte) error {
 		return fmt.Errorf("object: tree: entry %q not found", name)
 	}
 
-	for i := range tree.Entries {
-		if bytes.Equal(tree.Entries[i].Name, name) {
-			copy(tree.Entries[i:], tree.Entries[i+1:])
-			tree.Entries = tree.Entries[:len(tree.Entries)-1]
-
-			return nil
-		}
+	index := slices.IndexFunc(tree.Entries, func(entry TreeEntry) bool {
+		return bytes.Equal(entry.Name, name)
+	})
+	if index >= 0 {
+		tree.Entries = slices.Delete(tree.Entries, index, index+1)
+		return nil
 	}
 
 	return fmt.Errorf("object: tree: entry %q not found", name)
