@@ -127,7 +127,7 @@ func successCommandResult(command Command) CommandResult {
 	return CommandResult{
 		Name:    command.Name,
 		RefName: command.Name,
-		OldID:   objectIDPointer(command.OldID),
-		NewID:   objectIDPointer(command.NewID),
+		OldID:   new(command.OldID),
+		NewID:   new(command.NewID),
 	}
 }

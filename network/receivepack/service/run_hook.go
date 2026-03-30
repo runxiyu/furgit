@@ -33,12 +33,21 @@ func (service *Service) runHook(
 
 	utils.BestEffortFprintf(service.opts.Progress, "running hooks...\r")
 
+	updates := make([]RefUpdate, 0, len(commands))
+	for _, command := range commands {
+		updates = append(updates, RefUpdate{
+			Name:  command.Name,
+			OldID: command.OldID,
+			NewID: command.NewID,
+		})
+	}
+
 	decisions, err := service.opts.Hook(ctx, HookRequest{
 		Refs:               service.opts.Refs,
 		ExistingObjects:    service.opts.ExistingObjects,
 		QuarantinedObjects: quarantinedObjects,
 		CommitGraph:        service.opts.CommitGraph,
-		Updates:            buildHookUpdates(commands),
+		Updates:            updates,
 		PushOptions:        append([]string(nil), req.PushOptions...),
 		IO:                 service.opts.HookIO,
 	})

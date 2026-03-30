@@ -15,18 +15,12 @@ func fillCommandErrors(result *Result, commands []Command, errText string) {
 			Name:    command.Name,
 			Error:   errText,
 			RefName: command.Name,
-			OldID:   objectIDPointer(command.OldID),
-			NewID:   objectIDPointer(command.NewID),
+			OldID:   new(command.OldID),
+			NewID:   new(command.NewID),
 		})
 	}
 }
 
 func isDelete(command Command) bool {
 	return command.NewID == command.NewID.Algorithm().Zero()
-}
-
-func objectIDPointer(id objectid.ObjectID) *objectid.ObjectID {
-	out := id
-
-	return &out
 }
