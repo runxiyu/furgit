@@ -30,7 +30,5 @@ var (
 	_ objectstore.Reader            = (*Dual)(nil)
 	_ objectstore.ObjectWriter      = (*Dual)(nil)
 	_ objectstore.PackWriter        = (*Dual)(nil)
-	_ objectstore.ObjectQuarantiner = (*Dual)(nil)
-	_ objectstore.PackQuarantiner   = (*Dual)(nil)
 	_ objectstore.WriterQuarantiner = (*Dual)(nil)
 )
