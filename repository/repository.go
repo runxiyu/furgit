@@ -32,7 +32,7 @@ type Repository struct {
 	config *config.Config
 	algo   objectid.Algorithm
 
-	objects         objectstore.ReadingStore
+	objects         objectstore.Reader
 	fetcher         *fetch.Fetcher
 	objectsRoot     *os.Root
 	objectsPackRoot *os.Root

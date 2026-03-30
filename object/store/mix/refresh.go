@@ -10,7 +10,7 @@ import (
 func (mix *Mix) Refresh() error {
 	mix.mu.RLock()
 
-	backends := make([]objectstore.ReadingStore, 0, len(mix.backendNodeByStore))
+	backends := make([]objectstore.Reader, 0, len(mix.backendNodeByStore))
 	for node := mix.backendHead; node != nil; node = node.next {
 		backends = append(backends, node.backend)
 	}

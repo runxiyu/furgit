@@ -16,5 +16,5 @@ type Mix struct {
 
 	backendHead        *backendNode
 	backendTail        *backendNode
-	backendNodeByStore map[objectstore.ReadingStore]*backendNode
+	backendNodeByStore map[objectstore.Reader]*backendNode
 }

@@ -9,7 +9,7 @@ import (
 //
 // Labels: MT-Safe.
 type Reachability struct {
-	store objectstore.ReadingStore
+	store objectstore.Reader
 	graph *commitgraphread.Reader
 }
 
@@ -17,6 +17,6 @@ type Reachability struct {
 // commit-graph reader for faster commit-domain traversal.
 //
 // Labels: Deps-Borrowed, Life-Parent.
-func New(store objectstore.ReadingStore, graph *commitgraphread.Reader) *Reachability {
+func New(store objectstore.Reader, graph *commitgraphread.Reader) *Reachability {
 	return &Reachability{store: store, graph: graph}
 }

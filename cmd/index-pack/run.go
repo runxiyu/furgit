@@ -14,7 +14,7 @@ import (
 func run(repoPath, destinationPath, objectFormat string, fixThin, writeRev bool) error {
 	var (
 		algo objectid.Algorithm
-		base objectstore.ReadingStore
+		base objectstore.Reader
 		repo *repository.Repository
 	)
 

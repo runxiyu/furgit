@@ -27,7 +27,7 @@ type PromotedObjectPermissions struct {
 type Options struct {
 	Algorithm                 objectid.Algorithm
 	Refs                      refstore.ReadWriteStore
-	ExistingObjects           objectstore.ReadingStore
+	ExistingObjects           objectstore.Reader
 	CommitGraph               *commitgraphread.Reader
 	ObjectsRoot               *os.Root
 	Progress                  iowrap.WriteFlusher

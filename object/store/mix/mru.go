@@ -3,13 +3,13 @@ package mix
 import objectstore "codeberg.org/lindenii/furgit/object/store"
 
 type backendNode struct {
-	backend objectstore.ReadingStore
+	backend objectstore.Reader
 	prev    *backendNode
 	next    *backendNode
 }
 
 //nolint:ireturn
-func (mix *Mix) firstBackend() objectstore.ReadingStore {
+func (mix *Mix) firstBackend() objectstore.Reader {
 	mix.mu.RLock()
 	defer mix.mu.RUnlock()
 
@@ -21,7 +21,7 @@ func (mix *Mix) firstBackend() objectstore.ReadingStore {
 }
 
 //nolint:ireturn
-func (mix *Mix) nextBackend(current objectstore.ReadingStore) objectstore.ReadingStore {
+func (mix *Mix) nextBackend(current objectstore.Reader) objectstore.Reader {
 	mix.mu.RLock()
 	defer mix.mu.RUnlock()
 
@@ -33,7 +33,7 @@ func (mix *Mix) nextBackend(current objectstore.ReadingStore) objectstore.Readin
 	return node.next.backend
 }
 
-func (mix *Mix) touchBackend(backend objectstore.ReadingStore) {
+func (mix *Mix) touchBackend(backend objectstore.Reader) {
 	if backend == nil {
 		return
 	}

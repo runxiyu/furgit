@@ -11,7 +11,7 @@ import (
 // the caller.
 //
 //nolint:ireturn
-func (testRepo *TestRepo) OpenObjectStore(tb testing.TB) objectstore.ReadingStore {
+func (testRepo *TestRepo) OpenObjectStore(tb testing.TB) objectstore.Reader {
 	tb.Helper()
 
 	root := testRepo.OpenGitRoot(tb)

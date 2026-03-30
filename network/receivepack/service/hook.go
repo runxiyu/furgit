@@ -31,8 +31,8 @@ type UpdateDecision struct {
 // Labels: Life-Call.
 type HookRequest struct {
 	Refs               refstore.ReadingStore
-	ExistingObjects    objectstore.ReadingStore
-	QuarantinedObjects objectstore.ReadingStore
+	ExistingObjects    objectstore.Reader
+	QuarantinedObjects objectstore.Reader
 	CommitGraph        *commitgraphread.Reader
 	Updates            []RefUpdate
 	PushOptions        []string

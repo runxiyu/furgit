@@ -26,7 +26,7 @@ type Options struct {
 	Refs refstore.ReadWriteStore
 	// ExistingObjects is the object store visible to the push before any newly
 	// uploaded quarantined objects are promoted.
-	ExistingObjects objectstore.ReadingStore
+	ExistingObjects objectstore.Reader
 	// CommitGraph is an optional commit-graph snapshot corresponding to
 	// ExistingObjects.
 	CommitGraph *commitgraphread.Reader

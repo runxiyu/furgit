@@ -12,7 +12,7 @@ import (
 )
 
 // ToCommit peels annotated tags transitively until a commit is reached.
-func ToCommit(store objectstore.ReadingStore, id objectid.ObjectID) (objectid.ObjectID, error) {
+func ToCommit(store objectstore.Reader, id objectid.ObjectID) (objectid.ObjectID, error) {
 	for {
 		ty, _, err := store.ReadHeader(id)
 		if err != nil {

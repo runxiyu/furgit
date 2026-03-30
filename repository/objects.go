@@ -26,7 +26,7 @@ func openObjectStore(
 	root *os.Root,
 	algo objectid.Algorithm,
 ) (
-	objects objectstore.ReadingStore,
+	objects objectstore.Reader,
 	objectsRoot *os.Root,
 	objectsPackRoot *os.Root,
 	objectsLoose *objectloose.Store,
@@ -45,7 +45,7 @@ func openObjectStore(
 		return nil, nil, nil, nil, nil, err
 	}
 
-	backends := []objectstore.ReadingStore{objectsLoose}
+	backends := []objectstore.Reader{objectsLoose}
 
 	objectsPackRoot, err = objectsRoot.OpenRoot("pack")
 	if err == nil {
@@ -84,6 +84,6 @@ func openObjectStore(
 // Labels: Life-Parent.
 //
 //nolint:ireturn
-func (repo *Repository) Objects() objectstore.ReadingStore {
+func (repo *Repository) Objects() objectstore.Reader {
 	return repo.objects
 }

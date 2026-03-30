@@ -5,7 +5,7 @@ package blob
 //
 // Blob is fully materialized in memory.
 //
-// Consider using objectstore.ReadingStore.ReadReaderContent,
+// Consider using objectstore.Reader.ReadReaderContent,
 // or appropriate streaming write APIs.
 //
 // Labels: MT-Unsafe.

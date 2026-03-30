@@ -50,4 +50,4 @@ type Store struct {
 	deltaCache *deltaCache
 }
 
-var _ objectstore.ReadingStore = (*Store)(nil)
+var _ objectstore.Reader = (*Store)(nil)
