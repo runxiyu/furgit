@@ -2,8 +2,8 @@
 
 * See [gitbench](https://git.sr.ht/~runxiyu/gitbench).
 * `legacy` branch furgit is slightly faster due to buffer reuse and custom
-  ZLIB. These will be re-added.
-* Alpine edge, i5-10210U, `performance` governor, `linux.git`.
+  ZLIB. These will be re‐added.
+* Alpine edge, i5‐10210U, `performance` governor, `linux.git`.
 * go-git may become much faster when
   [#1894](https://github.com/go-git/go-git/pull/1894)
   and such are fully in use.

@@ -3,7 +3,7 @@
 [![builds.sr.ht status](https://builds.sr.ht/~runxiyu/furgit.svg)](https://builds.sr.ht/~runxiyu/furgit)
 [![Go Reference](https://pkg.go.dev/badge/codeberg.org/lindenii/furgit.svg)](https://pkg.go.dev/codeberg.org/lindenii/furgit)
 
-Furgit is a low-level Git library in Go.
+Furgit is a low‐level Git library in Go.
 
 ## Status
 
@@ -14,7 +14,7 @@ Furgit is a low-level Git library in Go.
 
 ## Goals
 
-* General-purpose Git plumbing library for UNIX-like systems
+* General‐purpose Git plumbing library for UNIX‐like systems
 * Aim for extremely clear and modular architecture
 * Then aim for high performance
 * Expect familiarity with Git internals

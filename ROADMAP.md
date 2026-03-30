@@ -5,8 +5,8 @@
   * [ ] Includes
   * [ ] Writing
 * [X] Object IDs
-  * [X] SHA-256
-  * [X] SHA-1
+  * [X] SHA‐256
+  * [X] SHA‐1
 * [X] Object model (incl., parse, serialize)
   * [X] Blobs
   * [X] Trees
@@ -32,7 +32,7 @@
     * [X] Pack index lookups
     * [X] Delta caching
     * [X] Delta application
-    * [ ] Pack-wide bloom filters
+    * [ ] Pack‐wide bloom filters
     * [ ] Multi pack indexes
 * [ ] Writing objects
   * [X] Loose object writing
@@ -50,7 +50,7 @@
   * [ ] Plugabble compression algorithms
   * [X] ZLIB support
   * [ ] DEFLATE optimizations
-  * [X] Adler-32 SIMD optimizations
+  * [X] Adler‐32 SIMD optimizations
 * [X] References
   * [X] Detached references
   * [X] Symbolic references
@@ -103,21 +103,21 @@
   * [ ] Revision log walk
     * [ ] Topological ordering
     * [ ] Date ordering
-    * [ ] Path-limited
+    * [ ] Path‐limited
 * [ ] Diffing
   * [ ] Blame
   * [ ] Annotate
   * [X] Tree diffing
     * [ ] Similarity/rename/copy detection
-  * [ ] Multi-way diffs
-  * [ ] Patch-id
-  * [ ] Range-diff
+  * [ ] Multi‐way diffs
+  * [ ] Patch‐id
+  * [ ] Range‐diff
   * Blob diffing
     * [ ] Word diffs
     * [X] Myers
     * [ ] Patience
     * [ ] Histogram
-    * [ ] Tree-way
+    * [ ] Three‐way
   * [ ] Format patch
   * [ ] Apply/amend patch
 * Branch integration/rewrite/etc methods
@@ -133,7 +133,7 @@
   * [X] side-band-64k
   * [X] Ingesting packfiles
     * [X] Quarantine areas
-    * [X] Un-thinning thin packs
+    * [X] Un‐thinning thin packs
   * Version 0, version 1 protocols
     * [X] Server side
       * [X] Reference advertisement
@@ -148,7 +148,7 @@
       * [ ] "Upload"
     * [ ] Client side
       * [ ] Fetch
-  * Protocol-independent logic
+  * Protocol‐independent logic
     * Common
       * [X] Progress meters
     * Client side
@@ -188,11 +188,11 @@
   * [ ] Filesystem monitor
   * [ ] Worktree
     * [ ] Common directory
-    * [ ] Worktree-specific references
-      * [X] Worktree-specific reference name validation
+    * [ ] Worktree‐specific references
+      * [X] Worktree‐specific reference name validation
 * Research
   * [ ] Dynamic packfiles
-    * [ ] Compaction; page-sized hole punching
+    * [ ] Compaction; page‐sized hole punching
     * [ ] Dynamic indexing
       * [ ] Linear/extendible/spiral hashing
     * [ ] Dynamic reachability bitmaps

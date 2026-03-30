@@ -18,7 +18,7 @@ undesirable behavior.
 
 Please ask for help with writing your regression test before asking for your
 problem to be fixed. Time invested in writing a regression test saves time
-wasted on back-and-forth discussion about how the problem can be reproduced. A
+wasted on back‐and‐forth discussion about how the problem can be reproduced. A
 regression test will need to be written in any case to verify a fix and
 prevent the problem from resurfacing.
 
@@ -52,7 +52,7 @@ For the purposes of the Developer Certificate of Origin, the "open source
 license" refers to the GNU Affero General Public License, Version 3.0, with
 the above proxy designation in the README, pursuant to Section 14.
 
-All contributors are required to "sign-off" their commits (using `git commit
+All contributors are required to "sign‐off" their commits (using `git commit
 -s`) to indicate that they have agreed to the [Developer Certificate of
 Origin](https://developercertificate.org), reproduced below.
 
