@@ -22,11 +22,16 @@ type ObjectWriter interface {
 	WriteBytesFull(raw []byte) (objectid.ObjectID, error)
 }
 
-// PackWriteOptions controls one pack write operation.
-type PackWriteOptions struct{}
+// ObjectQuarantine represents one quarantined object-wise write.
+type ObjectQuarantine interface {
+	Quarantine
+	ObjectWriter
+}
 
-// PackWriter writes Git pack streams.
-type PackWriter interface {
-	// WritePack ingests one pack stream.
-	WritePack(src io.Reader, opts PackWriteOptions) error
+// ObjectQuarantineOptions controls the options for one object quarantine creation.
+type ObjectQuarantineOptions struct{}
+
+// ObjectQuarantiner creates quarantines for object-wise writes.
+type ObjectQuarantiner interface {
+	BeginObjectQuarantine(opts ObjectQuarantineOptions) (ObjectQuarantine, error)
 }
