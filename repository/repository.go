@@ -41,5 +41,9 @@ type Repository struct {
 	commitGraph     *commitgraphread.Reader
 	commitQueries   *commitquery.Queries
 	refRoot         *os.Root
-	refs            refstore.ReadWriteStore
+	refs            interface {
+		refstore.ReadingStore
+		refstore.TransactionalStore
+		refstore.BatchStore
+	}
 }

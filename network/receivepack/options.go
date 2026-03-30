@@ -23,7 +23,11 @@ type Options struct {
 	// Algorithm is the repository object ID algorithm used by the push session.
 	Algorithm objectid.Algorithm
 	// Refs is the reference store visible to the push.
-	Refs refstore.ReadWriteStore
+	Refs interface {
+		refstore.ReadingStore
+		refstore.TransactionalStore
+		refstore.BatchStore
+	}
 	// ExistingObjects is the object store visible to the push before any newly
 	// uploaded quarantined objects are promoted.
 	ExistingObjects objectstore.Reader

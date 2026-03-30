@@ -25,8 +25,12 @@ type PromotedObjectPermissions struct {
 // Progress, Hook, and HookIO are optional; when provided they are also
 // borrowed for the duration of Execute.
 type Options struct {
-	Algorithm                 objectid.Algorithm
-	Refs                      refstore.ReadWriteStore
+	Algorithm objectid.Algorithm
+	Refs      interface {
+		refstore.ReadingStore
+		refstore.TransactionalStore
+		refstore.BatchStore
+	}
 	ExistingObjects           objectstore.Reader
 	CommitGraph               *commitgraphread.Reader
 	ObjectsRoot               *os.Root

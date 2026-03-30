@@ -11,6 +11,10 @@ import refstore "codeberg.org/lindenii/furgit/ref/store"
 // Labels: Life-Parent.
 //
 //nolint:ireturn
-func (repo *Repository) Refs() refstore.ReadWriteStore {
+func (repo *Repository) Refs() interface {
+	refstore.ReadingStore
+	refstore.TransactionalStore
+	refstore.BatchStore
+} {
 	return repo.refs
 }
