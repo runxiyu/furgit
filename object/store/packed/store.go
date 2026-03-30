@@ -1,6 +1,9 @@
 package packed
 
 import (
+	"os"
+
+	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/store/packed/internal/reading"
 )
 
@@ -8,6 +11,9 @@ import (
 //
 // Labels: Close-Caller.
 type Store struct {
+	root   *os.Root
+	algo   objectid.Algorithm
+	opts   Options
 	reader *reading.Store
 }
 

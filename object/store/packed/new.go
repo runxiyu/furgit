@@ -16,5 +16,10 @@ func New(root *os.Root, algo objectid.Algorithm, opts Options) (*Store, error) {
 		return nil, err
 	}
 
-	return &Store{reader: reader}, nil
+	return &Store{
+		root:   root,
+		algo:   algo,
+		opts:   opts,
+		reader: reader,
+	}, nil
 }
