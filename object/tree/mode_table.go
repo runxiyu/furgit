@@ -2,18 +2,23 @@ package tree
 
 var fileModeTable = map[FileMode]fileModeDetails{ //nolint:gochecknoglobals
 	FileModeDir: {
-		isBlobLike: false,
+		isBlobLike:    false,
+		isRegularFile: false,
 	},
 	FileModeRegular: {
-		isBlobLike: true,
+		isBlobLike:    true,
+		isRegularFile: true,
 	},
 	FileModeExecutable: {
-		isBlobLike: true,
+		isBlobLike:    true,
+		isRegularFile: true,
 	},
 	FileModeSymlink: {
-		isBlobLike: true,
+		isBlobLike:    true,
+		isRegularFile: false,
 	},
 	FileModeGitlink: {
-		isBlobLike: false,
+		isBlobLike:    false,
+		isRegularFile: false,
 	},
 }
