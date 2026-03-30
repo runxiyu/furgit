@@ -1,5 +1,11 @@
 // Package furgit provides low-level Git operations.
 //
+// Furgit provides absolutely no guarantees on correctness, performance,
+// API stability. In particular, before version 1.0.0, no attempt at
+// API stability is made at all, and breaking changes may be introduced
+// in patch-level releases. See also the warranty and liability disclaimers
+// in the license.
+//
 // Git libraries often center on a repository type that owns objects, refs,
 // worktree state, and configuration behind a single facade. Furgit inverts
 // that: objects are plain values, stored objects are separate types that
