@@ -25,7 +25,6 @@ func TestExecutePackExpectedWithoutObjectIngress(t *testing.T) {
 
 		store := memory.New(algo)
 		svc := service.New(service.Options{
-			Algorithm:       algo,
 			ExistingObjects: store,
 		})
 
@@ -59,7 +58,6 @@ func TestExecuteDiscardedQuarantineAfterIngestFailure(t *testing.T) {
 		objectIngress := newDualIngress(t, algo)
 
 		svc := service.New(service.Options{
-			Algorithm:       algo,
 			ExistingObjects: store,
 			ObjectIngress:   objectIngress,
 		})

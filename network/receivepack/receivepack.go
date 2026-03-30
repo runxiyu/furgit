@@ -105,7 +105,6 @@ func ReceivePack(
 	}
 
 	svc := service.New(service.Options{
-		Algorithm:       opts.Algorithm,
 		Refs:            opts.Refs,
 		ExistingObjects: opts.ExistingObjects,
 		ObjectIngress:   opts.ObjectIngress,

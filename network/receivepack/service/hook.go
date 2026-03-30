@@ -30,8 +30,11 @@ type UpdateDecision struct {
 //
 // Labels: Life-Call.
 type HookRequest struct {
-	Refs               refstore.ReadingStore
-	ExistingObjects    objectstore.Reader
+	Refs            refstore.ReadingStore
+	ExistingObjects objectstore.Reader
+	// QuarantinedObjects exposes quarantined objects for this push.
+	//
+	// When the push did not create a quarantine, QuarantinedObjects is nil.
 	QuarantinedObjects objectstore.Reader
 	CommitGraph        *commitgraphread.Reader
 	Updates            []RefUpdate

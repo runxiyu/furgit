@@ -21,7 +21,10 @@ func RejectForcePush() receivepack.Hook {
 	) ([]receivepack.UpdateDecision, error) {
 		_ = ctx
 
-		objects := objectmix.New(req.QuarantinedObjects, req.ExistingObjects)
+		objects := req.ExistingObjects
+		if req.QuarantinedObjects != nil {
+			objects = objectmix.New(req.QuarantinedObjects, req.ExistingObjects)
+		}
 
 		queries := commitquery.New(fetch.New(objects), req.CommitGraph)
 
