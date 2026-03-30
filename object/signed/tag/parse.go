@@ -52,6 +52,7 @@ func Parse(body []byte, storageAlgo objectid.Algorithm) (*Tag, error) {
 	}
 
 	payloadStart := 0
+
 	payloadEnd := signatureStart
 	if signatureStart == len(body) {
 		payloadEnd = len(body)
@@ -122,6 +123,7 @@ func Parse(body []byte, storageAlgo objectid.Algorithm) (*Tag, error) {
 	}
 
 	tag.appendPayloadRange(payloadStart, payloadEnd)
+
 	if signatureStart != len(body) {
 		tag.signatures[storageAlgo] = append(tag.signatures[storageAlgo], byteRange{
 			start: signatureStart,

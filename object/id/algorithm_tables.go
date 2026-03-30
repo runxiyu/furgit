@@ -61,10 +61,12 @@ func init() { //nolint:gochecknoinits
 		}
 
 		info.emptyTree = info.sum(emptyTreeInput)
+
 		algorithmByName[info.name] = algo
 		if info.signatureHeaderName != "" {
 			algorithmBySignatureHeaderName[info.signatureHeaderName] = algo
 		}
+
 		supportedAlgorithms = append(supportedAlgorithms, algo)
 	}
 }

@@ -17,6 +17,7 @@ func (tree *Tree) RemoveEntry(name []byte) error {
 	})
 	if index >= 0 {
 		tree.Entries = slices.Delete(tree.Entries, index, index+1)
+
 		return nil
 	}
 
