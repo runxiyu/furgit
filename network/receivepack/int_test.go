@@ -15,6 +15,10 @@ import (
 	receivepack "codeberg.org/lindenii/furgit/network/receivepack"
 	receivepackhooks "codeberg.org/lindenii/furgit/network/receivepack/hooks"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectstore "codeberg.org/lindenii/furgit/object/store"
+	objectdual "codeberg.org/lindenii/furgit/object/store/dual"
+	objectloose "codeberg.org/lindenii/furgit/object/store/loose"
+	objectpacked "codeberg.org/lindenii/furgit/object/store/packed"
 )
 
 func TestReceivePackDeleteOnlyAtomicDeleteSucceeds(t *testing.T) {
@@ -301,7 +305,7 @@ func testReceivePackProtocolFallback(t *testing.T, gitProtocol string) {
 	})
 }
 
-func TestReceivePackPackRequestWithoutObjectsRootReportsNotConfigured(t *testing.T) {
+func TestReceivePackPackRequestWithoutObjectIngressReportsNotConfigured(t *testing.T) {
 	t.Parallel()
 
 	//nolint:thelper
@@ -334,7 +338,7 @@ func TestReceivePackPackRequestWithoutObjectsRootReportsNotConfigured(t *testing
 		}
 
 		got := output.String()
-		if !strings.Contains(got, "unpack objects root not configured\n") {
+		if !strings.Contains(got, "unpack object ingress not configured\n") {
 			t.Fatalf("unexpected receive-pack output %q", got)
 		}
 	})
@@ -352,7 +356,7 @@ func TestReceivePackPackCreatePromotesObjectsAndUpdatesRef(t *testing.T) {
 
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		repo := receiver.OpenRepository(t)
-		objectsRoot := receiver.OpenObjectsRoot(t)
+		objectIngress := openReceivePackIngress(t, receiver, algo)
 
 		packStream := sender.PackObjectsReader(t, []string{commitID.String()}, false)
 		t.Cleanup(func() {
@@ -377,7 +381,7 @@ func TestReceivePackPackCreatePromotesObjectsAndUpdatesRef(t *testing.T) {
 				Algorithm:       algo,
 				Refs:            repo.Refs(),
 				ExistingObjects: repo.Objects(),
-				ObjectsRoot:     objectsRoot,
+				ObjectIngress:   objectIngress,
 			},
 		)
 		if err != nil {
@@ -423,7 +427,7 @@ func TestReceivePackHookSeesQuarantinedObjectsAndCanRejectBeforePromotion(t *tes
 
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		repo := receiver.OpenRepository(t)
-		objectsRoot := receiver.OpenObjectsRoot(t)
+		objectIngress := openReceivePackIngress(t, receiver, algo)
 
 		packStream := sender.PackObjectsReader(t, []string{commitID.String()}, false)
 		t.Cleanup(func() {
@@ -449,7 +453,7 @@ func TestReceivePackHookSeesQuarantinedObjectsAndCanRejectBeforePromotion(t *tes
 				Algorithm:       algo,
 				Refs:            repo.Refs(),
 				ExistingObjects: repo.Objects(),
-				ObjectsRoot:     objectsRoot,
+				ObjectIngress:   objectIngress,
 				Hook: func(ctx context.Context, req receivepack.HookRequest) ([]receivepack.UpdateDecision, error) {
 					hookCalled = true
 
@@ -658,7 +662,7 @@ func TestReceivePackPredefinedRejectForcePushHookRejectsNonFastForward(t *testin
 		testRepo.UpdateRef(t, "refs/heads/main", currentID)
 
 		repo := testRepo.OpenRepository(t)
-		objectsRoot := testRepo.OpenObjectsRoot(t)
+		objectIngress := openReceivePackIngress(t, testRepo, algo)
 		packStream := testRepo.PackObjectsReader(t, []string{forcedID.String(), "^" + currentID.String()}, false)
 		t.Cleanup(func() {
 			_ = packStream.Close()
@@ -682,7 +686,7 @@ func TestReceivePackPredefinedRejectForcePushHookRejectsNonFastForward(t *testin
 				Algorithm:       algo,
 				Refs:            repo.Refs(),
 				ExistingObjects: repo.Objects(),
-				ObjectsRoot:     objectsRoot,
+				ObjectIngress:   objectIngress,
 				Hook:            receivepackhooks.RejectForcePush(),
 			},
 		)
@@ -765,7 +769,7 @@ func TestReceivePackGitPushCreatesBranch(t *testing.T) {
 
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		repo := receiver.OpenRepository(t)
-		objectsRoot := receiver.OpenObjectsRoot(t)
+		objectIngress := openReceivePackIngress(t, receiver, algo)
 
 		stdout, stderr, clientErr, serverErr := runGitPushFD(
 			t,
@@ -774,7 +778,7 @@ func TestReceivePackGitPushCreatesBranch(t *testing.T) {
 				Algorithm:       algo,
 				Refs:            repo.Refs(),
 				ExistingObjects: repo.Objects(),
-				ObjectsRoot:     objectsRoot,
+				ObjectIngress:   objectIngress,
 			},
 			"push", "--porcelain", "fd::3,4/test", "refs/heads/main:refs/heads/main",
 		)
@@ -815,7 +819,7 @@ func TestReceivePackGitPushRefUpdateWithoutNewObjectsSucceeds(t *testing.T) {
 		receiver.UpdateRef(t, "refs/heads/main", commitID)
 
 		repo := receiver.OpenRepository(t)
-		objectsRoot := receiver.OpenObjectsRoot(t)
+		objectIngress := openReceivePackIngress(t, receiver, algo)
 
 		stdout, stderr, clientErr, serverErr := runGitPushFD(
 			t,
@@ -824,7 +828,7 @@ func TestReceivePackGitPushRefUpdateWithoutNewObjectsSucceeds(t *testing.T) {
 				Algorithm:       algo,
 				Refs:            repo.Refs(),
 				ExistingObjects: repo.Objects(),
-				ObjectsRoot:     objectsRoot,
+				ObjectIngress:   objectIngress,
 			},
 			"push", "--porcelain", "fd::3,4/test", "refs/heads/main:refs/heads/topic",
 		)
@@ -911,7 +915,7 @@ func TestReceivePackGitPushRejectsForcedUpdateViaHook(t *testing.T) {
 		receiver.UpdateRef(t, "refs/heads/main", currentID)
 
 		repo := receiver.OpenRepository(t)
-		objectsRoot := receiver.OpenObjectsRoot(t)
+		objectIngress := openReceivePackIngress(t, receiver, algo)
 
 		stdout, stderr, clientErr, serverErr := runGitPushFD(
 			t,
@@ -920,7 +924,7 @@ func TestReceivePackGitPushRejectsForcedUpdateViaHook(t *testing.T) {
 				Algorithm:       algo,
 				Refs:            repo.Refs(),
 				ExistingObjects: repo.Objects(),
-				ObjectsRoot:     objectsRoot,
+				ObjectIngress:   objectIngress,
 				Hook:            receivepackhooks.RejectForcePush(),
 			},
 			"push", "--porcelain", "--force", "fd::3,4/test", "refs/heads/main:refs/heads/main",
@@ -958,6 +962,50 @@ func (bufferWriteFlusher) Flush() error {
 
 func pktlineData(payload string) string {
 	return fmt.Sprintf("%04x%s", len(payload)+4, payload)
+}
+
+func openReceivePackIngress(
+	tb testing.TB,
+	testRepo *testgit.TestRepo,
+	algo objectid.Algorithm,
+) objectstore.Quarantiner {
+	tb.Helper()
+
+	objectsRoot := testRepo.OpenObjectsRoot(tb)
+
+	err := objectsRoot.Mkdir("pack", 0o755)
+	if err != nil && !os.IsExist(err) {
+		tb.Fatalf("Mkdir(pack): %v", err)
+	}
+
+	packRoot, err := objectsRoot.OpenRoot("pack")
+	if err != nil {
+		tb.Fatalf("OpenRoot(pack): %v", err)
+	}
+
+	tb.Cleanup(func() {
+		_ = packRoot.Close()
+	})
+
+	looseStore, err := objectloose.New(objectsRoot, algo)
+	if err != nil {
+		tb.Fatalf("loose.New: %v", err)
+	}
+
+	tb.Cleanup(func() {
+		_ = looseStore.Close()
+	})
+
+	packedStore, err := objectpacked.New(packRoot, algo, objectpacked.Options{WriteRev: true})
+	if err != nil {
+		tb.Fatalf("packed.New: %v", err)
+	}
+
+	tb.Cleanup(func() {
+		_ = packedStore.Close()
+	})
+
+	return objectdual.New(looseStore, packedStore)
 }
 
 type fileWriteFlusher struct {

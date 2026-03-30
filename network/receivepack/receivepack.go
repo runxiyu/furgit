@@ -108,13 +108,10 @@ func ReceivePack(
 		Algorithm:       opts.Algorithm,
 		Refs:            opts.Refs,
 		ExistingObjects: opts.ExistingObjects,
+		ObjectIngress:   opts.ObjectIngress,
 		CommitGraph:     opts.CommitGraph,
-		ObjectsRoot:     opts.ObjectsRoot,
 		Progress:        progress,
-		PromotedObjectPermissions: translatePromotedObjectPermissions(
-			opts.PromotedObjectPermissions,
-		),
-		Hook: translateHook(opts.Hook),
+		Hook:            translateHook(opts.Hook),
 		HookIO: service.HookIO{
 			Progress: progress,
 			Error:    protoSession.ErrorWriter(),

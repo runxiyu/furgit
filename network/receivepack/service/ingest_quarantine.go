@@ -1,19 +1,17 @@
 package service
 
 import (
-	"os"
-
-	"codeberg.org/lindenii/furgit/format/packfile/ingest"
 	"codeberg.org/lindenii/furgit/internal/utils"
+	objectstore "codeberg.org/lindenii/furgit/object/store"
 )
 
 func (service *Service) ingestQuarantine(
 	result *Result,
 	commands []Command,
 	req *Request,
-) (string, *os.Root, bool) {
+) (objectstore.Quarantine, bool) {
 	if !req.PackExpected {
-		return "", nil, true
+		return nil, true
 	}
 
 	if req.Pack == nil {
@@ -22,16 +20,16 @@ func (service *Service) ingestQuarantine(
 		result.UnpackError = "missing pack stream"
 		fillCommandErrors(result, commands, "missing pack stream")
 
-		return "", nil, false
+		return nil, false
 	}
 
-	if service.opts.ObjectsRoot == nil {
-		utils.BestEffortFprintf(service.opts.Progress, "unpack failed: objects root not configured.\n")
+	if service.opts.ObjectIngress == nil {
+		utils.BestEffortFprintf(service.opts.Progress, "unpack failed: object ingress not configured.\n")
 
-		result.UnpackError = "objects root not configured"
-		fillCommandErrors(result, commands, "objects root not configured")
+		result.UnpackError = "object ingress not configured"
+		fillCommandErrors(result, commands, "object ingress not configured")
 
-		return "", nil, false
+		return nil, false
 	}
 
 	var err error
@@ -43,101 +41,41 @@ func (service *Service) ingestQuarantine(
 		result.UnpackError = err.Error()
 		fillCommandErrors(result, commands, err.Error())
 
-		return "", nil, false
-	}
-
-	pending, err := ingest.Ingest(
-		req.Pack,
-		service.opts.Algorithm,
-		ingest.Options{
-			FixThin:  true,
-			WriteRev: true,
-			Base:     service.opts.ExistingObjects,
-			Progress: service.opts.Progress,
-		},
-	)
-	if err != nil {
-		utils.BestEffortFprintf(service.opts.Progress, "unpack failed: %v.\n", err)
-
-		result.UnpackError = err.Error()
-		fillCommandErrors(result, commands, err.Error())
-
-		return "", nil, false
-	}
-
-	if pending.Header().ObjectCount == 0 {
-		discarded, err := pending.Discard()
-		if err != nil {
-			utils.BestEffortFprintf(service.opts.Progress, "unpack failed: %v.\n", err)
-
-			result.UnpackError = err.Error()
-			fillCommandErrors(result, commands, err.Error())
-
-			return "", nil, false
-		}
-
-		result.Ingest = &ingest.Result{
-			PackHash:    discarded.PackHash,
-			ObjectCount: discarded.ObjectCount,
-		}
-
-		utils.BestEffortFprintf(
-			service.opts.Progress,
-			"unpacking: done (%d objects, %s).\n",
-			discarded.ObjectCount,
-			discarded.PackHash,
-		)
-
-		return "", nil, true
+		return nil, false
 	}
 
 	utils.BestEffortFprintf(service.opts.Progress, "creating quarantine...\r")
 
-	quarantineName, quarantineRoot, err := service.createQuarantineRoot()
+	quarantine, err := service.opts.ObjectIngress.BeginQuarantine(objectstore.QuarantineOptions{})
 	if err != nil {
 		utils.BestEffortFprintf(service.opts.Progress, "unpack failed: %v.\n", err)
 
 		result.UnpackError = err.Error()
 		fillCommandErrors(result, commands, err.Error())
 
-		return "", nil, false
-	}
-
-	quarantinePackRoot, err := service.openQuarantinePackRoot(quarantineRoot)
-	if err != nil {
-		utils.BestEffortFprintf(service.opts.Progress, "unpack failed: %v.\n", err)
-
-		result.UnpackError = err.Error()
-		fillCommandErrors(result, commands, err.Error())
-
-		_ = quarantineRoot.Close()
-		_ = service.opts.ObjectsRoot.RemoveAll(quarantineName)
-
-		return "", nil, false
+		return nil, false
 	}
 
 	utils.BestEffortFprintf(service.opts.Progress, "creating quarantine: done.\n")
 	utils.BestEffortFprintf(service.opts.Progress, "unpacking...\r")
 
-	ingested, err := pending.Continue(quarantinePackRoot)
-
-	_ = quarantinePackRoot.Close()
-
+	err = quarantine.WritePack(req.Pack, objectstore.PackWriteOptions{
+		ThinBase:           service.opts.ExistingObjects,
+		Progress:           service.opts.Progress,
+		RequireTrailingEOF: false,
+	})
 	if err != nil {
 		utils.BestEffortFprintf(service.opts.Progress, "unpack failed: %v.\n", err)
 
 		result.UnpackError = err.Error()
 		fillCommandErrors(result, commands, err.Error())
 
-		_ = quarantineRoot.Close()
-		_ = service.opts.ObjectsRoot.RemoveAll(quarantineName)
+		_ = quarantine.Discard()
 
-		return "", nil, false
+		return nil, false
 	}
 
-	utils.BestEffortFprintf(service.opts.Progress, "unpacking: done (%d objects, %s).\n", ingested.ObjectCount, ingested.PackHash)
+	utils.BestEffortFprintf(service.opts.Progress, "unpacking: done.\n")
 
-	result.Ingest = &ingested
-
-	return quarantineName, quarantineRoot, true
+	return quarantine, true
 }

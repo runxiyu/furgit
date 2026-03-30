@@ -1,9 +1,6 @@
 package service
 
 import (
-	"io/fs"
-	"os"
-
 	"codeberg.org/lindenii/furgit/common/iowrap"
 	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	objectid "codeberg.org/lindenii/furgit/object/id"
@@ -11,18 +8,14 @@ import (
 	refstore "codeberg.org/lindenii/furgit/ref/store"
 )
 
-type PromotedObjectPermissions struct {
-	DirMode  fs.FileMode
-	FileMode fs.FileMode
-}
-
 // Options configures one protocol-independent receive-pack service.
 //
 // Service borrows all configured dependencies.
 //
 // Refs and ExistingObjects are required and must be non-nil.
-// ObjectsRoot is required if Execute may need to ingest or promote a pack.
-// Progress, Hook, and HookIO are optional; when provided they are also
+// ObjectIngress is required if Execute may need to ingest or quarantine a
+// pack.
+// CommitGraph, Progress, Hook, and HookIO are optional; when provided they are also
 // borrowed for the duration of Execute.
 type Options struct {
 	Algorithm objectid.Algorithm
@@ -31,11 +24,10 @@ type Options struct {
 		refstore.TransactionalStore
 		refstore.BatchStore
 	}
-	ExistingObjects           objectstore.Reader
-	CommitGraph               *commitgraphread.Reader
-	ObjectsRoot               *os.Root
-	Progress                  iowrap.WriteFlusher
-	PromotedObjectPermissions *PromotedObjectPermissions
-	Hook                      Hook
-	HookIO                    HookIO
+	ExistingObjects objectstore.Reader
+	ObjectIngress   objectstore.Quarantiner
+	CommitGraph     *commitgraphread.Reader
+	Progress        iowrap.WriteFlusher
+	Hook            Hook
+	HookIO          HookIO
 }

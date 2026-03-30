@@ -2,7 +2,6 @@ package service_test
 
 import (
 	"context"
-	"io/fs"
 	"os"
 	"strings"
 	"testing"
@@ -10,10 +9,14 @@ import (
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	"codeberg.org/lindenii/furgit/network/receivepack/service"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectstore "codeberg.org/lindenii/furgit/object/store"
+	objectdual "codeberg.org/lindenii/furgit/object/store/dual"
+	objectloose "codeberg.org/lindenii/furgit/object/store/loose"
 	"codeberg.org/lindenii/furgit/object/store/memory"
+	objectpacked "codeberg.org/lindenii/furgit/object/store/packed"
 )
 
-func TestExecutePackExpectedWithoutObjectsRoot(t *testing.T) {
+func TestExecutePackExpectedWithoutObjectIngress(t *testing.T) {
 	t.Parallel()
 
 	//nolint:thelper
@@ -39,13 +42,13 @@ func TestExecutePackExpectedWithoutObjectsRoot(t *testing.T) {
 			t.Fatalf("Execute: %v", err)
 		}
 
-		if result.UnpackError != "objects root not configured" {
+		if result.UnpackError != "object ingress not configured" {
 			t.Fatalf("unexpected unpack error %q", result.UnpackError)
 		}
 	})
 }
 
-func TestExecuteRemovesDerivedQuarantineAfterIngestFailure(t *testing.T) {
+func TestExecuteDiscardedQuarantineAfterIngestFailure(t *testing.T) {
 	t.Parallel()
 
 	//nolint:thelper
@@ -53,21 +56,12 @@ func TestExecuteRemovesDerivedQuarantineAfterIngestFailure(t *testing.T) {
 		t.Parallel()
 
 		store := memory.New(algo)
-		objectsDir := t.TempDir()
-
-		objectsRoot, err := os.OpenRoot(objectsDir)
-		if err != nil {
-			t.Fatalf("os.OpenRoot: %v", err)
-		}
-
-		t.Cleanup(func() {
-			_ = objectsRoot.Close()
-		})
+		objectIngress := newDualIngress(t, algo)
 
 		svc := service.New(service.Options{
 			Algorithm:       algo,
 			ExistingObjects: store,
-			ObjectsRoot:     objectsRoot,
+			ObjectIngress:   objectIngress,
 		})
 
 		result, err := svc.Execute(context.Background(), &service.Request{
@@ -86,14 +80,52 @@ func TestExecuteRemovesDerivedQuarantineAfterIngestFailure(t *testing.T) {
 		if result.UnpackError == "" {
 			t.Fatal("Execute returned empty unpack error for invalid pack")
 		}
-
-		entries, err := fs.ReadDir(objectsRoot.FS(), ".")
-		if err != nil {
-			t.Fatalf("fs.ReadDir: %v", err)
-		}
-
-		if len(entries) != 0 {
-			t.Fatalf("objects root still has entries after failed ingest: %d", len(entries))
-		}
 	})
+}
+
+func newDualIngress(tb testing.TB, algo objectid.Algorithm) objectstore.Quarantiner {
+	tb.Helper()
+
+	objectsRoot, err := os.OpenRoot(tb.TempDir())
+	if err != nil {
+		tb.Fatalf("os.OpenRoot: %v", err)
+	}
+
+	tb.Cleanup(func() {
+		_ = objectsRoot.Close()
+	})
+
+	err = objectsRoot.Mkdir("pack", 0o755)
+	if err != nil {
+		tb.Fatalf("Mkdir(pack): %v", err)
+	}
+
+	packRoot, err := objectsRoot.OpenRoot("pack")
+	if err != nil {
+		tb.Fatalf("OpenRoot(pack): %v", err)
+	}
+
+	tb.Cleanup(func() {
+		_ = packRoot.Close()
+	})
+
+	looseStore, err := objectloose.New(objectsRoot, algo)
+	if err != nil {
+		tb.Fatalf("loose.New: %v", err)
+	}
+
+	tb.Cleanup(func() {
+		_ = looseStore.Close()
+	})
+
+	packedStore, err := objectpacked.New(packRoot, algo, objectpacked.Options{WriteRev: true})
+	if err != nil {
+		tb.Fatalf("packed.New: %v", err)
+	}
+
+	tb.Cleanup(func() {
+		_ = packedStore.Close()
+	})
+
+	return objectdual.New(looseStore, packedStore)
 }

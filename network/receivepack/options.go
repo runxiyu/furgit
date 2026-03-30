@@ -1,8 +1,6 @@
 package receivepack
 
 import (
-	"os"
-
 	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objectstore "codeberg.org/lindenii/furgit/object/store"
@@ -14,7 +12,7 @@ import (
 // ReceivePack borrows all configured dependencies.
 //
 // Refs and ExistingObjects are required and must be non-nil.
-// ObjectsRoot is required if the invocation may need to ingest or promote a
+// ObjectIngress is required if the invocation may need to ingest or quarantine a
 // pack.
 type Options struct {
 	// GitProtocol is the raw Git protocol version string from the transport,
@@ -31,15 +29,12 @@ type Options struct {
 	// ExistingObjects is the object store visible to the push before any newly
 	// uploaded quarantined objects are promoted.
 	ExistingObjects objectstore.Reader
+	// ObjectIngress creates coordinated quarantines for quarantined object and
+	// pack ingestion during the push.
+	ObjectIngress objectstore.Quarantiner
 	// CommitGraph is an optional commit-graph snapshot corresponding to
 	// ExistingObjects.
 	CommitGraph *commitgraphread.Reader
-	// ObjectsRoot is the permanent object storage root beneath which per-push
-	// quarantine directories are derived.
-	ObjectsRoot *os.Root
-	// PromotedObjectPermissions, when non-nil, is applied to objects and
-	// directories moved from quarantine into the permanent object store.
-	PromotedObjectPermissions *PromotedObjectPermissions
 	// Hook, when non-nil, runs after pack ingestion into quarantine and before
 	// quarantine promotion or ref updates. Hook is borrowed for the duration of
 	// ReceivePack.

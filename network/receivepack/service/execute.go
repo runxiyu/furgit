@@ -2,9 +2,9 @@ package service
 
 import (
 	"context"
-	"os"
 
 	"codeberg.org/lindenii/furgit/internal/utils"
+	objectstore "codeberg.org/lindenii/furgit/object/store"
 )
 
 // Execute validates one receive-pack request, optionally ingests its pack into
@@ -15,23 +15,17 @@ func (service *Service) Execute(ctx context.Context, req *Request) (*Result, err
 	result := &Result{
 		Commands: make([]CommandResult, 0, len(req.Commands)),
 	}
+	var err error
 
-	var (
-		quarantineName string
-		quarantineRoot *os.Root
-		err            error
-	)
-
-	quarantineName, quarantineRoot, ok := service.ingestQuarantine(result, req.Commands, req)
+	quarantine, ok := service.ingestQuarantine(result, req.Commands, req)
 	if !ok {
 		return result, nil
 	}
 
-	if quarantineRoot != nil {
-		defer func() {
-			_ = quarantineRoot.Close()
-			_ = service.opts.ObjectsRoot.RemoveAll(quarantineName)
-		}()
+	if quarantine != nil {
+		defer func(q objectstore.Quarantine) {
+			_ = q.Discard()
+		}(quarantine)
 	}
 
 	for _, command := range req.Commands {
@@ -51,7 +45,7 @@ func (service *Service) Execute(ctx context.Context, req *Request) (*Result, err
 		ctx,
 		req,
 		req.Commands,
-		quarantineName,
+		quarantine,
 	)
 	if !ok {
 		fillCommandErrors(result, req.Commands, errText)
@@ -79,12 +73,12 @@ func (service *Service) Execute(ctx context.Context, req *Request) (*Result, err
 		return result, nil
 	}
 
-	if req.PackExpected && quarantineRoot != nil {
+	if req.PackExpected && quarantine != nil {
 		// Git migrates quarantined objects into permanent storage immediately
 		// before starting ref updates.
 		utils.BestEffortFprintf(service.opts.Progress, "promoting quarantine...\r")
 
-		err = service.promoteQuarantine(quarantineName, quarantineRoot)
+		err := quarantine.Promote()
 		if err != nil {
 			utils.BestEffortFprintf(service.opts.Progress, "promoting quarantine: failed: %v.\n", err)
 
@@ -94,6 +88,7 @@ func (service *Service) Execute(ctx context.Context, req *Request) (*Result, err
 			return result, nil
 		}
 
+		quarantine = nil
 		utils.BestEffortFprintf(service.opts.Progress, "promoting quarantine: done.\n")
 	}
 
