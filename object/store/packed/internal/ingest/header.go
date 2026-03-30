@@ -10,39 +10,44 @@ import (
 
 const packHeaderSize = 12
 
+type packHeader struct {
+	Version     uint32
+	ObjectCount uint32
+}
+
 // readAndValidatePackHeader reads one PACK header from src and validates it.
-func readAndValidatePackHeader(src io.Reader) (HeaderInfo, [packHeaderSize]byte, error) {
+func readAndValidatePackHeader(src io.Reader) (packHeader, [packHeaderSize]byte, error) {
 	var hdr [packHeaderSize]byte
 
 	_, err := io.ReadFull(src, hdr[:])
 	if err != nil {
-		return HeaderInfo{}, [packHeaderSize]byte{}, &InvalidPackHeaderError{
+		return packHeader{}, [packHeaderSize]byte{}, &InvalidPackHeaderError{
 			Reason: fmt.Sprintf("read header: %v", err),
 		}
 	}
 
 	header, err := parseAndValidatePackHeader(hdr)
 	if err != nil {
-		return HeaderInfo{}, [packHeaderSize]byte{}, err
+		return packHeader{}, [packHeaderSize]byte{}, err
 	}
 
 	return header, hdr, nil
 }
 
 // parseAndValidatePackHeader validates one already-read PACK header.
-func parseAndValidatePackHeader(hdr [packHeaderSize]byte) (HeaderInfo, error) {
+func parseAndValidatePackHeader(hdr [packHeaderSize]byte) (packHeader, error) {
 	if binary.BigEndian.Uint32(hdr[:4]) != packfile.Signature {
-		return HeaderInfo{}, &InvalidPackHeaderError{Reason: "signature mismatch"}
+		return packHeader{}, &InvalidPackHeaderError{Reason: "signature mismatch"}
 	}
 
 	version := binary.BigEndian.Uint32(hdr[4:8])
 	if !packfile.SupportedVersion(version) {
-		return HeaderInfo{}, &InvalidPackHeaderError{
+		return packHeader{}, &InvalidPackHeaderError{
 			Reason: fmt.Sprintf("unsupported version %d", version),
 		}
 	}
 
-	return HeaderInfo{
+	return packHeader{
 		Version:     version,
 		ObjectCount: binary.BigEndian.Uint32(hdr[8:12]),
 	}, nil

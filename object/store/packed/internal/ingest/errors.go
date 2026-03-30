@@ -66,10 +66,3 @@ func (err *DestinationWriteError) Error() string {
 }
 
 var errExternalThinBase = errors.New("packfile/ingest: external thin base required")
-
-var (
-	// ErrZeroObjectContinue indicates Continue was called for a zero-object pack.
-	ErrZeroObjectContinue = errors.New("packfile/ingest: cannot continue zero-object pack")
-	// ErrNonZeroDiscard indicates Discard was called for a non-zero-object pack.
-	ErrNonZeroDiscard = errors.New("packfile/ingest: cannot discard non-zero pack")
-)

@@ -49,7 +49,7 @@ func newIngestState(
 	destination *os.Root,
 	algo objectid.Algorithm,
 	opts Options,
-	header HeaderInfo,
+	header packHeader,
 	headerRaw [packHeaderSize]byte,
 ) (*ingestState, error) {
 	if algo.Size() == 0 {

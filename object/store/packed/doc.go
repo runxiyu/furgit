@@ -1,3 +1,3 @@
-// Package packed provides Git object reading from pack/index files under an
-// objects/pack directory.
+// Package packed provides Git object reading from, and pack writing to,
+// an objects/pack directory.
 package packed
