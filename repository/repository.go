@@ -15,7 +15,7 @@ import (
 	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
 	"codeberg.org/lindenii/furgit/object/fetch"
 	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstore "codeberg.org/lindenii/furgit/object/store"
+	objectdual "codeberg.org/lindenii/furgit/object/store/dual"
 	objectloose "codeberg.org/lindenii/furgit/object/store/loose"
 	objectpacked "codeberg.org/lindenii/furgit/object/store/packed"
 	refstore "codeberg.org/lindenii/furgit/ref/store"
@@ -32,7 +32,7 @@ type Repository struct {
 	config *config.Config
 	algo   objectid.Algorithm
 
-	objects         objectstore.Reader
+	objects         *objectdual.Dual
 	fetcher         *fetch.Fetcher
 	objectsRoot     *os.Root
 	objectsPackRoot *os.Root

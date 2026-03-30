@@ -1,14 +1,13 @@
 package repository
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	objectstore "codeberg.org/lindenii/furgit/object/store"
+	objectdual "codeberg.org/lindenii/furgit/object/store/dual"
 	objectloose "codeberg.org/lindenii/furgit/object/store/loose"
-	objectmix "codeberg.org/lindenii/furgit/object/store/mix"
 	objectpacked "codeberg.org/lindenii/furgit/object/store/packed"
 )
 
@@ -26,7 +25,7 @@ func openObjectStore(
 	root *os.Root,
 	algo objectid.Algorithm,
 ) (
-	objects objectstore.Reader,
+	objects *objectdual.Dual,
 	objectsRoot *os.Root,
 	objectsPackRoot *os.Root,
 	objectsLoose *objectloose.Store,
@@ -45,32 +44,39 @@ func openObjectStore(
 		return nil, nil, nil, nil, nil, err
 	}
 
-	backends := []objectstore.Reader{objectsLoose}
+	err = objectsRoot.Mkdir("pack", 0o755)
+	if err != nil && !os.IsExist(err) {
+		_ = objectsLoose.Close()
+		_ = objectsRoot.Close()
+
+		return nil, nil, nil, nil, nil, fmt.Errorf("repository: create objects/pack: %w", err)
+	}
 
 	objectsPackRoot, err = objectsRoot.OpenRoot("pack")
-	if err == nil {
-		objectsPacked, err = objectpacked.New(
-			objectsPackRoot,
-			algo,
-			objectpacked.Options{RefreshPolicy: objectpacked.RefreshPolicyNever},
-		)
-		if err != nil {
-			_ = objectsPackRoot.Close()
-			_ = objectsLoose.Close()
-			_ = objectsRoot.Close()
-
-			return nil, nil, nil, nil, nil, err
-		}
-
-		backends = append(backends, objectsPacked)
-	} else if !errors.Is(err, os.ErrNotExist) {
+	if err != nil {
 		_ = objectsLoose.Close()
 		_ = objectsRoot.Close()
 
 		return nil, nil, nil, nil, nil, fmt.Errorf("repository: open objects/pack: %w", err)
 	}
 
-	objects = objectmix.New(backends...)
+	objectsPacked, err = objectpacked.New(
+		objectsPackRoot,
+		algo,
+		objectpacked.Options{
+			RefreshPolicy: objectpacked.RefreshPolicyNever,
+			WriteRev:      true,
+		},
+	)
+	if err != nil {
+		_ = objectsPackRoot.Close()
+		_ = objectsLoose.Close()
+		_ = objectsRoot.Close()
+
+		return nil, nil, nil, nil, nil, err
+	}
+
+	objects = objectdual.New(objectsLoose, objectsPacked)
 
 	return objects, objectsRoot, objectsPackRoot, objectsLoose, objectsPacked, nil
 }
@@ -78,12 +84,17 @@ func openObjectStore(
 // Objects returns the configured object store.
 //
 // Use Objects for direct object-ID lookups, object headers, sizes, raw object
-// bytes, or streamed object contents. Callers who want typed object values
-// should usually prefer [Repository.Fetcher].
+// bytes, streamed object contents, object writes, pack ingestion, and
+// coordinated quarantines. Callers who want typed object values should usually
+// prefer [Repository.Fetcher].
 //
 // Labels: Life-Parent.
 //
 //nolint:ireturn
-func (repo *Repository) Objects() objectstore.Reader {
+func (repo *Repository) Objects() interface {
+	objectstore.Reader
+	objectstore.Writer
+	objectstore.Quarantiner
+} {
 	return repo.objects
 }
