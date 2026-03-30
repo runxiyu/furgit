@@ -9,7 +9,9 @@
 // very different write models: writing one loose object is natural, while
 // writing one object into a packfile backend is wasteful. Instead, we define
 // distinct optional capabilities for object-wise writes, pack-wise writes,
-// and compose them against quarantined writes.
+// and compose them against quarantined writes. Where one logical quarantine
+// supports multiple write shapes together, this package also defines a
+// coordinated writer quarantine capability.
 //
 // Concrete implementations generally inherit the contract documented by the
 // interfaces they satisfy. Implementation docs focus on additional guarantees
