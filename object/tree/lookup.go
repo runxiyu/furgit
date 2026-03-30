@@ -9,9 +9,10 @@ func (tree *Tree) Entry(name []byte) *TreeEntry {
 		return nil
 	}
 
-	if e := tree.entry(name, true); e != nil {
-		return e
+	index, ok := tree.entryIndex(name)
+	if !ok {
+		return nil
 	}
 
-	return tree.entry(name, false)
+	return &tree.Entries[index]
 }

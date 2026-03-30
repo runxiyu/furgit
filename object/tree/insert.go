@@ -15,11 +15,8 @@ func (tree *Tree) InsertEntry(newEntry TreeEntry) error {
 
 	newEntry.Name = append([]byte(nil), newEntry.Name...)
 
-	insertAt, _ := slices.BinarySearchFunc(tree.Entries, treeEntrySearch{
-		name:   newEntry.Name,
-		isTree: newEntry.Mode == FileModeDir,
-	}, func(entry TreeEntry, search treeEntrySearch) int {
-		return TreeEntryNameCompare(entry.Name, entry.Mode, search.name, search.isTree)
+	insertAt, _ := slices.BinarySearchFunc(tree.Entries, newEntry.Name, func(entry TreeEntry, name []byte) int {
+		return TreeEntryNameCompare(entry.Name, entry.Mode, name, newEntry.Mode == FileModeDir)
 	})
 	tree.Entries = slices.Insert(tree.Entries, insertAt, newEntry)
 

@@ -1,7 +1,6 @@
 package tree
 
 import (
-	"bytes"
 	"fmt"
 	"slices"
 )
@@ -12,14 +11,12 @@ func (tree *Tree) RemoveEntry(name []byte) error {
 		return fmt.Errorf("object: tree: entry %q not found", name)
 	}
 
-	index := slices.IndexFunc(tree.Entries, func(entry TreeEntry) bool {
-		return bytes.Equal(entry.Name, name)
-	})
-	if index >= 0 {
-		tree.Entries = slices.Delete(tree.Entries, index, index+1)
-
-		return nil
+	index, ok := tree.entryIndex(name)
+	if !ok {
+		return fmt.Errorf("object: tree: entry %q not found", name)
 	}
 
-	return fmt.Errorf("object: tree: entry %q not found", name)
+	tree.Entries = slices.Delete(tree.Entries, index, index+1)
+
+	return nil
 }

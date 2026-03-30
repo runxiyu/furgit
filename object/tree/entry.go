@@ -17,11 +17,8 @@ type TreeEntry struct {
 }
 
 func (tree *Tree) entry(name []byte, searchIsTree bool) *TreeEntry {
-	index, ok := slices.BinarySearchFunc(tree.Entries, treeEntrySearch{
-		name:   name,
-		isTree: searchIsTree,
-	}, func(entry TreeEntry, search treeEntrySearch) int {
-		return TreeEntryNameCompare(entry.Name, entry.Mode, search.name, search.isTree)
+	index, ok := slices.BinarySearchFunc(tree.Entries, name, func(entry TreeEntry, name []byte) int {
+		return TreeEntryNameCompare(entry.Name, entry.Mode, name, searchIsTree)
 	})
 	if !ok {
 		return nil
@@ -35,7 +32,26 @@ func (tree *Tree) entry(name []byte, searchIsTree bool) *TreeEntry {
 	return entry
 }
 
-type treeEntrySearch struct {
-	name   []byte
-	isTree bool
+func (tree *Tree) entryIndex(name []byte) (int, bool) {
+	index, ok := tree.entryIndexWithMode(name, true)
+	if ok {
+		return index, true
+	}
+
+	return tree.entryIndexWithMode(name, false)
+}
+
+func (tree *Tree) entryIndexWithMode(name []byte, searchIsTree bool) (int, bool) {
+	index, ok := slices.BinarySearchFunc(tree.Entries, name, func(entry TreeEntry, name []byte) int {
+		return TreeEntryNameCompare(entry.Name, entry.Mode, name, searchIsTree)
+	})
+	if !ok {
+		return 0, false
+	}
+
+	if !bytes.Equal(tree.Entries[index].Name, name) {
+		return 0, false
+	}
+
+	return index, true
 }
