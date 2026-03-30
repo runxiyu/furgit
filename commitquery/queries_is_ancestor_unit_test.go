@@ -55,22 +55,54 @@ func TestIs(t *testing.T) {
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
-		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeAncestorTree(t, &objecttree.Tree{Entries: []objecttree.TreeEntry{{
+
+		blob, err := store.WriteBytesContent(objecttype.TypeBlob, []byte("blob\n"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeAncestorTree(t, &objecttree.Tree{Entries: []objecttree.TreeEntry{{
 			Mode: objecttree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
-		c1 := store.AddObject(objecttype.TypeCommit, ancestorCommitBody(tree))
-		c2 := store.AddObject(objecttype.TypeCommit, ancestorCommitBody(tree, c1))
-		otherBlob := store.AddObject(objecttype.TypeBlob, []byte("other-blob\n"))
-		otherTree := store.AddObject(objecttype.TypeTree, mustSerializeAncestorTree(t, &objecttree.Tree{Entries: []objecttree.TreeEntry{{
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		c1, err := store.WriteBytesContent(objecttype.TypeCommit, ancestorCommitBody(tree))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		c2, err := store.WriteBytesContent(objecttype.TypeCommit, ancestorCommitBody(tree, c1))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		otherBlob, err := store.WriteBytesContent(objecttype.TypeBlob, []byte("other-blob\n"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		otherTree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeAncestorTree(t, &objecttree.Tree{Entries: []objecttree.TreeEntry{{
 			Mode: objecttree.FileModeRegular,
 			Name: []byte("g"),
 			ID:   otherBlob,
 		}}}))
-		c3 := store.AddObject(objecttype.TypeCommit, ancestorCommitBody(otherTree))
-		tag := store.AddObject(objecttype.TypeTag, ancestorTagBody(c2, objecttype.TypeCommit))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		c3, err := store.WriteBytesContent(objecttype.TypeCommit, ancestorCommitBody(otherTree))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tag, err := store.WriteBytesContent(objecttype.TypeTag, ancestorTagBody(c2, objecttype.TypeCommit))
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		ok, err := commitquery.New(fetch.New(store), nil).IsAncestor(c1, tag)
 		if err != nil {
@@ -97,16 +129,32 @@ func TestIsRejectsNonCommitAfterPeel(t *testing.T) {
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
-		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeAncestorTree(t, &objecttree.Tree{Entries: []objecttree.TreeEntry{{
+
+		blob, err := store.WriteBytesContent(objecttype.TypeBlob, []byte("blob\n"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeAncestorTree(t, &objecttree.Tree{Entries: []objecttree.TreeEntry{{
 			Mode: objecttree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
-		commit := store.AddObject(objecttype.TypeCommit, ancestorCommitBody(tree))
-		tagToTree := store.AddObject(objecttype.TypeTag, ancestorTagBody(tree, objecttype.TypeTree))
+		if err != nil {
+			t.Fatal(err)
+		}
 
-		_, err := commitquery.New(fetch.New(store), nil).IsAncestor(commit, tagToTree)
+		commit, err := store.WriteBytesContent(objecttype.TypeCommit, ancestorCommitBody(tree))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tagToTree, err := store.WriteBytesContent(objecttype.TypeTag, ancestorTagBody(tree, objecttype.TypeTree))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		_, err = commitquery.New(fetch.New(store), nil).IsAncestor(commit, tagToTree)
 		if err == nil {
 			t.Fatal("expected error")
 		}

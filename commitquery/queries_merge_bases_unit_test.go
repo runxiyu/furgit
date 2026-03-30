@@ -74,15 +74,35 @@ func TestQueryLinearHistory(t *testing.T) {
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
-		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+
+		blob, err := store.WriteBytesContent(objecttype.TypeBlob, []byte("blob\n"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
-		base := store.AddObject(objecttype.TypeCommit, commitBody(tree))
-		left := store.AddObject(objecttype.TypeCommit, commitBody(tree, base))
-		right := store.AddObject(objecttype.TypeCommit, commitBody(tree, left))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		base, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(tree))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		left, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(tree, base))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		right, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(tree, left))
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		query := commitquery.New(fetch.New(store), nil)
 
@@ -115,21 +135,49 @@ func TestQueryPeelsAnnotatedTags(t *testing.T) {
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
-		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		leftTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+
+		blob, err := store.WriteBytesContent(objecttype.TypeBlob, []byte("blob\n"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		leftTree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("left"),
 			ID:   blob,
 		}}}))
-		rightTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rightTree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("right"),
 			ID:   blob,
 		}}}))
-		base := store.AddObject(objecttype.TypeCommit, commitBody(leftTree))
-		left := store.AddObject(objecttype.TypeCommit, commitBody(leftTree, base))
-		right := store.AddObject(objecttype.TypeCommit, commitBody(rightTree, base))
-		tag := store.AddObject(objecttype.TypeTag, tagBody(right, objecttype.TypeCommit))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		base, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(leftTree))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		left, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(leftTree, base))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		right, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(rightTree, base))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tag, err := store.WriteBytesContent(objecttype.TypeTag, tagBody(right, objecttype.TypeCommit))
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		query := commitquery.New(fetch.New(store), nil)
 
@@ -149,37 +197,81 @@ func TestQueryCrissCrossReturnsAllBestCommonAncestors(t *testing.T) {
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
-		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		rootTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+
+		blob, err := store.WriteBytesContent(objecttype.TypeBlob, []byte("blob\n"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rootTree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("root"),
 			ID:   blob,
 		}}}))
-		base1Tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		base1Tree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("base1"),
 			ID:   blob,
 		}}}))
-		base2Tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		base2Tree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("base2"),
 			ID:   blob,
 		}}}))
-		leftTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		leftTree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("left"),
 			ID:   blob,
 		}}}))
-		rightTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rightTree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("right"),
 			ID:   blob,
 		}}}))
-		root := store.AddObject(objecttype.TypeCommit, commitBody(rootTree))
-		base1 := store.AddObject(objecttype.TypeCommit, commitBody(base1Tree, root))
-		base2 := store.AddObject(objecttype.TypeCommit, commitBody(base2Tree, root))
-		left := store.AddObject(objecttype.TypeCommit, commitBody(leftTree, base1, base2))
-		right := store.AddObject(objecttype.TypeCommit, commitBody(rightTree, base2, base1))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		root, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(rootTree))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		base1, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(base1Tree, root))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		base2, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(base2Tree, root))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		left, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(leftTree, base1, base2))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		right, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(rightTree, base2, base1))
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		query := commitquery.New(fetch.New(store), nil)
 
@@ -215,20 +307,44 @@ func TestQueryReturnsNoResultWhenNoCommonAncestorExists(t *testing.T) {
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
-		leftBlob := store.AddObject(objecttype.TypeBlob, []byte("left\n"))
-		leftTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+
+		leftBlob, err := store.WriteBytesContent(objecttype.TypeBlob, []byte("left\n"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		leftTree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("left"),
 			ID:   leftBlob,
 		}}}))
-		rightBlob := store.AddObject(objecttype.TypeBlob, []byte("right\n"))
-		rightTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rightBlob, err := store.WriteBytesContent(objecttype.TypeBlob, []byte("right\n"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rightTree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("right"),
 			ID:   rightBlob,
 		}}}))
-		left := store.AddObject(objecttype.TypeCommit, commitBody(leftTree))
-		right := store.AddObject(objecttype.TypeCommit, commitBody(rightTree))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		left, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(leftTree))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		right, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(rightTree))
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		query := commitquery.New(fetch.New(store), nil)
 
@@ -257,18 +373,34 @@ func TestQueryRejectsNonCommitAfterPeel(t *testing.T) {
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
-		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+
+		blob, err := store.WriteBytesContent(objecttype.TypeBlob, []byte("blob\n"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
-		commit := store.AddObject(objecttype.TypeCommit, commitBody(tree))
-		tagToTree := store.AddObject(objecttype.TypeTag, tagBody(tree, objecttype.TypeTree))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		commit, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(tree))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tagToTree, err := store.WriteBytesContent(objecttype.TypeTag, tagBody(tree, objecttype.TypeTree))
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		query := commitquery.New(fetch.New(store), nil)
 
-		_, err := query.MergeBases(commit, tagToTree)
+		_, err = query.MergeBases(commit, tagToTree)
 		if err == nil {
 			t.Fatal("expected error")
 		}
@@ -289,15 +421,35 @@ func TestQueryAllIsRepeatable(t *testing.T) {
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := memory.New(algo)
-		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+
+		blob, err := store.WriteBytesContent(objecttype.TypeBlob, []byte("blob\n"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
-		base := store.AddObject(objecttype.TypeCommit, commitBody(tree))
-		left := store.AddObject(objecttype.TypeCommit, commitBody(tree, base))
-		right := store.AddObject(objecttype.TypeCommit, commitBody(tree, left))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		base, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(tree))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		left, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(tree, base))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		right, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(tree, left))
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		query := commitquery.New(fetch.New(store), nil)
 

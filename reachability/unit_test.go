@@ -83,23 +83,47 @@ func TestWalkDomainCommitsIncludesTagNodes(t *testing.T) {
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := newCountingMemStore(algo)
-		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+
+		blob, err := store.WriteBytesContent(objecttype.TypeBlob, []byte("blob\n"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
-		commit1 := store.AddObject(objecttype.TypeCommit, commitBody(tree))
-		commit2 := store.AddObject(objecttype.TypeCommit, commitBody(tree, commit1))
-		tag1 := store.AddObject(objecttype.TypeTag, tagBody(commit2, objecttype.TypeCommit))
-		tag2 := store.AddObject(objecttype.TypeTag, tagBody(tag1, objecttype.TypeTag))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		commit1, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(tree))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		commit2, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(tree, commit1))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tag1, err := store.WriteBytesContent(objecttype.TypeTag, tagBody(commit2, objecttype.TypeCommit))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tag2, err := store.WriteBytesContent(objecttype.TypeTag, tagBody(tag1, objecttype.TypeTag))
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		r := reachability.New(store, nil)
 		walk := r.Walk(reachability.DomainCommits, nil, map[objectid.ObjectID]struct{}{tag2: {}})
 
 		got := collectSeq(walk.Seq())
 
-		err := walk.Err()
+		err = walk.Err()
 		if err != nil {
 			t.Fatalf("walk.Err(): %v", err)
 		}
@@ -118,20 +142,32 @@ func TestWalkExcludesHavesCompletely(t *testing.T) {
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := newCountingMemStore(algo)
-		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+
+		blob, err := store.WriteBytesContent(objecttype.TypeBlob, []byte("blob\n"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
-		commit := store.AddObject(objecttype.TypeCommit, commitBody(tree))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		commit, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(tree))
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		r := reachability.New(store, nil)
 		walk := r.Walk(reachability.DomainCommits, map[objectid.ObjectID]struct{}{commit: {}}, map[objectid.ObjectID]struct{}{commit: {}})
 
 		got := collectSeq(walk.Seq())
 
-		err := walk.Err()
+		err = walk.Err()
 		if err != nil {
 			t.Fatalf("walk.Err(): %v", err)
 		}
@@ -147,19 +183,31 @@ func TestWalkDomainCommitsRejectsNonCommitRootAfterPeel(t *testing.T) {
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := newCountingMemStore(algo)
-		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+
+		blob, err := store.WriteBytesContent(objecttype.TypeBlob, []byte("blob\n"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
-		tag := store.AddObject(objecttype.TypeTag, tagBody(tree, objecttype.TypeTree))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tag, err := store.WriteBytesContent(objecttype.TypeTag, tagBody(tree, objecttype.TypeTree))
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		r := reachability.New(store, nil)
 		walk := r.Walk(reachability.DomainCommits, nil, map[objectid.ObjectID]struct{}{tag: {}})
 		_ = collectSeq(walk.Seq())
 
-		err := walk.Err()
+		err = walk.Err()
 		if err == nil {
 			t.Fatal("expected error")
 		}
@@ -180,16 +228,40 @@ func TestWalkDomainCommitsHaveTagStopsTraversal(t *testing.T) {
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := newCountingMemStore(algo)
-		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+
+		blob, err := store.WriteBytesContent(objecttype.TypeBlob, []byte("blob\n"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
-		commit1 := store.AddObject(objecttype.TypeCommit, commitBody(tree))
-		commit2 := store.AddObject(objecttype.TypeCommit, commitBody(tree, commit1))
-		tag1 := store.AddObject(objecttype.TypeTag, tagBody(commit2, objecttype.TypeCommit))
-		tag2 := store.AddObject(objecttype.TypeTag, tagBody(tag1, objecttype.TypeTag))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		commit1, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(tree))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		commit2, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(tree, commit1))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tag1, err := store.WriteBytesContent(objecttype.TypeTag, tagBody(commit2, objecttype.TypeCommit))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tag2, err := store.WriteBytesContent(objecttype.TypeTag, tagBody(tag1, objecttype.TypeTag))
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		r := reachability.New(store, nil)
 		walk := r.Walk(
@@ -200,7 +272,7 @@ func TestWalkDomainCommitsHaveTagStopsTraversal(t *testing.T) {
 
 		got := collectSeq(walk.Seq())
 
-		err := walk.Err()
+		err = walk.Err()
 		if err != nil {
 			t.Fatalf("walk.Err(): %v", err)
 		}
@@ -220,28 +292,47 @@ func TestWalkDomainObjectsRecursesTreesAndSkipsBlobContentReads(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := newCountingMemStore(algo)
 
-		blob1 := store.AddObject(objecttype.TypeBlob, []byte("b1\n"))
-		blob2 := store.AddObject(objecttype.TypeBlob, []byte("b2\n"))
+		blob1, err := store.WriteBytesContent(objecttype.TypeBlob, []byte("b1\n"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		blob2, err := store.WriteBytesContent(objecttype.TypeBlob, []byte("b2\n"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
 		gitlinkTarget := store.Algorithm().Sum([]byte("external-submodule"))
 
-		subtree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+		subtree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("nested"),
 			ID:   blob2,
 		}}}))
-		rootTree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rootTree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{
 			{Mode: tree.FileModeRegular, Name: []byte("a"), ID: blob1},
 			{Mode: tree.FileModeDir, Name: []byte("dir"), ID: subtree},
 			{Mode: tree.FileModeGitlink, Name: []byte("submodule"), ID: gitlinkTarget},
 		}}))
-		commit := store.AddObject(objecttype.TypeCommit, commitBody(rootTree))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		commit, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(rootTree))
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		r := reachability.New(store, nil)
 		walk := r.Walk(reachability.DomainObjects, nil, map[objectid.ObjectID]struct{}{commit: {}})
 
 		got := collectSeq(walk.Seq())
 
-		err := walk.Err()
+		err = walk.Err()
 		if err != nil {
 			t.Fatalf("walk.Err(): %v", err)
 		}
@@ -264,18 +355,31 @@ func TestCheckConnectedReturnsConcreteMissingObject(t *testing.T) {
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		store := newCountingMemStore(algo)
-		blob := store.AddObject(objecttype.TypeBlob, []byte("blob\n"))
-		tree := store.AddObject(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
+
+		blob, err := store.WriteBytesContent(objecttype.TypeBlob, []byte("blob\n"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		tree, err := store.WriteBytesContent(objecttype.TypeTree, mustSerializeTree(t, &tree.Tree{Entries: []tree.TreeEntry{{
 			Mode: tree.FileModeRegular,
 			Name: []byte("f"),
 			ID:   blob,
 		}}}))
+		if err != nil {
+			t.Fatal(err)
+		}
+
 		missingParent := store.Algorithm().Sum([]byte("missing-parent"))
-		commit := store.AddObject(objecttype.TypeCommit, commitBody(tree, missingParent))
+
+		commit, err := store.WriteBytesContent(objecttype.TypeCommit, commitBody(tree, missingParent))
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		r := reachability.New(store, nil)
 
-		err := r.CheckConnected(reachability.DomainCommits, nil, map[objectid.ObjectID]struct{}{commit: {}})
+		err = r.CheckConnected(reachability.DomainCommits, nil, map[objectid.ObjectID]struct{}{commit: {}})
 		if err == nil {
 			t.Fatal("expected error")
 		}

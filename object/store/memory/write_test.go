@@ -1,4 +1,4 @@
-package memory
+package memory_test
 
 import (
 	"bytes"
@@ -7,13 +7,14 @@ import (
 	"codeberg.org/lindenii/furgit/internal/testgit"
 	objectheader "codeberg.org/lindenii/furgit/object/header"
 	objectid "codeberg.org/lindenii/furgit/object/id"
+	"codeberg.org/lindenii/furgit/object/store/memory"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 func TestStoreWriteReaderContent(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
-		store := New(algo)
+		store := memory.New(algo)
 		content := []byte("memory-content\n")
 
 		gotID, err := store.WriteReaderContent(objecttype.TypeBlob, int64(len(content)), bytes.NewReader(content))
@@ -21,7 +22,7 @@ func TestStoreWriteReaderContent(t *testing.T) {
 			t.Fatalf("WriteReaderContent: %v", err)
 		}
 
-		wantID := algo.Sum(buildRawObject(objecttype.TypeBlob, content))
+		wantID := algo.Sum(buildRawObject(t, objecttype.TypeBlob, content))
 		if gotID != wantID {
 			t.Fatalf("WriteReaderContent id = %s, want %s", gotID, wantID)
 		}
@@ -44,9 +45,9 @@ func TestStoreWriteReaderContent(t *testing.T) {
 func TestStoreWriteReaderFull(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
-		store := New(algo)
+		store := memory.New(algo)
 		content := []byte("memory-full\n")
-		raw := buildRawObject(objecttype.TypeBlob, content)
+		raw := buildRawObject(t, objecttype.TypeBlob, content)
 
 		gotID, err := store.WriteReaderFull(bytes.NewReader(raw))
 		if err != nil {
@@ -72,7 +73,7 @@ func TestStoreWriteReaderFull(t *testing.T) {
 func TestStoreWriteBytes(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
-		store := New(algo)
+		store := memory.New(algo)
 		content := []byte("memory-bytes\n")
 
 		gotID, err := store.WriteBytesContent(objecttype.TypeBlob, content)
@@ -80,12 +81,12 @@ func TestStoreWriteBytes(t *testing.T) {
 			t.Fatalf("WriteBytesContent: %v", err)
 		}
 
-		wantID := algo.Sum(buildRawObject(objecttype.TypeBlob, content))
+		wantID := algo.Sum(buildRawObject(t, objecttype.TypeBlob, content))
 		if gotID != wantID {
 			t.Fatalf("WriteBytesContent id = %s, want %s", gotID, wantID)
 		}
 
-		raw := buildRawObject(objecttype.TypeBlob, content)
+		raw := buildRawObject(t, objecttype.TypeBlob, content)
 
 		gotID2, err := store.WriteBytesFull(raw)
 		if err != nil {
@@ -103,7 +104,8 @@ func TestStoreWriteReaderValidationErrors(t *testing.T) {
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		t.Run("content overflow", func(t *testing.T) {
 			t.Parallel()
-			store := New(algo)
+
+			store := memory.New(algo)
 
 			_, err := store.WriteReaderContent(objecttype.TypeBlob, 1, bytes.NewReader([]byte("hello")))
 			if err == nil {
@@ -113,7 +115,8 @@ func TestStoreWriteReaderValidationErrors(t *testing.T) {
 
 		t.Run("content short", func(t *testing.T) {
 			t.Parallel()
-			store := New(algo)
+
+			store := memory.New(algo)
 
 			_, err := store.WriteReaderContent(objecttype.TypeBlob, 5, bytes.NewReader([]byte("x")))
 			if err == nil {
@@ -123,7 +126,8 @@ func TestStoreWriteReaderValidationErrors(t *testing.T) {
 
 		t.Run("full malformed header", func(t *testing.T) {
 			t.Parallel()
-			store := New(algo)
+
+			store := memory.New(algo)
 
 			_, err := store.WriteReaderFull(bytes.NewReader([]byte("not-a-header")))
 			if err == nil {
@@ -133,7 +137,8 @@ func TestStoreWriteReaderValidationErrors(t *testing.T) {
 
 		t.Run("full size mismatch", func(t *testing.T) {
 			t.Parallel()
-			store := New(algo)
+
+			store := memory.New(algo)
 
 			_, err := store.WriteReaderFull(bytes.NewReader([]byte("blob 1\x00hello")))
 			if err == nil {
@@ -143,7 +148,8 @@ func TestStoreWriteReaderValidationErrors(t *testing.T) {
 
 		t.Run("bytes malformed header", func(t *testing.T) {
 			t.Parallel()
-			store := New(algo)
+
+			store := memory.New(algo)
 
 			_, err := store.WriteBytesFull([]byte("not-a-header"))
 			if err == nil {
@@ -157,7 +163,8 @@ func TestBuildRawObjectMatchesObjectHeaderEncode(t *testing.T) {
 	t.Parallel()
 
 	content := []byte("body")
-	raw := buildRawObject(objecttype.TypeBlob, content)
+	raw := buildRawObject(t, objecttype.TypeBlob, content)
+
 	header, ok := objectheader.Encode(objecttype.TypeBlob, int64(len(content)))
 	if !ok {
 		t.Fatalf("objectheader.Encode failed")
@@ -167,4 +174,19 @@ func TestBuildRawObjectMatchesObjectHeaderEncode(t *testing.T) {
 	if !bytes.Equal(raw, want) {
 		t.Fatalf("buildRawObject mismatch")
 	}
+}
+
+func buildRawObject(tb testing.TB, ty objecttype.Type, body []byte) []byte { //nolint:unparam
+	tb.Helper()
+
+	header, ok := objectheader.Encode(ty, int64(len(body)))
+	if !ok {
+		tb.Fatalf("objectheader.Encode(%v, %d) failed", ty, len(body))
+	}
+
+	raw := make([]byte, len(header)+len(body))
+	copy(raw, header)
+	copy(raw[len(header):], body)
+
+	return raw
 }
