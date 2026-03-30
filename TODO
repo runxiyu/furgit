@@ -27,33 +27,24 @@ Unstructured ones
 * Completely redo error handling.
 
 * Better status reporting, filling in more things in report-status-v2.
-* Design some way to pass commit graphs to hooks.
 * Maybe the Progress/Error writers should return error on creation
   instead of automatically discarding content?
 * Actually making signed-push work reasonably
 * Investigate fsck issues with receive-pack
 * Improve performance of delta resolution
 
-* Okay, I think this is a pretty big design issue between the object
-  store and network operations: Things are modular enough that implementing
-  this probably doesn't break many other things, so it's not too big of a deal,
-  but it's an architectural debt that we should concsider: we have nice
-  pluggable object stores, but network-related paths like ingest still take an
-  *os.Root to write their quarantines and final packs into. This is fine for
-  the normal repository that uses Git packfiles, but would obviously not work
-  if we add something like dynamic packs, or want to write to any other sort of
-  object store. Perhaps object stores should get a batch writing interface? But
-  any general purpose, non-pack-aware writing interface would probably perform
-  significantly worse than just natively teeing the network pack (since what we
-  get from the network are always literally packs) to an indexer and the
-  filesystem.  A possible design is to require implementations to implement
-  their own pack ingestion algorithm; but that would make it harder to have
-  alternative protocols in the future, however for now it seems like a valid
-  solution. When there is any sight of alternative, non-pack-based protocols in
-  the future, we should think of another way.
-  go-git handles it in their object stores but the way they
-  implement it is extremely complex and not fit for furgit
-  architecture.
+* Okay, I think this is still a real design issue, just at a different layer
+  now. receive-pack and the object stores are better than they were when pack
+  ingest still wanted raw roots, and we now have coordinated quarantines and a
+  dual store to represent the normal mix. However, that probably isn't the end
+  state either. In the usual repository layout, loose and packed objects are
+  really two parts of one files object storage, and dual may just be an
+  intermediate abstraction until files-backed storage gets a more integrated
+  API, including in particular, ingress/quarantine. We should preserve the
+  current separation for now, because it keeps the boundaries there, and is
+  much simpler than trying to prematurely fuse everything together, but if
+  receive-pack and hooks keep growing around dual then that is probably a sign
+  that the underlying files object storage wants a interface of its own.
 
 * Digital signature API
 * Revision-ish entry points like if you get main or v1.0 we should
