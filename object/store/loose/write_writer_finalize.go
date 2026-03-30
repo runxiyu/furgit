@@ -83,6 +83,7 @@ func (writer *streamWriter) finalize() (objectid.ObjectID, error) {
 	}
 
 	cleanup = false
+	_ = writer.store.root.Remove(writer.tmpRelPath)
 
 	return id, nil
 }
