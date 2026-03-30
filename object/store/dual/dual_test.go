@@ -117,14 +117,14 @@ func TestDualReadsWritesAndQuarantine(t *testing.T) {
 		repo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		store := newDualStore(t, repo, algo)
 
-		quarantiner, ok := any(store).(objectstore.PackQuarantiner)
+		quarantiner, ok := any(store).(objectstore.WriterQuarantiner)
 		if !ok {
-			t.Fatal("dual does not implement PackQuarantiner")
+			t.Fatal("dual does not implement WriterQuarantiner")
 		}
 
-		quarantine, err := quarantiner.BeginPackQuarantine(objectstore.PackQuarantineOptions{})
+		quarantine, err := quarantiner.BeginQuarantine(objectstore.QuarantineOptions{})
 		if err != nil {
-			t.Fatalf("BeginPackQuarantine: %v", err)
+			t.Fatalf("BeginQuarantine: %v", err)
 		}
 
 		err = quarantine.WritePack(bytes.NewReader(packBytes), objectstore.PackWriteOptions{RequireTrailingEOF: true})
@@ -219,18 +219,13 @@ func TestDualQuarantineDiscardDropsBothHalves(t *testing.T) {
 		repo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		store := newDualStore(t, repo, algo)
 
-		quarantiner := any(store).(objectstore.ObjectQuarantiner)
-		quarantine, err := quarantiner.BeginObjectQuarantine(objectstore.ObjectQuarantineOptions{})
+		quarantiner := any(store).(objectstore.WriterQuarantiner)
+		quarantine, err := quarantiner.BeginQuarantine(objectstore.QuarantineOptions{})
 		if err != nil {
-			t.Fatalf("BeginObjectQuarantine: %v", err)
+			t.Fatalf("BeginQuarantine: %v", err)
 		}
 
-		packQ, ok := any(quarantine).(objectstore.PackQuarantine)
-		if !ok {
-			t.Fatal("object quarantine does not also implement PackQuarantine")
-		}
-
-		err = packQ.WritePack(bytes.NewReader(packBytes), objectstore.PackWriteOptions{RequireTrailingEOF: true})
+		err = quarantine.WritePack(bytes.NewReader(packBytes), objectstore.PackWriteOptions{RequireTrailingEOF: true})
 		if err != nil {
 			t.Fatalf("quarantine.WritePack: %v", err)
 		}
