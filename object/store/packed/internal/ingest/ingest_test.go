@@ -28,15 +28,6 @@ func (r *noExtraReadReader) Read(p []byte) (int, error) {
 	return r.reader.Read(p)
 }
 
-func writePack(
-	src io.Reader,
-	packRoot *os.Root,
-	algo objectid.Algorithm,
-	opts ingest.Options,
-) (ingest.Result, error) {
-	return ingest.WritePack(packRoot, algo, src, opts)
-}
-
 // fixturePath returns one fixture file path for the selected algorithm.
 func fixturePath(t *testing.T, algo objectid.Algorithm, name string) string {
 	t.Helper()
@@ -184,7 +175,7 @@ func TestIngestNonThinPackWritesPackIdxRev(t *testing.T) {
 
 		packRoot := receiver.OpenPackRoot(t)
 
-		result, err := writePack(bytes.NewReader(packBytes), packRoot, algo, ingest.Options{
+		result, err := ingest.WritePack(packRoot, algo, bytes.NewReader(packBytes), ingest.Options{
 			WriteRev:           true,
 			RequireTrailingEOF: true,
 		})
@@ -232,7 +223,7 @@ func TestIngestThinPackWithoutFixReturnsUnresolved(t *testing.T) {
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		packRoot := receiver.OpenPackRoot(t)
 
-		_, err := writePack(bytes.NewReader(thinPack), packRoot, algo, ingest.Options{
+		_, err := ingest.WritePack(packRoot, algo, bytes.NewReader(thinPack), ingest.Options{
 			WriteRev:           true,
 			RequireTrailingEOF: true,
 		})
@@ -268,7 +259,7 @@ func TestIngestThinPackWithFixThin(t *testing.T) {
 
 		packRoot := receiver.OpenPackRoot(t)
 
-		_, err := writePack(bytes.NewReader(basePack), packRoot, algo, ingest.Options{
+		_, err := ingest.WritePack(packRoot, algo, bytes.NewReader(basePack), ingest.Options{
 			RequireTrailingEOF: true,
 		})
 		if err != nil {
@@ -277,7 +268,7 @@ func TestIngestThinPackWithFixThin(t *testing.T) {
 
 		receiverRepo := receiver.OpenRepository(t)
 
-		result, err := writePack(bytes.NewReader(thinPack), packRoot, algo, ingest.Options{
+		result, err := ingest.WritePack(packRoot, algo, bytes.NewReader(thinPack), ingest.Options{
 			FixThin:            true,
 			WriteRev:           true,
 			ThinBase:           receiverRepo.Objects(),
@@ -312,7 +303,7 @@ func TestIngestPackTrailerMismatch(t *testing.T) {
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		packRoot := receiver.OpenPackRoot(t)
 
-		_, err := writePack(bytes.NewReader(packBytes), packRoot, algo, ingest.Options{
+		_, err := ingest.WritePack(packRoot, algo, bytes.NewReader(packBytes), ingest.Options{
 			WriteRev:           true,
 			RequireTrailingEOF: true,
 		})
@@ -363,7 +354,7 @@ func TestIngestZeroObjectPackIsDiscardedInternally(t *testing.T) {
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		packRoot := receiver.OpenPackRoot(t)
 
-		result, err := writePack(bytes.NewReader(packBytes), packRoot, algo, ingest.Options{
+		result, err := ingest.WritePack(packRoot, algo, bytes.NewReader(packBytes), ingest.Options{
 			RequireTrailingEOF: true,
 		})
 		if err != nil {
@@ -407,7 +398,7 @@ func TestIngestCanFinishWithoutTrailingEOF(t *testing.T) {
 		receiver := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
 		packRoot := receiver.OpenPackRoot(t)
 
-		result, err := writePack(&noExtraReadReader{reader: bytes.NewReader(packBytes)}, packRoot, algo, ingest.Options{
+		result, err := ingest.WritePack(packRoot, algo, &noExtraReadReader{reader: bytes.NewReader(packBytes)}, ingest.Options{
 			WriteRev: true,
 		})
 		if err != nil {
