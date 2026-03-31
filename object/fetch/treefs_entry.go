@@ -69,12 +69,7 @@ func (entry treeEntryValue) isDir() bool {
 }
 
 func (entry treeEntryValue) blobSize(fetcher *Fetcher) (int64, error) {
-	_, size, err := fetcher.store.ReadHeader(entry.objectID)
-	if err != nil {
-		return 0, err
-	}
-
-	return size, nil
+	return fetcher.Size(entry.objectID)
 }
 
 func (entry treeEntryValue) subtreeID() (objectid.ObjectID, error) {

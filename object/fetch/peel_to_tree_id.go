@@ -10,9 +10,9 @@ import (
 // root tree object ID is then returned.
 func (r *Fetcher) PeelToTreeID(id objectid.ObjectID) (objectid.ObjectID, error) {
 	for {
-		ty, _, err := r.store.ReadHeader(id)
+		ty, _, err := r.Header(id)
 		if err != nil {
-			return objectid.ObjectID{}, wrapObjectReadError(id, err)
+			return objectid.ObjectID{}, err
 		}
 
 		switch ty {

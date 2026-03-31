@@ -2,7 +2,10 @@ package fetch
 
 import objectstore "codeberg.org/lindenii/furgit/object/store"
 
-// Fetcher resolves parsed and streamed objects from an object store.
+// Fetcher provides ordinary object access above an object store.
+//
+// It exposes object metadata, typed object loading, tree-ish and commit-ish
+// peeling, path resolution, one-tree fs views, and blob content streaming.
 //
 // Labels: MT-Safe.
 type Fetcher struct {
