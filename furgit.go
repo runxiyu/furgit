@@ -60,6 +60,10 @@
 //   - Close-No: the caller must not close the returned value directly.
 //   - Close-Idem: repeated Close calls are safe.
 //
+// Mutation labels:
+//
+//   - Mut-Never: returned values must not be mutated.
+//
 // Unless Close-Idem is specified, repeated Close calls are undefined behavior.
 //
 // Unless a doc comment explicitly states otherwise, these labels describe the
