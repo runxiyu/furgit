@@ -57,7 +57,15 @@ func (service *Service) applyBatch(result *Result, commands []Command) error {
 	}
 
 	for _, command := range commands {
-		queueWriteBatch(batch, command)
+		err = queueWriteBatch(batch, command)
+		if err != nil {
+			_ = batch.Abort()
+
+			fillCommandErrors(result, commands, err.Error())
+			utils.BestEffortFprintf(service.opts.Progress, "updating refs: failed while queueing batch.\n")
+
+			return nil
+		}
 	}
 
 	batchResults, err := batch.Apply()
@@ -107,20 +115,16 @@ func queueWriteTransaction(tx refstore.Transaction, command Command) error {
 	return tx.Update(command.Name, command.NewID, command.OldID)
 }
 
-func queueWriteBatch(batch refstore.Batch, command Command) {
+func queueWriteBatch(batch refstore.Batch, command Command) error {
 	if isDelete(command) {
-		batch.Delete(command.Name, command.OldID)
-
-		return
+		return batch.Delete(command.Name, command.OldID)
 	}
 
 	if command.OldID == command.OldID.Algorithm().Zero() {
-		batch.Create(command.Name, command.NewID)
-
-		return
+		return batch.Create(command.Name, command.NewID)
 	}
 
-	batch.Update(command.Name, command.NewID, command.OldID)
+	return batch.Update(command.Name, command.NewID, command.OldID)
 }
 
 func successCommandResult(command Command) CommandResult {

@@ -13,14 +13,6 @@ func (batch *Batch) Apply() ([]refstore.BatchResult, error) {
 	for i, op := range batch.ops {
 		results[i].Name = op.name
 
-		err := executor.validateQueuedUpdate(op)
-		if err != nil {
-			results[i].Status = refstore.BatchStatusRejected
-			results[i].Error = batchResultError(err)
-
-			continue
-		}
-
 		target, err := executor.resolveQueuedUpdateTarget(op)
 		if err != nil {
 			if isBatchRejected(err) {

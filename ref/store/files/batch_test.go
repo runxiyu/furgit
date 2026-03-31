@@ -29,8 +29,15 @@ func TestBatchApplyRejectsStaleDeleteAndAppliesIndependentDelete(t *testing.T) {
 			t.Fatalf("BeginBatch: %v", err)
 		}
 
-		batch.Delete("refs/heads/main", staleID)
-		batch.Delete("refs/heads/topic", commitID)
+		err = batch.Delete("refs/heads/main", staleID)
+		if err != nil {
+			t.Fatalf("Delete(main) queue: %v", err)
+		}
+
+		err = batch.Delete("refs/heads/topic", commitID)
+		if err != nil {
+			t.Fatalf("Delete(topic) queue: %v", err)
+		}
 
 		results, err := batch.Apply()
 		if err != nil {
@@ -83,8 +90,15 @@ func TestBatchApplyRejectsDuplicateQueuedRef(t *testing.T) {
 			t.Fatalf("BeginBatch: %v", err)
 		}
 
-		batch.Delete("refs/heads/main", commitID)
-		batch.Verify("refs/heads/main", commitID)
+		err = batch.Delete("refs/heads/main", commitID)
+		if err != nil {
+			t.Fatalf("Delete(main) queue: %v", err)
+		}
+
+		err = batch.Verify("refs/heads/main", commitID)
+		if err != nil {
+			t.Fatalf("Verify(main) queue: %v", err)
+		}
 
 		results, err := batch.Apply()
 		if err != nil {
