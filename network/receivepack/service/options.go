@@ -18,9 +18,9 @@ import (
 // borrowed for the duration of Execute.
 type Options struct {
 	Refs interface {
-		refstore.ReadingStore
-		refstore.TransactionalStore
-		refstore.BatchStore
+		refstore.Reader
+		refstore.Transactioner
+		refstore.Batcher
 	}
 	ExistingObjects objectstore.Reader
 	ObjectIngress   objectstore.Quarantiner

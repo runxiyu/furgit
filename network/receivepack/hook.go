@@ -34,7 +34,7 @@ type UpdateDecision struct {
 //
 // Labels: Life-Call.
 type HookRequest struct {
-	Refs            refstore.ReadingStore
+	Refs            refstore.Reader
 	ExistingObjects objectstore.Reader
 	// QuarantinedObjects exposes quarantined objects for this push.
 	//

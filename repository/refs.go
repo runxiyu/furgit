@@ -12,9 +12,9 @@ import refstore "codeberg.org/lindenii/furgit/ref/store"
 //
 //nolint:ireturn
 func (repo *Repository) Refs() interface {
-	refstore.ReadingStore
-	refstore.TransactionalStore
-	refstore.BatchStore
+	refstore.Reader
+	refstore.Transactioner
+	refstore.Batcher
 } {
 	return repo.refs
 }

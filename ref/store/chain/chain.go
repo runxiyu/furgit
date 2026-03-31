@@ -8,5 +8,5 @@ import refstore "codeberg.org/lindenii/furgit/ref/store"
 //
 // Labels: Close-Caller.
 type Chain struct {
-	backends []refstore.ReadingStore
+	backends []refstore.Reader
 }

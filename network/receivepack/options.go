@@ -22,9 +22,9 @@ type Options struct {
 	Algorithm objectid.Algorithm
 	// Refs is the reference store visible to the push.
 	Refs interface {
-		refstore.ReadingStore
-		refstore.TransactionalStore
-		refstore.BatchStore
+		refstore.Reader
+		refstore.Transactioner
+		refstore.Batcher
 	}
 	// ExistingObjects is the object store visible to the push before any newly
 	// uploaded quarantined objects are promoted.

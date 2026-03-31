@@ -1,11 +1,11 @@
 package refstore
 
-// TransactionalStore begins atomic reference transactions.
+// Transactioner begins atomic reference transactions.
 //
 // Not every readable reference store is writable. Implementations should only
-// satisfy TransactionalStore when they can stage and commit reference updates
+// satisfy Transactioner when they can stage and commit reference updates
 // atomically within that backend.
-type TransactionalStore interface {
+type Transactioner interface {
 	// BeginTransaction creates one new mutable transaction.
 	//
 	// Labels: Life-Parent.

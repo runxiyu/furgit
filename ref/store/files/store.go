@@ -25,7 +25,7 @@ type Store struct {
 }
 
 var (
-	_ refstore.ReadingStore       = (*Store)(nil)
-	_ refstore.TransactionalStore = (*Store)(nil)
-	_ refstore.BatchStore         = (*Store)(nil)
+	_ refstore.Reader        = (*Store)(nil)
+	_ refstore.Transactioner = (*Store)(nil)
+	_ refstore.Batcher       = (*Store)(nil)
 )

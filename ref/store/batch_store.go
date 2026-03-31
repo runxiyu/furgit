@@ -1,7 +1,7 @@
 package refstore
 
-// BatchStore begins non-atomic reference batches.
-type BatchStore interface {
+// Batcher begins non-atomic reference batches.
+type Batcher interface {
 	// BeginBatch creates one new queued batch.
 	//
 	// Labels: Life-Parent.

@@ -2,10 +2,10 @@ package refstore
 
 import "codeberg.org/lindenii/furgit/ref"
 
-// ReadingStore reads Git references.
+// Reader reads Git references.
 //
 // Labels: MT-Safe.
-type ReadingStore interface {
+type Reader interface {
 	// Resolve resolves a reference name to either a symbolic or detached ref.
 	//
 	// Implementations should return value forms ([ref.Detached] or [ref.Symbolic]),

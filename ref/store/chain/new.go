@@ -7,8 +7,8 @@ import refstore "codeberg.org/lindenii/furgit/ref/store"
 // The provided backends must be non-nil and distinct.
 //
 // Labels: Deps-Borrowed, Life-Parent.
-func New(backends ...refstore.ReadingStore) *Chain {
+func New(backends ...refstore.Reader) *Chain {
 	return &Chain{
-		backends: append([]refstore.ReadingStore(nil), backends...),
+		backends: append([]refstore.Reader(nil), backends...),
 	}
 }
