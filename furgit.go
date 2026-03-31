@@ -17,8 +17,9 @@
 //
 // While the [codeberg.org/lindenii/furgit/repository] package is where
 // most users should begin, it only exists as one convenient composition of
-// those pieces for the standard on-disk repository layout. Nothing should
-// depend on it.
+// those pieces for the standard on-disk repository layout. Nothing inside
+// furgit should depend on it; extensions to furgit such as alterntaive
+// object stores must not depend on it either.
 //
 // # Contract labels
 //
