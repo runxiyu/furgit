@@ -6,5 +6,10 @@ import objectid "codeberg.org/lindenii/furgit/object/id"
 //
 // Labels: Life-Parent.
 func (r *Fetcher) Size(id objectid.ObjectID) (int64, error) {
-	return r.store.ReadSize(id)
+	size, err := r.store.ReadSize(id)
+	if err != nil {
+		return 0, wrapObjectReadError(id, err)
+	}
+
+	return size, nil
 }
