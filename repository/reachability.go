@@ -10,5 +10,5 @@ import "codeberg.org/lindenii/furgit/reachability"
 //
 // Labels: Life-Parent.
 func (repo *Repository) Reachability() *reachability.Reachability {
-	return reachability.New(repo.objects, repo.commitGraph)
+	return reachability.New(repo.fetcher, repo.commitGraph)
 }
