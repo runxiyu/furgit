@@ -11,6 +11,7 @@ import (
 
 	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/internal/testgit"
+	objectfetch "codeberg.org/lindenii/furgit/object/fetch"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/reachability"
 )
@@ -249,7 +250,7 @@ func TestWalkOnPackedOnlyRepo(t *testing.T) {
 func openReachabilityFromTestRepo(t *testing.T, testRepo *testgit.TestRepo) *reachability.Reachability {
 	t.Helper()
 
-	return reachability.New(testRepo.OpenObjectStore(t), nil)
+	return reachability.New(objectfetch.New(testRepo.OpenObjectStore(t)), nil)
 }
 
 func oidSetFromSeq(seq func(func(objectid.ObjectID) bool)) map[objectid.ObjectID]struct{} {

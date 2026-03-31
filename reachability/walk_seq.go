@@ -37,7 +37,7 @@ func (walk *Walk) Seq() iter.Seq[objectid.ObjectID] {
 			item := stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
 
-			if containsOID(walk.haves, item.id) {
+			if _, ok := walk.haves[item.id]; ok {
 				continue
 			}
 

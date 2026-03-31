@@ -4,14 +4,12 @@ import (
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/errors"
-	objectcommit "codeberg.org/lindenii/furgit/object/commit"
-	objecttag "codeberg.org/lindenii/furgit/object/tag"
 	objecttree "codeberg.org/lindenii/furgit/object/tree"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
 func (walk *Walk) expandObjects(item walkItem) ([]walkItem, error) {
-	ty, err := walk.readHeaderType(item.id)
+	ty, _, err := walk.reachability.fetcher.Header(item.id)
 	if err != nil {
 		return nil, err
 	}
@@ -24,37 +22,27 @@ func (walk *Walk) expandObjects(item walkItem) ([]walkItem, error) {
 	case objecttype.TypeBlob:
 		return nil, nil
 	case objecttype.TypeCommit:
-		content, err := walk.readBytesContent(item.id)
+		commit, err := walk.reachability.fetcher.ExactCommit(item.id)
 		if err != nil {
 			return nil, err
 		}
 
-		commit, err := objectcommit.Parse(content, item.id.Algorithm())
-		if err != nil {
-			return nil, err
-		}
+		next := make([]walkItem, 0, len(commit.Object().Parents)+1)
 
-		next := make([]walkItem, 0, len(commit.Parents)+1)
-
-		next = append(next, walkItem{id: commit.Tree, want: objecttype.TypeTree})
-		for _, parent := range commit.Parents {
+		next = append(next, walkItem{id: commit.Object().Tree, want: objecttype.TypeTree})
+		for _, parent := range commit.Object().Parents {
 			next = append(next, walkItem{id: parent, want: objecttype.TypeCommit})
 		}
 
 		return next, nil
 	case objecttype.TypeTree:
-		content, err := walk.readBytesContent(item.id)
+		tree, err := walk.reachability.fetcher.ExactTree(item.id)
 		if err != nil {
 			return nil, err
 		}
 
-		tree, err := objecttree.Parse(content, item.id.Algorithm())
-		if err != nil {
-			return nil, err
-		}
-
-		next := make([]walkItem, 0, len(tree.Entries))
-		for _, entry := range tree.Entries {
+		next := make([]walkItem, 0, len(tree.Object().Entries))
+		for _, entry := range tree.Object().Entries {
 			switch entry.Mode {
 			case objecttree.FileModeGitlink:
 				continue
@@ -67,17 +55,12 @@ func (walk *Walk) expandObjects(item walkItem) ([]walkItem, error) {
 
 		return next, nil
 	case objecttype.TypeTag:
-		content, err := walk.readBytesContent(item.id)
+		tag, err := walk.reachability.fetcher.ExactTag(item.id)
 		if err != nil {
 			return nil, err
 		}
 
-		tag, err := objecttag.Parse(content, item.id.Algorithm())
-		if err != nil {
-			return nil, err
-		}
-
-		return []walkItem{{id: tag.Target, want: tag.TargetType}}, nil
+		return []walkItem{{id: tag.Object().Target, want: tag.Object().TargetType}}, nil
 	case objecttype.TypeInvalid, objecttype.TypeFuture, objecttype.TypeOfsDelta, objecttype.TypeRefDelta:
 		return nil, &errors.ObjectTypeError{OID: item.id, Got: ty, Want: item.want}
 	}

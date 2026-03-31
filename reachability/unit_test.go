@@ -9,6 +9,7 @@ import (
 
 	giterrors "codeberg.org/lindenii/furgit/errors"
 	"codeberg.org/lindenii/furgit/internal/testgit"
+	objectfetch "codeberg.org/lindenii/furgit/object/fetch"
 	objectid "codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/store/memory"
 	"codeberg.org/lindenii/furgit/object/tree"
@@ -118,7 +119,7 @@ func TestWalkDomainCommitsIncludesTagNodes(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		r := reachability.New(store, nil)
+		r := reachability.New(objectfetch.New(store), nil)
 		walk := r.Walk(reachability.DomainCommits, nil, map[objectid.ObjectID]struct{}{tag2: {}})
 
 		got := collectSeq(walk.Seq())
@@ -162,7 +163,7 @@ func TestWalkExcludesHavesCompletely(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		r := reachability.New(store, nil)
+		r := reachability.New(objectfetch.New(store), nil)
 		walk := r.Walk(reachability.DomainCommits, map[objectid.ObjectID]struct{}{commit: {}}, map[objectid.ObjectID]struct{}{commit: {}})
 
 		got := collectSeq(walk.Seq())
@@ -203,7 +204,7 @@ func TestWalkDomainCommitsRejectsNonCommitRootAfterPeel(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		r := reachability.New(store, nil)
+		r := reachability.New(objectfetch.New(store), nil)
 		walk := r.Walk(reachability.DomainCommits, nil, map[objectid.ObjectID]struct{}{tag: {}})
 		_ = collectSeq(walk.Seq())
 
@@ -263,7 +264,7 @@ func TestWalkDomainCommitsHaveTagStopsTraversal(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		r := reachability.New(store, nil)
+		r := reachability.New(objectfetch.New(store), nil)
 		walk := r.Walk(
 			reachability.DomainCommits,
 			map[objectid.ObjectID]struct{}{tag1: {}},
@@ -327,7 +328,7 @@ func TestWalkDomainObjectsRecursesTreesAndSkipsBlobContentReads(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		r := reachability.New(store, nil)
+		r := reachability.New(objectfetch.New(store), nil)
 		walk := r.Walk(reachability.DomainObjects, nil, map[objectid.ObjectID]struct{}{commit: {}})
 
 		got := collectSeq(walk.Seq())
@@ -377,7 +378,7 @@ func TestCheckConnectedReturnsConcreteMissingObject(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		r := reachability.New(store, nil)
+		r := reachability.New(objectfetch.New(store), nil)
 
 		err = r.CheckConnected(reachability.DomainCommits, nil, map[objectid.ObjectID]struct{}{commit: {}})
 		if err == nil {
@@ -399,7 +400,7 @@ func TestWalkInvalidDomainReturnsPlainError(t *testing.T) {
 	t.Parallel()
 
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
-		r := reachability.New(newCountingMemStore(algo), nil)
+		r := reachability.New(objectfetch.New(newCountingMemStore(algo)), nil)
 		walk := r.Walk(reachability.Domain(99), nil, nil)
 
 		_ = collectSeq(walk.Seq())

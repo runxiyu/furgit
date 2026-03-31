@@ -4,8 +4,6 @@ import (
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/errors"
-	objectcommit "codeberg.org/lindenii/furgit/object/commit"
-	objecttag "codeberg.org/lindenii/furgit/object/tag"
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
@@ -28,41 +26,31 @@ func (walk *Walk) expandCommits(item walkItem) ([]walkItem, error) {
 		}
 	}
 
-	ty, err := walk.readHeaderType(item.id)
+	ty, _, err := walk.reachability.fetcher.Header(item.id)
 	if err != nil {
 		return nil, err
 	}
 
 	switch ty {
 	case objecttype.TypeCommit:
-		content, err := walk.readBytesContent(item.id)
+		commit, err := walk.reachability.fetcher.ExactCommit(item.id)
 		if err != nil {
 			return nil, err
 		}
 
-		commit, err := objectcommit.Parse(content, item.id.Algorithm())
-		if err != nil {
-			return nil, err
-		}
-
-		next := make([]walkItem, 0, len(commit.Parents))
-		for _, parent := range commit.Parents {
+		next := make([]walkItem, 0, len(commit.Object().Parents))
+		for _, parent := range commit.Object().Parents {
 			next = append(next, walkItem{id: parent, want: objecttype.TypeInvalid})
 		}
 
 		return next, nil
 	case objecttype.TypeTag:
-		content, err := walk.readBytesContent(item.id)
+		tag, err := walk.reachability.fetcher.ExactTag(item.id)
 		if err != nil {
 			return nil, err
 		}
 
-		tag, err := objecttag.Parse(content, item.id.Algorithm())
-		if err != nil {
-			return nil, err
-		}
-
-		return []walkItem{{id: tag.Target, want: objecttype.TypeInvalid}}, nil
+		return []walkItem{{id: tag.Object().Target, want: objecttype.TypeInvalid}}, nil
 	case objecttype.TypeTree, objecttype.TypeBlob, objecttype.TypeInvalid,
 		objecttype.TypeFuture, objecttype.TypeOfsDelta, objecttype.TypeRefDelta:
 		return nil, &errors.ObjectTypeError{OID: item.id, Got: ty, Want: objecttype.TypeCommit}
