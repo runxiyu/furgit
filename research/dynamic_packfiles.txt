@@ -164,3 +164,10 @@ random chat log dump
 <&ori> for 9front, <alt>*e gives ε
 <&ori> but, don't remember the compose map
 <&ori> thought that there was a similar thing for all greek letters
+
+
+See also:
+https://github.com/inkandswitch/darn
+https://www.youtube.com/watch?v=nk4nefmguZk
+https://crates.io/crates/iroh-blobs
+https://crates.io/crates/bao-tree
