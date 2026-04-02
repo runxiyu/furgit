@@ -1,0 +1,70 @@
+package store
+
+// QuarantineBase is one quarantined write.
+// It is intended to be embedded.
+type QuarantineBase interface {
+	// Reader exposes the objects written into this quarantine.
+	Reader
+
+	// Promote publishes quarantined writes into their final destination.
+	//
+	// Promote invalidates the receiver.
+	Promote() error
+
+	// Discard abandons quarantined writes.
+	//
+	// Discard invalidates the receiver.
+	Discard() error
+}
+
+// Quarantine represents one quarantined write
+// that accepts both object-wise and pack-wise writes.
+type Quarantine interface {
+	QuarantineBase
+	Writer
+}
+
+// QuarantineOptions controls the options
+// for one coordinated quarantine creation.
+type QuarantineOptions struct {
+	Object ObjectQuarantineOptions
+	Pack   PackQuarantineOptions
+}
+
+// Quarantiner creates coordinated quarantines
+// that accept both object-wise and pack-wise writes.
+type Quarantiner interface {
+	BeginQuarantine(opts QuarantineOptions) (Quarantine, error)
+}
+
+// ObjectQuarantine represents one quarantined object-wise write.
+type ObjectQuarantine interface {
+	QuarantineBase
+	ObjectWriter
+}
+
+// ObjectQuarantineOptions controls the options
+// for one object quarantine creation.
+type ObjectQuarantineOptions struct{}
+
+// ObjectQuarantiner creates quarantines
+// for object-wise writes.
+type ObjectQuarantiner interface {
+	BeginObjectQuarantine(opts ObjectQuarantineOptions) (ObjectQuarantine, error)
+}
+
+// PackQuarantine represents one quarantined pack-wise write.
+type PackQuarantine interface {
+	QuarantineBase
+	PackWriter
+}
+
+// PackQuarantineOptions controls the options
+// for one pack quarantine creation.
+type PackQuarantineOptions struct{}
+
+// PackQuarantiner creates quarantines
+// for pack-wise writes.
+type PackQuarantiner interface {
+	BeginPackQuarantine(opts PackQuarantineOptions) (PackQuarantine, error)
+}
