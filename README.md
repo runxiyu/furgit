@@ -7,6 +7,7 @@ Furgit is a low‐level Git library in Go.
 
 ## Status
 
+* **A refactor is pending on the `next` branch.**
 * Years or decades away from stable
 * Absolutely no guarantees
 * Do not use in production
