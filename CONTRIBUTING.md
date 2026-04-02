@@ -4,7 +4,7 @@ Refer to the README for community spaces.
 
 ## Repos and mirrors
 
-* [Codeberg](https://codeberg.org/lindenii/furgit)
+* [Main repository on Codeberg](https://codeberg.org/lindenii/furgit)
 * [SourceHut mirror](https://git.sr.ht/~runxiyu/furgit)
 * [tangled mirror](https://tangled.org/@runxiyu.tngl.sh/furgit)
 * [GitHub mirror](https://github.com/runxiyu/furgit)
@@ -14,16 +14,7 @@ Refer to the README for community spaces.
 
 Bug reports ideally include a reproduction recipe: a Go program which starts
 out with an empty repository and calls Furgit and/or Git commands to trigger
-undesirable behavior.
-
-Please ask for help with writing your regression test before asking for your
-problem to be fixed. Time invested in writing a regression test saves time
-wasted on back‐and‐forth discussion about how the problem can be reproduced. A
-regression test will need to be written in any case to verify a fix and
-prevent the problem from resurfacing.
-
-If writing an automated test really turns out to be impossible, please explain
-in very clear terms how the problem can be reproduced.
+undesirable behavior. Feel free to ask for help writing them.
 
 Choose any one of:
 
@@ -37,7 +28,8 @@ When fixing a bug, please write a regression test in a separate commit before
 your fix. Demonstrate that the regression test fails and that your fix lets it
 succeed. Obviously, the regression test must be reasonable, demonstrate a real
 issue (however minor), and must not itself contain hacks solely designed for
-the purposes of making the old code fail and the new one succeed.
+the purposes of making the old code fail and the new one succeed. Feel free to
+ask for help writing regression tests.
 
 Choose any one of:
 
@@ -46,7 +38,7 @@ Choose any one of:
   [my public inbox](https://lists.sr.ht/~runxiyu/public-inbox)
 * Open a [pull request on GitHub](https://github.com/runxiyu/furgit/pulls)
 
-## Licensing
+## DCO sign-off
 
 For the purposes of the Developer Certificate of Origin, the "open source
 license" refers to the GNU Affero General Public License, Version 3.0, with

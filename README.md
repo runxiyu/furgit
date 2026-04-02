@@ -5,6 +5,8 @@
 
 Furgit is a low‐level Git library in Go.
 
+Please refer to the API reference.
+
 ## Status
 
 * Years or decades away from stable
@@ -27,7 +29,7 @@ Furgit is a low‐level Git library in Go.
 * [#lindenii](https://web.libera.chat/#lindenii)
   on [Libera.Chat](https://libera.chat)
 
-See the CONTRIBUTING document for bug reports and patch submissions.
+See `CONTRIBUTING.md` for bug reports and patch submissions.
 
 ## Acknowledgements
 
@@ -50,14 +52,3 @@ under the GNU Affero General Public License, Version 3.0 only, a public
 acceptance by the Designated Proxy of any subsequent version of the GNU Affero
 General Public License shall permanently authorize the use of that accepted
 version for this Program.
-
-## Alternatives
-
-Not endorsements.
-
-* [github.com/go-git/go-git](https://github.com/go-git/go-git) (by far the most mature)
-* [github.com/driusan/dgit](https://github.com/driusan/dgit)
-* [github.com/Nivl/git-go](https://github.com/Nivl/git-go)
-* [github.com/unkn0wn-root/git-go.git](https://github.com/unkn0wn-root/git-go.git)
-* [github.com/speedata/gogit](https://github.com/speedata/gogit)
-
