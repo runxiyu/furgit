@@ -5,7 +5,7 @@ type Algorithm uint8
 
 const (
 	// AlgorithmUnknown identifies an unknown object ID hash algorithm.
-	AlgorithmUknown Algorithm = iota
+	AlgorithmUnknown Algorithm = iota
 
 	// AlgorithmSHA1 identifies the SHA-1 object ID hash algorithm.
 	// This is the default for all versions of Git until Git 3.0.
@@ -15,3 +15,9 @@ const (
 	// This is the default for Git 3.0 and beyond.
 	AlgorithmSHA256
 )
+
+// SupportedAlgorithms returns all object ID algorithms supported by furgit.
+// Labels: Mut-No.
+func SupportedAlgorithms() []Algorithm {
+	return supportedAlgorithms
+}
