@@ -57,4 +57,11 @@
 //
 // These labels describe the API contract only,
 // and do not imply any specific implementation strategy.
+//
+// Concrete implementations of capability interfaces
+// generally inherit the contract documented by the interfaces they satisfy.
+// Implementation docs focus on additional guarantees
+// and implementation-specific behavior,
+// but users are advised not to reply on them
+// in order to maintain the flexibility of switching implementations.
 package furgit
