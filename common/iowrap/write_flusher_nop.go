@@ -7,6 +7,8 @@ type nopFlusher struct {
 }
 
 // NopFlush adapts writer into a [WriteFlusher] with a no-op Flush.
+//
+//nolint:ireturn
 func NopFlush(writer io.Writer) WriteFlusher {
 	if writer == nil {
 		return nil

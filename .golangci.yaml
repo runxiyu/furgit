@@ -8,8 +8,6 @@ linters:
       - internal/compress/internal
   disable:
     - dupword          # extremely normal in tests and a pretty unnecessary linter
-    - dupl             # i know when i'm duplicating things and it's almost always for a good reason
-    - ireturn          # can't seem to ignore this linter properly and we don't need anyway, cf. tagged unions
     - goconst          # unnecessary especially for our parsing code; many false positives
     - mnd              # unnecessary especially for our parsing code; many false positives
     - lll              # common sense is much better than these sort of rules
@@ -21,12 +19,7 @@ linters:
     - cyclop           # cyclomatic metrics aren't that good
     - godox            # TODO/etc comments are allowed in our codebase
     - funlen           # long functions are fine
-    - wrapcheck        # rules around interface-return methods are a bit silly
     - dogsled          # definitely not an issue, ignoring returns is normal
-
-    - exhaustruct      # tmp: should fix... but too annoying at the moment
-    - err113           # tmp: will enable when we properly use defined errors
-    - gocognit         # tmp: should consider sometime
 
   settings:
     perfsprint:

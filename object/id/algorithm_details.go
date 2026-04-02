@@ -16,26 +16,46 @@ type algorithmDetails struct {
 	emptyTree           ObjectID
 }
 
-func (algo Algorithm) info() algorithmDetails {
+func (algo Algorithm) details() algorithmDetails {
 	return algorithmTable[algo]
 }
 
 //nolint:gochecknoglobals
 var algorithmTable = [...]algorithmDetails{
-	AlgorithmUnknown: {},
+	AlgorithmUnknown: {}, //nolint:exhaustruct
 	AlgorithmSHA1: {
 		name:                "sha1",
 		size:                sha1.Size,
 		packHashID:          1,
 		signatureHeaderName: "gpgsig",
-		new:                 sha1.New,
+		sum: func(data []byte) ObjectID {
+			sum := sha1.Sum(data) //#nosec G401
+
+			var id ObjectID
+			copy(id.data[:], sum[:])
+			id.algo = AlgorithmSHA1
+
+			return id
+		},
+		new:       sha1.New,
+		emptyTree: ObjectID{}, //nolint:exhaustruct
 	},
 	AlgorithmSHA256: {
 		name:                "sha256",
 		size:                sha256.Size,
 		packHashID:          2,
 		signatureHeaderName: "gpgsig-sha256",
-		new:                 sha256.New,
+		sum: func(data []byte) ObjectID {
+			sum := sha256.Sum256(data)
+
+			var id ObjectID
+			copy(id.data[:], sum[:])
+			id.algo = AlgorithmSHA256
+
+			return id
+		},
+		new:       sha256.New,
+		emptyTree: ObjectID{}, //nolint:exhaustruct
 	},
 }
 
