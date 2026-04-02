@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-// Serialize renders the signature in canonical Git format.
-func (signature Signature) Serialize() ([]byte, error) {
+// Bytes renders the signature in canonical Git format.
+func (signature Signature) Bytes() ([]byte, error) {
 	var b strings.Builder
 	b.Grow(len(signature.Name) + len(signature.Email) + 32)
 	b.Write(signature.Name)
