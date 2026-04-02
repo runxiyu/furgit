@@ -17,6 +17,7 @@ const (
 )
 
 // SupportedAlgorithms returns all object ID algorithms supported by furgit.
+//
 // Labels: Mut-No.
 func SupportedAlgorithms() []Algorithm {
 	return supportedAlgorithms

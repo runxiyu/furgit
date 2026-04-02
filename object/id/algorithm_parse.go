@@ -6,3 +6,11 @@ func ParseAlgorithm(s string) (Algorithm, bool) {
 
 	return algo, ok
 }
+
+// ParseSignatureHeaderName parses one canonical signature header name
+// such as "gpgsig" or "gpgsig-sha256" to its respective algorithm.
+func ParseSignatureHeaderName(s string) (Algorithm, bool) {
+	algo, ok := algorithmBySignatureHeaderName[s]
+
+	return algo, ok
+}

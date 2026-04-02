@@ -7,6 +7,5 @@ var (
 	ErrInvalidAlgorithm = errors.New("objectid: invalid algorithm")
 
 	// ErrInvalidObjectID indicates malformed object ID data.
-	// ErrInvalidObjectID = errors.New("objectid: invalid object id")
-	// TODO
+	ErrInvalidObjectID = errors.New("objectid: invalid object id")
 )
