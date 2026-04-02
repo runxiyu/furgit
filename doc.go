@@ -40,6 +40,15 @@
 //   - Deps-Mixed: some are mixed while others are borrowed.
 //     The documentation should specify further.
 //
+// Lifetime labels:
+//
+//   - Life-Independent: returned values remain valid
+//     independently of the parent or provider.
+//   - Life-Parent: returned values are only valid
+//     while the parent or provider remains valid.
+//   - Life-Call: returned values are only valid
+//     for the duration of the current call, callback, or hook invocation.
+//
 // Close labels:
 //
 //   - Close-Caller: the caller must close the returned value.

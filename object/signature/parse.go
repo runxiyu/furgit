@@ -9,6 +9,8 @@ import (
 )
 
 // Parse parses a canonical Git signature line.
+//
+// Labels: Life-Independent.
 func Parse(line []byte) (*Signature, error) {
 	lt := bytes.IndexByte(line, '<')
 	if lt < 0 {
