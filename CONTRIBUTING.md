@@ -2,14 +2,6 @@
 
 Refer to the README for community spaces.
 
-## Repos and mirrors
-
-* [Codeberg](https://codeberg.org/lindenii/furgit)
-* [SourceHut mirror](https://git.sr.ht/~runxiyu/furgit)
-* [tangled mirror](https://tangled.org/@runxiyu.tngl.sh/furgit)
-* [GitHub mirror](https://github.com/runxiyu/furgit)
-* [git.runxiyu.org mirror](https://git.runxiyu.org/furgit.git//)
-
 ## Reporting bugs
 
 Bug reports ideally include a reproduction recipe: a Go program which starts

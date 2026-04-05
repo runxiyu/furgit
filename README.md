@@ -52,13 +52,12 @@ acceptance by the Designated Proxy of any subsequent version of the GNU Affero
 General Public License shall permanently authorize the use of that accepted
 version for this Program.
 
-## Alternatives
+## Repos and mirrors
 
-Not endorsements.
-
-* [github.com/go-git/go-git](https://github.com/go-git/go-git) (by far the most mature)
-* [github.com/driusan/dgit](https://github.com/driusan/dgit)
-* [github.com/Nivl/git-go](https://github.com/Nivl/git-go)
-* [github.com/unkn0wn-root/git-go.git](https://github.com/unkn0wn-root/git-go.git)
-* [github.com/speedata/gogit](https://github.com/speedata/gogit)
+* [Codeberg](https://codeberg.org/lindenii/furgit)
+* [SourceHut mirror](https://git.sr.ht/~runxiyu/furgit)
+* [hjgit mirror](https://hjgit.org/runxiyu/furgit/HEAD/info.html)
+* [tangled mirror](https://tangled.org/@runxiyu.tngl.sh/furgit)
+* [GitHub mirror](https://github.com/runxiyu/furgit)
+* [git.runxiyu.org mirror](https://git.runxiyu.org/furgit.git//)
 
