@@ -1,8 +1,7 @@
 package typ
 
 type typeDetails struct {
-	name         string
-	isBaseObject bool
+	name string
 }
 
 func (ty Type) details() typeDetails {
@@ -11,14 +10,11 @@ func (ty Type) details() typeDetails {
 
 //nolint:gochecknoglobals
 var typeTable = [...]typeDetails{
-	TypeInvalid:  {name: "", isBaseObject: false},
-	TypeCommit:   {name: "commit", isBaseObject: true},
-	TypeTree:     {name: "tree", isBaseObject: true},
-	TypeBlob:     {name: "blob", isBaseObject: true},
-	TypeTag:      {name: "tag", isBaseObject: true},
-	TypeFuture:   {name: "", isBaseObject: false},
-	TypeOfsDelta: {name: "", isBaseObject: false},
-	TypeRefDelta: {name: "", isBaseObject: false},
+	TypeInvalid: {name: ""},
+	TypeCommit:  {name: "commit"},
+	TypeTree:    {name: "tree"},
+	TypeBlob:    {name: "blob"},
+	TypeTag:     {name: "tag"},
 }
 
 //nolint:gochecknoglobals
