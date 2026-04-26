@@ -171,3 +171,9 @@ https://github.com/inkandswitch/darn
 https://www.youtube.com/watch?v=nk4nefmguZk
 https://crates.io/crates/iroh-blobs
 https://crates.io/crates/bao-tree
+
+
+Actually, who cares about abbreviated hashes?
+Clients. Clients only.
+It will be a separate interface satisfied by "normal repos"
+but not satisfied by our store. Good enough.
