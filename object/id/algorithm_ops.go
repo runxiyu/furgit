@@ -2,13 +2,6 @@ package id
 
 import "hash"
 
-// EmptyTree returns the object ID of
-// an empty tree ("tree 0\x00")
-// for this algorithm.
-func (algo Algorithm) EmptyTree() ObjectID {
-	return algo.details().emptyTree
-}
-
 // HexLen returns the encoded hexadecimal length.
 func (algo Algorithm) HexLen() int {
 	return algo.Size() * 2
@@ -27,18 +20,6 @@ func (algo Algorithm) New() (hash.Hash, error) {
 	}
 
 	return newFn(), nil
-}
-
-// PackHashID returns the Git pack/rev hash-id encoding for this algorithm.
-//
-// Unknown algorithms return 0.
-func (algo Algorithm) PackHashID() uint32 {
-	return algo.details().packHashID
-}
-
-// SignatureHeaderName returns the signature header name for this algorithm.
-func (algo Algorithm) SignatureHeaderName() string {
-	return algo.details().signatureHeaderName
 }
 
 // String returns the canonical algorithm name.

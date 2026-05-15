@@ -6,39 +6,6 @@ import (
 	"codeberg.org/lindenii/furgit/object/id"
 )
 
-func TestAlgorithmEmptyTree(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		name string
-		algo id.Algorithm
-		want string
-	}{
-		{
-			name: "sha1",
-			algo: id.AlgorithmSHA1,
-			want: "4b825dc642cb6eb9a060e54bf8d69288fbee4904",
-		},
-		{
-			name: "sha256",
-			algo: id.AlgorithmSHA256,
-			want: "6ef19b41225c5369f1c104d45d8d85efa9b057b53b14b4b9b939dd74decc5321",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			got := tt.algo.EmptyTree()
-
-			if got.String() != tt.want {
-				t.Fatalf("EmptyTree() = %q, want %q", got.String(), tt.want)
-			}
-		})
-	}
-}
-
 func TestParseAlgorithm(t *testing.T) {
 	t.Parallel()
 
@@ -72,14 +39,5 @@ func TestAlgorithmSum(t *testing.T) {
 
 	if id1.String() == id2.String() {
 		t.Fatalf("sha1 and sha256 should differ")
-	}
-}
-
-func TestUnknownAlgorithmEmptyTree(t *testing.T) {
-	t.Parallel()
-
-	got := id.AlgorithmUnknown.EmptyTree()
-	if got != (id.ObjectID{}) {
-		t.Fatalf("EmptyTree() for unknown algorithm = %#v, want zero value", got)
 	}
 }
