@@ -47,7 +47,6 @@ object
 object/blob
 object/commit
 object/fetch
-object/signature
 object/signed
 object/signed/commit
 object/signed/tag
@@ -64,7 +63,6 @@ object/store/packed/internal/reading
 object/stored
 object/tag
 object/tree
-object/type
 reachability
 ref
 ref/name
