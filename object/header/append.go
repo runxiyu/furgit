@@ -6,12 +6,8 @@ import (
 	"codeberg.org/lindenii/furgit/object/typ"
 )
 
-// Append appends a canonical loose-object header ("type size\x00") to dst.
-func Append(dst []byte, ty typ.Type, size int64) ([]byte, bool) {
-	if size < 0 {
-		return nil, false
-	}
-
+// AppendHeader appends a canonical loose-object header ("type size\x00") to dst.
+func AppendHeader(dst []byte, ty typ.Type, size uint64) ([]byte, bool) {
 	tyName, ok := ty.Name()
 	if !ok {
 		return nil, false
