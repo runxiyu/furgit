@@ -4,18 +4,15 @@ package typ
 type Type uint8
 
 const (
-	// TypeInvalid represents an invalid Git object type.
-	TypeInvalid Type = 0
-
-	// TypeCommit represents a Git commit.
-	TypeCommit Type = 1
+	// TypeBlob represents a Git blob.
+	TypeBlob Type = iota
 
 	// TypeTree represents a Git tree.
-	TypeTree Type = 2
+	TypeTree
 
-	// TypeBlob represents a Git blob.
-	TypeBlob Type = 3
+	// TypeCommit represents a Git commit.
+	TypeCommit
 
 	// TypeTag represents a Git tag.
-	TypeTag Type = 4
+	TypeTag
 )

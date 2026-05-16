@@ -1,8 +1,12 @@
 package typ
 
 // Parse parses a canonical Git object type name.
-func Parse(name string) (Type, bool) {
+func Parse(name string) (Type, error) {
 	ty, ok := typeByName[name]
 
-	return ty, ok
+	if !ok {
+		return 0, ErrInvalidType
+	}
+
+	return ty, nil
 }
