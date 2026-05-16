@@ -50,7 +50,6 @@ object/fetch
 object/signed
 object/signed/commit
 object/signed/tag
-object/store
 object/store/chain
 object/store/dual
 object/store/loose
