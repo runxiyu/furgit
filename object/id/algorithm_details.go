@@ -57,8 +57,6 @@ var (
 	//nolint:gochecknoglobals
 	algorithmByName = map[string]Algorithm{}
 	//nolint:gochecknoglobals
-	algorithmBySignatureHeaderName = map[string]Algorithm{}
-	//nolint:gochecknoglobals
 	supportedAlgorithms []Algorithm
 )
 
