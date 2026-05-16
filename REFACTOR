@@ -47,7 +47,6 @@ object
 object/blob
 object/commit
 object/fetch
-object/header
 object/signature
 object/signed
 object/signed/commit

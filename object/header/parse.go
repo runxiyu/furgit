@@ -2,39 +2,42 @@ package header
 
 import (
 	"bytes"
+	"errors"
 	"strconv"
 
 	"codeberg.org/lindenii/furgit/object/typ"
 )
 
+var ErrInvalidHeader = errors.New("object/header: invalid header")
+
 // Parse parses a canonical loose-object header ("type size\x00").
-func Parse(data []byte) (ty typ.Type, size int64, consumed int, ok bool) {
+func Parse(data []byte) (ty typ.Type, size uint64, consumed int, err error) {
 	space := bytes.IndexByte(data, ' ')
 	if space <= 0 {
-		return typ.TypeInvalid, 0, 0, false
+		return 0, 0, 0, ErrInvalidHeader
 	}
 
 	nulRel := bytes.IndexByte(data[space+1:], 0)
 	if nulRel < 0 {
-		return typ.TypeInvalid, 0, 0, false
+		return 0, 0, 0, ErrInvalidHeader
 	}
 
 	nul := space + 1 + nulRel
 
-	ty, ok = typ.Parse(string(data[:space]))
-	if !ok {
-		return typ.TypeInvalid, 0, 0, false
+	ty, err = typ.Parse(string(data[:space]))
+	if err != nil {
+		return 0, 0, 0, ErrInvalidHeader
 	}
 
 	sizeBytes := data[space+1 : nul]
 	if len(sizeBytes) == 0 {
-		return typ.TypeInvalid, 0, 0, false
+		return 0, 0, 0, ErrInvalidHeader
 	}
 
-	size, err := strconv.ParseInt(string(sizeBytes), 10, 64)
-	if err != nil || size < 0 {
-		return typ.TypeInvalid, 0, 0, false
+	size, err = strconv.ParseUint(string(sizeBytes), 10, 64)
+	if err != nil {
+		return 0, 0, 0, ErrInvalidHeader
 	}
 
-	return ty, size, nul + 1, true
+	return ty, size, nul + 1, nil
 }
