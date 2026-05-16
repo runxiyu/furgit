@@ -17,7 +17,7 @@ func (signature Signature) AppendTo(dst []byte) []byte {
 
 	offset := signature.OffsetMinutes
 
-	sign := '+'
+	var sign byte = '+'
 	if offset < 0 {
 		sign = '-'
 		offset = -offset
@@ -26,7 +26,7 @@ func (signature Signature) AppendTo(dst []byte) []byte {
 	hh := offset / 60
 	mm := offset % 60
 
-	dst = append(dst, byte(sign))
+	dst = append(dst, sign)
 	dst = append(dst, byte('0'+hh/10), byte('0'+hh%10))
 	dst = append(dst, byte('0'+mm/10), byte('0'+mm%10))
 
