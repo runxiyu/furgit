@@ -17,26 +17,6 @@ type QuarantineBase interface {
 	Discard() error
 }
 
-// Quarantine represents one quarantined write
-// that accepts both object-wise and pack-wise writes.
-type Quarantine interface {
-	QuarantineBase
-	Writer
-}
-
-// QuarantineOptions controls the options
-// for one coordinated quarantine creation.
-type QuarantineOptions struct {
-	Object ObjectQuarantineOptions
-	Pack   PackQuarantineOptions
-}
-
-// Quarantiner creates coordinated quarantines
-// that accept both object-wise and pack-wise writes.
-type Quarantiner interface {
-	BeginQuarantine(opts QuarantineOptions) (Quarantine, error)
-}
-
 // ObjectQuarantine represents one quarantined object-wise write.
 type ObjectQuarantine interface {
 	QuarantineBase

@@ -8,14 +8,6 @@ import (
 	"codeberg.org/lindenii/furgit/object/typ"
 )
 
-// Writer represents a store
-// that could perform both pack ingestions
-// and individual object writes.
-type Writer interface {
-	PackWriter
-	ObjectWriter
-}
-
 // ObjectWriter writes individual Git objects.
 type ObjectWriter interface {
 	// WriteReaderContent writes one typed object content stream.
@@ -62,8 +54,6 @@ type PackWriteOptions struct {
 	// When nil,
 	// external thin-base repair is disabled,
 	// and unresolved thin deltas fail ingestion.
-	//
-	// TODO: Define the errors here?
 	ThinBase Reader
 
 	// Progress receives human-readable progress messages
