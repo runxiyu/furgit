@@ -7,13 +7,13 @@ import (
 	"codeberg.org/lindenii/furgit/object/typ"
 )
 
-// Reader reads Git objects by object ID.
+// ObjectReader reads Git objects by object ID.
 //
 // Methods may perform implementation-defined integrity verification
 // beyond successfully producing their documented result.
 //
 // Labels: MT-Safe.
-type Reader interface {
+type ObjectReader interface {
 	// ReadBytesFull reads a full serialized object as "type size\0content".
 	//
 	// In a valid repository,

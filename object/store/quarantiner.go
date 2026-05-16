@@ -4,7 +4,7 @@ package store
 // It is intended to be embedded.
 type QuarantineBase interface {
 	// Reader exposes the objects written into this quarantine.
-	Reader
+	ObjectReader
 
 	// Promote publishes quarantined writes into their final destination.
 	//

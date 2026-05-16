@@ -54,7 +54,7 @@ type PackWriteOptions struct {
 	// When nil,
 	// external thin-base repair is disabled,
 	// and unresolved thin deltas fail ingestion.
-	ThinBase Reader
+	ThinBase ObjectReader
 
 	// Progress receives human-readable progress messages
 	// for packfile ingestion.
