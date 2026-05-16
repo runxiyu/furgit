@@ -2,6 +2,7 @@ package signature
 
 import (
 	"bytes"
+	"errors"
 	"strconv"
 
 	"codeberg.org/lindenii/furgit/internal/intconv"

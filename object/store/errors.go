@@ -10,7 +10,7 @@ import "errors"
 var ErrObjectNotFound = errors.New("objectstore: object not found")
 
 // This is a sentinel with no details,
-// because it could be a frequent occurence,
+// because it could be a frequent occurrence,
 // and allocating frequently on expected error paths
 // would be extremely harmful to performance.
 // Sometime, I will audit this again.
