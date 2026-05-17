@@ -17,9 +17,9 @@ func TestBlobSerialize(t *testing.T) {
 
 		obj := &blob.Blob{Data: body}
 
-		rawObj, err := obj.SerializeWithHeader()
+		rawObj, err := obj.BytesWithHeader()
 		if err != nil {
-			t.Fatalf("SerializeWithHeader: %v", err)
+			t.Fatalf("BytesWithHeader: %v", err)
 		}
 
 		gotID := algo.Sum(rawObj)

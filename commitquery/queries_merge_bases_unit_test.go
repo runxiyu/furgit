@@ -60,9 +60,9 @@ func containsID(set map[objectid.ObjectID]struct{}, id objectid.ObjectID) bool {
 func mustSerializeTree(tb testing.TB, tree *tree.Tree) []byte {
 	tb.Helper()
 
-	body, err := tree.SerializeWithoutHeader()
+	body, err := tree.BytesWithoutHeader()
 	if err != nil {
-		tb.Fatalf("SerializeWithoutHeader: %v", err)
+		tb.Fatalf("BytesWithoutHeader: %v", err)
 	}
 
 	return body

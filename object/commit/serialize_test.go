@@ -21,9 +21,9 @@ func TestCommitSerialize(t *testing.T) {
 			t.Fatalf("ParseCommit: %v", err)
 		}
 
-		rawObj, err := parsed.SerializeWithHeader()
+		rawObj, err := parsed.BytesWithHeader()
 		if err != nil {
-			t.Fatalf("SerializeWithHeader: %v", err)
+			t.Fatalf("BytesWithHeader: %v", err)
 		}
 
 		gotID := algo.Sum(rawObj)

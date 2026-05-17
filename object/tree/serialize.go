@@ -8,8 +8,8 @@ import (
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
-// SerializeWithoutHeader renders the raw tree body bytes.
-func (tree *Tree) SerializeWithoutHeader() ([]byte, error) {
+// BytesWithoutHeader renders the raw tree body bytes.
+func (tree *Tree) BytesWithoutHeader() ([]byte, error) {
 	var bodyLen int
 
 	for _, entry := range tree.Entries {
@@ -35,9 +35,9 @@ func (tree *Tree) SerializeWithoutHeader() ([]byte, error) {
 	return body, nil
 }
 
-// SerializeWithHeader renders the raw object (header + body).
-func (tree *Tree) SerializeWithHeader() ([]byte, error) {
-	body, err := tree.SerializeWithoutHeader()
+// BytesWithHeader renders the raw object (header + body).
+func (tree *Tree) BytesWithHeader() ([]byte, error) {
+	body, err := tree.BytesWithoutHeader()
 	if err != nil {
 		return nil, err
 	}

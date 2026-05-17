@@ -9,8 +9,8 @@ import (
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
-// SerializeWithoutHeader renders the raw commit body bytes.
-func (commit *Commit) SerializeWithoutHeader() ([]byte, error) {
+// BytesWithoutHeader renders the raw commit body bytes.
+func (commit *Commit) BytesWithoutHeader() ([]byte, error) {
 	var buf bytes.Buffer
 
 	if commit.Tree.Algorithm().Size() == 0 {
@@ -64,9 +64,9 @@ func (commit *Commit) SerializeWithoutHeader() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// SerializeWithHeader renders the raw object (header + body).
-func (commit *Commit) SerializeWithHeader() ([]byte, error) {
-	body, err := commit.SerializeWithoutHeader()
+// BytesWithHeader renders the raw object (header + body).
+func (commit *Commit) BytesWithHeader() ([]byte, error) {
+	body, err := commit.BytesWithoutHeader()
 	if err != nil {
 		return nil, err
 	}

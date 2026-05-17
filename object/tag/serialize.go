@@ -9,8 +9,8 @@ import (
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
-// SerializeWithoutHeader renders the raw tag body bytes.
-func (tag *Tag) SerializeWithoutHeader() ([]byte, error) {
+// BytesWithoutHeader renders the raw tag body bytes.
+func (tag *Tag) BytesWithoutHeader() ([]byte, error) {
 	if tag.Target.Algorithm().Size() == 0 {
 		return nil, errors.New("object: tag: missing target id")
 	}
@@ -48,9 +48,9 @@ func (tag *Tag) SerializeWithoutHeader() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// SerializeWithHeader renders the raw object (header + body).
-func (tag *Tag) SerializeWithHeader() ([]byte, error) {
-	body, err := tag.SerializeWithoutHeader()
+// BytesWithHeader renders the raw object (header + body).
+func (tag *Tag) BytesWithHeader() ([]byte, error) {
+	body, err := tag.BytesWithoutHeader()
 	if err != nil {
 		return nil, err
 	}

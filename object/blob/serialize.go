@@ -7,14 +7,14 @@ import (
 	objecttype "codeberg.org/lindenii/furgit/object/type"
 )
 
-// SerializeWithoutHeader renders the raw blob body bytes.
-func (blob *Blob) SerializeWithoutHeader() ([]byte, error) {
+// BytesWithoutHeader renders the raw blob body bytes.
+func (blob *Blob) BytesWithoutHeader() ([]byte, error) {
 	return append([]byte(nil), blob.Data...), nil
 }
 
-// SerializeWithHeader renders the raw object (header + body).
-func (blob *Blob) SerializeWithHeader() ([]byte, error) {
-	body, err := blob.SerializeWithoutHeader()
+// BytesWithHeader renders the raw object (header + body).
+func (blob *Blob) BytesWithHeader() ([]byte, error) {
+	body, err := blob.BytesWithoutHeader()
 	if err != nil {
 		return nil, err
 	}
