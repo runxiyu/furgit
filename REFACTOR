@@ -14,16 +14,7 @@ format/packfile
 format/packfile/delta
 format/packfile/delta/apply
 internal
-internal/adler32
 internal/bufpool
-internal/compress
-internal/compress/flate
-internal/compress/internal
-internal/compress/internal/fuzz
-internal/compress/internal/le
-internal/compress/zlib
-internal/cpu
-internal/intconv
 internal/iolimit
 internal/lru
 internal/priorityqueue
