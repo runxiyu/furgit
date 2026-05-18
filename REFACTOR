@@ -1,6 +1,3 @@
-cmd
-cmd/receivepack9418
-cmd/show-object
 commitquery
 common
 common/iowrap
