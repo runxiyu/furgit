@@ -7,8 +7,8 @@ import (
 	"codeberg.org/lindenii/furgit/object/typ"
 )
 
-// AppendHeader appends a canonical loose-object header ("type size\x00") to dst.
-func AppendHeader(dst []byte, ty typ.Type, size uint64) []byte {
+// Append appends a canonical loose-object header ("type size\x00") to dst.
+func Append(dst []byte, ty typ.Type, size uint64) []byte {
 	tyName := ty.Name()
 
 	dst = slices.Grow(dst, len(tyName)+1+19+1)

@@ -5,8 +5,8 @@ import (
 	"strconv"
 )
 
-// AppendTo renders the signature in canonical Git format.
-func (signature Signature) AppendTo(dst []byte) []byte {
+// Append renders the signature in canonical Git format.
+func (signature Signature) Append(dst []byte) []byte {
 	dst = slices.Grow(dst, len(signature.Name)+len(signature.Email)+32)
 	dst = append(dst, signature.Name...)
 	dst = append(dst, ' ', '<')
