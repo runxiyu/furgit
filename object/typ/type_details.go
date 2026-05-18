@@ -10,10 +10,10 @@ func (ty Type) details() typeDetails {
 
 //nolint:gochecknoglobals
 var typeTable = [...]typeDetails{
-	TypeCommit:  {name: "commit"},
-	TypeTree:    {name: "tree"},
-	TypeBlob:    {name: "blob"},
-	TypeTag:     {name: "tag"},
+	TypeCommit: {name: "commit"},
+	TypeTree:   {name: "tree"},
+	TypeBlob:   {name: "blob"},
+	TypeTag:    {name: "tag"},
 }
 
 //nolint:gochecknoglobals
