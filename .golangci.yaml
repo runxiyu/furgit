@@ -34,10 +34,6 @@ linters:
             - $gostd
             - codeberg.org/lindenii/furgit
             - golang.org/x
-    gosec:
-      excludes:
-        - G301         # UNIX permissions
-        - G306         # UNIX permissions
     revive:
       rules:
         - name: error-strings
