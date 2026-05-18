@@ -1,6 +1,7 @@
 package store
 
 import (
+	"errors"
 	"io"
 
 	"codeberg.org/lindenii/furgit/object/id"
@@ -57,3 +58,17 @@ type ObjectReader interface {
 	// Backends without dynamic discovery should do nothing and return nil.
 	Refresh() error
 }
+
+// ErrObjectNotFound indicates that
+// an object does not exist in a backend.
+// This error must only be produced by object stores,
+// when it has no specified object ID,
+// but no other unexpected conditions were encountered.
+var ErrObjectNotFound = errors.New("objectstore: object not found")
+
+// This is a sentinel with no details,
+// because it could be a frequent occurrence,
+// and allocating frequently on expected error paths
+// would be extremely harmful to performance.
+// Sometime, I will audit this again.
+// TODO
