@@ -37,13 +37,16 @@ func (d *digest) MarshalBinary() ([]byte, error) {
 	return b, nil
 }
 
+var ErrInvalidHashStateIdentifier = errors.New("internal/adler32: invalid hash state identifier")
+var ErrInvalidHashStateSize = errors.New("internal/adler32: invalid hash state size")
+
 func (d *digest) UnmarshalBinary(b []byte) error {
 	if len(b) < len(magic) || string(b[:len(magic)]) != magic {
-		return errors.New("internal/adler32: invalid hash state identifier")
+		return ErrInvalidHashStateIdentifier
 	}
 
 	if len(b) != marshaledSize {
-		return errors.New("internal/adler32: invalid hash state size")
+		return ErrInvalidHashStateSize
 	}
 
 	*d = digest(binary.BigEndian.Uint32(b[len(magic):]))
