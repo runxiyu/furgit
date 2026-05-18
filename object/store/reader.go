@@ -55,7 +55,5 @@ type ObjectReader interface {
 	// Refresh updates any backend-local discovery/cache view of on-disk objects.
 	//
 	// Backends without dynamic discovery should do nothing and return nil.
-	//
-	// TODO
 	Refresh() error
 }
