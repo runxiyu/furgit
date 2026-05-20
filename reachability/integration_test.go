@@ -183,6 +183,7 @@ func TestCheckConnectedMissingObject(t *testing.T) {
 			reachability.DomainObjects,
 			nil,
 			map[objectid.ObjectID]struct{}{commitID: {}},
+			false,
 		)
 		if err == nil {
 			t.Fatal("expected error")

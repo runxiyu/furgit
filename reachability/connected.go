@@ -6,12 +6,13 @@ import objectid "codeberg.org/lindenii/furgit/object/id"
 // selected domain) can be fully traversed without missing-object/type/parse
 // errors, excluding subgraphs rooted at haves.
 //
-// Even with commit-graph acceleration available, each visited commit is
-// still validated against the object store.
-func (r *Reachability) CheckConnected(domain Domain, haves, wants map[objectid.ObjectID]struct{}) error {
+// With commit-graph acceleration available,
+// each visited commit is validated against the object store
+// iff struct is set to true.
+func (r *Reachability) CheckConnected(domain Domain, haves, wants map[objectid.ObjectID]struct{}, strict bool) error {
 	walk := r.Walk(domain, haves, wants)
 
-	walk.strict = true
+	walk.strict = strict
 	for range walk.Seq() {
 	}
 

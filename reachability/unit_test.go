@@ -380,7 +380,7 @@ func TestCheckConnectedReturnsConcreteMissingObject(t *testing.T) {
 
 		r := reachability.New(objectfetch.New(store), nil)
 
-		err = r.CheckConnected(reachability.DomainCommits, nil, map[objectid.ObjectID]struct{}{commit: {}})
+		err = r.CheckConnected(reachability.DomainCommits, nil, map[objectid.ObjectID]struct{}{commit: {}}, false)
 		if err == nil {
 			t.Fatal("expected error")
 		}
