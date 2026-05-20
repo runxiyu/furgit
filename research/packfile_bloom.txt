@@ -30,13 +30,6 @@ are as follows:
 4. A lookup thus reads one 64-octet bucket and checks whether all required bits
    are set.
 
-Note on Object IDs
-------------------
-
-Git object IDs are cryptographic hashes (e.g., currently either SHA-256
-or SHA-1), and are thus uniformly distributed in non-pathological scenarios.
-See also the "Security considerations" section.
-
 Definitions
 -----------
 
