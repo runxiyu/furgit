@@ -62,6 +62,9 @@ func (err *CreateExistsError) Error() string {
 
 // IncorrectOldValueError indicates that one operation's expected old value did
 // not match the current reference value.
+//
+// TODO: All of these errors should be redesigned.
+// Strings are not appropriate here.
 type IncorrectOldValueError struct {
 	Actual   string
 	Expected string
