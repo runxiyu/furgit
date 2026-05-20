@@ -50,7 +50,7 @@ func (walk *Walk) expandCommits(item walkItem) ([]walkItem, error) {
 			return nil, err
 		}
 
-		return []walkItem{{id: tag.Object().Target, want: objecttype.TypeInvalid}}, nil
+		return []walkItem{{id: tag.Object().TargetID, want: objecttype.TypeInvalid}}, nil
 	case objecttype.TypeTree, objecttype.TypeBlob, objecttype.TypeInvalid,
 		objecttype.TypeFuture, objecttype.TypeOfsDelta, objecttype.TypeRefDelta:
 		return nil, &errors.ObjectTypeError{OID: item.id, Got: ty, Want: objecttype.TypeCommit}

@@ -42,7 +42,7 @@ func Parse(body []byte, algo objectid.Algorithm) (*Tag, error) {
 				return nil, fmt.Errorf("object: tag: object: %w", err)
 			}
 
-			t.Target = id
+			t.TargetID = id
 			haveTarget = true
 		case "type":
 			ty, ok := objecttype.Parse(string(value))

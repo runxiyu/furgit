@@ -11,12 +11,12 @@ import (
 
 // BytesWithoutHeader renders the raw tag body bytes.
 func (tag *Tag) BytesWithoutHeader() ([]byte, error) {
-	if tag.Target.Algorithm().Size() == 0 {
+	if tag.TargetID.Algorithm().Size() == 0 {
 		return nil, errors.New("object: tag: missing target id")
 	}
 
 	var buf bytes.Buffer
-	fmt.Fprintf(&buf, "object %s\n", tag.Target.String())
+	fmt.Fprintf(&buf, "object %s\n", tag.TargetID.String())
 
 	tyName, ok := tag.TargetType.Name()
 	if !ok {

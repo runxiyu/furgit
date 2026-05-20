@@ -199,7 +199,7 @@ func traverseReachableIter(repo *repository.Repository, root objectid.ObjectID) 
 				stack = append(stack, entry.ID)
 			}
 		case *tag.Tag:
-			stack = append(stack, obj.Target)
+			stack = append(stack, obj.TargetID)
 		case *blob.Blob:
 		default:
 			// Unknown parsed object variants are treated as leaves.

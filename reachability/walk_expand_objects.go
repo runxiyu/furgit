@@ -60,7 +60,7 @@ func (walk *Walk) expandObjects(item walkItem) ([]walkItem, error) {
 			return nil, err
 		}
 
-		return []walkItem{{id: tag.Object().Target, want: tag.Object().TargetType}}, nil
+		return []walkItem{{id: tag.Object().TargetID, want: tag.Object().TargetType}}, nil
 	case objecttype.TypeInvalid, objecttype.TypeFuture, objecttype.TypeOfsDelta, objecttype.TypeRefDelta:
 		return nil, &errors.ObjectTypeError{OID: item.id, Got: ty, Want: item.want}
 	}

@@ -23,7 +23,7 @@ func (r *Fetcher) PeelToCommit(id objectid.ObjectID) (*stored.Stored[*commit.Com
 		case *commit.Commit:
 			return stored.New(id, parsed), nil
 		case *tag.Tag:
-			id = parsed.Target
+			id = parsed.TargetID
 		default:
 			return nil, &giterrors.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: objecttype.TypeCommit}
 		}

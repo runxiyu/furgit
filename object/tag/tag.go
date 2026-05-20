@@ -16,7 +16,7 @@ import (
 //
 // Labels: MT-Unsafe.
 type Tag struct {
-	Target     objectid.ObjectID
+	TargetID   objectid.ObjectID
 	TargetType objecttype.Type
 	Name       []byte
 	Tagger     *objectsignature.Signature

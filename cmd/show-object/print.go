@@ -58,7 +58,7 @@ func printStored(s *stored.Stored[object.Object]) {
 			targetTy = fmt.Sprintf("type %d", tag.TargetType)
 		}
 
-		fmt.Fprintf(&b, "target: %s (%s)\n", tag.Target, targetTy)
+		fmt.Fprintf(&b, "target: %s (%s)\n", tag.TargetID, targetTy)
 		fmt.Fprintf(&b, "name: %s\n", tag.Name)
 
 		if tag.Tagger != nil {

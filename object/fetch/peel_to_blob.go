@@ -23,7 +23,7 @@ func (r *Fetcher) PeelToBlob(id objectid.ObjectID) (*stored.Stored[*blob.Blob], 
 		case *blob.Blob:
 			return stored.New(id, parsed), nil
 		case *tag.Tag:
-			id = parsed.Target
+			id = parsed.TargetID
 		default:
 			return nil, &giterrors.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: objecttype.TypeBlob}
 		}

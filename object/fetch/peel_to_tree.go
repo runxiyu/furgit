@@ -27,7 +27,7 @@ func (r *Fetcher) PeelToTree(id objectid.ObjectID) (*stored.Stored[*tree.Tree], 
 		case *commit.Commit:
 			return r.ExactTree(parsed.Tree)
 		case *tag.Tag:
-			id = parsed.Target
+			id = parsed.TargetID
 		default:
 			return nil, &giterrors.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: objecttype.TypeTree}
 		}

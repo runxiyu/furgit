@@ -23,7 +23,7 @@ func (r *Fetcher) PeelToBlobID(id objectid.ObjectID) (objectid.ObjectID, error) 
 				return objectid.ObjectID{}, err
 			}
 
-			id = tag.Object().Target
+			id = tag.Object().TargetID
 		case objecttype.TypeInvalid,
 			objecttype.TypeCommit,
 			objecttype.TypeTree,

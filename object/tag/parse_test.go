@@ -24,8 +24,8 @@ func TestTagParseFromGit(t *testing.T) {
 			t.Fatalf("ParseTag: %v", err)
 		}
 
-		if parsed.Target != commitID {
-			t.Fatalf("tag target mismatch: got %s want %s", parsed.Target, commitID)
+		if parsed.TargetID != commitID {
+			t.Fatalf("tag target mismatch: got %s want %s", parsed.TargetID, commitID)
 		}
 
 		if parsed.TargetType != objecttype.TypeCommit {
