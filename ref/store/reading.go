@@ -28,6 +28,8 @@ type Reader interface {
 	// List returns references matching pattern.
 	//
 	// The exact pattern language is backend-defined.
+	// This is not good, and I should fix this soon.
+	// Also, this should be an iter.Seq[ref.Ref] instead.
 	//
 	// Labels: Life-Parent.
 	List(pattern string) ([]ref.Ref, error)
