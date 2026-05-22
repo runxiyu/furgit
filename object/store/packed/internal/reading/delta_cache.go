@@ -44,14 +44,14 @@ func (cache *deltaCache) get(key deltaBaseKey) (objecttype.Type, []byte, bool) {
 		return objecttype.TypeInvalid, nil, false
 	}
 
-	return value.ty, append([]byte(nil), value.content...), true
+	return value.ty, value.content, true
 }
 
 // add stores a cloned base object value.
 func (cache *deltaCache) add(key deltaBaseKey, ty objecttype.Type, content []byte) {
 	cache.lru.Add(key, deltaBaseValue{
 		ty:      ty,
-		content: append([]byte(nil), content...),
+		content: content,
 	})
 }
 
