@@ -8,7 +8,7 @@ import objectid "codeberg.org/lindenii/furgit/object/id"
 //
 // With commit-graph acceleration available,
 // each visited commit is validated against the object store
-// iff struct is set to true.
+// iff strict is set to true.
 func (r *Reachability) CheckConnected(domain Domain, haves, wants map[objectid.ObjectID]struct{}, strict bool) error {
 	walk := r.Walk(domain, haves, wants)
 
