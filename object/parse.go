@@ -7,9 +7,9 @@ import (
 	"codeberg.org/lindenii/furgit/object/commit"
 	"codeberg.org/lindenii/furgit/object/header"
 	"codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/tag"
-	"codeberg.org/lindenii/furgit/object/tree"
 	"codeberg.org/lindenii/furgit/object/typ"
+	// "codeberg.org/lindenii/furgit/object/tag"
+	// "codeberg.org/lindenii/furgit/object/tree"
 )
 
 // ParseWithHeader parses a loose object in "type size\x00body" format.
@@ -37,11 +37,11 @@ func ParseWithoutHeader(ty typ.Type, body []byte, algo id.Algorithm) (Object, er
 	case typ.TypeBlob:
 		return blob.Parse(body)
 	case typ.TypeTree:
-		return tree.Parse(body, algo)
+		panic("TODO")
 	case typ.TypeCommit:
 		return commit.Parse(body, algo)
 	case typ.TypeTag:
-		return tag.Parse(body, algo)
+		panic("TODO")
 	default:
 		return nil, fmt.Errorf("object: unsupported object type %d", ty)
 	}
