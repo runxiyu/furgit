@@ -17,6 +17,7 @@ linters:
     - varnamelen       # it's rather reasonable to have counters like i, even when it spans quite a bit
     - gocyclo          # cyclomatic metrics aren't that good
     - cyclop           # cyclomatic metrics aren't that good
+    - gocognit         # too many false positives still
     - godox            # TODO/etc comments are allowed in our codebase
     - funlen           # long functions are fine
     - dogsled          # definitely not an issue, ignoring returns is normal

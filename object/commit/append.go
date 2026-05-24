@@ -31,7 +31,6 @@ func (commit *Commit) AppendWithoutHeader(dst []byte) ([]byte, error) {
 
 	for _, h := range commit.ExtraHeaders {
 		// GIGO on empty keys and such.
-
 		dst = append(dst, []byte(h.Key)...)
 		dst = append(dst, byte(' '))
 		dst = append(dst, h.Value...)

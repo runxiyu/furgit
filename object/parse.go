@@ -8,15 +8,13 @@ import (
 	"codeberg.org/lindenii/furgit/object/header"
 	"codeberg.org/lindenii/furgit/object/id"
 	"codeberg.org/lindenii/furgit/object/typ"
-	// "codeberg.org/lindenii/furgit/object/tag"
-	// "codeberg.org/lindenii/furgit/object/tree"
 )
 
 // SizeMismatchError indicates a mismatch
 // between the size expected from the object header
 // and the size of the object.
 type SizeMismatchError struct {
-	Expected int
+	Expected uint64
 	Got      int
 }
 
@@ -34,12 +32,12 @@ func (sizeMismatchError SizeMismatchError) Error() string {
 func ParseWithHeader(raw []byte, algo id.Algorithm) (Object, error) {
 	ty, size, headerLen, err := header.Parse(raw)
 	if err != nil {
-		return nil, err
+		return nil, err //nolint:wrapcheck
 	}
 
 	body := raw[headerLen:]
 	if uint64(len(body)) != size {
-		return nil, SizeMismatchError{Expected: int(size), Got: len(body)}
+		return nil, SizeMismatchError{Expected: size, Got: len(body)}
 	}
 
 	return ParseWithoutHeader(ty, body, algo)
