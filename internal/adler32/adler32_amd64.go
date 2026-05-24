@@ -37,8 +37,10 @@ func (d *digest) MarshalBinary() ([]byte, error) {
 	return b, nil
 }
 
-var ErrInvalidHashStateIdentifier = errors.New("internal/adler32: invalid hash state identifier")
-var ErrInvalidHashStateSize = errors.New("internal/adler32: invalid hash state size")
+var (
+	ErrInvalidHashStateIdentifier = errors.New("internal/adler32: invalid hash state identifier")
+	ErrInvalidHashStateSize       = errors.New("internal/adler32: invalid hash state size")
+)
 
 func (d *digest) UnmarshalBinary(b []byte) error {
 	if len(b) < len(magic) || string(b[:len(magic)]) != magic {

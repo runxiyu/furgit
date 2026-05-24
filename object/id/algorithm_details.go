@@ -7,10 +7,10 @@ import (
 )
 
 type algorithmDetails struct {
-	name                string
-	size                int
-	sum                 func([]byte) ObjectID
-	new                 func() hash.Hash
+	name string
+	size int
+	sum  func([]byte) ObjectID
+	new  func() hash.Hash
 }
 
 func (algo Algorithm) details() algorithmDetails {
@@ -21,8 +21,8 @@ func (algo Algorithm) details() algorithmDetails {
 var algorithmTable = [...]algorithmDetails{
 	AlgorithmUnknown: {}, //nolint:exhaustruct
 	AlgorithmSHA1: {
-		name:                "sha1",
-		size:                sha1.Size,
+		name: "sha1",
+		size: sha1.Size,
 		sum: func(data []byte) ObjectID {
 			sum := sha1.Sum(data) //#nosec G401
 
@@ -32,11 +32,11 @@ var algorithmTable = [...]algorithmDetails{
 
 			return id
 		},
-		new:       sha1.New,
+		new: sha1.New,
 	},
 	AlgorithmSHA256: {
-		name:                "sha256",
-		size:                sha256.Size,
+		name: "sha256",
+		size: sha256.Size,
 		sum: func(data []byte) ObjectID {
 			sum := sha256.Sum256(data)
 
@@ -46,7 +46,7 @@ var algorithmTable = [...]algorithmDetails{
 
 			return id
 		},
-		new:       sha256.New,
+		new: sha256.New,
 	},
 }
 
