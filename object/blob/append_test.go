@@ -8,7 +8,7 @@ import (
 	objectid "codeberg.org/lindenii/furgit/object/id"
 )
 
-func TestBlobSerialize(t *testing.T) {
+func TestBlobAppend(t *testing.T) {
 	t.Parallel()
 	testgit.ForEachAlgorithm(t, func(t *testing.T, algo objectid.Algorithm) { //nolint:thelper
 		testRepo := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: algo, Bare: true})
