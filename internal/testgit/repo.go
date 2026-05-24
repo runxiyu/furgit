@@ -14,6 +14,10 @@ type Repo struct {
 	env  []string
 }
 
+func (repo *Repo) Algorithm() id.Algorithm {
+	return repo.algo
+}
+
 func (repo *Repo) Command(
 	tb testing.TB,
 	command string,
