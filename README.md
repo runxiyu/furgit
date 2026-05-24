@@ -1,6 +1,6 @@
 # Furgit
 
-[![builds.sr.ht status](https://builds.sr.ht/~runxiyu/furgit.svg)](https://builds.sr.ht/~runxiyu/furgit)
+[![builds.sr.ht status](https://builds.sr.ht/~runxiyu/furgit/commits/master.svg)](https://builds.sr.ht/~runxiyu/furgit/commits/master)
 [![Go Reference](https://pkg.go.dev/badge/codeberg.org/lindenii/furgit.svg)](https://pkg.go.dev/codeberg.org/lindenii/furgit)
 
 Furgit is a low‐level Git library in Go.
