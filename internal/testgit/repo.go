@@ -14,23 +14,6 @@ type Repo struct {
 	env          []string
 }
 
-func (repo *Repo) ObjectFormat() id.ObjectFormat {
-	return repo.objectFormat
-}
-
-func (repo *Repo) Command(
-	tb testing.TB,
-	command string,
-	args ...string,
-) *exec.Cmd {
-	//nolint:noctx
-	cmd := exec.Command(command, args...)
-	cmd.Dir = repo.path
-	cmd.Env = repo.env
-
-	return cmd
-}
-
 type RepoOptions struct {
 	ObjectFormat id.ObjectFormat
 }
@@ -53,5 +36,24 @@ func NewRepo(tb testing.TB, opts RepoOptions) (*Repo, error) {
 		),
 	}
 
-	return repo, repo.Command(tb, "git", "init", "--object-format="+repo.objectFormat.String(), "--", repo.path).Run()
+	return repo, repo.Command(tb, "git", "init", "--object-format="+repo.objectFormat.String(), "--", repo.path).Run() //nolint:wrapcheck
+}
+
+func (repo *Repo) ObjectFormat() id.ObjectFormat {
+	return repo.objectFormat
+}
+
+func (repo *Repo) Command(
+	tb testing.TB,
+	command string,
+	args ...string,
+) *exec.Cmd {
+	tb.Helper()
+
+	//nolint:noctx
+	cmd := exec.Command(command, args...)
+	cmd.Dir = repo.path
+	cmd.Env = repo.env
+
+	return cmd
 }
