@@ -12,24 +12,31 @@ Refer to the README for community spaces.
 
 ## Reporting bugs
 
-Bug reports ideally include a reproduction recipe: a Go program which starts
-out with an empty repository and calls Furgit and/or Git commands to trigger
-undesirable behavior. Feel free to ask for help writing them.
+Bug reports ideally include a reproduction recipe:
+a Go program which starts out with an empty repository
+and calls Furgit and/or Git commands
+to trigger undesirable behavior.
+Feel free to ask for help writing them.
 
 Choose any one of:
 
 * [Open an issue on Codeberg](https://codeberg.org/lindenii/furgit/issues/new/choose)
-* Sending email to [my public inbox](https://lists.sr.ht/~runxiyu/public-inbox)
+* Send email to [my public inbox](https://lists.sr.ht/~runxiyu/public-inbox)
 * [Open an issue on GitHub](https://github.com/runxiyu/furgit/issues/new/choose)
 
 ## Submitting changes
 
-When fixing a bug, please write a regression test in a separate commit before
-your fix. Demonstrate that the regression test fails and that your fix lets it
-succeed. Obviously, the regression test must be reasonable, demonstrate a real
-issue (however minor), and must not itself contain hacks solely designed for
-the purposes of making the old code fail and the new one succeed. Feel free to
-ask for help writing regression tests.
+When fixing a bug,
+please write a regression test in a separate commit before your fix.
+Demonstrate that the regression test originally fails
+and that your fix lets it succeed.
+The regression test must be reasonable,
+demonstrate a real issue (however minor),
+and must not itself contain hacks
+solely designed for the purposes of
+making the old code fail
+and making the new one succeed.
+Feel free to ask for help writing them.
 
 Choose any one of:
 
@@ -40,13 +47,17 @@ Choose any one of:
 
 ## DCO sign-off
 
-For the purposes of the Developer Certificate of Origin, the "open source
-license" refers to the GNU Affero General Public License, Version 3.0, with
-the above proxy designation in the README, pursuant to Section 14.
+For the purposes of the Developer Certificate of Origin,
+the "open source license"
+refers to the GNU Affero General Public License, Version 3.0,
+with the proxy designation in the README,
+pursuant to Section 14.
 
-All contributors are required to "sign‐off" their commits (using `git commit
--s`) to indicate that they have agreed to the [Developer Certificate of
-Origin](https://developercertificate.org), reproduced below.
+All contributors are required to "sign‐off" their commits
+(using `git commit -s`)
+to indicate that they have agreed to the
+[Developer Certificate of Origin](https://developercertificate.org),
+reproduced below.
 
 ```
 Developer Certificate of Origin
