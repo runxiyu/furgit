@@ -3,23 +3,13 @@
 [![builds.sr.ht status](https://builds.sr.ht/~runxiyu/furgit/commits/master.svg)](https://builds.sr.ht/~runxiyu/furgit/commits/master)
 [![Go Reference](https://pkg.go.dev/badge/codeberg.org/lindenii/furgit.svg)](https://pkg.go.dev/codeberg.org/lindenii/furgit)
 
-Furgit is a low‐level Git library in Go.
+A low‐level Git library in Go.
 
 ## Status
 
 * **A refactor is pending on the `next` branch.**
-* Years or decades away from stable
-* Absolutely no guarantees
-* Do not use in production
-* Mature alternative: [go-git](https://github.com/go-git/go-git)
-* Will use [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) starting at 1.0.0
-
-## Goals
-
-* General‐purpose Git plumbing library for UNIX‐like systems
-* Aim for extremely clear and modular architecture
-* Then aim for high performance
-* Expect familiarity with Git internals
+* Early development, not suitable for production.
+* A mature alternative is [go-git](https://github.com/go-git/go-git).
 
 ## Community
 
@@ -28,7 +18,7 @@ Furgit is a low‐level Git library in Go.
 * [#lindenii](https://web.libera.chat/#lindenii)
   on [Libera.Chat](https://libera.chat)
 
-See the CONTRIBUTING document for bug reports and patch submissions.
+See also `CONTRIBUTING.md`.
 
 ## Acknowledgements
 
@@ -60,4 +50,4 @@ version for this Program.
 * [tangled mirror](https://tangled.org/@runxiyu.tngl.sh/furgit)
 * [GitHub mirror](https://github.com/runxiyu/furgit)
 * [git.runxiyu.org mirror](https://git.runxiyu.org/furgit.git//)
-
+* [cgit.space mirror](https://cgit.space/~runxiyu/furgit.git/)
