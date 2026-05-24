@@ -41,3 +41,14 @@ under the GNU Affero General Public License, Version 3.0 only, a public
 acceptance by the Designated Proxy of any subsequent version of the GNU Affero
 General Public License shall permanently authorize the use of that accepted
 version for this Program.
+
+
+## Repos and mirrors
+
+* [Codeberg](https://codeberg.org/lindenii/furgit)
+* [SourceHut mirror](https://git.sr.ht/~runxiyu/furgit)
+* [hjgit mirror](https://hjgit.org/runxiyu/furgit/HEAD/info.html)
+* [tangled mirror](https://tangled.org/@runxiyu.tngl.sh/furgit)
+* [GitHub mirror](https://github.com/runxiyu/furgit)
+* [git.runxiyu.org mirror](https://git.runxiyu.org/furgit.git//)
+* [cgit.space mirror](https://cgit.space/~runxiyu/furgit.git/)
