@@ -29,7 +29,7 @@ func (sizeMismatchError SizeMismatchError) Error() string {
 // in "type size\x00body" format.
 //
 //nolint:ireturn
-func ParseWithHeader(raw []byte, algo id.Algorithm) (Object, error) {
+func ParseWithHeader(raw []byte, objectFormat id.ObjectFormat) (Object, error) {
 	ty, size, headerLen, err := header.Parse(raw)
 	if err != nil {
 		return nil, err //nolint:wrapcheck
@@ -40,20 +40,20 @@ func ParseWithHeader(raw []byte, algo id.Algorithm) (Object, error) {
 		return nil, SizeMismatchError{Expected: size, Got: len(body)}
 	}
 
-	return ParseWithoutHeader(ty, body, algo)
+	return ParseWithoutHeader(ty, body, objectFormat)
 }
 
 // ParseWithoutHeader parses a typed object body.
 //
 //nolint:ireturn
-func ParseWithoutHeader(ty typ.Type, body []byte, algo id.Algorithm) (Object, error) {
+func ParseWithoutHeader(ty typ.Type, body []byte, objectFormat id.ObjectFormat) (Object, error) {
 	switch ty {
 	case typ.TypeBlob:
 		return blob.Parse(body) //nolint:wrapcheck
 	case typ.TypeTree:
 		panic("TODO")
 	case typ.TypeCommit:
-		return commit.Parse(body, algo) //nolint:wrapcheck
+		return commit.Parse(body, objectFormat) //nolint:wrapcheck
 	case typ.TypeTag:
 		panic("TODO")
 	default:

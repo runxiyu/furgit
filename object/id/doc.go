@@ -1,7 +1,7 @@
-// Package id provides Git object IDs and hash algorithms.
+// Package id provides Git object IDs and object formats.
 //
 // Not all properties about
-// each object ID hash algorithm
+// each object format (hash algorithm)
 // are listed here.
 // In particular,
 // properties that only make sense for particular subsystems

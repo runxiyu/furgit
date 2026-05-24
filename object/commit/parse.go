@@ -13,7 +13,7 @@ import (
 var ErrInvalidCommit = errors.New("object/commit: invalid commit")
 
 // Parse decodes a commit object body.
-func Parse(body []byte, algo id.Algorithm) (*Commit, error) {
+func Parse(body []byte, objectFormat id.ObjectFormat) (*Commit, error) {
 	c := new(Commit)
 
 	i := 0
@@ -37,14 +37,14 @@ func Parse(body []byte, algo id.Algorithm) (*Commit, error) {
 
 		switch string(key) {
 		case "tree":
-			id, err := id.FromHex(algo, string(value))
+			id, err := id.FromHex(objectFormat, string(value))
 			if err != nil {
 				return nil, fmt.Errorf("object: commit: tree: %w", err)
 			}
 
 			c.Tree = id
 		case "parent":
-			id, err := id.FromHex(algo, string(value))
+			id, err := id.FromHex(objectFormat, string(value))
 			if err != nil {
 				return nil, fmt.Errorf("object: commit: parent: %w", err)
 			}

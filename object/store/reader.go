@@ -18,7 +18,7 @@ type ObjectReader interface {
 	// ReadBytesFull reads a full serialized object as "type size\0content".
 	//
 	// In a valid repository,
-	// hashing this payload with the same algorithm
+	// hashing this payload with the same object format
 	// yields the requested object ID.
 	// Users should treat this as an invariant;
 	// implementations should not re-verify it on every read.

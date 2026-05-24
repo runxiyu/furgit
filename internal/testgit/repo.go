@@ -9,13 +9,13 @@ import (
 )
 
 type Repo struct {
-	path string
-	algo id.Algorithm
-	env  []string
+	path         string
+	objectFormat id.ObjectFormat
+	env          []string
 }
 
-func (repo *Repo) Algorithm() id.Algorithm {
-	return repo.algo
+func (repo *Repo) ObjectFormat() id.ObjectFormat {
+	return repo.objectFormat
 }
 
 func (repo *Repo) Command(
@@ -32,15 +32,15 @@ func (repo *Repo) Command(
 }
 
 type RepoOptions struct {
-	ObjectFormat id.Algorithm
+	ObjectFormat id.ObjectFormat
 }
 
 func NewRepo(tb testing.TB, opts RepoOptions) (*Repo, error) {
 	tb.Helper()
 
 	repo := &Repo{
-		path: tb.TempDir(),
-		algo: opts.ObjectFormat,
+		path:         tb.TempDir(),
+		objectFormat: opts.ObjectFormat,
 		env: append(os.Environ(),
 			"GIT_CONFIG_GLOBAL=/dev/null",
 			"GIT_CONFIG_SYSTEM=/dev/null",
@@ -53,5 +53,5 @@ func NewRepo(tb testing.TB, opts RepoOptions) (*Repo, error) {
 		),
 	}
 
-	return repo, repo.Command(tb, "git", "init", "--object-format="+repo.algo.String(), "--", repo.path).Run()
+	return repo, repo.Command(tb, "git", "init", "--object-format="+repo.objectFormat.String(), "--", repo.path).Run()
 }

@@ -4,6 +4,6 @@ package id
 //
 //nolint:recvcheck
 type ObjectID struct {
-	algo Algorithm
-	data [maxObjectIDSize]byte
+	objectFormat ObjectFormat
+	data         [maxObjectIDSize]byte
 }

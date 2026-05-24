@@ -11,13 +11,13 @@ import (
 func TestFromBytesErrors(t *testing.T) {
 	t.Parallel()
 
-	_, err := id.FromBytes(id.AlgorithmUnknown, []byte{1, 2})
+	_, err := id.FromBytes(id.ObjectFormatUnknown, []byte{1, 2})
 	if err == nil {
-		t.Fatalf("expected FromBytes unknown algo error")
+		t.Fatalf("expected FromBytes unknown object format error")
 	}
 
-	for _, algo := range id.SupportedAlgorithms() {
-		_, err = id.FromBytes(algo, []byte{1, 2})
+	for _, objectFormat := range id.SupportedObjectFormats() {
+		_, err = id.FromBytes(objectFormat, []byte{1, 2})
 		if err == nil {
 			t.Fatalf("expected FromBytes wrong size error")
 		}
@@ -27,8 +27,8 @@ func TestFromBytesErrors(t *testing.T) {
 func TestBytesReturnsCopy(t *testing.T) {
 	t.Parallel()
 
-	for _, algo := range id.SupportedAlgorithms() {
-		id, err := id.FromHex(algo, strings.Repeat("01", algo.Size()))
+	for _, objectFormat := range id.SupportedObjectFormats() {
+		id, err := id.FromHex(objectFormat, strings.Repeat("01", objectFormat.Size()))
 		if err != nil {
 			t.Fatalf("ParseHex failed: %v", err)
 		}
@@ -50,31 +50,31 @@ func TestBytesReturnsCopy(t *testing.T) {
 func TestFromHexErrors(t *testing.T) {
 	t.Parallel()
 
-	t.Run("unknown algo", func(t *testing.T) {
+	t.Run("unknown object format", func(t *testing.T) {
 		t.Parallel()
 
-		_, err := id.FromHex(id.AlgorithmUnknown, "00")
+		_, err := id.FromHex(id.ObjectFormatUnknown, "00")
 		if err == nil {
 			t.Fatalf("expected FromHex error")
 		}
 	})
 	// TODO: This may need to be revisited when hash-function-transition is implemented.
 
-	for _, algo := range id.SupportedAlgorithms() {
-		t.Run(algo.String(), func(t *testing.T) {
+	for _, objectFormat := range id.SupportedObjectFormats() {
+		t.Run(objectFormat.String(), func(t *testing.T) {
 			t.Parallel()
 
-			_, err := id.FromHex(algo, strings.Repeat("0", algo.HexLen()-1))
+			_, err := id.FromHex(objectFormat, strings.Repeat("0", objectFormat.HexLen()-1))
 			if err == nil {
 				t.Fatalf("expected FromHex odd-len error")
 			}
 
-			_, err = id.FromHex(algo, strings.Repeat("0", algo.HexLen()-2))
+			_, err = id.FromHex(objectFormat, strings.Repeat("0", objectFormat.HexLen()-2))
 			if err == nil {
 				t.Fatalf("expected FromHex wrong-len error")
 			}
 
-			_, err = id.FromHex(algo, "z"+strings.Repeat("0", algo.HexLen()-1))
+			_, err = id.FromHex(objectFormat, "z"+strings.Repeat("0", objectFormat.HexLen()-1))
 			if err == nil {
 				t.Fatalf("expected FromHex invalid-hex error")
 			}
@@ -85,13 +85,13 @@ func TestFromHexErrors(t *testing.T) {
 func TestFromHexRoundtrip(t *testing.T) {
 	t.Parallel()
 
-	for _, algo := range id.SupportedAlgorithms() {
-		t.Run(algo.String(), func(t *testing.T) {
+	for _, objectFormat := range id.SupportedObjectFormats() {
+		t.Run(objectFormat.String(), func(t *testing.T) {
 			t.Parallel()
 
-			hex := strings.Repeat("01", algo.Size())
+			hex := strings.Repeat("01", objectFormat.Size())
 
-			i, err := id.FromHex(algo, hex)
+			i, err := id.FromHex(objectFormat, hex)
 			if err != nil {
 				t.Fatalf("FromHex failed: %v", err)
 			}
@@ -100,16 +100,16 @@ func TestFromHexRoundtrip(t *testing.T) {
 				t.Fatalf("String() = %q, want %q", got, hex)
 			}
 
-			if got := i.Algorithm().Size(); got != algo.Size() {
-				t.Fatalf("Size() = %d, want %d", got, algo.Size())
+			if got := i.ObjectFormat().Size(); got != objectFormat.Size() {
+				t.Fatalf("Size() = %d, want %d", got, objectFormat.Size())
 			}
 
 			raw := i.Bytes()
-			if len(raw) != algo.Size() {
-				t.Fatalf("Bytes len = %d, want %d", len(raw), algo.Size())
+			if len(raw) != objectFormat.Size() {
+				t.Fatalf("Bytes len = %d, want %d", len(raw), objectFormat.Size())
 			}
 
-			id2, err := id.FromBytes(algo, raw)
+			id2, err := id.FromBytes(objectFormat, raw)
 			if err != nil {
 				t.Fatalf("FromBytes failed: %v", err)
 			}

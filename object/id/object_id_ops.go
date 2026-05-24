@@ -5,14 +5,14 @@ import (
 	"encoding/hex"
 )
 
-// Algorithm returns the object ID's hash algorithm.
-func (id ObjectID) Algorithm() Algorithm {
-	return id.algo
+// ObjectFormat returns the object ID's object format (hash algorithm).
+func (id ObjectID) ObjectFormat() ObjectFormat {
+	return id.objectFormat
 }
 
 // Bytes returns a copy of the object ID bytes.
 func (id ObjectID) Bytes() []byte {
-	size := id.Algorithm().Size()
+	size := id.ObjectFormat().Size()
 
 	return append([]byte(nil), id.data[:size]...)
 }
@@ -23,7 +23,7 @@ func (id ObjectID) Bytes() []byte {
 //
 // Labels: Mut-No.
 func (id *ObjectID) RawBytes() []byte {
-	size := id.Algorithm().Size()
+	size := id.ObjectFormat().Size()
 
 	return id.data[:size:size]
 }
@@ -36,7 +36,7 @@ func (id ObjectID) Compare(other ObjectID) int {
 
 // String returns the canonical hex representation.
 func (id ObjectID) String() string {
-	size := id.Algorithm().Size()
+	size := id.ObjectFormat().Size()
 
 	return hex.EncodeToString(id.data[:size])
 }

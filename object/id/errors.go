@@ -3,9 +3,9 @@ package id
 import "errors"
 
 var (
-	// ErrInvalidAlgorithm indicates an unsupported object ID algorithm.
-	ErrInvalidAlgorithm = errors.New("objectid: invalid algorithm")
+	// ErrInvalidObjectFormat indicates an unsupported object format.
+	ErrInvalidObjectFormat = errors.New("object/id: invalid object format")
 
 	// ErrInvalidObjectID indicates malformed object ID data.
-	ErrInvalidObjectID = errors.New("objectid: invalid object id")
+	ErrInvalidObjectID = errors.New("object/id: invalid object id")
 )

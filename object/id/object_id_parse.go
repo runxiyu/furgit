@@ -5,36 +5,36 @@ import (
 	"fmt"
 )
 
-// FromBytes builds an object ID from raw bytes for the specified algorithm.
-func FromBytes(algo Algorithm, b []byte) (ObjectID, error) {
+// FromBytes builds an object ID from raw bytes for the specified object format.
+func FromBytes(objectFormat ObjectFormat, b []byte) (ObjectID, error) {
 	var id ObjectID
-	if algo.Size() == 0 {
-		return id, ErrInvalidAlgorithm
+	if objectFormat.Size() == 0 {
+		return id, ErrInvalidObjectFormat
 	}
 
-	if len(b) != algo.Size() {
-		return id, fmt.Errorf("%w: got %d bytes, expected %d", ErrInvalidObjectID, len(b), algo.Size())
+	if len(b) != objectFormat.Size() {
+		return id, fmt.Errorf("%w: got %d bytes, expected %d", ErrInvalidObjectID, len(b), objectFormat.Size())
 	}
 
 	copy(id.data[:], b)
-	id.algo = algo
+	id.objectFormat = objectFormat
 
 	return id, nil
 }
 
-// FromHex parses an object ID from hex for the specified algorithm.
-func FromHex(algo Algorithm, s string) (ObjectID, error) {
+// FromHex parses an object ID from hex for the specified object format.
+func FromHex(objectFormat ObjectFormat, s string) (ObjectID, error) {
 	var id ObjectID
-	if algo.Size() == 0 {
-		return id, ErrInvalidAlgorithm
+	if objectFormat.Size() == 0 {
+		return id, ErrInvalidObjectFormat
 	}
 
 	if len(s)%2 != 0 {
 		return id, fmt.Errorf("%w: odd hex length %d", ErrInvalidObjectID, len(s))
 	}
 
-	if len(s) != algo.HexLen() {
-		return id, fmt.Errorf("%w: got %d chars, expected %d", ErrInvalidObjectID, len(s), algo.HexLen())
+	if len(s) != objectFormat.HexLen() {
+		return id, fmt.Errorf("%w: got %d chars, expected %d", ErrInvalidObjectID, len(s), objectFormat.HexLen())
 	}
 
 	decoded, err := hex.DecodeString(s)
@@ -43,7 +43,7 @@ func FromHex(algo Algorithm, s string) (ObjectID, error) {
 	}
 
 	copy(id.data[:], decoded)
-	id.algo = algo
+	id.objectFormat = objectFormat
 
 	return id, nil
 }
