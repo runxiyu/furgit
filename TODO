@@ -22,6 +22,9 @@ Missing operations that tangled needs
 Unstructured ones
 =================
 
+* See if the space-trimming behavior on symbolic ref storage is correct again
+* Ref namespace yaks to shave
+
 * Receive-pack hook shape redesign; separate post-ref and post-ingest hook
   types.
 * Completely redo error handling.
