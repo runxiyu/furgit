@@ -1,7 +1,6 @@
 package commit
 
 import (
-	"errors"
 	"fmt"
 
 	"codeberg.org/lindenii/furgit/object/header"
@@ -10,10 +9,6 @@ import (
 
 // AppendWithoutHeader renders the raw commit body bytes.
 func (commit *Commit) AppendWithoutHeader(dst []byte) ([]byte, error) {
-	if commit.Tree.Algorithm().Size() == 0 {
-		return dst, errors.New("object: commit: missing tree id")
-	}
-
 	dst = fmt.Appendf(dst, "tree %s\n", commit.Tree.String())
 
 	for _, parent := range commit.Parents {
@@ -35,9 +30,7 @@ func (commit *Commit) AppendWithoutHeader(dst []byte) ([]byte, error) {
 	}
 
 	for _, h := range commit.ExtraHeaders {
-		if h.Key == "" {
-			return dst, errors.New("object: commit: extra header has empty key")
-		}
+		// GIGO on empty keys and such.
 
 		dst = append(dst, []byte(h.Key)...)
 		dst = append(dst, byte(' '))

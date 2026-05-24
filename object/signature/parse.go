@@ -9,7 +9,7 @@ import (
 )
 
 // ErrInvalidSignature indicates an attempt to parse an invalid signature.
-var ErrInvalidSignature = errors.New("object: signature: invalid signature")
+var ErrInvalidSignature = errors.New("object/signature: invalid signature")
 
 // Parse parses a canonical Git signature line.
 //

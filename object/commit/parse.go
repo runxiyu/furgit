@@ -9,6 +9,9 @@ import (
 	"codeberg.org/lindenii/furgit/object/signature"
 )
 
+// ErrInvalidCommit indicates an attempt to parse an invalid commit.
+var ErrInvalidCommit = errors.New("object/commit: invalid commit")
+
 // Parse decodes a commit object body.
 func Parse(body []byte, algo id.Algorithm) (*Commit, error) {
 	c := new(Commit)
@@ -17,7 +20,7 @@ func Parse(body []byte, algo id.Algorithm) (*Commit, error) {
 	for i < len(body) {
 		rel := bytes.IndexByte(body[i:], '\n')
 		if rel < 0 {
-			return nil, errors.New("object: commit: missing newline")
+			return nil, ErrInvalidCommit
 		}
 
 		line := body[i : i+rel]
@@ -29,7 +32,7 @@ func Parse(body []byte, algo id.Algorithm) (*Commit, error) {
 
 		key, value, found := bytes.Cut(line, []byte{' '})
 		if !found {
-			return nil, errors.New("object: commit: malformed header")
+			return nil, ErrInvalidCommit
 		}
 
 		switch string(key) {
@@ -67,7 +70,7 @@ func Parse(body []byte, algo id.Algorithm) (*Commit, error) {
 			for i < len(body) {
 				nextRel := bytes.IndexByte(body[i:], '\n')
 				if nextRel < 0 {
-					return nil, errors.New("object: commit: unterminated gpgsig")
+					return nil, ErrInvalidCommit
 				}
 
 				if body[i] != ' ' {
@@ -85,7 +88,7 @@ func Parse(body []byte, algo id.Algorithm) (*Commit, error) {
 	}
 
 	if i > len(body) {
-		return nil, errors.New("object: commit: parser position out of bounds")
+		return nil, ErrInvalidCommit
 	}
 
 	c.Message = append([]byte(nil), body[i:]...)
