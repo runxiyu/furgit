@@ -8,7 +8,8 @@ import (
 	"codeberg.org/lindenii/furgit/object/typ"
 )
 
-// HashObject hashes and writes an object and returns its object ID.
+// HashObject hashes and writes an object,
+// and returns its object ID.
 func (repo *Repo) HashObject(tb testing.TB, ty typ.Type, body io.Reader) id.ObjectID {
 	tb.Helper()
 	cmd := repo.Command(tb, "git", "hash-object", "-t", ty.Name(), "-w", "--stdin", "--literally")
