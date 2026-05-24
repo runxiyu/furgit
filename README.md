@@ -7,9 +7,27 @@ A low‐level Git plumbing library in Go.
 
 ## Status
 
-* This `next` branch is work in progress.
-* Early development, not suitable for production.
-* Mature alternative: [go-git](https://github.com/go-git/go-git).
+Furgit is an unfinished research-ish project,
+and is **not suitable for production**.
+
+The architecture is rather deliberate
+and the parts that exist have been
+built carefully to our capability,
+and tested against git as the canonical oracle, etc.
+
+However, the API is not yet settled at all;
+we may revise interfaces and behaviour at any time,
+to incorporate findings from ongoing audits,
+including full rearchitectures.
+Consumers that depend on a 0.x version of furgit
+will need to revise their usages
+every few days or weeks.
+
+Therefore, **you should probably not use furgit**.
+Instead, use [go-git](https://github.com/go-git/go-git),
+which has API stability promises,
+or simply `os/exec` to git,
+which is sufficient for many purposes.
 
 ## Community
 
@@ -22,9 +40,9 @@ See also `CONTRIBUTING.md`.
 
 ## Acknowledgements
 
-Partly inspired by [upstream Git](https://git-scm.com),
+Partly inspired by [upstream git](https://git-scm.com),
 OpenBSD's [Game of Trees](https://gameoftrees.org), and
-[9front Git](https://git.9front.org/plan9front/9front/HEAD/sys/src/cmd/git/f.html).
+[9front git](https://git.9front.org/plan9front/9front/HEAD/sys/src/cmd/git/f.html).
 
 ## License
 
