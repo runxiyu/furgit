@@ -12,7 +12,7 @@ and is **not suitable for production**.
 
 The architecture is rather deliberate
 and the parts that exist have been
-built carefully to our capability,
+built carefully (to the best our capability)
 and tested against git as the canonical oracle, etc.
 
 However, the API is not yet settled at all;
@@ -25,7 +25,8 @@ every few days or weeks.
 
 Therefore, **you should probably not use furgit**.
 Instead, use [go-git](https://github.com/go-git/go-git),
-which has API stability promises,
+which is mature
+and has API stability promises,
 or simply `os/exec` to git,
 which is sufficient for many purposes.
 
