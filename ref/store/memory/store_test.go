@@ -42,6 +42,7 @@ func TestReadListAndResolveSymbolic(t *testing.T) {
 		}
 
 		mainID := algo.Sum([]byte("main"))
+
 		tx, err := store.BeginTransaction()
 		if err != nil {
 			t.Fatalf("BeginTransaction: %v", err)
