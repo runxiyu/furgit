@@ -7,8 +7,10 @@ A low‐level Git plumbing library in Go.
 
 ## Status
 
-Furgit is an unfinished research-ish project,
-and is **not suitable for production**.
+**You should *not* use furgit.**
+
+Furgit is an unfinished research project,
+and has breaking API changes every few days.
 
 ## Community
 
