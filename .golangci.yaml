@@ -33,7 +33,7 @@ linters:
             - $all
           allow:
             - $gostd
-            - codeberg.org/lindenii/furgit
+            - lindenii.org/go/furgit
             - golang.org/x
     revive:
       rules:

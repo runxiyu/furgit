@@ -28,7 +28,7 @@ body:
       placeholder: |
         package main
 
-        import "codeberg.org/lindenii/furgit"
+        import "lindenii.org/go/furgit"
 
         func main() {
         	// do something
