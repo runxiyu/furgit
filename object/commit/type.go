@@ -1,7 +1,7 @@
 package commit
 
 import (
-	"codeberg.org/lindenii/furgit/object/typ"
+	"lindenii.org/go/furgit/object/typ"
 )
 
 // ObjectType returns TypeCommit.

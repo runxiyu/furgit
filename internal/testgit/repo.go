@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/object/id"
+	"lindenii.org/go/furgit/object/id"
 )
 
 type Repo struct {

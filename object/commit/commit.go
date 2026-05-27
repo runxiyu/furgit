@@ -1,8 +1,8 @@
 package commit
 
 import (
-	"codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/signature"
+	"lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/signature"
 )
 
 // Commit represents a fully materialized Git commit object.

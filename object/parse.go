@@ -3,11 +3,11 @@ package object
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/object/blob"
-	"codeberg.org/lindenii/furgit/object/commit"
-	"codeberg.org/lindenii/furgit/object/header"
-	"codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/typ"
+	"lindenii.org/go/furgit/object/blob"
+	"lindenii.org/go/furgit/object/commit"
+	"lindenii.org/go/furgit/object/header"
+	"lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/typ"
 )
 
 // SizeMismatchError indicates a mismatch

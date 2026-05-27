@@ -6,6 +6,6 @@
 // such as those providing IO-related interfaces,
 // belong here.
 // Internal-only helper packages
-// belong in [codeberg.org/lindenii/furgit/internal]
+// belong in [lindenii.org/go/furgit/internal]
 // or other internal packages.
 package common

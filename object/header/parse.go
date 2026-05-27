@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strconv"
 
-	"codeberg.org/lindenii/furgit/object/typ"
+	"lindenii.org/go/furgit/object/typ"
 )
 
 var ErrInvalidHeader = errors.New("object/header: invalid header")

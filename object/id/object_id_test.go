@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/object/id"
+	"lindenii.org/go/furgit/object/id"
 )
 
 func TestFromBytesErrors(t *testing.T) {

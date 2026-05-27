@@ -4,5 +4,5 @@
 // It does not preserve the exact original byte layout
 // needed for signature verification;
 // callers that need signature-verification payload fidelity
-// should use [codeberg.org/lindenii/furgit/object/signed/commit].
+// should use [lindenii.org/go/furgit/object/signed/commit].
 package commit

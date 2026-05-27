@@ -4,8 +4,8 @@ import (
 	"io"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/typ"
+	"lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/typ"
 )
 
 // HashObject hashes and writes an object,

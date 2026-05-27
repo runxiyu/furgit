@@ -4,7 +4,7 @@
 // in terms of headers (type and size), raw bytes, and streaming payloads,
 // but they do not parse commits, trees, blobs, or tags into typed values.
 // Turning stored objects into typed objects
-// is the job of [codeberg.org/lindenii/furgit/object/fetch].
+// is the job of [lindenii.org/go/furgit/object/fetch].
 //
 // This package does not define one unified writing interface.
 // Backends have very different write models:

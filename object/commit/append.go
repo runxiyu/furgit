@@ -3,8 +3,8 @@ package commit
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/object/header"
-	"codeberg.org/lindenii/furgit/object/typ"
+	"lindenii.org/go/furgit/object/header"
+	"lindenii.org/go/furgit/object/typ"
 )
 
 // AppendWithoutHeader renders the raw commit body bytes.

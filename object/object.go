@@ -1,6 +1,6 @@
 package object
 
-import "codeberg.org/lindenii/furgit/object/typ"
+import "lindenii.org/go/furgit/object/typ"
 
 // Object is a Git object.
 type Object interface {

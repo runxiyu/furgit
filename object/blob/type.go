@@ -1,6 +1,6 @@
 package blob
 
-import "codeberg.org/lindenii/furgit/object/typ"
+import "lindenii.org/go/furgit/object/typ"
 
 // ObjectType returns TypeBlob.
 func (blob *Blob) ObjectType() typ.Type {

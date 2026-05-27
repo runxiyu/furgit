@@ -4,7 +4,7 @@ import (
 	"slices"
 	"strconv"
 
-	"codeberg.org/lindenii/furgit/object/typ"
+	"lindenii.org/go/furgit/object/typ"
 )
 
 // Append appends a canonical loose-object header ("type size\x00") to dst.

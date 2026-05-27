@@ -4,8 +4,8 @@ import (
 	"errors"
 	"io"
 
-	"codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/typ"
+	"lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/typ"
 )
 
 // ObjectReader reads Git objects by object ID.

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strconv"
 
-	"codeberg.org/lindenii/furgit/internal/intconv"
+	"lindenii.org/go/furgit/internal/intconv"
 )
 
 // ErrInvalidSignature indicates an attempt to parse an invalid signature.

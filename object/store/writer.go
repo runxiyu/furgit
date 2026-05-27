@@ -3,9 +3,9 @@ package store
 import (
 	"io"
 
-	"codeberg.org/lindenii/furgit/common/iowrap"
-	"codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/typ"
+	"lindenii.org/go/furgit/common/iowrap"
+	"lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/typ"
 )
 
 // ObjectWriter writes individual Git objects.

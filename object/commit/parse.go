@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/signature"
+	"lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/signature"
 )
 
 // ErrInvalidCommit indicates an attempt to parse an invalid commit.
