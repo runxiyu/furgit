@@ -3,13 +3,16 @@
 [![builds.sr.ht status](https://builds.sr.ht/~runxiyu/furgit/commits/master.svg)](https://builds.sr.ht/~runxiyu/furgit/commits/master)
 [![Go Reference](https://pkg.go.dev/badge/codeberg.org/lindenii/furgit.svg)](https://pkg.go.dev/codeberg.org/lindenii/furgit)
 
-A low‐level Git library in Go.
+A low‐level Git plumbing library in Go.
+
+A refactor is pending on the `next` branch.
 
 ## Status
 
-* **A refactor is pending on the `next` branch.**
-* Early development, not suitable for production.
-* A mature alternative is [go-git](https://github.com/go-git/go-git).
+**You should *not* use furgit.**
+
+Furgit is an unfinished research project,
+and has breaking API changes every few days.
 
 ## Community
 
@@ -22,9 +25,9 @@ See also `CONTRIBUTING.md`.
 
 ## Acknowledgements
 
-Partly inspired by [upstream Git](https://git-scm.com),
+Partly inspired by [upstream git](https://git-scm.com),
 OpenBSD's [Game of Trees](https://gameoftrees.org), and
-[9front Git](https://git.9front.org/plan9front/9front/HEAD/sys/src/cmd/git/f.html).
+[9front git](https://git.9front.org/plan9front/9front/HEAD/sys/src/cmd/git/f.html).
 
 ## License
 
@@ -47,7 +50,7 @@ version for this Program.
 * [Codeberg](https://codeberg.org/lindenii/furgit)
 * [SourceHut mirror](https://git.sr.ht/~runxiyu/furgit)
 * [hjgit mirror](https://hjgit.org/runxiyu/furgit/HEAD/info.html)
-* [tangled mirror](https://tangled.org/@runxiyu.tngl.sh/furgit)
-* [GitHub mirror](https://github.com/runxiyu/furgit)
 * [git.runxiyu.org mirror](https://git.runxiyu.org/furgit.git//)
 * [cgit.space mirror](https://cgit.space/~runxiyu/furgit.git/)
+* [tangled mirror](https://tangled.org/@runxiyu.tngl.sh/furgit)
+* [GitHub mirror](https://github.com/runxiyu/furgit)
