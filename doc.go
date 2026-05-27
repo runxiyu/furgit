@@ -6,7 +6,7 @@
 // The architecture is rather deliberate
 // and the parts that exist
 // have been built carefully
-// (to the best our capability)
+// (to the best of our capability)
 // and tested against git as the canonical oracle, etc.
 //
 // However, the API is not yet settled at all;
@@ -91,7 +91,7 @@
 // generally inherit the contract documented by the interfaces they satisfy.
 // Implementation docs focus on additional guarantees
 // and implementation-specific behavior,
-// but users are advised not to reply on them
+// but users are advised not to rely on them
 // in order to maintain the flexibility of switching implementations.
 //
 // [go-git]: https://github.com/go-git/go-git
