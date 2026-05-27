@@ -1,11 +1,29 @@
-// Package furgit provides low-level Git operations.
+// Package furgit provides low-level git operations.
 //
-// Furgit provides absolutely no guarantees,
-// including but not limited to correctness, performance, API stability, etc.
-// In particular, before version 1.0.0,
-// no attempt at API stability is made at all:
-// breaking changes may even be introduced in patch-level releases.
-// See also the warranty and liability disclaimers in the license.
+// Furgit is an unfinished research project,
+// and is not suitable for production.
+//
+// The architecture is rather deliberate
+// and the parts that exist
+// have been built carefully
+// (to the best our capability)
+// and tested against git as the canonical oracle, etc.
+//
+// However, the API is not yet settled at all;
+// we may revise interfaces and behaviour at any time,
+// to incorporate findings from ongoing audits,
+// including full rearchitectures.
+// Consumers that depend on a 0.x version of furgit
+// will need to revise their usages
+// every few days or weeks.
+//
+// Therefore, you should probably not use furgit.
+// Consider using [go-git],
+// which is mature and has API stability promises,
+// or simply use [os/exec] to upstream git,
+// which is sufficient for many purposes.
+//
+// # Overall architecture
 //
 // Git libraries often center on a central repository type where all
 // data structures and operations are hosted.
@@ -22,7 +40,8 @@
 // Many furgit APIs use short labels to document
 // concurrency, dependency ownership, value lifetime, and other behavior.
 //
-// When both a type and one of its methods specify conflicting labels,
+// When both a type and one of its methods
+// specify conflicting labels,
 // the method-label takes precedence.
 //
 // Concurrency labels:
@@ -74,4 +93,6 @@
 // and implementation-specific behavior,
 // but users are advised not to reply on them
 // in order to maintain the flexibility of switching implementations.
+//
+// [go-git]: https://github.com/go-git/go-git
 package furgit

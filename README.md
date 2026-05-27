@@ -10,26 +10,6 @@ A low‐level Git plumbing library in Go.
 Furgit is an unfinished research-ish project,
 and is **not suitable for production**.
 
-The architecture is rather deliberate
-and the parts that exist have been
-built carefully (to the best our capability)
-and tested against git as the canonical oracle, etc.
-
-However, the API is not yet settled at all;
-we may revise interfaces and behaviour at any time,
-to incorporate findings from ongoing audits,
-including full rearchitectures.
-Consumers that depend on a 0.x version of furgit
-will need to revise their usages
-every few days or weeks.
-
-Therefore, **you should probably not use furgit**.
-Instead, use [go-git](https://github.com/go-git/go-git),
-which is mature
-and has API stability promises,
-or simply `os/exec` to git,
-which is sufficient for many purposes.
-
 ## Community
 
 * [#lindenii](https://webirc.runxiyu.org/kiwiirc/#lindenii)
@@ -60,7 +40,6 @@ under the GNU Affero General Public License, Version 3.0 only, a public
 acceptance by the Designated Proxy of any subsequent version of the GNU Affero
 General Public License shall permanently authorize the use of that accepted
 version for this Program.
-
 
 ## Repos and mirrors
 
