@@ -3,8 +3,8 @@ package dual
 import (
 	"io"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	objectid "lindenii.org/go/furgit/object/id"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // WriteReaderContent writes one typed object content stream to the object-wise

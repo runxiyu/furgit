@@ -3,7 +3,7 @@ package testgit
 import (
 	"testing"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // CatFile returns raw output from git cat-file.

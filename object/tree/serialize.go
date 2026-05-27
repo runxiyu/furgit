@@ -4,8 +4,8 @@ import (
 	"errors"
 	"strconv"
 
-	objectheader "codeberg.org/lindenii/furgit/object/header"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	objectheader "lindenii.org/go/furgit/object/header"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // BytesWithoutHeader renders the raw tree body bytes.

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // RevList runs "git rev-list" with args and parses one object ID per line.

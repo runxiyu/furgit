@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"codeberg.org/lindenii/furgit/common/iowrap"
+	"lindenii.org/go/furgit/common/iowrap"
 )
 
 // Encoder writes pkt-line frames to a flush-capable output transport.

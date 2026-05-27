@@ -1,6 +1,6 @@
 package fetch
 
-import objectstore "codeberg.org/lindenii/furgit/object/store"
+import objectstore "lindenii.org/go/furgit/object/store"
 
 // Fetcher provides ordinary object access above an object store.
 //

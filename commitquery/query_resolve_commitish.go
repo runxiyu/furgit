@@ -1,6 +1,6 @@
 package commitquery
 
-import objectid "codeberg.org/lindenii/furgit/object/id"
+import objectid "lindenii.org/go/furgit/object/id"
 
 // resolveCommitish peels one commit-ish object ID and resolves the commit.
 func (query *query) resolveCommitish(id objectid.ObjectID) (nodeIndex, error) {

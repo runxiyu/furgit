@@ -1,8 +1,8 @@
 package receivepack
 
 import (
-	protoreceive "codeberg.org/lindenii/furgit/network/protocol/v0v1/server/receivepack"
-	"codeberg.org/lindenii/furgit/network/receivepack/service"
+	protoreceive "lindenii.org/go/furgit/network/protocol/v0v1/server/receivepack"
+	"lindenii.org/go/furgit/network/receivepack/service"
 )
 
 func translateResult(result *service.Result) protoreceive.ReportStatusResult {

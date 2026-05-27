@@ -3,8 +3,8 @@ package repository
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/config"
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	"lindenii.org/go/furgit/config"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // detectObjectAlgorithm uses a repository's configuration to detect

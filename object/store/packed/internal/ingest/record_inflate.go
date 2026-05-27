@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"codeberg.org/lindenii/furgit/internal/intconv"
+	"lindenii.org/go/furgit/internal/intconv"
 )
 
 // inflateRecordPayload inflates one record's zlib payload from pack file.

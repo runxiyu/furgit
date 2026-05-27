@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/internal/intconv"
-	"codeberg.org/lindenii/furgit/internal/progress"
-	objectstore "codeberg.org/lindenii/furgit/object/store"
+	"lindenii.org/go/furgit/internal/intconv"
+	"lindenii.org/go/furgit/internal/progress"
+	objectstore "lindenii.org/go/furgit/object/store"
 )
 
 // maybeFixThin appends missing bases and rewrites pack header/trailer when needed.

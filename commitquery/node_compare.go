@@ -1,6 +1,6 @@
 package commitquery
 
-import objectid "codeberg.org/lindenii/furgit/object/id"
+import objectid "lindenii.org/go/furgit/object/id"
 
 // compare orders two internal nodes using merge-base queue ordering.
 func (query *query) compare(left, right nodeIndex) int {

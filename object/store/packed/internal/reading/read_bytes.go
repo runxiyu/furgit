@@ -3,9 +3,9 @@ package reading
 import (
 	"fmt"
 
-	objectheader "codeberg.org/lindenii/furgit/object/header"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	objectheader "lindenii.org/go/furgit/object/header"
+	objectid "lindenii.org/go/furgit/object/id"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // ReadBytesContent reads an object's type and content bytes.

@@ -3,8 +3,8 @@ package signedtag_test
 import (
 	"testing"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	signedtag "codeberg.org/lindenii/furgit/object/signed/tag"
+	objectid "lindenii.org/go/furgit/object/id"
+	signedtag "lindenii.org/go/furgit/object/signed/tag"
 )
 
 func TestParseSignedTag(t *testing.T) {

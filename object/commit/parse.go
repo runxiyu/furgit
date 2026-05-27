@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectsignature "codeberg.org/lindenii/furgit/object/signature"
+	objectid "lindenii.org/go/furgit/object/id"
+	objectsignature "lindenii.org/go/furgit/object/signature"
 )
 
 // Parse decodes a commit object body.

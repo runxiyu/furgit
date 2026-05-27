@@ -3,9 +3,9 @@ package commit_test
 import (
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/object/commit"
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	"lindenii.org/go/furgit/internal/testgit"
+	"lindenii.org/go/furgit/object/commit"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 func TestCommitSerialize(t *testing.T) {

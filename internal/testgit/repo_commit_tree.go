@@ -3,7 +3,7 @@ package testgit
 import (
 	"testing"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // CommitTree creates a commit from a tree and message, optionally with parents.

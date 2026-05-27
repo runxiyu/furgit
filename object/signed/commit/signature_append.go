@@ -1,6 +1,6 @@
 package signedcommit
 
-import objectid "codeberg.org/lindenii/furgit/object/id"
+import objectid "lindenii.org/go/furgit/object/id"
 
 // AppendSignature appends the unfolded signature for algo to dst.
 func (commit *Commit) AppendSignature(dst []byte, algo objectid.Algorithm) ([]byte, bool) {

@@ -1,6 +1,6 @@
 package commitquery
 
-import objectid "codeberg.org/lindenii/furgit/object/id"
+import objectid "lindenii.org/go/furgit/object/id"
 
 // MergeBases reports all merge bases in Git's merge-base --all order.
 //

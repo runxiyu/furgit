@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/ref"
-	refstore "codeberg.org/lindenii/furgit/ref/store"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/ref"
+	refstore "lindenii.org/go/furgit/ref/store"
 )
 
 func (store *Store) readLooseRef(name string) (ref.Ref, error) { //nolint:ireturn

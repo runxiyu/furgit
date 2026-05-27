@@ -1,7 +1,7 @@
 package reachability
 
 import (
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // Walk is one single-use iterator traversal.

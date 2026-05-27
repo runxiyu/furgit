@@ -1,9 +1,9 @@
 package commitquery
 
 import (
-	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
-	objectfetch "codeberg.org/lindenii/furgit/object/fetch"
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	commitgraphread "lindenii.org/go/furgit/format/commitgraph/read"
+	objectfetch "lindenii.org/go/furgit/object/fetch"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // newQuery builds one empty mutable worker over one object fetcher and graph.

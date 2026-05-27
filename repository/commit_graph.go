@@ -4,8 +4,8 @@ import (
 	"errors"
 	"os"
 
-	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	commitgraphread "lindenii.org/go/furgit/format/commitgraph/read"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 func openCommitGraph(root *os.Root, algo objectid.Algorithm) (*commitgraphread.Reader, error) {

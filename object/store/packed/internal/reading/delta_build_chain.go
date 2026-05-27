@@ -3,7 +3,7 @@ package reading
 import (
 	"fmt"
 
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // deltaBuildChain walks one object's chain and builds a reconstruction chain.

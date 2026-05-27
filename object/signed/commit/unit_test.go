@@ -4,8 +4,8 @@ import (
 	"slices"
 	"testing"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	signedcommit "codeberg.org/lindenii/furgit/object/signed/commit"
+	objectid "lindenii.org/go/furgit/object/id"
+	signedcommit "lindenii.org/go/furgit/object/signed/commit"
 )
 
 func TestParseUpstreamMultiplySignedCommit(t *testing.T) {

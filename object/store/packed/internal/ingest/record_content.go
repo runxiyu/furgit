@@ -3,7 +3,7 @@ package ingest
 import (
 	"fmt"
 
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // readBaseRecordContent reads canonical base content for one non-delta record.

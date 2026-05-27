@@ -3,10 +3,10 @@ package dual
 import (
 	"io"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstore "codeberg.org/lindenii/furgit/object/store"
-	objectmix "codeberg.org/lindenii/furgit/object/store/mix"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	objectid "lindenii.org/go/furgit/object/id"
+	objectstore "lindenii.org/go/furgit/object/store"
+	objectmix "lindenii.org/go/furgit/object/store/mix"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // quarantine is one coordinated dual quarantine over both stores.

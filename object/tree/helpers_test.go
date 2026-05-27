@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/object/tree"
+	"lindenii.org/go/furgit/internal/testgit"
+	"lindenii.org/go/furgit/object/tree"
 )
 
 func buildGitMktreeInput(entries []tree.TreeEntry) string {

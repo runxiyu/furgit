@@ -1,6 +1,6 @@
 package repository
 
-import refstore "codeberg.org/lindenii/furgit/ref/store"
+import refstore "lindenii.org/go/furgit/ref/store"
 
 // RefStore returns the configured ref store.
 //

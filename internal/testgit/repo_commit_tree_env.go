@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // CommitTreeWithEnv creates one commit from a tree and message, optionally with

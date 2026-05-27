@@ -3,7 +3,7 @@ package read
 import (
 	"os"
 
-	"codeberg.org/lindenii/furgit/format/commitgraph/bloom"
+	"lindenii.org/go/furgit/format/commitgraph/bloom"
 )
 
 type layer struct {

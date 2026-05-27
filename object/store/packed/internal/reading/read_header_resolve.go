@@ -3,7 +3,7 @@ package reading
 import (
 	"fmt"
 
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // resolveHeaderAt resolves one object's canonical type and declared content size.

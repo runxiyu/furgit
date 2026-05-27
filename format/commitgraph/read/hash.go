@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // HashVersion returns the commit-graph hash version.

@@ -3,7 +3,7 @@ package progress
 import (
 	"time"
 
-	"codeberg.org/lindenii/furgit/internal/intconv"
+	"lindenii.org/go/furgit/internal/intconv"
 )
 
 // Set records current progress and renders when percent changed or the 1s tick

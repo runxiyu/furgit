@@ -3,7 +3,7 @@ package progress
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/internal/intconv"
+	"lindenii.org/go/furgit/internal/intconv"
 )
 
 func (meter *Meter) renderCounters() string {

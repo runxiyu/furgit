@@ -1,6 +1,6 @@
 package read
 
-import objectid "codeberg.org/lindenii/furgit/object/id"
+import objectid "lindenii.org/go/furgit/object/id"
 
 // Commit stores decoded commit-graph record data.
 type Commit struct {

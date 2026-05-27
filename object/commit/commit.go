@@ -3,12 +3,12 @@
 // It parses commits into ordinary Go values for reading and construction. It
 // does not preserve the exact original byte layout needed for signature
 // verification; callers that need signature-verification payload fidelity
-// should use [codeberg.org/lindenii/furgit/object/signed/commit].
+// should use [lindenii.org/go/furgit/object/signed/commit].
 package commit
 
 import (
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectsignature "codeberg.org/lindenii/furgit/object/signature"
+	objectid "lindenii.org/go/furgit/object/id"
+	objectsignature "lindenii.org/go/furgit/object/signature"
 )
 
 // Commit represents a fully materialized Git commit object.

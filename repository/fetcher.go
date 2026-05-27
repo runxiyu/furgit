@@ -1,6 +1,6 @@
 package repository
 
-import "codeberg.org/lindenii/furgit/object/fetch"
+import "lindenii.org/go/furgit/object/fetch"
 
 // Fetcher returns an object fetcher backed by the repository's object store.
 //

@@ -3,7 +3,7 @@ package bloom
 import (
 	"encoding/binary"
 
-	"codeberg.org/lindenii/furgit/internal/intconv"
+	"lindenii.org/go/furgit/internal/intconv"
 )
 
 // Settings describe the changed-paths Bloom filter parameters stored in

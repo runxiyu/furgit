@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"codeberg.org/lindenii/furgit/commitquery"
-	"codeberg.org/lindenii/furgit/object/fetch"
-	reffiles "codeberg.org/lindenii/furgit/ref/store/files"
+	"lindenii.org/go/furgit/commitquery"
+	"lindenii.org/go/furgit/object/fetch"
+	reffiles "lindenii.org/go/furgit/ref/store/files"
 )
 
 // Open opens a repository and wires its stores and helpers from the on-disk

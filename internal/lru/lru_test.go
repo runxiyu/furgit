@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/lru"
+	"lindenii.org/go/furgit/internal/lru"
 )
 
 type testValue struct {

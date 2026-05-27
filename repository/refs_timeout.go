@@ -3,7 +3,7 @@ package repository
 import (
 	"time"
 
-	"codeberg.org/lindenii/furgit/config"
+	"lindenii.org/go/furgit/config"
 )
 
 func detectPackedRefsTimeout(cfg *config.Config) time.Duration {

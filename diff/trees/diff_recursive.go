@@ -1,8 +1,8 @@
 package trees
 
 import (
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/tree"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/tree"
 )
 
 func diffRecursive(a, b *tree.Tree, prefix []byte, readTree func(objectid.ObjectID) (*tree.Tree, error), out *[]Entry) error {

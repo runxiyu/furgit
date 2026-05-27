@@ -3,13 +3,13 @@
 // It parses annotated tags into ordinary Go values for reading and
 // construction. It does not preserve the exact original byte layout needed for
 // signature verification; callers that need signature-verification payload
-// fidelity should use [codeberg.org/lindenii/furgit/object/signed/tag].
+// fidelity should use [lindenii.org/go/furgit/object/signed/tag].
 package tag
 
 import (
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectsignature "codeberg.org/lindenii/furgit/object/signature"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	objectid "lindenii.org/go/furgit/object/id"
+	objectsignature "lindenii.org/go/furgit/object/signature"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // Tag represents a fully materialized Git annotated tag object.

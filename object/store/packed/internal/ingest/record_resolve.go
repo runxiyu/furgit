@@ -3,7 +3,7 @@ package ingest
 import (
 	"fmt"
 
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // resolveRecord resolves one record and returns canonical type/content.

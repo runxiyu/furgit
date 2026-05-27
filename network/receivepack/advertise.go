@@ -3,9 +3,9 @@ package receivepack
 import (
 	"errors"
 
-	common "codeberg.org/lindenii/furgit/network/protocol/v0v1/server"
-	"codeberg.org/lindenii/furgit/ref"
-	refstore "codeberg.org/lindenii/furgit/ref/store"
+	common "lindenii.org/go/furgit/network/protocol/v0v1/server"
+	"lindenii.org/go/furgit/ref"
+	refstore "lindenii.org/go/furgit/ref/store"
 )
 
 func advertisedRefs(opts Options) ([]common.AdvertisedRef, error) {

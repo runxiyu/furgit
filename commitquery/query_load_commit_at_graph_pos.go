@@ -1,6 +1,6 @@
 package commitquery
 
-import commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
+import commitgraphread "lindenii.org/go/furgit/format/commitgraph/read"
 
 // loadCommitAtGraphPos populates one node from one commit-graph record.
 func (query *query) loadCommitAtGraphPos(idx nodeIndex, pos commitgraphread.Position) error {

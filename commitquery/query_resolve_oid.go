@@ -1,6 +1,6 @@
 package commitquery
 
-import objectid "codeberg.org/lindenii/furgit/object/id"
+import objectid "lindenii.org/go/furgit/object/id"
 
 // resolveOID resolves one commit object ID to one internal query node.
 func (query *query) resolveOID(id objectid.ObjectID) (nodeIndex, error) {

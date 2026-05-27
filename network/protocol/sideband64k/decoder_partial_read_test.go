@@ -3,7 +3,7 @@ package sideband64k_test
 import (
 	"testing"
 
-	"codeberg.org/lindenii/furgit/network/protocol/sideband64k"
+	"lindenii.org/go/furgit/network/protocol/sideband64k"
 )
 
 func TestDecoderHandlesPartialReads(t *testing.T) {

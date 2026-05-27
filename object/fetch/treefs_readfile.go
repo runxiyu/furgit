@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"codeberg.org/lindenii/furgit/object/tree"
+	"lindenii.org/go/furgit/object/tree"
 )
 
 // ReadFile reads the blob contents at name.

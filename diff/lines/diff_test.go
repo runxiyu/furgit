@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/diff/lines"
+	"lindenii.org/go/furgit/diff/lines"
 )
 
 func TestDiff(t *testing.T) { //nolint:maintidx

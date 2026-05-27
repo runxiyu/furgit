@@ -3,7 +3,7 @@ package testgit
 import (
 	"testing"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // HashObject hashes and writes an object and returns its object ID.

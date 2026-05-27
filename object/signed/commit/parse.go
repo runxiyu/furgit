@@ -3,7 +3,7 @@ package signedcommit
 import (
 	"bytes"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // Parse parses one raw commit object body for signature extraction.

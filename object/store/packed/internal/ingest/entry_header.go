@@ -1,8 +1,8 @@
 package ingest
 
 import (
-	"codeberg.org/lindenii/furgit/internal/intconv"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/internal/intconv"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // encodePackEntryHeader encodes one non-delta packed entry header.

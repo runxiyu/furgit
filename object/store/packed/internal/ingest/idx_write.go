@@ -8,8 +8,8 @@ import (
 	"io"
 	"slices"
 
-	"codeberg.org/lindenii/furgit/internal/intconv"
-	"codeberg.org/lindenii/furgit/internal/progress"
+	"lindenii.org/go/furgit/internal/intconv"
+	"lindenii.org/go/furgit/internal/progress"
 )
 
 const (

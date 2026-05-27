@@ -4,7 +4,7 @@ import (
 	"io/fs"
 	"time"
 
-	"codeberg.org/lindenii/furgit/object/tree"
+	"lindenii.org/go/furgit/object/tree"
 )
 
 type treeFSInfo struct {

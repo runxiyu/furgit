@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"codeberg.org/lindenii/furgit/repository"
+	"lindenii.org/go/furgit/repository"
 )
 
 type server struct {

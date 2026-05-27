@@ -1,8 +1,8 @@
 package ingest
 
 import (
-	"codeberg.org/lindenii/furgit/internal/lru"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/internal/lru"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // deltaBaseCacheKey identifies one resolved base by record index.

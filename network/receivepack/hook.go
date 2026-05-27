@@ -3,12 +3,12 @@ package receivepack
 import (
 	"context"
 
-	"codeberg.org/lindenii/furgit/common/iowrap"
-	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
-	"codeberg.org/lindenii/furgit/network/receivepack/service"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstore "codeberg.org/lindenii/furgit/object/store"
-	refstore "codeberg.org/lindenii/furgit/ref/store"
+	"lindenii.org/go/furgit/common/iowrap"
+	commitgraphread "lindenii.org/go/furgit/format/commitgraph/read"
+	"lindenii.org/go/furgit/network/receivepack/service"
+	objectid "lindenii.org/go/furgit/object/id"
+	objectstore "lindenii.org/go/furgit/object/store"
+	refstore "lindenii.org/go/furgit/ref/store"
 )
 
 type HookIO struct {

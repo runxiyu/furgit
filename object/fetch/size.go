@@ -1,6 +1,6 @@
 package fetch
 
-import objectid "codeberg.org/lindenii/furgit/object/id"
+import objectid "lindenii.org/go/furgit/object/id"
 
 // Size returns the object content size at id.
 //

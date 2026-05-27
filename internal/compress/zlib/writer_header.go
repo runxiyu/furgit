@@ -7,8 +7,8 @@ package zlib
 import (
 	"encoding/binary"
 
-	"codeberg.org/lindenii/furgit/internal/adler32"
-	"codeberg.org/lindenii/furgit/internal/compress/flate"
+	"lindenii.org/go/furgit/internal/adler32"
+	"lindenii.org/go/furgit/internal/compress/flate"
 )
 
 // writeHeader writes the ZLIB header.

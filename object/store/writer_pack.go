@@ -3,7 +3,7 @@ package objectstore
 import (
 	"io"
 
-	"codeberg.org/lindenii/furgit/common/iowrap"
+	"lindenii.org/go/furgit/common/iowrap"
 )
 
 // PackWriteOptions controls one pack write operation.

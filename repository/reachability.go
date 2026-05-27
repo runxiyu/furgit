@@ -1,6 +1,6 @@
 package repository
 
-import "codeberg.org/lindenii/furgit/reachability"
+import "lindenii.org/go/furgit/reachability"
 
 // Reachability returns graph traversal helpers backed by the repository's
 // object store and optional commit-graph.

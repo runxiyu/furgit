@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"codeberg.org/lindenii/furgit/internal/intconv"
+	"lindenii.org/go/furgit/internal/intconv"
 )
 
 // Parse parses a canonical Git signature line:

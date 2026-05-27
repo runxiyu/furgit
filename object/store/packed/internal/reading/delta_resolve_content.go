@@ -1,6 +1,6 @@
 package reading
 
-import objecttype "codeberg.org/lindenii/furgit/object/type"
+import objecttype "lindenii.org/go/furgit/object/type"
 
 // deltaResolveContent resolves one object's content bytes from its pack location.
 func (store *Store) deltaResolveContent(start location) (objecttype.Type, []byte, error) {

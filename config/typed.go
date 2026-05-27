@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"codeberg.org/lindenii/furgit/internal/intconv"
+	"lindenii.org/go/furgit/internal/intconv"
 )
 
 // ValueKind describes the presence and form of a config value.

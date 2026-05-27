@@ -1,6 +1,6 @@
 package service
 
-import objectid "codeberg.org/lindenii/furgit/object/id"
+import objectid "lindenii.org/go/furgit/object/id"
 
 // PlannedUpdate is one requested ref update planned for this execution.
 type PlannedUpdate struct {

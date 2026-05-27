@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	signedcommit "codeberg.org/lindenii/furgit/object/signed/commit"
+	"lindenii.org/go/furgit/internal/testgit"
+	objectid "lindenii.org/go/furgit/object/id"
+	signedcommit "lindenii.org/go/furgit/object/signed/commit"
 )
 
 func setupSSHSignedCommit(

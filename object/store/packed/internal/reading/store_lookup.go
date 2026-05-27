@@ -3,8 +3,8 @@ package reading
 import (
 	"errors"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstore "codeberg.org/lindenii/furgit/object/store"
+	objectid "lindenii.org/go/furgit/object/id"
+	objectstore "lindenii.org/go/furgit/object/store"
 )
 
 // lookup resolves one object ID to its pack location.

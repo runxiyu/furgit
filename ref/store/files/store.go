@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	refstore "codeberg.org/lindenii/furgit/ref/store"
+	objectid "lindenii.org/go/furgit/object/id"
+	refstore "lindenii.org/go/furgit/ref/store"
 )
 
 // Store reads and writes one Git files ref namespace rooted at one repository

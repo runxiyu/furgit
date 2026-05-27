@@ -1,7 +1,7 @@
 package files
 
 import (
-	refstore "codeberg.org/lindenii/furgit/ref/store"
+	refstore "lindenii.org/go/furgit/ref/store"
 )
 
 // Transaction stages files-store updates for one atomic commit.

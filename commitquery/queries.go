@@ -3,8 +3,8 @@ package commitquery
 import (
 	"sync"
 
-	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
-	objectfetch "codeberg.org/lindenii/furgit/object/fetch"
+	commitgraphread "lindenii.org/go/furgit/format/commitgraph/read"
+	objectfetch "lindenii.org/go/furgit/object/fetch"
 )
 
 // Queries provides commit-domain queries over one object fetcher

@@ -3,7 +3,7 @@ package read
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/internal/intconv"
+	"lindenii.org/go/furgit/internal/intconv"
 )
 
 // Position identifies one commit record by layer and row index.

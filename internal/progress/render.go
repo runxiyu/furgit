@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"codeberg.org/lindenii/furgit/internal/utils"
+	"lindenii.org/go/furgit/internal/utils"
 )
 
 func (meter *Meter) render(now time.Time, eol string) {

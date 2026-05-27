@@ -3,10 +3,10 @@ package reading
 import (
 	"fmt"
 
-	packfmt "codeberg.org/lindenii/furgit/format/packfile"
-	"codeberg.org/lindenii/furgit/internal/intconv"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	packfmt "lindenii.org/go/furgit/format/packfile"
+	"lindenii.org/go/furgit/internal/intconv"
+	objectid "lindenii.org/go/furgit/object/id"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // entryMeta describes one parsed pack entry header.

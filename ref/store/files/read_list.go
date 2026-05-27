@@ -5,8 +5,8 @@ import (
 	"path"
 	"slices"
 
-	"codeberg.org/lindenii/furgit/ref"
-	refstore "codeberg.org/lindenii/furgit/ref/store"
+	"lindenii.org/go/furgit/ref"
+	refstore "lindenii.org/go/furgit/ref/store"
 )
 
 // List lists references from the visible files ref namespace.

@@ -1,13 +1,13 @@
 package fetch
 
 import (
-	giterrors "codeberg.org/lindenii/furgit/errors"
-	"codeberg.org/lindenii/furgit/object/commit"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/stored"
-	"codeberg.org/lindenii/furgit/object/tag"
-	"codeberg.org/lindenii/furgit/object/tree"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	giterrors "lindenii.org/go/furgit/errors"
+	"lindenii.org/go/furgit/object/commit"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/stored"
+	"lindenii.org/go/furgit/object/tag"
+	"lindenii.org/go/furgit/object/tree"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // PeelToTree peels tags until it reaches a tree or commit. If it reaches a

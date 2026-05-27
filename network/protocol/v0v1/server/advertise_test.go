@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	server "codeberg.org/lindenii/furgit/network/protocol/v0v1/server"
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	"lindenii.org/go/furgit/internal/testgit"
+	server "lindenii.org/go/furgit/network/protocol/v0v1/server"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 func TestAdvertiseRefsWritesVersionOneHeadCapsAndPeeledTag(t *testing.T) {

@@ -3,8 +3,8 @@ package packed
 import (
 	"io"
 
-	objectstore "codeberg.org/lindenii/furgit/object/store"
-	"codeberg.org/lindenii/furgit/object/store/packed/internal/ingest"
+	objectstore "lindenii.org/go/furgit/object/store"
+	"lindenii.org/go/furgit/object/store/packed/internal/ingest"
 )
 
 var _ objectstore.PackWriter = (*Store)(nil)

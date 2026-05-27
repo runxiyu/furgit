@@ -3,8 +3,8 @@ package object
 import (
 	"fmt"
 
-	objectheader "codeberg.org/lindenii/furgit/object/header"
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectheader "lindenii.org/go/furgit/object/header"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // ParseWithHeader parses a loose object in "type size\x00body" format.

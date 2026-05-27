@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // WritePack ingests one pack stream into destination and writes pack artifacts.

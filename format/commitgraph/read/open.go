@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // Open opens commit-graph data from one objects root.

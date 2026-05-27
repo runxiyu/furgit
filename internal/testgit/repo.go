@@ -1,7 +1,7 @@
 // Package testgit provides helpers for integration tests with upstream git(1).
 package testgit
 
-import objectid "codeberg.org/lindenii/furgit/object/id"
+import objectid "lindenii.org/go/furgit/object/id"
 
 // TestRepo is a temporary git repository harness for integration tests.
 type TestRepo struct {

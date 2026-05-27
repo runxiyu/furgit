@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"codeberg.org/lindenii/furgit/common/iowrap"
-	common "codeberg.org/lindenii/furgit/network/protocol/v0v1/server"
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	"lindenii.org/go/furgit/common/iowrap"
+	common "lindenii.org/go/furgit/network/protocol/v0v1/server"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // Session is one stateful server-side receive-pack protocol session.

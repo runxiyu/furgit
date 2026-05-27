@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/priorityqueue"
+	"lindenii.org/go/furgit/internal/priorityqueue"
 )
 
 func TestQueueAscending(t *testing.T) {

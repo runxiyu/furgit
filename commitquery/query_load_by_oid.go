@@ -3,7 +3,7 @@ package commitquery
 import (
 	stderrors "errors"
 
-	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
+	commitgraphread "lindenii.org/go/furgit/format/commitgraph/read"
 )
 
 // loadByOID populates one node from an object ID.

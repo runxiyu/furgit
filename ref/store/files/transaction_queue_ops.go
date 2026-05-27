@@ -1,6 +1,6 @@
 package files
 
-import objectid "codeberg.org/lindenii/furgit/object/id"
+import objectid "lindenii.org/go/furgit/object/id"
 
 // Create queues a detached reference creation.
 func (tx *Transaction) Create(name string, newID objectid.ObjectID) error {

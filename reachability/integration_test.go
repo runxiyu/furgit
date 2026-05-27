@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	giterrors "codeberg.org/lindenii/furgit/errors"
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	objectfetch "codeberg.org/lindenii/furgit/object/fetch"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/reachability"
+	giterrors "lindenii.org/go/furgit/errors"
+	"lindenii.org/go/furgit/internal/testgit"
+	objectfetch "lindenii.org/go/furgit/object/fetch"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/reachability"
 )
 
 func TestWalkCommitsMatchesGitRevList(t *testing.T) {

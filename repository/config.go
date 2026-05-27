@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"codeberg.org/lindenii/furgit/config"
+	"lindenii.org/go/furgit/config"
 )
 
 // parseRepositoryConfig loads the configuration of the repository through

@@ -5,12 +5,12 @@ import (
 	"os"
 	"strings"
 
-	"codeberg.org/lindenii/furgit/object"
-	"codeberg.org/lindenii/furgit/object/blob"
-	"codeberg.org/lindenii/furgit/object/commit"
-	"codeberg.org/lindenii/furgit/object/stored"
-	"codeberg.org/lindenii/furgit/object/tag"
-	"codeberg.org/lindenii/furgit/object/tree"
+	"lindenii.org/go/furgit/object"
+	"lindenii.org/go/furgit/object/blob"
+	"lindenii.org/go/furgit/object/commit"
+	"lindenii.org/go/furgit/object/stored"
+	"lindenii.org/go/furgit/object/tag"
+	"lindenii.org/go/furgit/object/tree"
 )
 
 func printStored(s *stored.Stored[object.Object]) {

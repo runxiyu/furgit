@@ -1,7 +1,7 @@
 package memory
 
 import (
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // Store is one in-memory object store.

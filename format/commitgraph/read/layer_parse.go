@@ -3,10 +3,10 @@ package read
 import (
 	"encoding/binary"
 
-	"codeberg.org/lindenii/furgit/format/commitgraph"
-	"codeberg.org/lindenii/furgit/format/commitgraph/bloom"
-	"codeberg.org/lindenii/furgit/internal/intconv"
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	"lindenii.org/go/furgit/format/commitgraph"
+	"lindenii.org/go/furgit/format/commitgraph/bloom"
+	"lindenii.org/go/furgit/internal/intconv"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 func parseLayer(layer *layer, algo objectid.Algorithm) error { //nolint:maintidx

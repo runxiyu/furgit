@@ -1,8 +1,8 @@
 package ingest
 
 import (
-	"codeberg.org/lindenii/furgit/common/iowrap"
-	objectstore "codeberg.org/lindenii/furgit/object/store"
+	"lindenii.org/go/furgit/common/iowrap"
+	objectstore "lindenii.org/go/furgit/object/store"
 )
 
 // Options controls one pack ingest operation.

@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/compress/internal/fuzz"
+	"lindenii.org/go/furgit/internal/compress/internal/fuzz"
 )
 
 // Fuzzing tweaks:

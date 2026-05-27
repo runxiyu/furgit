@@ -2,6 +2,6 @@
 //
 // Its subpackages extract verification payloads and embedded signatures from
 // raw commit and tag object bodies, without depending on the parsed
-// object models in [codeberg.org/lindenii/furgit/object/commit] and
-// [codeberg.org/lindenii/furgit/object/tag].
+// object models in [lindenii.org/go/furgit/object/commit] and
+// [lindenii.org/go/furgit/object/tag].
 package signed

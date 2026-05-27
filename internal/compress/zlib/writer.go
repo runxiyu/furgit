@@ -11,7 +11,7 @@ import (
 	"io"
 	"sync"
 
-	"codeberg.org/lindenii/furgit/internal/compress/flate"
+	"lindenii.org/go/furgit/internal/compress/flate"
 )
 
 // These constants are copied from the [flate] package, so that code that imports

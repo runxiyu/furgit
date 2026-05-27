@@ -1,6 +1,6 @@
 package sideband64k
 
-import "codeberg.org/lindenii/furgit/network/protocol/pktline"
+import "lindenii.org/go/furgit/network/protocol/pktline"
 
 const (
 	// PacketMax is the maximum on-wire pkt-line size used by side-band-64k.

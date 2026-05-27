@@ -1,6 +1,6 @@
 package tree
 
-import objecttype "codeberg.org/lindenii/furgit/object/type"
+import objecttype "lindenii.org/go/furgit/object/type"
 
 // ObjectType returns TypeTree.
 func (tree *Tree) ObjectType() objecttype.Type {

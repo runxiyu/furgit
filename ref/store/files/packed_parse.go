@@ -6,8 +6,8 @@ import (
 	"io"
 	"strings"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/ref"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/ref"
 )
 
 func parsePackedRefs(r io.Reader, algo objectid.Algorithm) (map[string]ref.Detached, []ref.Detached, error) {

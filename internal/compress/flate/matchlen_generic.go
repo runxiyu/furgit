@@ -6,7 +6,7 @@ package flate
 import (
 	"math/bits"
 
-	"codeberg.org/lindenii/furgit/internal/compress/internal/le"
+	"lindenii.org/go/furgit/internal/compress/internal/le"
 )
 
 // matchLen returns the maximum common prefix length of a and b.

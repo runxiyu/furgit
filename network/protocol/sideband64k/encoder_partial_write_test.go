@@ -5,7 +5,7 @@ import (
 	"io"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/network/protocol/sideband64k"
+	"lindenii.org/go/furgit/network/protocol/sideband64k"
 )
 
 func TestEncoderHandlesPartialWrites(t *testing.T) {

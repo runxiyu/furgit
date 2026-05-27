@@ -1,8 +1,8 @@
 package dual
 
 import (
-	objectstore "codeberg.org/lindenii/furgit/object/store"
-	objectmix "codeberg.org/lindenii/furgit/object/store/mix"
+	objectstore "lindenii.org/go/furgit/object/store"
+	objectmix "lindenii.org/go/furgit/object/store/mix"
 )
 
 // New creates one dual object store from borrowed object-wise and pack-wise

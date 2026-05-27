@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/internal/testgit"
+	objectid "lindenii.org/go/furgit/object/id"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 func TestWriteLooseBytesContent(t *testing.T) {

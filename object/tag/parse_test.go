@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/tag"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/internal/testgit"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/tag"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 func TestTagParseFromGit(t *testing.T) {

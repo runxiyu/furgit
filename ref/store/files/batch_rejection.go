@@ -3,7 +3,7 @@ package files
 import (
 	"errors"
 
-	refstore "codeberg.org/lindenii/furgit/ref/store"
+	refstore "lindenii.org/go/furgit/ref/store"
 )
 
 func isBatchRejected(err error) bool {

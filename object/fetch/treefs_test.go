@@ -5,11 +5,11 @@ import (
 	"io/fs"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/object/fetch"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/tree"
-	"codeberg.org/lindenii/furgit/repository"
+	"lindenii.org/go/furgit/internal/testgit"
+	"lindenii.org/go/furgit/object/fetch"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/tree"
+	"lindenii.org/go/furgit/repository"
 )
 
 func TestTreeFS(t *testing.T) {

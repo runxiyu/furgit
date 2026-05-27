@@ -3,7 +3,7 @@ package packfile
 import (
 	"fmt"
 
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // EntryHeader is one parsed pack entry header prefix.

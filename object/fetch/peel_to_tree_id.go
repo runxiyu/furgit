@@ -1,9 +1,9 @@
 package fetch
 
 import (
-	giterrors "codeberg.org/lindenii/furgit/errors"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	giterrors "lindenii.org/go/furgit/errors"
+	objectid "lindenii.org/go/furgit/object/id"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // PeelToTreeID peels tags until it reaches a tree object ID, or a commit whose

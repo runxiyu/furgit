@@ -7,7 +7,7 @@ import (
 	"io/fs"
 	"os"
 
-	objectstore "codeberg.org/lindenii/furgit/object/store"
+	objectstore "lindenii.org/go/furgit/object/store"
 )
 
 // BeginObjectQuarantine creates one quarantined loose store rooted privately

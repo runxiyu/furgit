@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"codeberg.org/lindenii/furgit/ref"
+	"lindenii.org/go/furgit/ref"
 )
 
 func (store *Store) readPackedRefs() (*packedRefs, error) {

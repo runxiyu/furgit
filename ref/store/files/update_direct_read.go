@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/ref"
-	"codeberg.org/lindenii/furgit/ref/name"
-	refstore "codeberg.org/lindenii/furgit/ref/store"
+	"lindenii.org/go/furgit/ref"
+	"lindenii.org/go/furgit/ref/name"
+	refstore "lindenii.org/go/furgit/ref/store"
 )
 
 func (executor *refUpdateExecutor) directRead(name string) (directRefState, error) {

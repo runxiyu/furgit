@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/ref/name"
-	refstore "codeberg.org/lindenii/furgit/ref/store"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/ref/name"
+	refstore "lindenii.org/go/furgit/ref/store"
 )
 
 func (executor *refUpdateExecutor) validateQueuedUpdate(op queuedUpdate) error {

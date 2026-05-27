@@ -3,8 +3,8 @@ package packed
 import (
 	"os"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/store/packed/internal/reading"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/store/packed/internal/reading"
 )
 
 // Store reads Git objects from pack/index files under an objects/pack root.

@@ -3,7 +3,7 @@ package progress
 import (
 	"time"
 
-	"codeberg.org/lindenii/furgit/common/iowrap"
+	"lindenii.org/go/furgit/common/iowrap"
 )
 
 // Options configures one progress meter.

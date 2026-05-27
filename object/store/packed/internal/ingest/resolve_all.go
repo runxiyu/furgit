@@ -3,7 +3,7 @@ package ingest
 import (
 	"errors"
 
-	"codeberg.org/lindenii/furgit/internal/progress"
+	"lindenii.org/go/furgit/internal/progress"
 )
 
 // resolveAll resolves all delta records and finalizes ObjectID/RealType for every record.

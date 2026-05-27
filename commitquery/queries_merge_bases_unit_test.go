@@ -7,14 +7,14 @@ import (
 	"slices"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/commitquery"
-	giterrors "codeberg.org/lindenii/furgit/errors"
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/object/fetch"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/store/memory"
-	"codeberg.org/lindenii/furgit/object/tree"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/commitquery"
+	giterrors "lindenii.org/go/furgit/errors"
+	"lindenii.org/go/furgit/internal/testgit"
+	"lindenii.org/go/furgit/object/fetch"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/store/memory"
+	"lindenii.org/go/furgit/object/tree"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // commitBody serializes one minimal commit body.

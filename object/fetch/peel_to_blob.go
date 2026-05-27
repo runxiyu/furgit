@@ -1,12 +1,12 @@
 package fetch
 
 import (
-	giterrors "codeberg.org/lindenii/furgit/errors"
-	"codeberg.org/lindenii/furgit/object/blob"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/stored"
-	"codeberg.org/lindenii/furgit/object/tag"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	giterrors "lindenii.org/go/furgit/errors"
+	"lindenii.org/go/furgit/object/blob"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/stored"
+	"lindenii.org/go/furgit/object/tag"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // PeelToBlob peels tags until it reaches a blob.

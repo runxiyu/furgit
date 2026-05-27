@@ -1,6 +1,6 @@
 package ref
 
-import objectid "codeberg.org/lindenii/furgit/object/id"
+import objectid "lindenii.org/go/furgit/object/id"
 
 // Detached points directly to an object ID.
 type Detached struct {

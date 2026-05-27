@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	"codeberg.org/lindenii/furgit/internal/utils"
-	objectstore "codeberg.org/lindenii/furgit/object/store"
+	"lindenii.org/go/furgit/internal/utils"
+	objectstore "lindenii.org/go/furgit/object/store"
 )
 
 // Execute validates one receive-pack request, optionally ingests its pack into

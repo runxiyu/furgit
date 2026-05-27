@@ -2,7 +2,7 @@
 // backends.
 package chain
 
-import objectstore "codeberg.org/lindenii/furgit/object/store"
+import objectstore "lindenii.org/go/furgit/object/store"
 
 // Chain queries multiple object databases in order.
 //

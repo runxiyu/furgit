@@ -3,8 +3,8 @@ package ingest
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/internal/progress"
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	"lindenii.org/go/furgit/internal/progress"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // streamPackAndScan copies src into temp .pack while scanning packed entries.

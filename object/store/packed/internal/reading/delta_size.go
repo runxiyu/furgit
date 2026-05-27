@@ -3,7 +3,7 @@ package reading
 import (
 	"bufio"
 
-	deltaapply "codeberg.org/lindenii/furgit/format/packfile/delta/apply"
+	deltaapply "lindenii.org/go/furgit/format/packfile/delta/apply"
 )
 
 // deltaDeclaredSizeAt returns the resolved object size declared by one delta

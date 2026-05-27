@@ -3,9 +3,9 @@ package reachability
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/errors"
-	objecttree "codeberg.org/lindenii/furgit/object/tree"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/errors"
+	objecttree "lindenii.org/go/furgit/object/tree"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 func (walk *Walk) expandObjects(item walkItem) ([]walkItem, error) {

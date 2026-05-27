@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"codeberg.org/lindenii/furgit/repository"
+	"lindenii.org/go/furgit/repository"
 )
 
 func run(repoPath, name *string) error {

@@ -1,6 +1,6 @@
 package commitquery
 
-import objectid "codeberg.org/lindenii/furgit/object/id"
+import objectid "lindenii.org/go/furgit/object/id"
 
 // MergeBase reports one merge base between left and right, if any.
 func (query *query) MergeBase(left, right objectid.ObjectID) (objectid.ObjectID, bool, error) {

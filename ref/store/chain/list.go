@@ -3,7 +3,7 @@ package chain
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/ref"
+	"lindenii.org/go/furgit/ref"
 )
 
 // List lists references from every backend and deduplicates by ref name.

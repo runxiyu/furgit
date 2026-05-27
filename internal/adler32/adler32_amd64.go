@@ -8,7 +8,7 @@ import (
 	"hash"
 	"hash/adler32"
 
-	"codeberg.org/lindenii/furgit/internal/cpu"
+	"lindenii.org/go/furgit/internal/cpu"
 )
 
 // Size of an Adler-32 checksum in bytes.

@@ -6,7 +6,7 @@ import (
 	"io"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/iolimit"
+	"lindenii.org/go/furgit/internal/iolimit"
 )
 
 func TestExpectLengthReaderExact(t *testing.T) {

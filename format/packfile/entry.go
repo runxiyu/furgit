@@ -3,7 +3,7 @@ package packfile
 import (
 	"fmt"
 
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // Entry is one parsed pack entry prefix, including any delta base reference

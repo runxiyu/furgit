@@ -1,6 +1,6 @@
 package reachability
 
-import objectid "codeberg.org/lindenii/furgit/object/id"
+import objectid "lindenii.org/go/furgit/object/id"
 
 // CheckConnected verifies that all objects reachable from wants (under the
 // selected domain) can be fully traversed without missing-object/type/parse

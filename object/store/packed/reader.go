@@ -3,10 +3,10 @@ package packed
 import (
 	"io"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstore "codeberg.org/lindenii/furgit/object/store"
-	"codeberg.org/lindenii/furgit/object/store/packed/internal/reading"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	objectid "lindenii.org/go/furgit/object/id"
+	objectstore "lindenii.org/go/furgit/object/store"
+	"lindenii.org/go/furgit/object/store/packed/internal/reading"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 var _ objectstore.Reader = (*Store)(nil)

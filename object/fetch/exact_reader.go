@@ -3,9 +3,9 @@ package fetch
 import (
 	"io"
 
-	giterrors "codeberg.org/lindenii/furgit/errors"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	giterrors "lindenii.org/go/furgit/errors"
+	objectid "lindenii.org/go/furgit/object/id"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // exactReader reads one object's content stream and verifies that its header

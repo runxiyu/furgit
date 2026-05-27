@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstore "codeberg.org/lindenii/furgit/object/store"
+	objectid "lindenii.org/go/furgit/object/id"
+	objectstore "lindenii.org/go/furgit/object/store"
 )
 
 // ReadSize reads object content length from the first backend that has it.

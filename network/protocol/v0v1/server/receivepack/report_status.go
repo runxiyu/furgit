@@ -3,7 +3,7 @@ package receivepack
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/network/protocol/pktline"
+	"lindenii.org/go/furgit/network/protocol/pktline"
 )
 
 // WriteReportStatus writes one classic report-status response.

@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectsignature "codeberg.org/lindenii/furgit/object/signature"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	objectid "lindenii.org/go/furgit/object/id"
+	objectsignature "lindenii.org/go/furgit/object/signature"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // Parse decodes a tag object body.

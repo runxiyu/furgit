@@ -1,8 +1,8 @@
 package service
 
 import (
-	"codeberg.org/lindenii/furgit/internal/utils"
-	refstore "codeberg.org/lindenii/furgit/ref/store"
+	"lindenii.org/go/furgit/internal/utils"
+	refstore "lindenii.org/go/furgit/ref/store"
 )
 
 func (service *Service) applyAtomic(result *Result, commands []Command) error {

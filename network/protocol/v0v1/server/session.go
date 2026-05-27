@@ -3,10 +3,10 @@ package server
 import (
 	"io"
 
-	"codeberg.org/lindenii/furgit/common/iowrap"
-	"codeberg.org/lindenii/furgit/network/protocol/pktline"
-	"codeberg.org/lindenii/furgit/network/protocol/sideband64k"
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	"lindenii.org/go/furgit/common/iowrap"
+	"lindenii.org/go/furgit/network/protocol/pktline"
+	"lindenii.org/go/furgit/network/protocol/sideband64k"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // Options configures one server-side v0/v1 session.

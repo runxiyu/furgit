@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/iolimit"
+	"lindenii.org/go/furgit/internal/iolimit"
 )
 
 func TestCappedCaptureWriterWithinLimit(t *testing.T) {

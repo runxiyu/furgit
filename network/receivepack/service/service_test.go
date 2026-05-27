@@ -6,14 +6,14 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/network/receivepack/service"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstore "codeberg.org/lindenii/furgit/object/store"
-	objectdual "codeberg.org/lindenii/furgit/object/store/dual"
-	objectloose "codeberg.org/lindenii/furgit/object/store/loose"
-	"codeberg.org/lindenii/furgit/object/store/memory"
-	objectpacked "codeberg.org/lindenii/furgit/object/store/packed"
+	"lindenii.org/go/furgit/internal/testgit"
+	"lindenii.org/go/furgit/network/receivepack/service"
+	objectid "lindenii.org/go/furgit/object/id"
+	objectstore "lindenii.org/go/furgit/object/store"
+	objectdual "lindenii.org/go/furgit/object/store/dual"
+	objectloose "lindenii.org/go/furgit/object/store/loose"
+	"lindenii.org/go/furgit/object/store/memory"
+	objectpacked "lindenii.org/go/furgit/object/store/packed"
 )
 
 func TestExecutePackExpectedWithoutObjectIngress(t *testing.T) {

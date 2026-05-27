@@ -3,7 +3,7 @@ package sideband64k
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/network/protocol/pktline"
+	"lindenii.org/go/furgit/network/protocol/pktline"
 )
 
 // AppendBand appends one side-band-64k data frame to dst.

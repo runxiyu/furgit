@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"io"
 
-	objectheader "codeberg.org/lindenii/furgit/object/header"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	objectheader "lindenii.org/go/furgit/object/header"
+	objectid "lindenii.org/go/furgit/object/id"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // WriteReaderContent writes one typed object content stream.

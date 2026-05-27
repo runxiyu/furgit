@@ -1,6 +1,6 @@
 package ingest
 
-import "codeberg.org/lindenii/furgit/internal/utils"
+import "lindenii.org/go/furgit/internal/utils"
 
 func writeProgressf(state *ingestState, format string, args ...any) {
 	utils.BestEffortFprintf(state.opts.Progress, format, args...)

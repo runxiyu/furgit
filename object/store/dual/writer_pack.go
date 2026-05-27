@@ -3,7 +3,7 @@ package dual
 import (
 	"io"
 
-	objectstore "codeberg.org/lindenii/furgit/object/store"
+	objectstore "lindenii.org/go/furgit/object/store"
 )
 
 // WritePack ingests one pack stream into the pack-wise store.

@@ -1,6 +1,6 @@
 package refstore
 
-import "codeberg.org/lindenii/furgit/ref"
+import "lindenii.org/go/furgit/ref"
 
 // Reader reads Git references.
 //

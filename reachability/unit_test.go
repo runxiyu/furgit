@@ -7,14 +7,14 @@ import (
 	"slices"
 	"testing"
 
-	giterrors "codeberg.org/lindenii/furgit/errors"
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	objectfetch "codeberg.org/lindenii/furgit/object/fetch"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/store/memory"
-	"codeberg.org/lindenii/furgit/object/tree"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
-	"codeberg.org/lindenii/furgit/reachability"
+	giterrors "lindenii.org/go/furgit/errors"
+	"lindenii.org/go/furgit/internal/testgit"
+	objectfetch "lindenii.org/go/furgit/object/fetch"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/store/memory"
+	"lindenii.org/go/furgit/object/tree"
+	objecttype "lindenii.org/go/furgit/object/type"
+	"lindenii.org/go/furgit/reachability"
 )
 
 type memStore struct {

@@ -3,9 +3,9 @@ package fetch
 import (
 	stderrors "errors"
 
-	giterrors "codeberg.org/lindenii/furgit/errors"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstore "codeberg.org/lindenii/furgit/object/store"
+	giterrors "lindenii.org/go/furgit/errors"
+	objectid "lindenii.org/go/furgit/object/id"
+	objectstore "lindenii.org/go/furgit/object/store"
 )
 
 // wrapObjectReadError maps raw object-store lookup failures to fetcher-level

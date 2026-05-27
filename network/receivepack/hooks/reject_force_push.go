@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/commitquery"
-	receivepack "codeberg.org/lindenii/furgit/network/receivepack"
-	"codeberg.org/lindenii/furgit/object/fetch"
-	objectmix "codeberg.org/lindenii/furgit/object/store/mix"
-	refstore "codeberg.org/lindenii/furgit/ref/store"
+	"lindenii.org/go/furgit/commitquery"
+	receivepack "lindenii.org/go/furgit/network/receivepack"
+	"lindenii.org/go/furgit/object/fetch"
+	objectmix "lindenii.org/go/furgit/object/store/mix"
+	refstore "lindenii.org/go/furgit/ref/store"
 )
 
 // RejectForcePush rejects updates whose new value is not a fast-forward of the

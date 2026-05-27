@@ -5,7 +5,7 @@ import (
 	"io"
 	"io/fs"
 
-	"codeberg.org/lindenii/furgit/object/tree"
+	"lindenii.org/go/furgit/object/tree"
 )
 
 // Open opens name for reading.

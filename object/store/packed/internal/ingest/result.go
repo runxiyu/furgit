@@ -1,6 +1,6 @@
 package ingest
 
-import objectid "codeberg.org/lindenii/furgit/object/id"
+import objectid "lindenii.org/go/furgit/object/id"
 
 // Result describes one successful ingest transaction.
 type Result struct {

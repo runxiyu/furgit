@@ -1,6 +1,6 @@
 package bloom
 
-import "codeberg.org/lindenii/furgit/internal/intconv"
+import "lindenii.org/go/furgit/internal/intconv"
 
 func murmur3SeededV2(seed uint32, data []byte) (uint32, error) {
 	const (

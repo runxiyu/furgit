@@ -3,8 +3,8 @@ package reachability
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/errors"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/errors"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 func (walk *Walk) expandCommits(item walkItem) ([]walkItem, error) {

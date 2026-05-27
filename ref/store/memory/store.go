@@ -3,8 +3,8 @@ package memory
 import (
 	"sync"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	refstore "codeberg.org/lindenii/furgit/ref/store"
+	objectid "lindenii.org/go/furgit/object/id"
+	refstore "lindenii.org/go/furgit/ref/store"
 )
 
 // Store reads and writes one in-memory Git reference namespace.

@@ -3,9 +3,9 @@ package ingest
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/internal/intconv"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/internal/intconv"
+	objectid "lindenii.org/go/furgit/object/id"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // parseEntryPrefix parses one entry prefix from stream.

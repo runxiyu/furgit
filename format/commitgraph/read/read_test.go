@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/format/commitgraph/bloom"
-	"codeberg.org/lindenii/furgit/format/commitgraph/read"
-	"codeberg.org/lindenii/furgit/internal/intconv"
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	"lindenii.org/go/furgit/format/commitgraph/bloom"
+	"lindenii.org/go/furgit/format/commitgraph/read"
+	"lindenii.org/go/furgit/internal/intconv"
+	"lindenii.org/go/furgit/internal/testgit"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 func fixtureRepoPath(t *testing.T, algo objectid.Algorithm, name string) string {

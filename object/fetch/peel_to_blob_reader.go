@@ -3,7 +3,7 @@ package fetch
 import (
 	"io"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // PeelToBlobReader returns a reader for the content of the peeled blob at id,

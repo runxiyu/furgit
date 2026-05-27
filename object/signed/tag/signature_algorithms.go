@@ -1,6 +1,6 @@
 package signedtag
 
-import objectid "codeberg.org/lindenii/furgit/object/id"
+import objectid "lindenii.org/go/furgit/object/id"
 
 // Algorithms returns the algorithms for which the tag carries signatures.
 func (tag *Tag) Algorithms() []objectid.Algorithm {

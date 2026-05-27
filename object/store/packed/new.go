@@ -3,8 +3,8 @@ package packed
 import (
 	"os"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/store/packed/internal/reading"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/store/packed/internal/reading"
 )
 
 // New creates a packed-object store rooted at an objects/pack directory.

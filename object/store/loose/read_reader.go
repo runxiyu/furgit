@@ -7,10 +7,10 @@ import (
 	"io"
 	"os"
 
-	"codeberg.org/lindenii/furgit/internal/compress/zlib"
-	"codeberg.org/lindenii/furgit/internal/iolimit"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/internal/compress/zlib"
+	"lindenii.org/go/furgit/internal/iolimit"
+	objectid "lindenii.org/go/furgit/object/id"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 type objectReader struct {

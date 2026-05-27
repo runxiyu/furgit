@@ -8,7 +8,7 @@ import (
 	"net"
 	"os"
 
-	"codeberg.org/lindenii/furgit/repository"
+	"lindenii.org/go/furgit/repository"
 )
 
 func run(listenAddr, repoPath string) error {

@@ -1,6 +1,6 @@
 package bloom
 
-import "codeberg.org/lindenii/furgit/internal/intconv"
+import "lindenii.org/go/furgit/internal/intconv"
 
 type key struct {
 	hashes []uint32

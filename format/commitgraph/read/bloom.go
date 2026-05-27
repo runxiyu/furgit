@@ -3,8 +3,8 @@ package read
 import (
 	"encoding/binary"
 
-	"codeberg.org/lindenii/furgit/format/commitgraph/bloom"
-	"codeberg.org/lindenii/furgit/internal/intconv"
+	"lindenii.org/go/furgit/format/commitgraph/bloom"
+	"lindenii.org/go/furgit/internal/intconv"
 )
 
 // HasBloom reports whether any layer has changed-path Bloom data.

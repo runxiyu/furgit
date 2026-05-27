@@ -1,11 +1,11 @@
 package fetch
 
 import (
-	giterrors "codeberg.org/lindenii/furgit/errors"
-	"codeberg.org/lindenii/furgit/object/commit"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/stored"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	giterrors "lindenii.org/go/furgit/errors"
+	"lindenii.org/go/furgit/object/commit"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/stored"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // ExactCommit reads, parses, and wraps the commit at id.

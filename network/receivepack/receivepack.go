@@ -4,10 +4,10 @@ import (
 	"context"
 	"io"
 
-	"codeberg.org/lindenii/furgit/common/iowrap"
-	common "codeberg.org/lindenii/furgit/network/protocol/v0v1/server"
-	protoreceive "codeberg.org/lindenii/furgit/network/protocol/v0v1/server/receivepack"
-	"codeberg.org/lindenii/furgit/network/receivepack/service"
+	"lindenii.org/go/furgit/common/iowrap"
+	common "lindenii.org/go/furgit/network/protocol/v0v1/server"
+	protoreceive "lindenii.org/go/furgit/network/protocol/v0v1/server/receivepack"
+	"lindenii.org/go/furgit/network/receivepack/service"
 )
 
 // TODO: Some more designing to do. In particular, we'd like to have access to

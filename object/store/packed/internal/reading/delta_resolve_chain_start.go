@@ -3,7 +3,7 @@ package reading
 import (
 	"fmt"
 
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // deltaResolveChainStart finds the nearest cached chain node or inflates the

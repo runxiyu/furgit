@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // Parse decodes a tree object body into a fully materialized Tree.

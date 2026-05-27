@@ -3,7 +3,7 @@ package flate
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/internal/compress/internal/le"
+	"lindenii.org/go/furgit/internal/compress/internal/le"
 )
 
 // fastGen maintains the table for matches,

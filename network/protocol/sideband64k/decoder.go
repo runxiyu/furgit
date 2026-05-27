@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"codeberg.org/lindenii/furgit/network/protocol/pktline"
+	"lindenii.org/go/furgit/network/protocol/pktline"
 )
 
 // ReadOptions controls sideband decoding behavior.

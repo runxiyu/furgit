@@ -7,13 +7,13 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/object/blob"
-	"codeberg.org/lindenii/furgit/object/commit"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/tag"
-	"codeberg.org/lindenii/furgit/object/tree"
-	"codeberg.org/lindenii/furgit/repository"
+	"lindenii.org/go/furgit/internal/testgit"
+	"lindenii.org/go/furgit/object/blob"
+	"lindenii.org/go/furgit/object/commit"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/tag"
+	"lindenii.org/go/furgit/object/tree"
+	"lindenii.org/go/furgit/repository"
 )
 
 func TestRepositoryDepthFirstEnumerationFromHEAD(t *testing.T) {

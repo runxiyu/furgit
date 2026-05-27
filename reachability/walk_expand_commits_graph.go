@@ -3,9 +3,9 @@ package reachability
 import (
 	"errors"
 
-	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	commitgraphread "lindenii.org/go/furgit/format/commitgraph/read"
+	objectid "lindenii.org/go/furgit/object/id"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 func (walk *Walk) expandCommitsFromGraph(id objectid.ObjectID) ([]walkItem, bool, error) {

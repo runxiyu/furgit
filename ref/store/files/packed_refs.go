@@ -1,7 +1,7 @@
 package files
 
 import (
-	"codeberg.org/lindenii/furgit/ref"
+	"lindenii.org/go/furgit/ref"
 )
 
 type packedRefs struct {

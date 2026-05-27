@@ -9,10 +9,10 @@ import (
 	"os"
 	"strings"
 
-	"codeberg.org/lindenii/furgit/network/receivepack"
-	objectdual "codeberg.org/lindenii/furgit/object/store/dual"
-	objectloose "codeberg.org/lindenii/furgit/object/store/loose"
-	objectpacked "codeberg.org/lindenii/furgit/object/store/packed"
+	"lindenii.org/go/furgit/network/receivepack"
+	objectdual "lindenii.org/go/furgit/object/store/dual"
+	objectloose "lindenii.org/go/furgit/object/store/loose"
+	objectpacked "lindenii.org/go/furgit/object/store/packed"
 )
 
 func (srv *server) handleConn(conn net.Conn) {

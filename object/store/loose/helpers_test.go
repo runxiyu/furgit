@@ -5,11 +5,11 @@ import (
 	"os"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	objectheader "codeberg.org/lindenii/furgit/object/header"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/store/loose"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/internal/testgit"
+	objectheader "lindenii.org/go/furgit/object/header"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/store/loose"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 func openLooseStore(t *testing.T, testRepo *testgit.TestRepo, algo objectid.Algorithm) *loose.Store {

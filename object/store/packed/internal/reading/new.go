@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // New creates a packed-object store rooted at an objects/pack directory.

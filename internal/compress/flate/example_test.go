@@ -13,7 +13,7 @@ import (
 	"strings"
 	"sync"
 
-	"codeberg.org/lindenii/furgit/internal/compress/flate"
+	"lindenii.org/go/furgit/internal/compress/flate"
 )
 
 // In performance critical applications, Reset can be used to discard the

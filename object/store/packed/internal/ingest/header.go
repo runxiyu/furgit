@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"codeberg.org/lindenii/furgit/format/packfile"
+	"lindenii.org/go/furgit/format/packfile"
 )
 
 const packHeaderSize = 12

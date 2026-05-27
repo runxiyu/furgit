@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/network/protocol/pktline"
-	"codeberg.org/lindenii/furgit/network/protocol/sideband64k"
+	"lindenii.org/go/furgit/network/protocol/pktline"
+	"lindenii.org/go/furgit/network/protocol/sideband64k"
 )
 
 func TestDecoderInvalid0003(t *testing.T) {

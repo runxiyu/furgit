@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstore "codeberg.org/lindenii/furgit/object/store"
-	"codeberg.org/lindenii/furgit/object/store/loose"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/internal/testgit"
+	objectid "lindenii.org/go/furgit/object/id"
+	objectstore "lindenii.org/go/furgit/object/store"
+	"lindenii.org/go/furgit/object/store/loose"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 func TestLooseStoreReadAgainstGit(t *testing.T) {

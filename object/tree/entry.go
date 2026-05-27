@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"slices"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // TreeEntry represents a single entry in a tree.

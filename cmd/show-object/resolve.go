@@ -3,8 +3,8 @@ package main
 import (
 	"strings"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/repository"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/repository"
 )
 
 func resolveInput(repo *repository.Repository, input string) (objectid.ObjectID, error) {

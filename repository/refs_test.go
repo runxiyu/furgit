@@ -3,10 +3,10 @@ package repository_test
 import (
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
-	"codeberg.org/lindenii/furgit/ref"
+	"lindenii.org/go/furgit/internal/testgit"
+	objectid "lindenii.org/go/furgit/object/id"
+	objecttype "lindenii.org/go/furgit/object/type"
+	"lindenii.org/go/furgit/ref"
 )
 
 func TestOpenFilesRefFormat(t *testing.T) {

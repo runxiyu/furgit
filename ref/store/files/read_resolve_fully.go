@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"codeberg.org/lindenii/furgit/ref"
+	"lindenii.org/go/furgit/ref"
 )
 
 // ResolveToDetached resolves symbolic references through the visible files store

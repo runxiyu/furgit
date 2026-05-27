@@ -6,10 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/commitquery"
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/object/fetch"
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	"lindenii.org/go/furgit/commitquery"
+	"lindenii.org/go/furgit/internal/testgit"
+	"lindenii.org/go/furgit/object/fetch"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 func TestQueryMatchesGitMergeBaseAll(t *testing.T) {

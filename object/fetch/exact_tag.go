@@ -1,11 +1,11 @@
 package fetch
 
 import (
-	giterrors "codeberg.org/lindenii/furgit/errors"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/stored"
-	"codeberg.org/lindenii/furgit/object/tag"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	giterrors "lindenii.org/go/furgit/errors"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/stored"
+	"lindenii.org/go/furgit/object/tag"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // ExactTag reads, parses, and wraps the tag at id.

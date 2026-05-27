@@ -3,7 +3,7 @@ package errors
 import (
 	"fmt"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // ObjectMissingError indicates that a referenced object is absent from the

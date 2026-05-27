@@ -3,8 +3,8 @@ package errors
 import (
 	"fmt"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	objectid "lindenii.org/go/furgit/object/id"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // ObjectTypeError indicates that a referenced object has a different type than

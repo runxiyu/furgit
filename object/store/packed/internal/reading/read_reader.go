@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"io"
 
-	"codeberg.org/lindenii/furgit/internal/iolimit"
-	objectheader "codeberg.org/lindenii/furgit/object/header"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/internal/iolimit"
+	objectheader "lindenii.org/go/furgit/object/header"
+	objectid "lindenii.org/go/furgit/object/id"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // ReadReaderContent reads an object's type, declared content size, and content

@@ -4,12 +4,12 @@ import (
 	"errors"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/diff/trees"
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/store/loose"
-	"codeberg.org/lindenii/furgit/object/tree"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/diff/trees"
+	"lindenii.org/go/furgit/internal/testgit"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/store/loose"
+	"lindenii.org/go/furgit/object/tree"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 func TestDiffComplexNestedChanges(t *testing.T) {

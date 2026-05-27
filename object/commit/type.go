@@ -1,6 +1,6 @@
 package commit
 
-import objecttype "codeberg.org/lindenii/furgit/object/type"
+import objecttype "lindenii.org/go/furgit/object/type"
 
 // ObjectType returns TypeCommit.
 func (commit *Commit) ObjectType() objecttype.Type {

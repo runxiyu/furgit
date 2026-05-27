@@ -3,7 +3,7 @@ package adler32_test
 import (
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/adler32"
+	"lindenii.org/go/furgit/internal/adler32"
 )
 
 const benchmarkSize = 64 * 1024

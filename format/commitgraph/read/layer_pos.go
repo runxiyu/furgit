@@ -1,6 +1,6 @@
 package read
 
-import "codeberg.org/lindenii/furgit/internal/intconv"
+import "lindenii.org/go/furgit/internal/intconv"
 
 func (reader *Reader) layerByPosition(pos Position) (*layer, error) {
 	graphIdx, err := intconv.Uint64ToInt(uint64(pos.Graph))

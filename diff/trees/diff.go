@@ -2,8 +2,8 @@
 package trees
 
 import (
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/tree"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/tree"
 )
 
 // Diff compares two trees and returns recursive differences.

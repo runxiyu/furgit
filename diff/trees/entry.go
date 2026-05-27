@@ -1,6 +1,6 @@
 package trees
 
-import "codeberg.org/lindenii/furgit/object/tree"
+import "lindenii.org/go/furgit/object/tree"
 
 // Entry is one recursive tree difference at a path.
 type Entry struct {

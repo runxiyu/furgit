@@ -1,6 +1,6 @@
 package dual
 
-import objectstore "codeberg.org/lindenii/furgit/object/store"
+import objectstore "lindenii.org/go/furgit/object/store"
 
 // BeginQuarantine creates one coordinated dual quarantine spanning both stores.
 //

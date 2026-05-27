@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // verifyMappedPackMatchesMappedIdx compares one mapped pack trailer hash with

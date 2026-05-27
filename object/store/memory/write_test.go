@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	objectheader "codeberg.org/lindenii/furgit/object/header"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/store/memory"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/internal/testgit"
+	objectheader "lindenii.org/go/furgit/object/header"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/store/memory"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 func TestStoreWriteReaderContent(t *testing.T) {

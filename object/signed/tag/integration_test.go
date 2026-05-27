@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	signedtag "codeberg.org/lindenii/furgit/object/signed/tag"
+	"lindenii.org/go/furgit/internal/testgit"
+	objectid "lindenii.org/go/furgit/object/id"
+	signedtag "lindenii.org/go/furgit/object/signed/tag"
 )
 
 func setupSSHSignedTag(

@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	"codeberg.org/lindenii/furgit/network/protocol/pktline"
-	common "codeberg.org/lindenii/furgit/network/protocol/v0v1/server"
-	receivepack "codeberg.org/lindenii/furgit/network/protocol/v0v1/server/receivepack"
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	"lindenii.org/go/furgit/internal/testgit"
+	"lindenii.org/go/furgit/network/protocol/pktline"
+	common "lindenii.org/go/furgit/network/protocol/v0v1/server"
+	receivepack "lindenii.org/go/furgit/network/protocol/v0v1/server/receivepack"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 func TestReadRequestParsesCommandsAndPushOptions(t *testing.T) {

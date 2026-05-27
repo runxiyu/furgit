@@ -6,9 +6,9 @@ import (
 	"io"
 	"os"
 
-	"codeberg.org/lindenii/furgit/internal/compress/zlib"
-	objectheader "codeberg.org/lindenii/furgit/object/header"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/internal/compress/zlib"
+	objectheader "lindenii.org/go/furgit/object/header"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // decodeAll inflates the full loose object payload from file.

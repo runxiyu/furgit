@@ -6,7 +6,7 @@ import (
 	"io/fs"
 	"strings"
 
-	"codeberg.org/lindenii/furgit/internal/intconv"
+	"lindenii.org/go/furgit/internal/intconv"
 )
 
 // finalizeArtifacts links temporary files to final names and returns Result.

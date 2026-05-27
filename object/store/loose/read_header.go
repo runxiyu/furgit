@@ -3,9 +3,9 @@ package loose
 import (
 	"bufio"
 
-	"codeberg.org/lindenii/furgit/internal/compress/zlib"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/internal/compress/zlib"
+	objectid "lindenii.org/go/furgit/object/id"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // ReadHeader reads an object's type and declared content length.

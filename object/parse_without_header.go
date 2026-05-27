@@ -3,12 +3,12 @@ package object
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/object/blob"
-	"codeberg.org/lindenii/furgit/object/commit"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/tag"
-	"codeberg.org/lindenii/furgit/object/tree"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/object/blob"
+	"lindenii.org/go/furgit/object/commit"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/tag"
+	"lindenii.org/go/furgit/object/tree"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // ParseWithoutHeader parses a typed object body.

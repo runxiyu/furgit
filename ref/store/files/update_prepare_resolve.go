@@ -1,6 +1,6 @@
 package files
 
-import refstore "codeberg.org/lindenii/furgit/ref/store"
+import refstore "lindenii.org/go/furgit/ref/store"
 
 func (executor *refUpdateExecutor) resolvePreparedUpdates(ops []queuedUpdate) ([]preparedUpdate, error) {
 	prepared := make([]preparedUpdate, 0, len(ops))

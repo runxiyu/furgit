@@ -3,8 +3,8 @@ package sideband64k
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/common/iowrap"
-	"codeberg.org/lindenii/furgit/network/protocol/pktline"
+	"lindenii.org/go/furgit/common/iowrap"
+	"lindenii.org/go/furgit/network/protocol/pktline"
 )
 
 // Encoder writes side-band-64k frames to a flush-capable output transport.

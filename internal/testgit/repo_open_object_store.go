@@ -3,8 +3,8 @@ package testgit
 import (
 	"testing"
 
-	objectstore "codeberg.org/lindenii/furgit/object/store"
-	"codeberg.org/lindenii/furgit/repository"
+	objectstore "lindenii.org/go/furgit/object/store"
+	"lindenii.org/go/furgit/repository"
 )
 
 // OpenObjectStore opens the repository object store and registers cleanup on

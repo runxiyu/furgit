@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstore "codeberg.org/lindenii/furgit/object/store"
-	objectdual "codeberg.org/lindenii/furgit/object/store/dual"
-	objectloose "codeberg.org/lindenii/furgit/object/store/loose"
-	objectpacked "codeberg.org/lindenii/furgit/object/store/packed"
+	objectid "lindenii.org/go/furgit/object/id"
+	objectstore "lindenii.org/go/furgit/object/store"
+	objectdual "lindenii.org/go/furgit/object/store/dual"
+	objectloose "lindenii.org/go/furgit/object/store/loose"
+	objectpacked "lindenii.org/go/furgit/object/store/packed"
 )
 
 // openObjectStore opens the roots and object stores of both

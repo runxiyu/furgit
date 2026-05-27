@@ -1,9 +1,9 @@
 package fetch
 
 import (
-	"codeberg.org/lindenii/furgit/object"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	"codeberg.org/lindenii/furgit/object/stored"
+	"lindenii.org/go/furgit/object"
+	objectid "lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/stored"
 )
 
 // ExactObject reads, parses, and wraps the object at id without constraining

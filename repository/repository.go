@@ -10,15 +10,15 @@ package repository
 import (
 	"os"
 
-	"codeberg.org/lindenii/furgit/commitquery"
-	"codeberg.org/lindenii/furgit/config"
-	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
-	"codeberg.org/lindenii/furgit/object/fetch"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectdual "codeberg.org/lindenii/furgit/object/store/dual"
-	objectloose "codeberg.org/lindenii/furgit/object/store/loose"
-	objectpacked "codeberg.org/lindenii/furgit/object/store/packed"
-	refstore "codeberg.org/lindenii/furgit/ref/store"
+	"lindenii.org/go/furgit/commitquery"
+	"lindenii.org/go/furgit/config"
+	commitgraphread "lindenii.org/go/furgit/format/commitgraph/read"
+	"lindenii.org/go/furgit/object/fetch"
+	objectid "lindenii.org/go/furgit/object/id"
+	objectdual "lindenii.org/go/furgit/object/store/dual"
+	objectloose "lindenii.org/go/furgit/object/store/loose"
+	objectpacked "lindenii.org/go/furgit/object/store/packed"
+	refstore "lindenii.org/go/furgit/ref/store"
 )
 
 // Repository represents a typical on-disk Git repository by composing its

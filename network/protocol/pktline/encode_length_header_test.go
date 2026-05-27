@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/network/protocol/pktline"
+	"lindenii.org/go/furgit/network/protocol/pktline"
 )
 
 func TestEncodeLengthHeader(t *testing.T) {

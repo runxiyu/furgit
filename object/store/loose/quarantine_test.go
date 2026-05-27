@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"testing"
 
-	"codeberg.org/lindenii/furgit/internal/testgit"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstore "codeberg.org/lindenii/furgit/object/store"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/internal/testgit"
+	objectid "lindenii.org/go/furgit/object/id"
+	objectstore "lindenii.org/go/furgit/object/store"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 func TestLooseQuarantinePromotePublishesWrittenObjects(t *testing.T) {

@@ -1,6 +1,6 @@
 package ingest
 
-import deltaapply "codeberg.org/lindenii/furgit/format/packfile/delta/apply"
+import deltaapply "lindenii.org/go/furgit/format/packfile/delta/apply"
 
 // finalizeStreamPackHash consumes trailer bytes and verifies stream integrity.
 // readDeltaHeaderSizes reads source and destination sizes from one delta payload.

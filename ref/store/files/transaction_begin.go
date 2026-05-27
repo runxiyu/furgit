@@ -1,6 +1,6 @@
 package files
 
-import refstore "codeberg.org/lindenii/furgit/ref/store"
+import refstore "lindenii.org/go/furgit/ref/store"
 
 // BeginTransaction creates one new files transaction.
 //

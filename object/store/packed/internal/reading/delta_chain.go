@@ -1,6 +1,6 @@
 package reading
 
-import objecttype "codeberg.org/lindenii/furgit/object/type"
+import objecttype "lindenii.org/go/furgit/object/type"
 
 // deltaChain describes how to reconstruct one requested object.
 type deltaChain struct {

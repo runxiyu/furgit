@@ -5,7 +5,7 @@ import (
 	"hash"
 	"os"
 
-	"codeberg.org/lindenii/furgit/internal/compress/zlib"
+	"lindenii.org/go/furgit/internal/compress/zlib"
 )
 
 const tempObjectFilePrefix = "tmp_obj_"

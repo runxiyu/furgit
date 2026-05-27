@@ -1,6 +1,6 @@
 package repository
 
-import "codeberg.org/lindenii/furgit/commitquery"
+import "lindenii.org/go/furgit/commitquery"
 
 // CommitQueries returns commit queries backed by the repository's object store
 // and optional commit-graph.

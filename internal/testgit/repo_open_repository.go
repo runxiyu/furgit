@@ -3,7 +3,7 @@ package testgit
 import (
 	"testing"
 
-	"codeberg.org/lindenii/furgit/repository"
+	"lindenii.org/go/furgit/repository"
 )
 
 // OpenRepository opens the repository and registers cleanup on the caller.

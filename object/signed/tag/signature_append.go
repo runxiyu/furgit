@@ -1,6 +1,6 @@
 package signedtag
 
-import objectid "codeberg.org/lindenii/furgit/object/id"
+import objectid "lindenii.org/go/furgit/object/id"
 
 // AppendSignature appends the signature for algo to dst.
 func (tag *Tag) AppendSignature(dst []byte, algo objectid.Algorithm) ([]byte, bool) {

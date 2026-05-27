@@ -5,9 +5,9 @@ import (
 	"hash/crc32"
 	"io"
 
-	"codeberg.org/lindenii/furgit/internal/intconv"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/internal/intconv"
+	objectid "lindenii.org/go/furgit/object/id"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 // appendBaseObject appends one base object as a new packed non-delta entry.

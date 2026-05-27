@@ -1,10 +1,10 @@
 package receivepack
 
 import (
-	commitgraphread "codeberg.org/lindenii/furgit/format/commitgraph/read"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objectstore "codeberg.org/lindenii/furgit/object/store"
-	refstore "codeberg.org/lindenii/furgit/ref/store"
+	commitgraphread "lindenii.org/go/furgit/format/commitgraph/read"
+	objectid "lindenii.org/go/furgit/object/id"
+	objectstore "lindenii.org/go/furgit/object/store"
+	refstore "lindenii.org/go/furgit/ref/store"
 )
 
 // Options configures one receive-pack invocation.

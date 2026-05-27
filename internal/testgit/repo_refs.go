@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 // UpdateRef updates a ref to point at id.

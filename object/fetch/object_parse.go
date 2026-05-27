@@ -3,8 +3,8 @@ package fetch
 import (
 	"fmt"
 
-	"codeberg.org/lindenii/furgit/object"
-	objectid "codeberg.org/lindenii/furgit/object/id"
+	"lindenii.org/go/furgit/object"
+	objectid "lindenii.org/go/furgit/object/id"
 )
 
 func (r *Fetcher) parseObject(id objectid.ObjectID) (object.Object, error) {

@@ -3,8 +3,8 @@ package read
 import (
 	"encoding/binary"
 
-	"codeberg.org/lindenii/furgit/format/commitgraph"
-	"codeberg.org/lindenii/furgit/internal/intconv"
+	"lindenii.org/go/furgit/format/commitgraph"
+	"lindenii.org/go/furgit/internal/intconv"
 )
 
 func (reader *Reader) decodeExtraEdgeList(layer *layer, edgeStart uint32) ([]Position, error) {

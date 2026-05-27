@@ -1,9 +1,9 @@
 package reachability
 
 import (
-	"codeberg.org/lindenii/furgit/errors"
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	objecttype "codeberg.org/lindenii/furgit/object/type"
+	"lindenii.org/go/furgit/errors"
+	objectid "lindenii.org/go/furgit/object/id"
+	objecttype "lindenii.org/go/furgit/object/type"
 )
 
 func (walk *Walk) validateCommitObject(id objectid.ObjectID) error {

@@ -1,8 +1,8 @@
 package memory
 
 import (
-	objectid "codeberg.org/lindenii/furgit/object/id"
-	refstore "codeberg.org/lindenii/furgit/ref/store"
+	objectid "lindenii.org/go/furgit/object/id"
+	refstore "lindenii.org/go/furgit/ref/store"
 )
 
 // Transaction stages in-memory updates for one atomic commit.

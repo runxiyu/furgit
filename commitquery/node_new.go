@@ -1,6 +1,6 @@
 package commitquery
 
-import objectid "codeberg.org/lindenii/furgit/object/id"
+import objectid "lindenii.org/go/furgit/object/id"
 
 // newNode allocates one empty internal node.
 func (query *query) newNode(id objectid.ObjectID) nodeIndex {
