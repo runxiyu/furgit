@@ -1,35 +1,48 @@
-// Package furgit provides low-level Git operations.
+// Package furgit provides low-level git operations.
 //
-// Furgit provides absolutely no guarantees on correctness, performance,
-// API stability. In particular, before version 1.0.0, no attempt at
-// API stability is made at all, and breaking changes may be introduced
-// in patch-level releases. See also the warranty and liability disclaimers
-// in the license.
+// Furgit is an unfinished research project,
+// and is not suitable for production.
 //
-// Git libraries often center on a repository type that owns objects, refs,
-// worktree state, and configuration behind a single facade. Furgit inverts
-// that: objects are plain values, stored objects are separate types that
-// associate objects with their object IDs, object storage and ref storage
-// are sets of narrow interfaces consisting only of things that are truly
-// reasonable for all implementations to satisfy, and every higher-level
-// operation, such as commit traversal, reachability analysis, and
-// recursive peeling, is built over those interfaces.
+// The architecture is rather deliberate
+// and the parts that exist
+// have been built carefully
+// (to the best of our capability)
+// and tested against git as the canonical oracle, etc.
 //
-// While the [codeberg.org/lindenii/furgit/repository] package is where
-// most users should begin, it only exists as one convenient composition of
-// those pieces for the standard on-disk repository layout. Nothing inside
-// furgit should depend on it; extensions to furgit such as alterntaive
-// object stores must not depend on it either.
+// However, the API is not yet settled at all;
+// we may revise interfaces and behaviour at any time,
+// to incorporate findings from ongoing audits,
+// including full rearchitectures.
+// Consumers that depend on a 0.x version of furgit
+// will need to revise their usages
+// every few days or weeks.
+//
+// Therefore, you should probably not use furgit.
+// Consider using [go-git],
+// which is mature and has API stability promises,
+// or simply use [os/exec] to upstream git,
+// which is sufficient for many purposes.
+//
+// # Overall architecture
+//
+// Git libraries often center on a central repository type where all
+// data structures and operations are hosted.
+// Furgit inverts that:
+// objects are plain values that do not provide access to the storer that loaded them,
+// object storage and ref storage are sets of narrow interfaces
+// that consist only of methods that are reasonable for all implementations,
+// and every higher-level operation,
+// such as commit traversal, reachability analysis, and recursive peeling,
+// is built over those interfaces as independent subsystems.
 //
 // # Contract labels
 //
-// Many furgit APIs document concurrency, dependency ownership, value lifetime,
-// and close behavior using short labels.
-// These labels summarize the API contract, but they do not replace the full
-// doc comment on a package, type, function, method, constant, or variable.
+// Many furgit APIs use short labels to document
+// concurrency, dependency ownership, value lifetime, and other behavior.
 //
-// When both a type and one of its methods specify labels, the method-level
-// labels take precedence for that operation.
+// When both a type and one of its methods
+// specify conflicting labels,
+// the method-label takes precedence.
 //
 // Concurrency labels:
 //
@@ -40,32 +53,46 @@
 //
 //   - Deps-Owned: the receiver takes ownership of all supplied dependencies
 //     where ownership is a reasonable concept.
-//   - Deps-Borrowed: the value borrows supplied dependencies. Also Life-Parent
-//     in most cases, unless those dependencies are not retained past
-//     construction.
-//   - Deps-Mixed: some supplied dependencies are owned and others are borrowed.
+//   - Deps-Borrowed: the value borrows supplied dependencies.
+//     Usually also labelled with Life-Parent
+//     unless those dependencies are not retained past construction.
+//   - Deps-Mixed: some are mixed while others are borrowed.
+//     The documentation should specify further.
 //
 // Lifetime labels:
 //
-//   - Life-Independent: returned values remain valid independently of the
-//     parent or provider.
-//   - Life-Parent: returned values are only valid while the parent or provider
-//     remains valid.
-//   - Life-Call: returned values are only valid for the duration of the
-//     current call, callback, or hook invocation.
+//   - Life-Independent: returned values remain valid
+//     independently of the parent or provider.
+//   - Life-Parent: returned values are only valid
+//     while the parent or provider remains valid.
+//   - Life-Call: returned values are only valid
+//     for the duration of the current call, callback, or hook invocation.
 //
 // Close labels:
 //
 //   - Close-Caller: the caller must close the returned value.
-//   - Close-No: the caller must not close the returned value directly.
-//   - Close-Idem: repeated Close calls are safe.
+//   - Close-No: the caller must not close the returned value,
+//     even if the returned value has a Close method.
+//
+// Idempotency labels:
+//
+//   - Idem-Yes: action is idempotent.
+//   - Idem-2UB: action is not idempotent;
+//     repeated use is undefined behavior.
 //
 // Mutation labels:
 //
-//   - Mut-Never: returned values must not be mutated.
+//   - Mut-No: returned values must not be mutated.
 //
-// Unless Close-Idem is specified, repeated Close calls are undefined behavior.
+// These labels describe the API contract only,
+// and do not imply any specific implementation strategy.
 //
-// Unless a doc comment explicitly states otherwise, these labels describe the
-// API contract only. They do not imply any specific implementation strategy.
+// Concrete implementations of capability interfaces
+// generally inherit the contract documented by the interfaces they satisfy.
+// Implementation docs focus on additional guarantees
+// and implementation-specific behavior,
+// but users are advised not to rely on them
+// in order to maintain the flexibility of switching implementations.
+//
+// [go-git]: https://github.com/go-git/go-git
 package furgit
