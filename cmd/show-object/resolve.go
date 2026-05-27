@@ -13,7 +13,7 @@ func resolveInput(repo *repository.Repository, input string) (objectid.ObjectID,
 		return id, nil
 	}
 
-	resolved, err := repo.Refs().ResolveToDetached(input)
+	resolved, err := repo.RefStore().ResolveToDetached(input)
 	if err != nil {
 		return objectid.ObjectID{}, err
 	}

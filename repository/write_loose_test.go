@@ -23,7 +23,7 @@ func TestWriteLooseBytesContent(t *testing.T) {
 
 		content := []byte("write-loose-bytes-content\n")
 
-		gotID, err := repo.Objects().WriteBytesContent(objecttype.TypeBlob, content)
+		gotID, err := repo.ObjectStore().WriteBytesContent(objecttype.TypeBlob, content)
 		if err != nil {
 			t.Fatalf("WriteLooseBytesContent: %v", err)
 		}
@@ -33,7 +33,7 @@ func TestWriteLooseBytesContent(t *testing.T) {
 			t.Fatalf("WriteLooseBytesContent id = %s, want %s", gotID, wantID)
 		}
 
-		ty, gotContent, err := repo.Objects().ReadBytesContent(gotID)
+		ty, gotContent, err := repo.ObjectStore().ReadBytesContent(gotID)
 		if err != nil {
 			t.Fatalf("ReadStoredBytesContent: %v", err)
 		}
@@ -62,7 +62,7 @@ func TestWriteLooseReaderContent(t *testing.T) {
 
 		content := []byte("write-loose-reader-content\n")
 
-		gotID, err := repo.Objects().WriteReaderContent(objecttype.TypeBlob, int64(len(content)), bytes.NewReader(content))
+		gotID, err := repo.ObjectStore().WriteReaderContent(objecttype.TypeBlob, int64(len(content)), bytes.NewReader(content))
 		if err != nil {
 			t.Fatalf("WriteLooseReaderContent: %v", err)
 		}
@@ -87,12 +87,12 @@ func TestWriteLooseFull(t *testing.T) {
 
 		repo := repoHarness.OpenRepository(t)
 
-		raw, err := repo.Objects().ReadBytesFull(commitID)
+		raw, err := repo.ObjectStore().ReadBytesFull(commitID)
 		if err != nil {
 			t.Fatalf("ReadStoredBytesFull: %v", err)
 		}
 
-		idFromBytes, err := repo.Objects().WriteBytesFull(raw)
+		idFromBytes, err := repo.ObjectStore().WriteBytesFull(raw)
 		if err != nil {
 			t.Fatalf("WriteLooseBytesFull: %v", err)
 		}
@@ -101,7 +101,7 @@ func TestWriteLooseFull(t *testing.T) {
 			t.Fatalf("WriteLooseBytesFull id = %s, want %s", idFromBytes, commitID)
 		}
 
-		idFromReader, err := repo.Objects().WriteReaderFull(bytes.NewReader(raw))
+		idFromReader, err := repo.ObjectStore().WriteReaderFull(bytes.NewReader(raw))
 		if err != nil {
 			t.Fatalf("WriteLooseReaderFull: %v", err)
 		}

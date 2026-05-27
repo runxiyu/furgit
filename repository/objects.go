@@ -81,9 +81,9 @@ func openObjectStore(
 	return objects, objectsRoot, objectsPackRoot, objectsLoose, objectsPacked, nil
 }
 
-// Objects returns the configured object store.
+// ObjectStore returns the configured object store.
 //
-// Use Objects for direct object-ID lookups, object headers, sizes, raw object
+// Use ObjectStore for direct object-ID lookups, object headers, sizes, raw object
 // bytes, streamed object contents, object writes, pack ingestion, and
 // coordinated quarantines. Callers who want typed object values should usually
 // prefer [Repository.Fetcher].
@@ -91,7 +91,7 @@ func openObjectStore(
 // Labels: Life-Parent.
 //
 //nolint:ireturn
-func (repo *Repository) Objects() interface {
+func (repo *Repository) ObjectStore() interface {
 	objectstore.Reader
 	objectstore.Writer
 	objectstore.Quarantiner

@@ -41,7 +41,7 @@ func TestTreeFS(t *testing.T) {
 
 		defer func() { _ = repo.Close() }()
 
-		fetcher := fetch.New(repo.Objects())
+		fetcher := fetch.New(repo.ObjectStore())
 
 		treeFS, err := fetcher.TreeFS(commitID)
 		if err != nil {

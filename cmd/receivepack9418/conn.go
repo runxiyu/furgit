@@ -57,8 +57,8 @@ func (srv *server) handleConn(conn net.Conn) {
 	opts := receivepack.Options{
 		GitProtocol:     gitProtocol,
 		Algorithm:       srv.repo.Algorithm(),
-		Refs:            srv.repo.Refs(),
-		ExistingObjects: srv.repo.Objects(),
+		Refs:            srv.repo.RefStore(),
+		ExistingObjects: srv.repo.ObjectStore(),
 		ObjectIngress:   objectIngress,
 	}
 

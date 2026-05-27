@@ -29,7 +29,7 @@ func TestOpenFilesRefFormat(t *testing.T) {
 			t.Fatalf("Algorithm = %v, want %v", repo.Algorithm(), algo)
 		}
 
-		headerType, headerSize, err := repo.Objects().ReadHeader(commitID)
+		headerType, headerSize, err := repo.ObjectStore().ReadHeader(commitID)
 		if err != nil {
 			t.Fatalf("ReadHeader(commit): %v", err)
 		}
@@ -42,7 +42,7 @@ func TestOpenFilesRefFormat(t *testing.T) {
 			t.Fatalf("ReadHeader(commit) size = %d, want > 0", headerSize)
 		}
 
-		resolved, err := repo.Refs().Resolve("refs/heads/main")
+		resolved, err := repo.RefStore().Resolve("refs/heads/main")
 		if err != nil {
 			t.Fatalf("Resolve(refs/heads/main): %v", err)
 		}
@@ -56,7 +56,7 @@ func TestOpenFilesRefFormat(t *testing.T) {
 			t.Fatalf("Resolve(refs/heads/main) id = %s, want %s", detached.ID, commitID)
 		}
 
-		head, err := repo.Refs().ResolveToDetached("HEAD")
+		head, err := repo.RefStore().ResolveToDetached("HEAD")
 		if err != nil {
 			t.Fatalf("ResolveToDetached(HEAD): %v", err)
 		}
@@ -102,7 +102,7 @@ func assertResolveToDetached(t *testing.T, repoHarness *testgit.TestRepo, name s
 
 	repo := repoHarness.OpenRepository(t)
 
-	resolved, err := repo.Refs().ResolveToDetached(name)
+	resolved, err := repo.RefStore().ResolveToDetached(name)
 	if err != nil {
 		t.Fatalf("ResolveToDetached(%s): %v", name, err)
 	}

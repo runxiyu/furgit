@@ -47,8 +47,8 @@ func TestReceivePackDeleteOnlyAtomicDeleteSucceeds(t *testing.T) {
 		err := receivepack.ReceivePack(context.Background(), &output, strings.NewReader(input.String()), receivepack.Options{
 			GitProtocol:     "",
 			Algorithm:       algo,
-			Refs:            repo.Refs(),
-			ExistingObjects: repo.Objects(),
+			Refs:            repo.RefStore(),
+			ExistingObjects: repo.ObjectStore(),
 		})
 		if err != nil {
 			t.Fatalf("ReceivePack: %v", err)
@@ -59,7 +59,7 @@ func TestReceivePackDeleteOnlyAtomicDeleteSucceeds(t *testing.T) {
 			t.Fatalf("unexpected receive-pack output %q", got)
 		}
 
-		_, err = repo.Refs().Resolve("refs/heads/main")
+		_, err = repo.RefStore().Resolve("refs/heads/main")
 		if err == nil {
 			t.Fatal("refs/heads/main still exists after delete push")
 		}
@@ -97,8 +97,8 @@ func TestReceivePackDeleteOnlyNonAtomicAppliesIndependentDeletes(t *testing.T) {
 		err := receivepack.ReceivePack(context.Background(), &output, strings.NewReader(input.String()), receivepack.Options{
 			GitProtocol:     "",
 			Algorithm:       algo,
-			Refs:            repo.Refs(),
-			ExistingObjects: repo.Objects(),
+			Refs:            repo.RefStore(),
+			ExistingObjects: repo.ObjectStore(),
 		})
 		if err != nil {
 			t.Fatalf("ReceivePack: %v", err)
@@ -109,12 +109,12 @@ func TestReceivePackDeleteOnlyNonAtomicAppliesIndependentDeletes(t *testing.T) {
 			t.Fatalf("unexpected receive-pack output %q", got)
 		}
 
-		_, err = repo.Refs().Resolve("refs/heads/main")
+		_, err = repo.RefStore().Resolve("refs/heads/main")
 		if err != nil {
 			t.Fatalf("Resolve(main): %v", err)
 		}
 
-		_, err = repo.Refs().Resolve("refs/heads/topic")
+		_, err = repo.RefStore().Resolve("refs/heads/topic")
 		if err == nil {
 			t.Fatal("refs/heads/topic still exists after successful delete")
 		}
@@ -152,8 +152,8 @@ func TestReceivePackDeleteOnlyAtomicFailureLeavesAllRefsUntouched(t *testing.T) 
 		err := receivepack.ReceivePack(context.Background(), &output, strings.NewReader(input.String()), receivepack.Options{
 			GitProtocol:     "",
 			Algorithm:       algo,
-			Refs:            repo.Refs(),
-			ExistingObjects: repo.Objects(),
+			Refs:            repo.RefStore(),
+			ExistingObjects: repo.ObjectStore(),
 		})
 		if err != nil {
 			t.Fatalf("ReceivePack: %v", err)
@@ -164,12 +164,12 @@ func TestReceivePackDeleteOnlyAtomicFailureLeavesAllRefsUntouched(t *testing.T) 
 			t.Fatalf("unexpected receive-pack output %q", got)
 		}
 
-		_, err = repo.Refs().Resolve("refs/heads/main")
+		_, err = repo.RefStore().Resolve("refs/heads/main")
 		if err != nil {
 			t.Fatalf("Resolve(main): %v", err)
 		}
 
-		_, err = repo.Refs().Resolve("refs/heads/topic")
+		_, err = repo.RefStore().Resolve("refs/heads/topic")
 		if err != nil {
 			t.Fatalf("Resolve(topic): %v", err)
 		}
@@ -199,8 +199,8 @@ func TestReceivePackAdvertisesResolvedHEAD(t *testing.T) {
 
 		err := receivepack.ReceivePack(context.Background(), &output, strings.NewReader(input.String()), receivepack.Options{
 			Algorithm:       algo,
-			Refs:            repo.Refs(),
-			ExistingObjects: repo.Objects(),
+			Refs:            repo.RefStore(),
+			ExistingObjects: repo.ObjectStore(),
 		})
 		if err != nil {
 			t.Fatalf("ReceivePack: %v", err)
@@ -252,8 +252,8 @@ func TestReceivePackWithoutReportStatusWritesNoStatusPayload(t *testing.T) {
 
 		err := receivepack.ReceivePack(context.Background(), &output, strings.NewReader(input.String()), receivepack.Options{
 			Algorithm:       algo,
-			Refs:            repo.Refs(),
-			ExistingObjects: repo.Objects(),
+			Refs:            repo.RefStore(),
+			ExistingObjects: repo.ObjectStore(),
 		})
 		if err != nil {
 			t.Fatalf("ReceivePack: %v", err)
@@ -292,8 +292,8 @@ func testReceivePackProtocolFallback(t *testing.T, gitProtocol string) {
 		err := receivepack.ReceivePack(context.Background(), &output, strings.NewReader(input.String()), receivepack.Options{
 			GitProtocol:     gitProtocol,
 			Algorithm:       algo,
-			Refs:            repo.Refs(),
-			ExistingObjects: repo.Objects(),
+			Refs:            repo.RefStore(),
+			ExistingObjects: repo.ObjectStore(),
 		})
 		if err != nil {
 			t.Fatalf("ReceivePack: %v", err)
@@ -330,8 +330,8 @@ func TestReceivePackPackRequestWithoutObjectIngressReportsNotConfigured(t *testi
 
 		err := receivepack.ReceivePack(context.Background(), &output, strings.NewReader(input.String()), receivepack.Options{
 			Algorithm:       algo,
-			Refs:            repo.Refs(),
-			ExistingObjects: repo.Objects(),
+			Refs:            repo.RefStore(),
+			ExistingObjects: repo.ObjectStore(),
 		})
 		if err != nil {
 			t.Fatalf("ReceivePack: %v", err)
@@ -379,8 +379,8 @@ func TestReceivePackPackCreatePromotesObjectsAndUpdatesRef(t *testing.T) {
 			io.MultiReader(strings.NewReader(input.String()), packStream),
 			receivepack.Options{
 				Algorithm:       algo,
-				Refs:            repo.Refs(),
-				ExistingObjects: repo.Objects(),
+				Refs:            repo.RefStore(),
+				ExistingObjects: repo.ObjectStore(),
 				ObjectIngress:   objectIngress,
 			},
 		)
@@ -395,7 +395,7 @@ func TestReceivePackPackCreatePromotesObjectsAndUpdatesRef(t *testing.T) {
 
 		reopened := receiver.OpenRepository(t)
 
-		resolved, err := reopened.Refs().ResolveToDetached("refs/heads/main")
+		resolved, err := reopened.RefStore().ResolveToDetached("refs/heads/main")
 		if err != nil {
 			t.Fatalf("ResolveToDetached(main): %v", err)
 		}
@@ -451,8 +451,8 @@ func TestReceivePackHookSeesQuarantinedObjectsAndCanRejectBeforePromotion(t *tes
 			io.MultiReader(strings.NewReader(input.String()), packStream),
 			receivepack.Options{
 				Algorithm:       algo,
-				Refs:            repo.Refs(),
-				ExistingObjects: repo.Objects(),
+				Refs:            repo.RefStore(),
+				ExistingObjects: repo.ObjectStore(),
 				ObjectIngress:   objectIngress,
 				Hook: func(ctx context.Context, req receivepack.HookRequest) ([]receivepack.UpdateDecision, error) {
 					hookCalled = true
@@ -491,7 +491,7 @@ func TestReceivePackHookSeesQuarantinedObjectsAndCanRejectBeforePromotion(t *tes
 			t.Fatalf("unexpected receive-pack output %q", got)
 		}
 
-		_, err = repo.Refs().Resolve("refs/heads/main")
+		_, err = repo.RefStore().Resolve("refs/heads/main")
 		if err == nil {
 			t.Fatal("refs/heads/main exists after hook rejection")
 		}
@@ -532,8 +532,8 @@ func TestReceivePackHookCanRejectSubsetOfNonAtomicDeleteOnlyPush(t *testing.T) {
 
 		err := receivepack.ReceivePack(context.Background(), &output, strings.NewReader(input.String()), receivepack.Options{
 			Algorithm:       algo,
-			Refs:            repo.Refs(),
-			ExistingObjects: repo.Objects(),
+			Refs:            repo.RefStore(),
+			ExistingObjects: repo.ObjectStore(),
 			Hook: func(ctx context.Context, req receivepack.HookRequest) ([]receivepack.UpdateDecision, error) {
 				return []receivepack.UpdateDecision{
 					{Accept: false, Message: "leave main alone"},
@@ -550,12 +550,12 @@ func TestReceivePackHookCanRejectSubsetOfNonAtomicDeleteOnlyPush(t *testing.T) {
 			t.Fatalf("unexpected receive-pack output %q", got)
 		}
 
-		_, err = repo.Refs().Resolve("refs/heads/main")
+		_, err = repo.RefStore().Resolve("refs/heads/main")
 		if err != nil {
 			t.Fatalf("Resolve(main): %v", err)
 		}
 
-		_, err = repo.Refs().Resolve("refs/heads/topic")
+		_, err = repo.RefStore().Resolve("refs/heads/topic")
 		if err == nil {
 			t.Fatal("refs/heads/topic still exists after successful delete")
 		}
@@ -587,8 +587,8 @@ func TestReceivePackHookProgressUsesSideBand64K(t *testing.T) {
 
 		err := receivepack.ReceivePack(context.Background(), &output, strings.NewReader(input.String()), receivepack.Options{
 			Algorithm:       algo,
-			Refs:            repo.Refs(),
-			ExistingObjects: repo.Objects(),
+			Refs:            repo.RefStore(),
+			ExistingObjects: repo.ObjectStore(),
 			Hook: func(ctx context.Context, req receivepack.HookRequest) ([]receivepack.UpdateDecision, error) {
 				_, err := io.WriteString(req.IO.Progress, "hook says hello\n")
 				if err != nil {
@@ -684,8 +684,8 @@ func TestReceivePackPredefinedRejectForcePushHookRejectsNonFastForward(t *testin
 			io.MultiReader(strings.NewReader(input.String()), packStream),
 			receivepack.Options{
 				Algorithm:       algo,
-				Refs:            repo.Refs(),
-				ExistingObjects: repo.Objects(),
+				Refs:            repo.RefStore(),
+				ExistingObjects: repo.ObjectStore(),
 				ObjectIngress:   objectIngress,
 				Hook:            receivepackhooks.RejectForcePush(),
 			},
@@ -699,7 +699,7 @@ func TestReceivePackPredefinedRejectForcePushHookRejectsNonFastForward(t *testin
 			t.Fatalf("unexpected receive-pack output %q", got)
 		}
 
-		resolved, err := repo.Refs().ResolveToDetached("refs/heads/main")
+		resolved, err := repo.RefStore().ResolveToDetached("refs/heads/main")
 		if err != nil {
 			t.Fatalf("ResolveToDetached(main): %v", err)
 		}
@@ -735,8 +735,8 @@ func TestReceivePackReportStatusV2IncludesRefDetails(t *testing.T) {
 
 		err := receivepack.ReceivePack(context.Background(), &output, strings.NewReader(input.String()), receivepack.Options{
 			Algorithm:       algo,
-			Refs:            repo.Refs(),
-			ExistingObjects: repo.Objects(),
+			Refs:            repo.RefStore(),
+			ExistingObjects: repo.ObjectStore(),
 		})
 		if err != nil {
 			t.Fatalf("ReceivePack: %v", err)
@@ -776,8 +776,8 @@ func TestReceivePackGitPushCreatesBranch(t *testing.T) {
 			sender,
 			receivepack.Options{
 				Algorithm:       algo,
-				Refs:            repo.Refs(),
-				ExistingObjects: repo.Objects(),
+				Refs:            repo.RefStore(),
+				ExistingObjects: repo.ObjectStore(),
 				ObjectIngress:   objectIngress,
 			},
 			"push", "--porcelain", "fd::3,4/test", "refs/heads/main:refs/heads/main",
@@ -790,7 +790,7 @@ func TestReceivePackGitPushCreatesBranch(t *testing.T) {
 			t.Fatalf("ReceivePack: %v", serverErr)
 		}
 
-		resolved, err := receiver.OpenRepository(t).Refs().ResolveToDetached("refs/heads/main")
+		resolved, err := receiver.OpenRepository(t).RefStore().ResolveToDetached("refs/heads/main")
 		if err != nil {
 			t.Fatalf("ResolveToDetached(main): %v", err)
 		}
@@ -826,8 +826,8 @@ func TestReceivePackGitPushRefUpdateWithoutNewObjectsSucceeds(t *testing.T) {
 			sender,
 			receivepack.Options{
 				Algorithm:       algo,
-				Refs:            repo.Refs(),
-				ExistingObjects: repo.Objects(),
+				Refs:            repo.RefStore(),
+				ExistingObjects: repo.ObjectStore(),
 				ObjectIngress:   objectIngress,
 			},
 			"push", "--porcelain", "fd::3,4/test", "refs/heads/main:refs/heads/topic",
@@ -840,7 +840,7 @@ func TestReceivePackGitPushRefUpdateWithoutNewObjectsSucceeds(t *testing.T) {
 			t.Fatalf("ReceivePack: %v", serverErr)
 		}
 
-		resolved, err := receiver.OpenRepository(t).Refs().ResolveToDetached("refs/heads/topic")
+		resolved, err := receiver.OpenRepository(t).RefStore().ResolveToDetached("refs/heads/topic")
 		if err != nil {
 			t.Fatalf("ResolveToDetached(topic): %v", err)
 		}
@@ -874,8 +874,8 @@ func TestReceivePackGitPushAtomicDelete(t *testing.T) {
 			sender,
 			receivepack.Options{
 				Algorithm:       algo,
-				Refs:            repo.Refs(),
-				ExistingObjects: repo.Objects(),
+				Refs:            repo.RefStore(),
+				ExistingObjects: repo.ObjectStore(),
 			},
 			"push", "--porcelain", "--atomic", "fd::3,4/test", ":refs/heads/main",
 		)
@@ -887,7 +887,7 @@ func TestReceivePackGitPushAtomicDelete(t *testing.T) {
 			t.Fatalf("ReceivePack: %v", serverErr)
 		}
 
-		_, err := receiver.OpenRepository(t).Refs().Resolve("refs/heads/main")
+		_, err := receiver.OpenRepository(t).RefStore().Resolve("refs/heads/main")
 		if err == nil {
 			t.Fatal("refs/heads/main still exists after delete push")
 		}
@@ -922,8 +922,8 @@ func TestReceivePackGitPushRejectsForcedUpdateViaHook(t *testing.T) {
 			sender,
 			receivepack.Options{
 				Algorithm:       algo,
-				Refs:            repo.Refs(),
-				ExistingObjects: repo.Objects(),
+				Refs:            repo.RefStore(),
+				ExistingObjects: repo.ObjectStore(),
 				ObjectIngress:   objectIngress,
 				Hook:            receivepackhooks.RejectForcePush(),
 			},
@@ -941,7 +941,7 @@ func TestReceivePackGitPushRejectsForcedUpdateViaHook(t *testing.T) {
 			t.Fatalf("git push output missing non-fast-forward message\nstdout=%s\nstderr=%s", stdout, stderr)
 		}
 
-		resolved, err := receiver.OpenRepository(t).Refs().ResolveToDetached("refs/heads/main")
+		resolved, err := receiver.OpenRepository(t).RefStore().ResolveToDetached("refs/heads/main")
 		if err != nil {
 			t.Fatalf("ResolveToDetached(main): %v", err)
 		}

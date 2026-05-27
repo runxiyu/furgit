@@ -25,5 +25,5 @@ func (testRepo *TestRepo) OpenObjectStore(tb testing.TB) objectstore.Reader {
 		_ = repo.Close()
 	})
 
-	return repo.Objects()
+	return repo.ObjectStore()
 }

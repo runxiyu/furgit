@@ -270,7 +270,7 @@ func TestIngestThinPackWithFixThin(t *testing.T) {
 		result, err := ingest.WritePack(packRoot, algo, bytes.NewReader(thinPack), ingest.Options{
 			FixThin:            true,
 			WriteRev:           true,
-			ThinBase:           receiverRepo.Objects(),
+			ThinBase:           receiverRepo.ObjectStore(),
 			RequireTrailingEOF: true,
 		})
 		if err != nil {
