@@ -13,6 +13,7 @@ var _ objectstore.PackWriter = (*Store)(nil)
 func (store *Store) WritePack(src io.Reader, opts objectstore.PackWriteOptions) error {
 	_, err := ingest.WritePack(store.root, store.algo, src, ingest.Options{
 		WriteRev:           store.opts.WriteRev,
+		FixThin:            opts.ThinBase != nil,
 		ThinBase:           opts.ThinBase,
 		Progress:           opts.Progress,
 		RequireTrailingEOF: opts.RequireTrailingEOF,
