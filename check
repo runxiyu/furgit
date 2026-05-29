@@ -1,0 +1,29 @@
+#!/bin/sh
+
+llmagent() {
+	printf >&2 'LLM agents are not allowed in this project.\n'
+	exit 1
+}
+
+[ "${CODEX_MANAGED_PACKAGE_ROOT+set}" = set ] && llmagent
+[ "${CODEX_MANAGED_BY_NPM+set}" = set ] && llmagent
+[ "${CODEX_THREAD_ID+set}" = set ] && llmagent
+[ "${CODEX_CI+set}" = set ] && llmagent
+[ "${CODEX_SANDBOX_NETWORK_DISABLED+set}" = set ] && llmagent
+[ "${AI_AGENT+set}" = set ] && llmagent
+[ "${CLAUDECODE+set}" = set ] && llmagent
+[ "${CLAUDE_CODE_ENTRYPOINT+set}" = set ] && llmagent
+[ "${CLAUDE_CODE_EXECPATH+set}" = set ] && llmagent
+[ "${CLAUDE_CODE_SESSION_ID+set}" = set ] && llmagent
+[ "${CLAUDE_CODE_TMPDIR+set}" = set ] && llmagent
+
+set -eux
+
+go build ./...
+go test -count 1 $(go list ./... | grep -v '/internal/compress')
+go test -race -count 1 $(go list ./... | grep -v '/internal/compress')
+go test -tags purego -count 1 $(go list ./... | grep -v '/internal/compress')
+golangci-lint run ./...
+go vet ./...
+test -z "$(gofmt -l .)"
+test -z "$(go fix -diff ./...)"

@@ -4,30 +4,6 @@ packages:
   - git
   - golangci-lint
 tasks:
-  - apk: |
-      sudo apk update
-      sudo apk upgrade
-  - build: |
+  - check: |
       cd furgit
-      go build ./...
-  - test: |
-      cd furgit
-      go test -v -count 1 $(go list ./... | grep -v '/internal/compress') 
-  - test-race: |
-      cd furgit
-      go test -race -v -count 1 $(go list ./... | grep -v '/internal/compress') 
-  - test-purego: |
-      cd furgit
-      go test -v -tags purego -count 1 $(go list ./... | grep -v '/internal/compress') 
-  - lint: |
-      cd furgit
-      golangci-lint run ./...
-  - vet: |
-      cd furgit
-      go vet ./...
-  - fmt-check: |
-      cd furgit
-      test -z "$(gofmt -l .)"
-  - fix-check: |
-      cd furgit
-      test -z "$(go fix -diff ./...)"
+      ./check
