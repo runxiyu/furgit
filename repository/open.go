@@ -27,21 +27,21 @@ func Open(root *os.Root) (repo *Repository, err error) {
 
 	cfg, err := parseRepositoryConfig(root)
 	if err != nil {
-		return nil, err
+		return repo, err
 	}
 
 	repo.config = cfg
 
 	algo, err := detectObjectAlgorithm(cfg)
 	if err != nil {
-		return nil, err
+		return repo, err
 	}
 
 	repo.algo = algo
 
 	objects, objectsRoot, objectsPackRoot, objectsLoose, objectsPacked, err := openObjectStore(root, algo)
 	if err != nil {
-		return nil, err
+		return repo, err
 	}
 
 	repo.objects = objects
@@ -53,7 +53,7 @@ func Open(root *os.Root) (repo *Repository, err error) {
 
 	commitGraph, err := openCommitGraph(objectsRoot, algo)
 	if err != nil {
-		return nil, err
+		return repo, err
 	}
 
 	repo.commitGraph = commitGraph
@@ -61,14 +61,14 @@ func Open(root *os.Root) (repo *Repository, err error) {
 
 	refRoot, err := root.OpenRoot(".")
 	if err != nil {
-		return nil, fmt.Errorf("repository: open root for refs: %w", err)
+		return repo, fmt.Errorf("repository: open root for refs: %w", err)
 	}
 
 	refs, err := reffiles.New(refRoot, algo, detectPackedRefsTimeout(cfg))
 	if err != nil {
 		_ = refRoot.Close()
 
-		return nil, err
+		return repo, err
 	}
 
 	repo.refs = refs
