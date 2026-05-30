@@ -19,7 +19,7 @@ func (repo *Repo) HashObject(tb testing.TB, ty typ.Type, body io.Reader) id.Obje
 		tb.Fatalf("hash-object: %v", hex)
 	}
 
-	id, err := id.FromHex(repo.objectFormat, string(hex))
+	id, err := repo.objectFormat.FromString(string(hex))
 	if err != nil {
 		tb.Fatalf("parse git hash-object output %q: %v", hex, err)
 	}
