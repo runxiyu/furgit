@@ -57,7 +57,6 @@ func (service *Service) ingestQuarantine(
 	}
 
 	utils.BestEffortFprintf(service.opts.Progress, "creating quarantine: done.\n")
-	utils.BestEffortFprintf(service.opts.Progress, "unpacking...\r")
 
 	err = quarantine.WritePack(req.Pack, objectstore.PackWriteOptions{
 		ThinBase:           service.opts.ExistingObjects,
@@ -74,8 +73,6 @@ func (service *Service) ingestQuarantine(
 
 		return nil, false
 	}
-
-	utils.BestEffortFprintf(service.opts.Progress, "unpacking: done.\n")
 
 	return quarantine, true
 }
