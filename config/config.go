@@ -17,6 +17,8 @@ import (
 // and subsections must match exactly.
 //
 // Includes aren't supported yet; they will be supported in a later revision.
+//
+// Labels: MT-Safe.
 type Config struct {
 	entries []Entry
 }

@@ -11,6 +11,8 @@ func (id ObjectID) ObjectFormat() ObjectFormat {
 }
 
 // Bytes returns a copy of the object ID bytes.
+//
+// Labels: Life-Independent.
 func (id ObjectID) Bytes() []byte {
 	size := id.ObjectFormat().Size()
 
@@ -21,7 +23,7 @@ func (id ObjectID) Bytes() []byte {
 //
 // Prefer [ObjectID.Bytes] except for when it is a performance bottleneck.
 //
-// Labels: Mut-No.
+// Labels: Life-Parent, Mut-No.
 func (id *ObjectID) RawBytes() []byte {
 	size := id.ObjectFormat().Size()
 
