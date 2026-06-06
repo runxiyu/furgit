@@ -1,5 +1,4 @@
 commitquery
-config
 diff
 diff/lines
 diff/trees
@@ -36,6 +35,7 @@ object/fetch
 object/signed
 object/signed/commit
 object/signed/tag
+object/store potential coordinated writing interface or not
 object/store/chain
 object/store/dual
 object/store/loose
