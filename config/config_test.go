@@ -45,9 +45,9 @@ func TestConfig(t *testing.T) {
 
 	defer func() { _ = cfgFile.Close() }()
 
-	cfg, err := config.ParseConfig(cfgFile)
+	cfg, err := config.Parse(cfgFile)
 	if err != nil {
-		t.Fatalf("ParseConfig failed: %v", err)
+		t.Fatalf("Parse failed: %v", err)
 	}
 
 	got, err := cfg.Lookup("test", "", "enabled").String()
@@ -112,9 +112,9 @@ func TestConfigSubsection(t *testing.T) {
 
 	defer func() { _ = cfgFile.Close() }()
 
-	cfg, err := config.ParseConfig(cfgFile)
+	cfg, err := config.Parse(cfgFile)
 	if err != nil {
-		t.Fatalf("ParseConfig failed: %v", err)
+		t.Fatalf("Parse failed: %v", err)
 	}
 
 	got, err := cfg.Lookup("test", "origin", "url").String()
@@ -166,9 +166,9 @@ func TestConfigMultiValue(t *testing.T) {
 
 	defer func() { _ = cfgFile.Close() }()
 
-	cfg, err := config.ParseConfig(cfgFile)
+	cfg, err := config.Parse(cfgFile)
 	if err != nil {
-		t.Fatalf("ParseConfig failed: %v", err)
+		t.Fatalf("Parse failed: %v", err)
 	}
 
 	fetches := cfg.LookupAll("test", "origin", "fetch")
@@ -231,9 +231,9 @@ func TestConfigCaseInsensitive(t *testing.T) {
 
 	defer func() { _ = cfgFile.Close() }()
 
-	cfg, err := config.ParseConfig(cfgFile)
+	cfg, err := config.Parse(cfgFile)
 	if err != nil {
-		t.Fatalf("ParseConfig failed: %v", err)
+		t.Fatalf("Parse failed: %v", err)
 	}
 
 	got, err := cfg.Lookup("test", "", "flag").String()
@@ -299,9 +299,9 @@ func TestConfigBoolean(t *testing.T) {
 
 	defer func() { _ = cfgFile.Close() }()
 
-	cfg, err := config.ParseConfig(cfgFile)
+	cfg, err := config.Parse(cfgFile)
 	if err != nil {
-		t.Fatalf("ParseConfig failed: %v", err)
+		t.Fatalf("Parse failed: %v", err)
 	}
 
 	tests := make([]struct {
@@ -353,14 +353,14 @@ toosmall = -2147483649
 badnum = " 2x"
 `
 
-	cfg, err := config.ParseConfig(strings.NewReader(cfgText))
+	cfg, err := config.Parse(strings.NewReader(cfgText))
 	if err != nil {
-		t.Fatalf("ParseConfig failed: %v", err)
+		t.Fatalf("Parse failed: %v", err)
 	}
 
 	novalue := cfg.Lookup("test", "", "novalue")
-	if novalue.Kind != config.ValueValueless {
-		t.Fatalf("novalue kind: got %v, want %v", novalue.Kind, config.ValueValueless)
+	if novalue.Kind != config.KindValueless {
+		t.Fatalf("novalue kind: got %v, want %v", novalue.Kind, config.KindValueless)
 	}
 
 	novalueBool, err := novalue.Bool()
@@ -369,8 +369,8 @@ badnum = " 2x"
 	}
 
 	empty := cfg.Lookup("test", "", "empty")
-	if empty.Kind != config.ValueString || empty.Value != "" {
-		t.Fatalf("empty: got (%v, %q), want (%v, %q)", empty.Kind, empty.Value, config.ValueString, "")
+	if empty.Kind != config.KindString || empty.Value != "" {
+		t.Fatalf("empty: got (%v, %q), want (%v, %q)", empty.Kind, empty.Value, config.KindString, "")
 	}
 
 	emptyBool, err := empty.Bool()
@@ -454,8 +454,8 @@ badnum = " 2x"
 	}
 
 	missing := cfg.Lookup("test", "", "missing")
-	if missing.Kind != config.ValueMissing {
-		t.Fatalf("missing kind: got %v, want %v", missing.Kind, config.ValueMissing)
+	if missing.Kind != config.KindMissing {
+		t.Fatalf("missing kind: got %v, want %v", missing.Kind, config.KindMissing)
 	}
 
 	_, err = missing.Bool()
@@ -509,9 +509,9 @@ func TestConfigComplexValues(t *testing.T) {
 
 	defer func() { _ = cfgFile.Close() }()
 
-	cfg, err := config.ParseConfig(cfgFile)
+	cfg, err := config.Parse(cfgFile)
 	if err != nil {
-		t.Fatalf("ParseConfig failed: %v", err)
+		t.Fatalf("Parse failed: %v", err)
 	}
 
 	tests := []string{"spaced", "special", "path", "number"}
@@ -564,9 +564,9 @@ func TestConfigEntries(t *testing.T) {
 
 	defer func() { _ = cfgFile.Close() }()
 
-	cfg, err := config.ParseConfig(cfgFile)
+	cfg, err := config.Parse(cfgFile)
 	if err != nil {
-		t.Fatalf("ParseConfig failed: %v", err)
+		t.Fatalf("Parse failed: %v", err)
 	}
 
 	entries := cfg.Entries()
@@ -627,7 +627,7 @@ func TestConfigErrorCases(t *testing.T) {
 
 			r := strings.NewReader(tt.config)
 
-			_, err := config.ParseConfig(r)
+			_, err := config.Parse(r)
 			if err == nil {
 				t.Errorf("expected error for %s", tt.name)
 			}
@@ -687,7 +687,7 @@ func TestConfigRawBytes(t *testing.T) {
 			}
 
 			gitValue, gitErr := testRepo.ConfigGet(t, tt.gitKey)
-			furConfig, furErr := config.ParseConfig(bytes.NewReader(tt.cfgData))
+			furConfig, furErr := config.Parse(bytes.NewReader(tt.cfgData))
 
 			if (gitErr == nil) != (furErr == nil) {
 				t.Fatalf("git: %v\nfur: %v", gitErr, furErr)
@@ -729,9 +729,9 @@ func FuzzConfig(f *testing.F) {
 
 		gitValue, gitErr := testRepo.ConfigGet(t, gitKey)
 
-		furConfig, furErr := config.ParseConfig(bytes.NewReader(cfgData))
+		furConfig, furErr := config.Parse(bytes.NewReader(cfgData))
 		if furErr == nil && furConfig == nil {
-			t.Fatalf("ParseConfig returned nil config with nil error")
+			t.Fatalf("Parse returned nil config with nil error")
 		}
 
 		sameErr := (gitErr == nil) == (furErr == nil)

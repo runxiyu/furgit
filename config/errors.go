@@ -24,11 +24,11 @@ type LookupError struct {
 
 func (err *LookupError) Error() string {
 	switch err.Kind {
-	case ValueMissing:
+	case KindMissing:
 		return fmt.Sprintf("config: %s: missing config value", err.Operation)
-	case ValueValueless:
+	case KindValueless:
 		return fmt.Sprintf("config: %s: valueless config key", err.Operation)
-	case ValueString:
+	case KindString:
 		return fmt.Sprintf("config: %s: invalid string config value", err.Operation)
 	default:
 		return fmt.Sprintf("config: %s: unknown value kind %d", err.Operation, err.Kind)

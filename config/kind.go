@@ -12,14 +12,14 @@ import (
 type Kind uint8
 
 const (
-	// ValueMissing means the queried key does not exist.
-	ValueMissing Kind = iota
+	// KindMissing means the queried key does not exist.
+	KindMissing Kind = iota
 
-	// ValueValueless means the key exists but has no "= <value>" part.
-	ValueValueless
+	// KindValueless means the key exists but has no "= <value>" part.
+	KindValueless
 
-	// ValueString means the key exists and has an explicit value (possibly "").
-	ValueString
+	// KindString means the key exists and has an explicit value (possibly "").
+	KindString
 )
 
 func isValidSection(s string) bool {

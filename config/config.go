@@ -18,11 +18,11 @@ import (
 //
 // Includes aren't supported yet; they will be supported in a later revision.
 type Config struct {
-	entries []ConfigEntry
+	entries []Entry
 }
 
-// ParseConfig reads and parses Git configuration entries from r.
-func ParseConfig(r io.Reader) (*Config, error) {
+// Parse reads and parses Git configuration entries from r.
+func Parse(r io.Reader) (*Config, error) {
 	parser := &configParser{
 		reader:         bufio.NewReader(r),
 		lineNum:        1,
@@ -35,21 +35,22 @@ func ParseConfig(r io.Reader) (*Config, error) {
 	return parser.parse()
 }
 
-// ConfigEntry represents a single parsed configuration directive.
-type ConfigEntry struct {
-	// The section name in canonical lowercase form.
+// Entry represents a single parsed configuration directive.
+type Entry struct {
+	// Section is the section name in canonical lowercase form.
 	Section string
 
-	// The subsection name, retaining the exact form parsed from the input.
+	// Subsection is the subsection name,
+	// retaining the exact form parsed from the input.
 	Subsection string
 
-	// The key name in canonical lowercase form.
+	// Key is the key name in canonical lowercase form.
 	Key string
 
-	// Whether this entry has no value or an explicit value.
+	// Kind reports whether this entry has no value or an explicit value.
 	Kind Kind
 
-	// The interpreted value of the configuration entry,
+	// Value is the interpreted value of the configuration entry,
 	// including unescaped characters where appropriate.
 	Value string
 }
@@ -58,8 +59,8 @@ type ConfigEntry struct {
 // in the order they appeared.
 //
 // Modifying the returned slice does not affect the Config.
-func (c *Config) Entries() []ConfigEntry {
-	return slices.Clone(c.entries)
+func (config *Config) Entries() []Entry {
+	return slices.Clone(config.entries)
 }
 
 type configParser struct {

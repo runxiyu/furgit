@@ -13,11 +13,11 @@ type LookupResult struct {
 // String returns the explicit string value.
 func (r LookupResult) String() (string, error) {
 	switch r.Kind {
-	case ValueMissing:
+	case KindMissing:
 		return "", &LookupError{Kind: r.Kind, Operation: "string"}
-	case ValueValueless:
+	case KindValueless:
 		return "", &LookupError{Kind: r.Kind, Operation: "string"}
-	case ValueString:
+	case KindString:
 		return r.Value, nil
 	default:
 		return "", &LookupError{Kind: r.Kind, Operation: "string"}
@@ -27,11 +27,11 @@ func (r LookupResult) String() (string, error) {
 // Bool interprets this lookup result using Git config boolean rules.
 func (r LookupResult) Bool() (bool, error) {
 	switch r.Kind {
-	case ValueMissing:
+	case KindMissing:
 		return false, &LookupError{Kind: r.Kind, Operation: "bool"}
-	case ValueValueless:
+	case KindValueless:
 		return true, nil
-	case ValueString:
+	case KindString:
 		return parseBool(r.Value)
 	default:
 		return false, &LookupError{Kind: r.Kind, Operation: "bool"}
@@ -41,11 +41,11 @@ func (r LookupResult) Bool() (bool, error) {
 // Int interprets this lookup result as a Git integer value.
 func (r LookupResult) Int() (int, error) {
 	switch r.Kind {
-	case ValueMissing:
+	case KindMissing:
 		return 0, &LookupError{Kind: r.Kind, Operation: "int"}
-	case ValueValueless:
+	case KindValueless:
 		return 0, &LookupError{Kind: r.Kind, Operation: "int"}
-	case ValueString:
+	case KindString:
 		return parseInt(r.Value)
 	default:
 		return 0, &LookupError{Kind: r.Kind, Operation: "int"}
@@ -55,11 +55,11 @@ func (r LookupResult) Int() (int, error) {
 // Int64 interprets this lookup result as a Git int64 value.
 func (r LookupResult) Int64() (int64, error) {
 	switch r.Kind {
-	case ValueMissing:
+	case KindMissing:
 		return 0, &LookupError{Kind: r.Kind, Operation: "int64"}
-	case ValueValueless:
+	case KindValueless:
 		return 0, &LookupError{Kind: r.Kind, Operation: "int64"}
-	case ValueString:
+	case KindString:
 		return parseInt64(r.Value)
 	default:
 		return 0, &LookupError{Kind: r.Kind, Operation: "int64"}
@@ -68,11 +68,11 @@ func (r LookupResult) Int64() (int64, error) {
 
 // Lookup retrieves the first value for a given section, optional subsection,
 // and key.
-func (c *Config) Lookup(section, subsection, key string) LookupResult {
+func (config *Config) Lookup(section, subsection, key string) LookupResult {
 	section = strings.ToLower(section)
 
 	key = strings.ToLower(key)
-	for _, entry := range c.entries {
+	for _, entry := range config.entries {
 		if strings.EqualFold(entry.Section, section) &&
 			entry.Subsection == subsection &&
 			strings.EqualFold(entry.Key, key) {
@@ -84,20 +84,20 @@ func (c *Config) Lookup(section, subsection, key string) LookupResult {
 	}
 
 	return LookupResult{
-		Kind:  ValueMissing,
+		Kind:  KindMissing,
 		Value: "",
 	}
 }
 
 // LookupAll retrieves all values for a given section, optional subsection,
 // and key.
-func (c *Config) LookupAll(section, subsection, key string) []LookupResult {
+func (config *Config) LookupAll(section, subsection, key string) []LookupResult {
 	section = strings.ToLower(section)
 	key = strings.ToLower(key)
 
 	var values []LookupResult
 
-	for _, entry := range c.entries {
+	for _, entry := range config.entries {
 		if strings.EqualFold(entry.Section, section) &&
 			entry.Subsection == subsection &&
 			strings.EqualFold(entry.Key, key) {

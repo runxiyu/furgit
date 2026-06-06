@@ -49,11 +49,11 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 	for {
 		ch, err := p.nextChar()
 		if errors.Is(err, io.EOF) {
-			cfg.entries = append(cfg.entries, ConfigEntry{
+			cfg.entries = append(cfg.entries, Entry{
 				Section:    p.currentSection,
 				Subsection: p.currentSubsec,
 				Key:        keyStr,
-				Kind:       ValueValueless,
+				Kind:       KindValueless,
 				Value:      "",
 			})
 
@@ -65,11 +65,11 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 		}
 
 		if ch == '\n' {
-			cfg.entries = append(cfg.entries, ConfigEntry{
+			cfg.entries = append(cfg.entries, Entry{
 				Section:    p.currentSection,
 				Subsection: p.currentSubsec,
 				Key:        keyStr,
-				Kind:       ValueValueless,
+				Kind:       KindValueless,
 				Value:      "",
 			})
 
@@ -82,11 +82,11 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 				return err
 			}
 
-			cfg.entries = append(cfg.entries, ConfigEntry{
+			cfg.entries = append(cfg.entries, Entry{
 				Section:    p.currentSection,
 				Subsection: p.currentSubsec,
 				Key:        keyStr,
-				Kind:       ValueValueless,
+				Kind:       KindValueless,
 				Value:      "",
 			})
 
@@ -107,11 +107,11 @@ func (p *configParser) parseKeyValue(cfg *Config) error {
 		return err
 	}
 
-	cfg.entries = append(cfg.entries, ConfigEntry{
+	cfg.entries = append(cfg.entries, Entry{
 		Section:    p.currentSection,
 		Subsection: p.currentSubsec,
 		Key:        keyStr,
-		Kind:       ValueString,
+		Kind:       KindString,
 		Value:      value,
 	})
 
