@@ -2,7 +2,7 @@ package name
 
 import "fmt"
 
-// NameError reports a invalid reference name.
+// NameError reports an invalid reference name.
 type NameError struct {
 	Name   string
 	Reason string
@@ -10,5 +10,5 @@ type NameError struct {
 
 // Error implements error.
 func (err *NameError) Error() string {
-	return fmt.Sprintf("ref: invalid name %q: %s", err.Name, err.Reason)
+	return fmt.Sprintf("ref/name: invalid name %q: %s", err.Name, err.Reason)
 }

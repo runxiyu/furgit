@@ -41,17 +41,17 @@ type ObjectReader interface {
 	// declared content length, and content stream.
 	//
 	// Labels: Life-Parent, Close-Caller.
-	ReadReaderContent(id id.ObjectID) (typ.Type, int64, io.ReadCloser, error)
+	ReadReaderContent(id id.ObjectID) (typ.Type, uint64, io.ReadCloser, error)
 
 	// ReadSize reads an object's declared content length.
 	//
-	// This is equivalent to ReadHeader(...).size;
+	// This returns the same size as the second result of [ObjectReader.ReadHeader];
 	// for some implementations, this may be cheaper than ReadHeader
-	// when callers do not need object type.
-	ReadSize(id id.ObjectID) (int64, error)
+	// when callers do not need the object type.
+	ReadSize(id id.ObjectID) (uint64, error)
 
 	// ReadHeader reads an object's type and declared content length.
-	ReadHeader(id id.ObjectID) (typ.Type, int64, error)
+	ReadHeader(id id.ObjectID) (typ.Type, uint64, error)
 
 	// Refresh updates any backend-local discovery/cache view of on-disk objects.
 	//
@@ -64,7 +64,7 @@ type ObjectReader interface {
 // This error must only be produced by object stores,
 // when it has no specified object ID,
 // but no other unexpected conditions were encountered.
-var ErrObjectNotFound = errors.New("objectstore: object not found")
+var ErrObjectNotFound = errors.New("object/store: object not found")
 
 // This is a sentinel with no details,
 // because it could be a frequent occurrence,

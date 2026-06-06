@@ -6,7 +6,7 @@ import "strings"
 type WorktreeType uint8
 
 const (
-	// WorktreeShared is a ordinary shared name.
+	// WorktreeShared is an ordinary shared name.
 	WorktreeShared WorktreeType = iota
 
 	// WorktreeCurrent is a current-worktree-only name like HEAD or refs/worktree/...
@@ -15,7 +15,7 @@ const (
 	// WorktreeMain is a main-worktree-qualified name like main-worktree/HEAD.
 	WorktreeMain
 
-	// WorktreeOther is a other-worktree-qualified name like worktrees/wt1/HEAD.
+	// WorktreeOther is another-worktree-qualified name like worktrees/wt1/HEAD.
 	WorktreeOther
 )
 

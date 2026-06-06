@@ -4,8 +4,11 @@ package typ
 type Type uint8
 
 const (
+	// TypeUnknown represents an unknown or unset Git object type.
+	TypeUnknown Type = iota
+
 	// TypeBlob represents a Git blob.
-	TypeBlob Type = iota
+	TypeBlob
 
 	// TypeTree represents a Git tree.
 	TypeTree

@@ -15,7 +15,7 @@ import (
 // and the size of the object.
 type SizeMismatchError struct {
 	Expected uint64
-	Got      int
+	Got      uint64
 }
 
 func (sizeMismatchError SizeMismatchError) Error() string {
@@ -37,7 +37,7 @@ func ParseWithHeader(raw []byte, objectFormat id.ObjectFormat) (Object, error) {
 
 	body := raw[headerLen:]
 	if uint64(len(body)) != size {
-		return nil, SizeMismatchError{Expected: size, Got: len(body)}
+		return nil, SizeMismatchError{Expected: size, Got: uint64(len(body))}
 	}
 
 	return ParseWithoutHeader(ty, body, objectFormat)

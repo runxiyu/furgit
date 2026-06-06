@@ -73,7 +73,7 @@ func SanitizeComponent(component string) string {
 
 	err := checkOrSanitizeRefname(component, nameAllowOneLevel, &builder)
 	if err != nil {
-		panic(fmt.Sprintf("ref: sanitize component %q: %v", component, err))
+		panic(fmt.Sprintf("ref/name: sanitize component %q: %v", component, err))
 	}
 
 	return builder.String()

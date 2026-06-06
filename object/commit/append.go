@@ -19,16 +19,16 @@ func (commit *Commit) AppendWithoutHeader(dst []byte) ([]byte, error) {
 
 	dst, err := commit.Author.Append(dst)
 	if err != nil {
-		return dst, fmt.Errorf("append author: %w", err)
+		return dst, fmt.Errorf("object/commit: append author: %w", err)
 	}
 
 	dst = append(dst, byte('\n'))
 
-	dst = append(dst, []byte("comitter ")...)
+	dst = append(dst, []byte("committer ")...)
 
 	dst, err = commit.Committer.Append(dst)
 	if err != nil {
-		return dst, fmt.Errorf("append committer: %w", err)
+		return dst, fmt.Errorf("object/commit: append committer: %w", err)
 	}
 
 	dst = append(dst, byte('\n'))
@@ -55,13 +55,8 @@ func (commit *Commit) AppendWithoutHeader(dst []byte) ([]byte, error) {
 
 // AppendWithHeader renders the raw object (header + body).
 func (commit *Commit) AppendWithHeader(dst []byte) ([]byte, error) {
-	dst, err := commit.AppendWithoutHeader(dst)
-	if err != nil {
-		return dst, err
-	}
-
 	// TODO: Try to not allocate?
-	body, err := commit.AppendWithoutHeader([]byte(nil))
+	body, err := commit.AppendWithoutHeader(nil)
 	if err != nil {
 		return dst, err
 	}

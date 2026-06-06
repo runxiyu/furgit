@@ -39,28 +39,28 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Commit, error) {
 		case "tree":
 			id, err := objectFormat.FromString(string(value))
 			if err != nil {
-				return nil, fmt.Errorf("object: commit: tree: %w", err)
+				return nil, fmt.Errorf("object/commit: tree: %w", err)
 			}
 
 			c.Tree = id
 		case "parent":
 			id, err := objectFormat.FromString(string(value))
 			if err != nil {
-				return nil, fmt.Errorf("object: commit: parent: %w", err)
+				return nil, fmt.Errorf("object/commit: parent: %w", err)
 			}
 
 			c.Parents = append(c.Parents, id)
 		case "author":
 			idt, err := signature.Parse(value)
 			if err != nil {
-				return nil, fmt.Errorf("object: commit: author: %w", err)
+				return nil, fmt.Errorf("object/commit: author: %w", err)
 			}
 
 			c.Author = *idt
 		case "committer":
 			idt, err := signature.Parse(value)
 			if err != nil {
-				return nil, fmt.Errorf("object: commit: committer: %w", err)
+				return nil, fmt.Errorf("object/commit: committer: %w", err)
 			}
 
 			c.Committer = *idt
