@@ -32,5 +32,5 @@ func (repo *Repo) Run(
 
 	cmd.Stdin = stdin
 
-	return cmd.Output()
+	return cmd.Output() //nolint:wrapcheck
 }
