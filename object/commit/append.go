@@ -16,11 +16,21 @@ func (commit *Commit) AppendWithoutHeader(dst []byte) ([]byte, error) {
 	}
 
 	dst = append(dst, []byte("author ")...)
-	dst = commit.Author.Append(dst)
+
+	dst, err := commit.Author.Append(dst)
+	if err != nil {
+		return dst, fmt.Errorf("append author: %w", err)
+	}
+
 	dst = append(dst, byte('\n'))
 
 	dst = append(dst, []byte("comitter ")...)
-	dst = commit.Committer.Append(dst)
+
+	dst, err = commit.Committer.Append(dst)
+	if err != nil {
+		return dst, fmt.Errorf("append committer: %w", err)
+	}
+
 	dst = append(dst, byte('\n'))
 
 	if commit.ChangeID != "" {

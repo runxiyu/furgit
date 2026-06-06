@@ -21,6 +21,7 @@ linters:
     - godox            # TODO/etc comments are allowed in our codebase
     - funlen           # long functions are fine
     - dogsled          # definitely not an issue, ignoring returns is normal
+    - gomodguard       # deprecated
 
   settings:
     perfsprint:
@@ -34,6 +35,7 @@ linters:
           allow:
             - $gostd
             - lindenii.org/go/furgit
+            - lindenii.org/go/lgo
             - golang.org/x
     revive:
       rules:

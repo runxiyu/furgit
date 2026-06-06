@@ -3,10 +3,12 @@ package signature
 import (
 	"slices"
 	"strconv"
+
+	"lindenii.org/go/lgo/intconv"
 )
 
 // Append renders the signature in canonical Git format.
-func (signature Signature) Append(dst []byte) []byte {
+func (signature Signature) Append(dst []byte) ([]byte, error) {
 	dst = slices.Grow(dst, len(signature.Name)+len(signature.Email)+32)
 	dst = append(dst, signature.Name...)
 	dst = append(dst, ' ', '<')
@@ -16,6 +18,9 @@ func (signature Signature) Append(dst []byte) []byte {
 	dst = append(dst, ' ')
 
 	offset := signature.OffsetMinutes
+	if offset < -(23*60+59) || offset > 23*60+59 {
+		return dst, ErrInvalidSignature
+	}
 
 	var sign byte = '+'
 	if offset < 0 {
@@ -26,9 +31,29 @@ func (signature Signature) Append(dst []byte) []byte {
 	hh := offset / 60
 	mm := offset % 60
 
-	dst = append(dst, sign)
-	dst = append(dst, byte('0'+hh/10), byte('0'+hh%10))
-	dst = append(dst, byte('0'+mm/10), byte('0'+mm%10))
+	hhTens, err := intconv.Int32ToUint8('0' + hh/10)
+	if err != nil {
+		return dst, ErrInvalidSignature
+	}
 
-	return dst
+	hhOnes, err := intconv.Int32ToUint8('0' + hh%10)
+	if err != nil {
+		return dst, ErrInvalidSignature
+	}
+
+	mmTens, err := intconv.Int32ToUint8('0' + mm/10)
+	if err != nil {
+		return dst, ErrInvalidSignature
+	}
+
+	mmOnes, err := intconv.Int32ToUint8('0' + mm%10)
+	if err != nil {
+		return dst, ErrInvalidSignature
+	}
+
+	dst = append(dst, sign)
+	dst = append(dst, hhTens, hhOnes)
+	dst = append(dst, mmTens, mmOnes)
+
+	return dst, nil
 }

@@ -304,10 +304,10 @@ func TestConfigBoolean(t *testing.T) {
 		t.Fatalf("ParseConfig failed: %v", err)
 	}
 
-	tests := []struct {
+	tests := make([]struct {
 		key  string
 		want string
-	}{}
+	}, 0, 4)
 	for _, key := range []string{"flag1", "flag2", "flag3", "flag4"} {
 		want, err := testRepo.ConfigGet(t, "test."+key)
 		if err != nil {

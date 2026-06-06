@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strconv"
 
-	"lindenii.org/go/furgit/internal/intconv"
+	"lindenii.org/go/lgo/intconv"
 )
 
 // ErrInvalidSignature indicates an attempt to parse an invalid signature.

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"lindenii.org/go/furgit/internal/intconv"
+	"lindenii.org/go/lgo/intconv"
 )
 
 // Kind describes the presence and form of a config value.
