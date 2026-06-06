@@ -20,9 +20,14 @@ type RepoOptions struct {
 func NewRepo(tb testing.TB, opts RepoOptions) (*Repo, error) {
 	tb.Helper()
 
+	objectFormat := opts.ObjectFormat
+	if objectFormat == id.ObjectFormatUnknown {
+		objectFormat = id.ObjectFormatSHA256
+	}
+
 	repo := &Repo{
 		path:         tb.TempDir(),
-		objectFormat: opts.ObjectFormat,
+		objectFormat: objectFormat,
 		env: append(os.Environ(),
 			"GIT_CONFIG_GLOBAL=/dev/null",
 			"GIT_CONFIG_SYSTEM=/dev/null",
