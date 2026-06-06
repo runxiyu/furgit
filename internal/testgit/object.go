@@ -12,16 +12,15 @@ import (
 // and returns its object ID.
 func (repo *Repo) HashObject(tb testing.TB, ty typ.Type, body io.Reader) id.ObjectID {
 	tb.Helper()
-	cmd := repo.Command(tb, "git", "hash-object", "-t", ty.Name(), "-w", "--stdin", "--literally")
 
-	hex, err := cmd.CombinedOutput()
+	stdout, err := repo.Run(tb, body, "git", "hash-object", "-t", ty.Name(), "-w", "--stdin", "--literally")
 	if err != nil {
-		tb.Fatalf("hash-object: %v", hex)
+		tb.Fatalf("hash-object: %v", err)
 	}
 
-	id, err := repo.objectFormat.FromString(string(hex))
+	id, err := repo.objectFormat.FromString(string(stdout))
 	if err != nil {
-		tb.Fatalf("parse git hash-object output %q: %v", hex, err)
+		tb.Fatalf("parse git hash-object output %q: %v", string(stdout), err)
 	}
 
 	return id

@@ -2,7 +2,6 @@ package testgit
 
 import (
 	"os"
-	"os/exec"
 	"testing"
 
 	"lindenii.org/go/furgit/object/id"
@@ -41,19 +40,4 @@ func NewRepo(tb testing.TB, opts RepoOptions) (*Repo, error) {
 
 func (repo *Repo) ObjectFormat() id.ObjectFormat {
 	return repo.objectFormat
-}
-
-func (repo *Repo) Command(
-	tb testing.TB,
-	command string,
-	args ...string,
-) *exec.Cmd {
-	tb.Helper()
-
-	//nolint:noctx
-	cmd := exec.Command(command, args...)
-	cmd.Dir = repo.path
-	cmd.Env = repo.env
-
-	return cmd
 }
