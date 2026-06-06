@@ -2,10 +2,10 @@ package ref
 
 import objectid "lindenii.org/go/furgit/object/id"
 
-// Detached points directly to an object ID.
+// Direct points directly to an object ID.
 //
 // Labels: MT-Unsafe.
-type Detached struct {
+type Direct struct {
 	RefName string
 	ID      objectid.ObjectID
 
@@ -17,8 +17,8 @@ type Detached struct {
 }
 
 // Name returns the fully-qualified reference name.
-func (ref Detached) Name() string {
+func (ref Direct) Name() string {
 	return ref.RefName
 }
 
-func (Detached) isRef() {}
+func (Direct) isRef() {}
