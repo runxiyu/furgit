@@ -1,6 +1,7 @@
 package object
 
 import (
+	"errors"
 	"fmt"
 
 	"lindenii.org/go/furgit/object/blob"
@@ -10,20 +11,10 @@ import (
 	"lindenii.org/go/furgit/object/typ"
 )
 
-// SizeMismatchError indicates a mismatch
-// between the size expected from the object header
-// and the size of the object.
-type SizeMismatchError struct {
-	Expected uint64
-	Got      uint64
-}
-
-func (sizeMismatchError SizeMismatchError) Error() string {
-	return fmt.Sprintf(
-		"object: size mismatch: header says %d bytes, but got %d from body",
-		sizeMismatchError.Expected, sizeMismatchError.Got,
-	)
-}
+// ErrSizeMismatch indicates a mismatch
+// between the size declared in the object header
+// and the size of the object body.
+var ErrSizeMismatch = errors.New("object: size mismatch")
 
 // ParseWithHeader parses a loose object
 // in "type size\x00body" format.
@@ -37,7 +28,7 @@ func ParseWithHeader(raw []byte, objectFormat id.ObjectFormat) (Object, error) {
 
 	body := raw[headerLen:]
 	if uint64(len(body)) != size {
-		return nil, SizeMismatchError{Expected: size, Got: uint64(len(body))}
+		return nil, fmt.Errorf("%w: header declares %d bytes, body has %d", ErrSizeMismatch, size, len(body))
 	}
 
 	return ParseWithoutHeader(ty, body, objectFormat)

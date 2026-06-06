@@ -20,7 +20,7 @@ func checkOrSanitizeRefname(name string, flags int, sanitized *strings.Builder) 
 
 	if name == "@" {
 		if sanitized == nil {
-			return &NameError{Name: name, Reason: "single @ is not allowed"}
+			return fmt.Errorf("%w: single @ is not allowed", ErrInvalidName)
 		}
 
 		sanitized.WriteByte('-')
@@ -31,7 +31,7 @@ func checkOrSanitizeRefname(name string, flags int, sanitized *strings.Builder) 
 			sanitized.WriteByte('/')
 		}
 
-		componentLen, err := checkRefnameComponent(remaining, &flags, sanitized, name)
+		componentLen, err := checkRefnameComponent(remaining, &flags, sanitized)
 		switch {
 		case sanitized != nil && componentLen == 0:
 		case componentLen <= 0:
@@ -39,7 +39,7 @@ func checkOrSanitizeRefname(name string, flags int, sanitized *strings.Builder) 
 				return err
 			}
 
-			return &NameError{Name: name, Reason: "component has zero length"}
+			return fmt.Errorf("%w: component has zero length", ErrInvalidName)
 		case err != nil:
 			return err
 		}
@@ -56,12 +56,12 @@ func checkOrSanitizeRefname(name string, flags int, sanitized *strings.Builder) 
 	componentLen := len(remaining)
 	if componentLen > 0 && remaining[componentLen-1] == '.' {
 		if sanitized == nil {
-			return &NameError{Name: name, Reason: "name ends with '.'"}
+			return fmt.Errorf("%w: name ends with '.'", ErrInvalidName)
 		}
 	}
 
 	if flags&nameAllowOneLevel == 0 && componentCount < 2 {
-		return &NameError{Name: name, Reason: "one-level name is not allowed"}
+		return fmt.Errorf("%w: one-level name is not allowed", ErrInvalidName)
 	}
 
 	return nil

@@ -1,6 +1,9 @@
 package name
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 // Branch checks a branch shorthand
 // and returns its fully-qualified refs/heads/... name.
@@ -10,7 +13,7 @@ import "strings"
 func Branch(name string) (string, error) {
 	full := "refs/heads/" + name
 	if strings.HasPrefix(name, "-") || full == "refs/heads/HEAD" {
-		return "", &NameError{Name: name, Reason: "invalid branch name"}
+		return "", fmt.Errorf("%w: invalid branch name", ErrInvalidName)
 	}
 
 	err := validate(full, 0)
@@ -29,7 +32,7 @@ func Branch(name string) (string, error) {
 // and returns its fully-qualified refs/tags/... name.
 func Tag(name string) (string, error) {
 	if strings.HasPrefix(name, "-") || name == "HEAD" {
-		return "", &NameError{Name: name, Reason: "invalid tag name"}
+		return "", fmt.Errorf("%w: invalid tag name", ErrInvalidName)
 	}
 
 	full := "refs/tags/" + name

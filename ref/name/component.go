@@ -1,6 +1,9 @@
 package name
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 const lockSuffix = ".lock"
 
@@ -23,7 +26,7 @@ func nameDisposition(ch byte) byte {
 	}
 }
 
-func checkRefnameComponent(name string, flags *int, sanitized *strings.Builder, fullName string) (int, error) {
+func checkRefnameComponent(name string, flags *int, sanitized *strings.Builder) (int, error) {
 	var last byte
 
 	var componentStart int
@@ -47,7 +50,7 @@ func checkRefnameComponent(name string, flags *int, sanitized *strings.Builder, 
 				if sanitized != nil {
 					truncateBuilder(sanitized, sanitized.Len()-1)
 				} else {
-					return 0, &NameError{Name: fullName, Reason: "name contains '..'"}
+					return 0, fmt.Errorf("%w: name contains '..'", ErrInvalidName)
 				}
 			}
 		case 3:
@@ -55,21 +58,21 @@ func checkRefnameComponent(name string, flags *int, sanitized *strings.Builder, 
 				if sanitized != nil {
 					overwriteBuilderAt(sanitized, sanitized.Len()-1)
 				} else {
-					return 0, &NameError{Name: fullName, Reason: "name contains '@{'"}
+					return 0, fmt.Errorf("%w: name contains '@{'", ErrInvalidName)
 				}
 			}
 		case 4:
 			if sanitized != nil {
 				overwriteBuilderAt(sanitized, sanitized.Len()-1)
 			} else {
-				return 0, &NameError{Name: fullName, Reason: "name contains a forbidden character"}
+				return 0, fmt.Errorf("%w: name contains a forbidden character", ErrInvalidName)
 			}
 		case 5:
 			if *flags&nameRefspecPattern == 0 {
 				if sanitized != nil {
 					overwriteBuilderAt(sanitized, sanitized.Len()-1)
 				} else {
-					return 0, &NameError{Name: fullName, Reason: "name contains '*'"}
+					return 0, fmt.Errorf("%w: name contains '*'", ErrInvalidName)
 				}
 			}
 
@@ -94,13 +97,13 @@ out:
 		if sanitized != nil {
 			overwriteBuilderAt(sanitized, componentStart)
 		} else {
-			return 0, &NameError{Name: fullName, Reason: "component starts with '.'"}
+			return 0, fmt.Errorf("%w: component starts with '.'", ErrInvalidName)
 		}
 	}
 
 	if componentLen >= len(lockSuffix) && name[componentLen-len(lockSuffix):componentLen] == lockSuffix {
 		if sanitized == nil {
-			return 0, &NameError{Name: fullName, Reason: "component ends with .lock"}
+			return 0, fmt.Errorf("%w: component ends with .lock", ErrInvalidName)
 		}
 
 		for strings.HasSuffix(sanitized.String(), lockSuffix) {

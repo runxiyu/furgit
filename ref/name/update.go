@@ -1,11 +1,14 @@
 package name
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 // ValidateUpdateName checks whether name is valid for a direct ref update.
 func ValidateUpdateName(name string, hasNewValue bool) error {
 	if IsPseudo(name) {
-		return &NameError{Name: name, Reason: "pseudoref updates are not allowed"}
+		return fmt.Errorf("%w: pseudoref updates are not allowed", ErrInvalidName)
 	}
 
 	if hasNewValue {
@@ -13,7 +16,7 @@ func ValidateUpdateName(name string, hasNewValue bool) error {
 	}
 
 	if !IsSafe(name) {
-		return &NameError{Name: name, Reason: "unsafe name for update"}
+		return fmt.Errorf("%w: unsafe name for update", ErrInvalidName)
 	}
 
 	return nil
@@ -23,7 +26,7 @@ func ValidateUpdateName(name string, hasNewValue bool) error {
 func ValidateSymbolicTarget(name string, target string) error {
 	parsed := ParseWorktree(name)
 	if parsed.BareRefName == "HEAD" && !strings.HasPrefix(target, "refs/heads/") {
-		return &NameError{Name: target, Reason: name + " must point to refs/heads/..."}
+		return fmt.Errorf("%w: %s must point to refs/heads/...", ErrInvalidName, name)
 	}
 
 	if IsRoot(target) {
@@ -43,5 +46,5 @@ func ValidateSymbolicTarget(name string, target string) error {
 		return nil
 	}
 
-	return &NameError{Name: target, Reason: "symref target is not a ref"}
+	return fmt.Errorf("%w: symref target is not a ref", ErrInvalidName)
 }
