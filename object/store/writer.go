@@ -13,13 +13,13 @@ type ObjectWriter interface {
 	// WriteReaderContent writes one typed object content stream.
 	WriteReaderContent(ty typ.Type, size int64, src io.Reader) (id.ObjectID, error)
 
-	// WriteReaderFull writes one full serialized object stream as "type size\0content".
+	// WriteReaderFull writes one full serialized object stream as "type size\x00content".
 	WriteReaderFull(src io.Reader) (id.ObjectID, error)
 
 	// WriteBytesContent writes one typed object content byte slice.
 	WriteBytesContent(ty typ.Type, content []byte) (id.ObjectID, error)
 
-	// WriteBytesFull writes one full serialized object byte slice as "type size\0content".
+	// WriteBytesFull writes one full serialized object byte slice as "type size\x00content".
 	WriteBytesFull(raw []byte) (id.ObjectID, error)
 }
 

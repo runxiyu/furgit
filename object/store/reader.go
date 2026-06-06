@@ -15,7 +15,7 @@ import (
 //
 // Labels: MT-Safe.
 type ObjectReader interface {
-	// ReadBytesFull reads a full serialized object as "type size\0content".
+	// ReadBytesFull reads a full serialized object as "type size\x00content".
 	//
 	// In a valid repository,
 	// hashing this payload with the same object format
@@ -32,7 +32,7 @@ type ObjectReader interface {
 	ReadBytesContent(id id.ObjectID) (typ.Type, []byte, error)
 
 	// ReadReaderFull reads a full serialized object stream
-	// as "type size\0content".
+	// as "type size\x00content".
 	//
 	// Labels: Life-Parent, Close-Caller.
 	ReadReaderFull(id id.ObjectID) (io.ReadCloser, error)
