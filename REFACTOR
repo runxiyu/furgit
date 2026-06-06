@@ -49,7 +49,6 @@ object/stored
 object/tag
 object/tree
 reachability
-ref/name
 ref/store
 ref/store/chain
 ref/store/files
