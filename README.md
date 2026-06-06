@@ -47,10 +47,10 @@ version for this Program.
 
 ## Repos and mirrors
 
-* [Codeberg](https://codeberg.org/lindenii/furgit)
+* [git.runxiyu.org](https://git.runxiyu.org/furgit.git//)
+* [Codeberg mirror](https://codeberg.org/lindenii/furgit)
 * [SourceHut mirror](https://git.sr.ht/~runxiyu/furgit)
 * [hjgit mirror](https://hjgit.org/runxiyu/furgit/HEAD/info.html)
-* [git.runxiyu.org mirror](https://git.runxiyu.org/furgit.git//)
 * [cgit.space mirror](https://cgit.space/~runxiyu/furgit.git/)
 * [tangled mirror](https://tangled.org/@runxiyu.tngl.sh/furgit)
 * [GitHub mirror](https://github.com/runxiyu/furgit)
