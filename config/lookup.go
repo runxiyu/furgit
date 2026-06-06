@@ -13,56 +13,56 @@ type LookupResult struct {
 // String returns the explicit string value.
 func (r LookupResult) String() (string, error) {
 	switch r.Kind {
-	case KindMissing:
-		return "", &LookupError{Kind: r.Kind, Operation: "string"}
-	case KindValueless:
-		return "", &LookupError{Kind: r.Kind, Operation: "string"}
 	case KindString:
 		return r.Value, nil
+	case KindValueless:
+		return "", ErrValueless
+	case KindMissing:
+		return "", ErrMissing
 	default:
-		return "", &LookupError{Kind: r.Kind, Operation: "string"}
+		return "", ErrMissing
 	}
 }
 
 // Bool interprets this lookup result using Git config boolean rules.
 func (r LookupResult) Bool() (bool, error) {
 	switch r.Kind {
-	case KindMissing:
-		return false, &LookupError{Kind: r.Kind, Operation: "bool"}
-	case KindValueless:
-		return true, nil
 	case KindString:
 		return parseBool(r.Value)
+	case KindValueless:
+		return true, nil
+	case KindMissing:
+		return false, ErrMissing
 	default:
-		return false, &LookupError{Kind: r.Kind, Operation: "bool"}
+		return false, ErrMissing
 	}
 }
 
 // Int interprets this lookup result as a Git integer value.
 func (r LookupResult) Int() (int, error) {
 	switch r.Kind {
-	case KindMissing:
-		return 0, &LookupError{Kind: r.Kind, Operation: "int"}
-	case KindValueless:
-		return 0, &LookupError{Kind: r.Kind, Operation: "int"}
 	case KindString:
 		return parseInt(r.Value)
+	case KindValueless:
+		return 0, ErrValueless
+	case KindMissing:
+		return 0, ErrMissing
 	default:
-		return 0, &LookupError{Kind: r.Kind, Operation: "int"}
+		return 0, ErrMissing
 	}
 }
 
 // Int64 interprets this lookup result as a Git int64 value.
 func (r LookupResult) Int64() (int64, error) {
 	switch r.Kind {
-	case KindMissing:
-		return 0, &LookupError{Kind: r.Kind, Operation: "int64"}
-	case KindValueless:
-		return 0, &LookupError{Kind: r.Kind, Operation: "int64"}
 	case KindString:
 		return parseInt64(r.Value)
+	case KindValueless:
+		return 0, ErrValueless
+	case KindMissing:
+		return 0, ErrMissing
 	default:
-		return 0, &LookupError{Kind: r.Kind, Operation: "int64"}
+		return 0, ErrMissing
 	}
 }
 

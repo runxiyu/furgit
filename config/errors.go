@@ -1,56 +1,39 @@
 package config
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+var (
+	// ErrMissing indicates that a looked-up key does not exist.
+	ErrMissing = errors.New("config: key not found")
+
+	// ErrValueless indicates that a key exists but carries no value.
+	ErrValueless = errors.New("config: key has no value")
+
+	// ErrValueEmpty indicates an empty value where one was required.
+	ErrValueEmpty = errors.New("config: empty value")
+
+	// ErrValueRange indicates a value outside the representable range.
+	ErrValueRange = errors.New("config: value out of range")
+
+	// ErrValueSyntax indicates a malformed value.
+	ErrValueSyntax = errors.New("config: invalid value syntax")
+)
 
 // ParseError describes a syntactic error in Git config input.
 type ParseError struct {
-	Line   int
-	Reason string
+	// Line is the 1-based input line where the error was detected.
+	Line int
+
+	reason string
 }
 
 func (err *ParseError) Error() string {
 	if err.Line > 0 {
-		return fmt.Sprintf("config: parse line %d: %s", err.Line, err.Reason)
+		return fmt.Sprintf("config: parse line %d: %s", err.Line, err.reason)
 	}
 
-	return "config: parse: " + err.Reason
-}
-
-// LookupError describes an invalid lookup result conversion.
-type LookupError struct {
-	Kind      Kind
-	Operation string
-}
-
-func (err *LookupError) Error() string {
-	switch err.Kind {
-	case KindMissing:
-		return fmt.Sprintf("config: %s: missing config value", err.Operation)
-	case KindValueless:
-		return fmt.Sprintf("config: %s: valueless config key", err.Operation)
-	case KindString:
-		return fmt.Sprintf("config: %s: invalid string config value", err.Operation)
-	default:
-		return fmt.Sprintf("config: %s: unknown value kind %d", err.Operation, err.Kind)
-	}
-}
-
-// ValueError describes a typed value conversion failure.
-type ValueError struct {
-	Operation string
-	Value     string
-	Reason    string
-	Err       error
-}
-
-func (err *ValueError) Error() string {
-	if err.Err != nil {
-		return fmt.Sprintf("config: %s %q: %s: %v", err.Operation, err.Value, err.Reason, err.Err)
-	}
-
-	return fmt.Sprintf("config: %s %q: %s", err.Operation, err.Value, err.Reason)
-}
-
-func (err *ValueError) Unwrap() error {
-	return err.Err
+	return "config: parse: " + err.reason
 }

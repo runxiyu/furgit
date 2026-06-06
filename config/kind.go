@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -56,38 +57,28 @@ func parseBool(value string) (bool, error) {
 
 	n, err := parseInt32(value)
 	if err != nil {
-		return false, &ValueError{
-			Operation: "parse bool",
-			Value:     value,
-			Reason:    "invalid boolean value",
-			Err:       err,
-		}
+		return false, err
 	}
 
 	return n != 0, nil
 }
 
 func parseInt32(value string) (int32, error) {
-	n64, err := parseInt64WithMax(value, math.MaxInt32, "parse int32")
+	n64, err := parseInt64WithMax(value, math.MaxInt32)
 	if err != nil {
 		return 0, err
 	}
 
 	n32, err := intconv.Int64ToInt32(n64)
 	if err != nil {
-		return 0, &ValueError{
-			Operation: "parse int32",
-			Value:     value,
-			Reason:    "convert integer",
-			Err:       err,
-		}
+		return 0, fmt.Errorf("%w: %q", ErrValueRange, value)
 	}
 
 	return n32, nil
 }
 
 func parseInt(value string) (int, error) {
-	n64, err := parseInt64WithMax(value, int64(int(^uint(0)>>1)), "parse int")
+	n64, err := parseInt64WithMax(value, int64(int(^uint(0)>>1)))
 	if err != nil {
 		return 0, err
 	}
@@ -96,27 +87,17 @@ func parseInt(value string) (int, error) {
 }
 
 func parseInt64(value string) (int64, error) {
-	return parseInt64WithMax(value, int64(^uint64(0)>>1), "parse int64")
+	return parseInt64WithMax(value, int64(^uint64(0)>>1))
 }
 
-func parseInt64WithMax(value string, maxValue int64, operation string) (int64, error) {
+func parseInt64WithMax(value string, maxValue int64) (int64, error) {
 	if value == "" {
-		return 0, &ValueError{
-			Operation: operation,
-			Value:     value,
-			Reason:    "empty value",
-			Err:       nil,
-		}
+		return 0, ErrValueEmpty
 	}
 
 	trimmed := strings.TrimLeft(value, " \t\n\r\f\v")
 	if trimmed == "" {
-		return 0, &ValueError{
-			Operation: operation,
-			Value:     value,
-			Reason:    "empty value",
-			Err:       nil,
-		}
+		return 0, fmt.Errorf("%w: %q", ErrValueEmpty, value)
 	}
 
 	numPart := trimmed
@@ -136,43 +117,23 @@ func parseInt64WithMax(value string, maxValue int64, operation string) (int64, e
 	}
 
 	if numPart == "" {
-		return 0, &ValueError{
-			Operation: operation,
-			Value:     value,
-			Reason:    "missing integer value",
-			Err:       nil,
-		}
+		return 0, fmt.Errorf("%w: %q", ErrValueSyntax, value)
 	}
 
 	n, err := strconv.ParseInt(numPart, 0, 64)
 	if err != nil {
-		return 0, &ValueError{
-			Operation: operation,
-			Value:     value,
-			Reason:    "parse integer",
-			Err:       err,
-		}
+		return 0, fmt.Errorf("%w: %q: %w", ErrValueSyntax, value, err)
 	}
 
 	intMax := maxValue
 	intMin := -maxValue - 1
 
 	if n > 0 && n > intMax/factor {
-		return 0, &ValueError{
-			Operation: operation,
-			Value:     value,
-			Reason:    "integer overflow",
-			Err:       nil,
-		}
+		return 0, fmt.Errorf("%w: %q", ErrValueRange, value)
 	}
 
 	if n < 0 && n < intMin/factor {
-		return 0, &ValueError{
-			Operation: operation,
-			Value:     value,
-			Reason:    "integer overflow",
-			Err:       nil,
-		}
+		return 0, fmt.Errorf("%w: %q", ErrValueRange, value)
 	}
 
 	n *= factor

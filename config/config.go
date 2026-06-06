@@ -140,6 +140,6 @@ func (p *configParser) parse() (*Config, error) {
 func (p *configParser) parseError(reason string) error {
 	return &ParseError{
 		Line:   p.lineNum,
-		Reason: reason,
+		reason: reason,
 	}
 }
