@@ -47,6 +47,8 @@ func ParseWithoutHeader(ty typ.Type, body []byte, objectFormat id.ObjectFormat) 
 		return commit.Parse(body, objectFormat) //nolint:wrapcheck
 	case typ.TypeTag:
 		panic("TODO")
+	case typ.TypeUnknown:
+		return nil, typ.ErrInvalidType
 	default:
 		return nil, typ.ErrInvalidType
 	}

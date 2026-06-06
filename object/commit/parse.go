@@ -18,9 +18,11 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Commit, error) {
 
 	i := 0
 	for i < len(body) {
+		lineStart := i
+
 		rel := bytes.IndexByte(body[i:], '\n')
 		if rel < 0 {
-			return nil, ErrInvalidCommit
+			return nil, fmt.Errorf("%w: unterminated header line at offset %d", ErrInvalidCommit, lineStart)
 		}
 
 		line := body[i : i+rel]
@@ -32,7 +34,7 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Commit, error) {
 
 		key, value, found := bytes.Cut(line, []byte{' '})
 		if !found {
-			return nil, ErrInvalidCommit
+			return nil, fmt.Errorf("%w: header line at offset %d has no ' ' separator", ErrInvalidCommit, lineStart)
 		}
 
 		switch string(key) {
@@ -70,7 +72,7 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Commit, error) {
 			for i < len(body) {
 				nextRel := bytes.IndexByte(body[i:], '\n')
 				if nextRel < 0 {
-					return nil, ErrInvalidCommit
+					return nil, fmt.Errorf("%w: unterminated signature header at offset %d", ErrInvalidCommit, i)
 				}
 
 				if body[i] != ' ' {
@@ -88,7 +90,7 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Commit, error) {
 	}
 
 	if i > len(body) {
-		return nil, ErrInvalidCommit
+		return nil, fmt.Errorf("%w: header section extends past end of body", ErrInvalidCommit)
 	}
 
 	c.Message = append([]byte(nil), body[i:]...)
