@@ -13,355 +13,325 @@ import (
 func TestConfig(t *testing.T) {
 	t.Parallel()
 
-	for _, of := range id.SupportedObjectFormats() {
-		t.Run(of.String(), func(t *testing.T) {
-			t.Parallel()
+	testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{}) //nolint:exhaustruct
+	if err != nil {
+		t.Fatalf("NewRepo: %v", err)
+	}
 
-			testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: of})
-			if err != nil {
-				t.Fatalf("NewRepo: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "test.enabled", "true")
+	if err != nil {
+		t.Fatalf("set test.enabled: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "test.enabled", "true")
-			if err != nil {
-				t.Fatalf("set test.enabled: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "test.mode", "false")
+	if err != nil {
+		t.Fatalf("set test.mode: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "test.mode", "false")
-			if err != nil {
-				t.Fatalf("set test.mode: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "test.name", "Jane Doe")
+	if err != nil {
+		t.Fatalf("set test.name: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "test.name", "Jane Doe")
-			if err != nil {
-				t.Fatalf("set test.name: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "test.email", "jane@example.org")
+	if err != nil {
+		t.Fatalf("set test.email: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "test.email", "jane@example.org")
-			if err != nil {
-				t.Fatalf("set test.email: %v", err)
-			}
+	cfgFile, err := testRepo.Root(t).Open(".git/config")
+	if err != nil {
+		t.Fatalf("open config: %v", err)
+	}
 
-			cfgFile, err := testRepo.Root(t).Open(".git/config")
-			if err != nil {
-				t.Fatalf("open config: %v", err)
-			}
+	defer func() { _ = cfgFile.Close() }()
 
-			defer func() { _ = cfgFile.Close() }()
+	cfg, err := config.ParseConfig(cfgFile)
+	if err != nil {
+		t.Fatalf("ParseConfig failed: %v", err)
+	}
 
-			cfg, err := config.ParseConfig(cfgFile)
-			if err != nil {
-				t.Fatalf("ParseConfig failed: %v", err)
-			}
+	got, err := cfg.Lookup("test", "", "enabled").String()
+	if err != nil {
+		t.Fatalf("test.enabled: %v", err)
+	}
 
-			got, err := cfg.Lookup("test", "", "enabled").String()
-			if err != nil {
-				t.Fatalf("test.enabled: %v", err)
-			}
+	if got != "true" {
+		t.Errorf("test.enabled: got %q, want %q", got, "true")
+	}
 
-			if got != "true" {
-				t.Errorf("test.enabled: got %q, want %q", got, "true")
-			}
+	got, err = cfg.Lookup("test", "", "mode").String()
+	if err != nil {
+		t.Fatalf("test.mode: %v", err)
+	}
 
-			got, err = cfg.Lookup("test", "", "mode").String()
-			if err != nil {
-				t.Fatalf("test.mode: %v", err)
-			}
+	if got != "false" {
+		t.Errorf("test.mode: got %q, want %q", got, "false")
+	}
 
-			if got != "false" {
-				t.Errorf("test.mode: got %q, want %q", got, "false")
-			}
+	got, err = cfg.Lookup("test", "", "name").String()
+	if err != nil {
+		t.Fatalf("test.name: %v", err)
+	}
 
-			got, err = cfg.Lookup("test", "", "name").String()
-			if err != nil {
-				t.Fatalf("test.name: %v", err)
-			}
+	if got != "Jane Doe" {
+		t.Errorf("test.name: got %q, want %q", got, "Jane Doe")
+	}
 
-			if got != "Jane Doe" {
-				t.Errorf("test.name: got %q, want %q", got, "Jane Doe")
-			}
+	got, err = cfg.Lookup("test", "", "email").String()
+	if err != nil {
+		t.Fatalf("test.email: %v", err)
+	}
 
-			got, err = cfg.Lookup("test", "", "email").String()
-			if err != nil {
-				t.Fatalf("test.email: %v", err)
-			}
-
-			if got != "jane@example.org" {
-				t.Errorf("test.email: got %q, want %q", got, "jane@example.org")
-			}
-		})
+	if got != "jane@example.org" {
+		t.Errorf("test.email: got %q, want %q", got, "jane@example.org")
 	}
 }
 
 func TestConfigSubsection(t *testing.T) {
 	t.Parallel()
 
-	for _, of := range id.SupportedObjectFormats() {
-		t.Run(of.String(), func(t *testing.T) {
-			t.Parallel()
+	testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: id.ObjectFormatSHA256})
+	if err != nil {
+		t.Fatalf("NewRepo: %v", err)
+	}
 
-			testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: of})
-			if err != nil {
-				t.Fatalf("NewRepo: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "test.origin.url", "https://example.org/repo.git")
+	if err != nil {
+		t.Fatalf("set test.origin.url: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "test.origin.url", "https://example.org/repo.git")
-			if err != nil {
-				t.Fatalf("set test.origin.url: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "test.origin.fetch", "+refs/heads/*:refs/remotes/origin/*")
+	if err != nil {
+		t.Fatalf("set test.origin.fetch: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "test.origin.fetch", "+refs/heads/*:refs/remotes/origin/*")
-			if err != nil {
-				t.Fatalf("set test.origin.fetch: %v", err)
-			}
+	cfgFile, err := testRepo.Root(t).Open(".git/config")
+	if err != nil {
+		t.Fatalf("open config: %v", err)
+	}
 
-			cfgFile, err := testRepo.Root(t).Open(".git/config")
-			if err != nil {
-				t.Fatalf("open config: %v", err)
-			}
+	defer func() { _ = cfgFile.Close() }()
 
-			defer func() { _ = cfgFile.Close() }()
+	cfg, err := config.ParseConfig(cfgFile)
+	if err != nil {
+		t.Fatalf("ParseConfig failed: %v", err)
+	}
 
-			cfg, err := config.ParseConfig(cfgFile)
-			if err != nil {
-				t.Fatalf("ParseConfig failed: %v", err)
-			}
+	got, err := cfg.Lookup("test", "origin", "url").String()
+	if err != nil {
+		t.Fatalf("test.origin.url: %v", err)
+	}
 
-			got, err := cfg.Lookup("test", "origin", "url").String()
-			if err != nil {
-				t.Fatalf("test.origin.url: %v", err)
-			}
+	if got != "https://example.org/repo.git" {
+		t.Errorf("test.origin.url: got %q, want %q", got, "https://example.org/repo.git")
+	}
 
-			if got != "https://example.org/repo.git" {
-				t.Errorf("test.origin.url: got %q, want %q", got, "https://example.org/repo.git")
-			}
+	got, err = cfg.Lookup("test", "origin", "fetch").String()
+	if err != nil {
+		t.Fatalf("test.origin.fetch: %v", err)
+	}
 
-			got, err = cfg.Lookup("test", "origin", "fetch").String()
-			if err != nil {
-				t.Fatalf("test.origin.fetch: %v", err)
-			}
-
-			if got != "+refs/heads/*:refs/remotes/origin/*" {
-				t.Errorf("test.origin.fetch: got %q, want %q", got, "+refs/heads/*:refs/remotes/origin/*")
-			}
-		})
+	if got != "+refs/heads/*:refs/remotes/origin/*" {
+		t.Errorf("test.origin.fetch: got %q, want %q", got, "+refs/heads/*:refs/remotes/origin/*")
 	}
 }
 
 func TestConfigMultiValue(t *testing.T) {
 	t.Parallel()
 
-	for _, of := range id.SupportedObjectFormats() {
-		t.Run(of.String(), func(t *testing.T) {
-			t.Parallel()
+	testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: id.ObjectFormatSHA256})
+	if err != nil {
+		t.Fatalf("NewRepo: %v", err)
+	}
 
-			testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: of})
-			if err != nil {
-				t.Fatalf("NewRepo: %v", err)
-			}
+	err = testRepo.ConfigAdd(t, "test.origin.fetch", "+refs/heads/main:refs/remotes/origin/main")
+	if err != nil {
+		t.Fatalf("add test.origin.fetch: %v", err)
+	}
 
-			err = testRepo.ConfigAdd(t, "test.origin.fetch", "+refs/heads/main:refs/remotes/origin/main")
-			if err != nil {
-				t.Fatalf("add test.origin.fetch: %v", err)
-			}
+	err = testRepo.ConfigAdd(t, "test.origin.fetch", "+refs/heads/dev:refs/remotes/origin/dev")
+	if err != nil {
+		t.Fatalf("add test.origin.fetch: %v", err)
+	}
 
-			err = testRepo.ConfigAdd(t, "test.origin.fetch", "+refs/heads/dev:refs/remotes/origin/dev")
-			if err != nil {
-				t.Fatalf("add test.origin.fetch: %v", err)
-			}
+	err = testRepo.ConfigAdd(t, "test.origin.fetch", "+refs/tags/*:refs/tags/*")
+	if err != nil {
+		t.Fatalf("add test.origin.fetch: %v", err)
+	}
 
-			err = testRepo.ConfigAdd(t, "test.origin.fetch", "+refs/tags/*:refs/tags/*")
-			if err != nil {
-				t.Fatalf("add test.origin.fetch: %v", err)
-			}
+	cfgFile, err := testRepo.Root(t).Open(".git/config")
+	if err != nil {
+		t.Fatalf("open config: %v", err)
+	}
 
-			cfgFile, err := testRepo.Root(t).Open(".git/config")
-			if err != nil {
-				t.Fatalf("open config: %v", err)
-			}
+	defer func() { _ = cfgFile.Close() }()
 
-			defer func() { _ = cfgFile.Close() }()
+	cfg, err := config.ParseConfig(cfgFile)
+	if err != nil {
+		t.Fatalf("ParseConfig failed: %v", err)
+	}
 
-			cfg, err := config.ParseConfig(cfgFile)
-			if err != nil {
-				t.Fatalf("ParseConfig failed: %v", err)
-			}
+	fetches := cfg.LookupAll("test", "origin", "fetch")
+	if len(fetches) != 3 {
+		t.Fatalf("expected 3 fetch values, got %d", len(fetches))
+	}
 
-			fetches := cfg.LookupAll("test", "origin", "fetch")
-			if len(fetches) != 3 {
-				t.Fatalf("expected 3 fetch values, got %d", len(fetches))
-			}
+	expected := []string{
+		"+refs/heads/main:refs/remotes/origin/main",
+		"+refs/heads/dev:refs/remotes/origin/dev",
+		"+refs/tags/*:refs/tags/*",
+	}
+	for i, want := range expected {
+		got, err := fetches[i].String()
+		if err != nil {
+			t.Fatalf("fetch[%d]: %v", i, err)
+		}
 
-			expected := []string{
-				"+refs/heads/main:refs/remotes/origin/main",
-				"+refs/heads/dev:refs/remotes/origin/dev",
-				"+refs/tags/*:refs/tags/*",
-			}
-			for i, want := range expected {
-				got, err := fetches[i].String()
-				if err != nil {
-					t.Fatalf("fetch[%d]: %v", i, err)
-				}
-
-				if got != want {
-					t.Errorf("fetch[%d]: got %q, want %q", i, got, want)
-				}
-			}
-		})
+		if got != want {
+			t.Errorf("fetch[%d]: got %q, want %q", i, got, want)
+		}
 	}
 }
 
 func TestConfigCaseInsensitive(t *testing.T) {
 	t.Parallel()
 
-	for _, of := range id.SupportedObjectFormats() {
-		t.Run(of.String(), func(t *testing.T) {
-			t.Parallel()
+	testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: id.ObjectFormatSHA256})
+	if err != nil {
+		t.Fatalf("NewRepo: %v", err)
+	}
 
-			testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: of})
-			if err != nil {
-				t.Fatalf("NewRepo: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "Test.Flag", "true")
+	if err != nil {
+		t.Fatalf("set Test.Flag: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "Test.Flag", "true")
-			if err != nil {
-				t.Fatalf("set Test.Flag: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "TEST.Mode", "false")
+	if err != nil {
+		t.Fatalf("set TEST.Mode: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "TEST.Mode", "false")
-			if err != nil {
-				t.Fatalf("set TEST.Mode: %v", err)
-			}
+	gitVerifyFlag, err := testRepo.ConfigGet(t, "test.flag")
+	if err != nil {
+		t.Fatalf("get test.flag: %v", err)
+	}
 
-			gitVerifyFlag, err := testRepo.ConfigGet(t, "test.flag")
-			if err != nil {
-				t.Fatalf("get test.flag: %v", err)
-			}
+	gitVerifyMode, err := testRepo.ConfigGet(t, "test.mode")
+	if err != nil {
+		t.Fatalf("get test.mode: %v", err)
+	}
 
-			gitVerifyMode, err := testRepo.ConfigGet(t, "test.mode")
-			if err != nil {
-				t.Fatalf("get test.mode: %v", err)
-			}
+	gitVerifyFlag = strings.TrimSuffix(gitVerifyFlag, "\n")
+	gitVerifyMode = strings.TrimSuffix(gitVerifyMode, "\n")
 
-			gitVerifyFlag = strings.TrimSuffix(gitVerifyFlag, "\n")
-			gitVerifyMode = strings.TrimSuffix(gitVerifyMode, "\n")
+	cfgFile, err := testRepo.Root(t).Open(".git/config")
+	if err != nil {
+		t.Fatalf("open config: %v", err)
+	}
 
-			cfgFile, err := testRepo.Root(t).Open(".git/config")
-			if err != nil {
-				t.Fatalf("open config: %v", err)
-			}
+	defer func() { _ = cfgFile.Close() }()
 
-			defer func() { _ = cfgFile.Close() }()
+	cfg, err := config.ParseConfig(cfgFile)
+	if err != nil {
+		t.Fatalf("ParseConfig failed: %v", err)
+	}
 
-			cfg, err := config.ParseConfig(cfgFile)
-			if err != nil {
-				t.Fatalf("ParseConfig failed: %v", err)
-			}
+	got, err := cfg.Lookup("test", "", "flag").String()
+	if err != nil {
+		t.Fatalf("test.flag: %v", err)
+	}
 
-			got, err := cfg.Lookup("test", "", "flag").String()
-			if err != nil {
-				t.Fatalf("test.flag: %v", err)
-			}
+	if got != gitVerifyFlag {
+		t.Errorf("test.flag: got %q, want %q (from git)", got, gitVerifyFlag)
+	}
 
-			if got != gitVerifyFlag {
-				t.Errorf("test.flag: got %q, want %q (from git)", got, gitVerifyFlag)
-			}
+	got, err = cfg.Lookup("TEST", "", "FLAG").String()
+	if err != nil {
+		t.Fatalf("TEST.FLAG: %v", err)
+	}
 
-			got, err = cfg.Lookup("TEST", "", "FLAG").String()
-			if err != nil {
-				t.Fatalf("TEST.FLAG: %v", err)
-			}
+	if got != gitVerifyFlag {
+		t.Errorf("TEST.FLAG: got %q, want %q (from git)", got, gitVerifyFlag)
+	}
 
-			if got != gitVerifyFlag {
-				t.Errorf("TEST.FLAG: got %q, want %q (from git)", got, gitVerifyFlag)
-			}
+	got, err = cfg.Lookup("test", "", "mode").String()
+	if err != nil {
+		t.Fatalf("test.mode: %v", err)
+	}
 
-			got, err = cfg.Lookup("test", "", "mode").String()
-			if err != nil {
-				t.Fatalf("test.mode: %v", err)
-			}
-
-			if got != gitVerifyMode {
-				t.Errorf("test.mode: got %q, want %q (from git)", got, gitVerifyMode)
-			}
-		})
+	if got != gitVerifyMode {
+		t.Errorf("test.mode: got %q, want %q (from git)", got, gitVerifyMode)
 	}
 }
 
 func TestConfigBoolean(t *testing.T) {
 	t.Parallel()
 
-	for _, of := range id.SupportedObjectFormats() {
-		t.Run(of.String(), func(t *testing.T) {
-			t.Parallel()
+	testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: id.ObjectFormatSHA256})
+	if err != nil {
+		t.Fatalf("NewRepo: %v", err)
+	}
 
-			testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: of})
-			if err != nil {
-				t.Fatalf("NewRepo: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "test.flag1", "true")
+	if err != nil {
+		t.Fatalf("set test.flag1: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "test.flag1", "true")
-			if err != nil {
-				t.Fatalf("set test.flag1: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "test.flag2", "false")
+	if err != nil {
+		t.Fatalf("set test.flag2: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "test.flag2", "false")
-			if err != nil {
-				t.Fatalf("set test.flag2: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "test.flag3", "yes")
+	if err != nil {
+		t.Fatalf("set test.flag3: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "test.flag3", "yes")
-			if err != nil {
-				t.Fatalf("set test.flag3: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "test.flag4", "no")
+	if err != nil {
+		t.Fatalf("set test.flag4: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "test.flag4", "no")
-			if err != nil {
-				t.Fatalf("set test.flag4: %v", err)
-			}
+	cfgFile, err := testRepo.Root(t).Open(".git/config")
+	if err != nil {
+		t.Fatalf("open config: %v", err)
+	}
 
-			cfgFile, err := testRepo.Root(t).Open(".git/config")
-			if err != nil {
-				t.Fatalf("open config: %v", err)
-			}
+	defer func() { _ = cfgFile.Close() }()
 
-			defer func() { _ = cfgFile.Close() }()
+	cfg, err := config.ParseConfig(cfgFile)
+	if err != nil {
+		t.Fatalf("ParseConfig failed: %v", err)
+	}
 
-			cfg, err := config.ParseConfig(cfgFile)
-			if err != nil {
-				t.Fatalf("ParseConfig failed: %v", err)
-			}
+	tests := []struct {
+		key  string
+		want string
+	}{}
+	for _, key := range []string{"flag1", "flag2", "flag3", "flag4"} {
+		want, err := testRepo.ConfigGet(t, "test."+key)
+		if err != nil {
+			t.Fatalf("get test.%s: %v", key, err)
+		}
 
-			tests := []struct {
-				key  string
-				want string
-			}{}
-			for _, key := range []string{"flag1", "flag2", "flag3", "flag4"} {
-				want, err := testRepo.ConfigGet(t, "test."+key)
-				if err != nil {
-					t.Fatalf("get test.%s: %v", key, err)
-				}
-
-				tests = append(tests, struct {
-					key  string
-					want string
-				}{
-					key:  key,
-					want: strings.TrimSuffix(want, "\n"),
-				})
-			}
-
-			for _, tt := range tests {
-				got, err := cfg.Lookup("test", "", tt.key).String()
-				if err != nil {
-					t.Fatalf("test.%s: %v", tt.key, err)
-				}
-
-				if got != tt.want {
-					t.Errorf("test.%s: got %q, want %q (from git)", tt.key, got, tt.want)
-				}
-			}
+		tests = append(tests, struct {
+			key  string
+			want string
+		}{
+			key:  key,
+			want: strings.TrimSuffix(want, "\n"),
 		})
+	}
+
+	for _, tt := range tests {
+		got, err := cfg.Lookup("test", "", tt.key).String()
+		if err != nil {
+			t.Fatalf("test.%s: %v", tt.key, err)
+		}
+
+		if got != tt.want {
+			t.Errorf("test.%s: got %q, want %q (from git)", tt.key, got, tt.want)
+		}
 	}
 }
 
@@ -507,130 +477,118 @@ badnum = " 2x"
 func TestConfigComplexValues(t *testing.T) {
 	t.Parallel()
 
-	for _, of := range id.SupportedObjectFormats() {
-		t.Run(of.String(), func(t *testing.T) {
-			t.Parallel()
+	testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: id.ObjectFormatSHA256})
+	if err != nil {
+		t.Fatalf("NewRepo: %v", err)
+	}
 
-			testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: of})
-			if err != nil {
-				t.Fatalf("NewRepo: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "test.spaced", "value with spaces")
+	if err != nil {
+		t.Fatalf("set test.spaced: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "test.spaced", "value with spaces")
-			if err != nil {
-				t.Fatalf("set test.spaced: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "test.special", "value=with=equals")
+	if err != nil {
+		t.Fatalf("set test.special: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "test.special", "value=with=equals")
-			if err != nil {
-				t.Fatalf("set test.special: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "test.path", "/path/to/something")
+	if err != nil {
+		t.Fatalf("set test.path: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "test.path", "/path/to/something")
-			if err != nil {
-				t.Fatalf("set test.path: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "test.number", "12345")
+	if err != nil {
+		t.Fatalf("set test.number: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "test.number", "12345")
-			if err != nil {
-				t.Fatalf("set test.number: %v", err)
-			}
+	cfgFile, err := testRepo.Root(t).Open(".git/config")
+	if err != nil {
+		t.Fatalf("open config: %v", err)
+	}
 
-			cfgFile, err := testRepo.Root(t).Open(".git/config")
-			if err != nil {
-				t.Fatalf("open config: %v", err)
-			}
+	defer func() { _ = cfgFile.Close() }()
 
-			defer func() { _ = cfgFile.Close() }()
+	cfg, err := config.ParseConfig(cfgFile)
+	if err != nil {
+		t.Fatalf("ParseConfig failed: %v", err)
+	}
 
-			cfg, err := config.ParseConfig(cfgFile)
-			if err != nil {
-				t.Fatalf("ParseConfig failed: %v", err)
-			}
+	tests := []string{"spaced", "special", "path", "number"}
+	for _, key := range tests {
+		want, err := testRepo.ConfigGet(t, "test."+key)
+		if err != nil {
+			t.Fatalf("get test.%s: %v", key, err)
+		}
 
-			tests := []string{"spaced", "special", "path", "number"}
-			for _, key := range tests {
-				want, err := testRepo.ConfigGet(t, "test."+key)
-				if err != nil {
-					t.Fatalf("get test.%s: %v", key, err)
-				}
+		want = strings.TrimSuffix(want, "\n")
 
-				want = strings.TrimSuffix(want, "\n")
+		got, err := cfg.Lookup("test", "", key).String()
+		if err != nil {
+			t.Fatalf("test.%s: %v", key, err)
+		}
 
-				got, err := cfg.Lookup("test", "", key).String()
-				if err != nil {
-					t.Fatalf("test.%s: %v", key, err)
-				}
-
-				if got != want {
-					t.Errorf("test.%s: got %q, want %q (from git)", key, got, want)
-				}
-			}
-		})
+		if got != want {
+			t.Errorf("test.%s: got %q, want %q (from git)", key, got, want)
+		}
 	}
 }
 
 func TestConfigEntries(t *testing.T) {
 	t.Parallel()
 
-	for _, of := range id.SupportedObjectFormats() {
-		t.Run(of.String(), func(t *testing.T) {
-			t.Parallel()
+	testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: id.ObjectFormatSHA256})
+	if err != nil {
+		t.Fatalf("NewRepo: %v", err)
+	}
 
-			testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: of})
-			if err != nil {
-				t.Fatalf("NewRepo: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "test.enabled", "true")
+	if err != nil {
+		t.Fatalf("set test.enabled: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "test.enabled", "true")
-			if err != nil {
-				t.Fatalf("set test.enabled: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "test.mode", "false")
+	if err != nil {
+		t.Fatalf("set test.mode: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "test.mode", "false")
-			if err != nil {
-				t.Fatalf("set test.mode: %v", err)
-			}
+	err = testRepo.ConfigSet(t, "test.name", "Test User")
+	if err != nil {
+		t.Fatalf("set test.name: %v", err)
+	}
 
-			err = testRepo.ConfigSet(t, "test.name", "Test User")
-			if err != nil {
-				t.Fatalf("set test.name: %v", err)
-			}
+	cfgFile, err := testRepo.Root(t).Open(".git/config")
+	if err != nil {
+		t.Fatalf("open config: %v", err)
+	}
 
-			cfgFile, err := testRepo.Root(t).Open(".git/config")
-			if err != nil {
-				t.Fatalf("open config: %v", err)
-			}
+	defer func() { _ = cfgFile.Close() }()
 
-			defer func() { _ = cfgFile.Close() }()
+	cfg, err := config.ParseConfig(cfgFile)
+	if err != nil {
+		t.Fatalf("ParseConfig failed: %v", err)
+	}
 
-			cfg, err := config.ParseConfig(cfgFile)
-			if err != nil {
-				t.Fatalf("ParseConfig failed: %v", err)
-			}
+	entries := cfg.Entries()
+	if len(entries) < 3 {
+		t.Errorf("expected at least 3 entries, got %d", len(entries))
+	}
 
-			entries := cfg.Entries()
-			if len(entries) < 3 {
-				t.Errorf("expected at least 3 entries, got %d", len(entries))
-			}
+	for _, entry := range entries {
+		key := entry.Section + "." + entry.Key
+		if entry.Subsection != "" {
+			key = entry.Section + "." + entry.Subsection + "." + entry.Key
+		}
 
-			for _, entry := range entries {
-				key := entry.Section + "." + entry.Key
-				if entry.Subsection != "" {
-					key = entry.Section + "." + entry.Subsection + "." + entry.Key
-				}
+		gitValue, err := testRepo.ConfigGet(t, key)
+		if err != nil {
+			t.Fatalf("get %s: %v", key, err)
+		}
 
-				gitValue, err := testRepo.ConfigGet(t, key)
-				if err != nil {
-					t.Fatalf("get %s: %v", key, err)
-				}
-
-				gitValue = strings.TrimSuffix(gitValue, "\n")
-				if entry.Value != gitValue {
-					t.Errorf("entry %s: got value %q, git has %q", key, entry.Value, gitValue)
-				}
-			}
-		})
+		gitValue = strings.TrimSuffix(gitValue, "\n")
+		if entry.Value != gitValue {
+			t.Errorf("entry %s: got value %q, git has %q", key, entry.Value, gitValue)
+		}
 	}
 }
 
@@ -718,42 +676,36 @@ func TestConfigRawBytes(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			for _, of := range id.SupportedObjectFormats() {
-				t.Run(of.String(), func(t *testing.T) {
-					t.Parallel()
+			testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: id.ObjectFormatSHA256})
+			if err != nil {
+				t.Fatalf("NewRepo: %v", err)
+			}
 
-					testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: of})
-					if err != nil {
-						t.Fatalf("NewRepo: %v", err)
-					}
+			err = testRepo.Root(t).WriteFile(".git/config", tt.cfgData, 0o600)
+			if err != nil {
+				t.Fatalf("write config: %v", err)
+			}
 
-					err = testRepo.Root(t).WriteFile(".git/config", tt.cfgData, 0o600)
-					if err != nil {
-						t.Fatalf("write config: %v", err)
-					}
+			gitValue, gitErr := testRepo.ConfigGet(t, tt.gitKey)
+			furConfig, furErr := config.ParseConfig(bytes.NewReader(tt.cfgData))
 
-					gitValue, gitErr := testRepo.ConfigGet(t, tt.gitKey)
-					furConfig, furErr := config.ParseConfig(bytes.NewReader(tt.cfgData))
+			if (gitErr == nil) != (furErr == nil) {
+				t.Fatalf("git: %v\nfur: %v", gitErr, furErr)
+			}
 
-					if (gitErr == nil) != (furErr == nil) {
-						t.Fatalf("git: %v\nfur: %v", gitErr, furErr)
-					}
+			if furErr != nil {
+				return
+			}
 
-					if furErr != nil {
-						return
-					}
+			gitValue = strings.TrimSuffix(gitValue, "\n")
 
-					gitValue = strings.TrimSuffix(gitValue, "\n")
+			got, err := furConfig.Lookup(tt.section, tt.subsection, tt.key).String()
+			if err != nil {
+				t.Fatalf("%s: %v", tt.gitKey, err)
+			}
 
-					got, err := furConfig.Lookup(tt.section, tt.subsection, tt.key).String()
-					if err != nil {
-						t.Fatalf("%s: %v", tt.gitKey, err)
-					}
-
-					if got != gitValue {
-						t.Fatalf("git: %q\nfur: %q", gitValue, got)
-					}
-				})
+			if got != gitValue {
+				t.Fatalf("git: %q\nfur: %q", gitValue, got)
 			}
 		})
 	}
@@ -764,80 +716,62 @@ func FuzzConfig(f *testing.F) {
 	f.Add([]byte("[test]\nflag = true\n[core/invalid]"), "test.flag")
 	f.Add([]byte("[test \"sub\"]\nflag = true"), "test.sub.flag")
 
-	type fuzzRepoState struct {
-		repo *testgit.Repo
-	}
-
-	repos := make(map[id.ObjectFormat]fuzzRepoState, len(id.SupportedObjectFormats()))
-	for _, of := range id.SupportedObjectFormats() {
-		testRepo, err := testgit.NewRepo(f, testgit.RepoOptions{ObjectFormat: of})
-		if err != nil {
-			f.Fatalf("NewRepo: %v", err)
-		}
-
-		repos[of] = fuzzRepoState{
-			repo: testRepo,
-		}
+	testRepo, err := testgit.NewRepo(f, testgit.RepoOptions{ObjectFormat: id.ObjectFormatSHA256})
+	if err != nil {
+		f.Fatalf("NewRepo: %v", err)
 	}
 
 	f.Fuzz(func(t *testing.T, cfgData []byte, gitKey string) {
-		for _, of := range id.SupportedObjectFormats() {
-			state, ok := repos[of]
-			if !ok {
-				t.Fatalf("missing fuzz repo state for %v", of)
-			}
+		err := testRepo.Root(t).WriteFile(".git/config", cfgData, 0o600)
+		if err != nil {
+			t.Fatalf("write config: %v", err)
+		}
 
-			err := state.repo.Root(t).WriteFile(".git/config", cfgData, 0o600)
-			if err != nil {
-				t.Fatalf("write config: %v", err)
-			}
+		gitValue, gitErr := testRepo.ConfigGet(t, gitKey)
 
-			gitValue, gitErr := state.repo.ConfigGet(t, gitKey)
+		furConfig, furErr := config.ParseConfig(bytes.NewReader(cfgData))
+		if furErr == nil && furConfig == nil {
+			t.Fatalf("ParseConfig returned nil config with nil error")
+		}
 
-			furConfig, furErr := config.ParseConfig(bytes.NewReader(cfgData))
-			if furErr == nil && furConfig == nil {
-				t.Fatalf("ParseConfig returned nil config with nil error")
-			}
-
-			sameErr := (gitErr == nil) == (furErr == nil)
-			if !sameErr {
-				if furErr == nil {
-					return
-				}
-
-				t.Fatalf("git: %v\nfur: %v", gitErr, furErr)
-			}
-
+		sameErr := (gitErr == nil) == (furErr == nil)
+		if !sameErr {
 			if furErr == nil {
-				parts := strings.SplitN(gitKey, ".", 3)
-				furSection := parts[0]
+				return
+			}
 
-				var furSubsection, furKey string
+			t.Fatalf("git: %v\nfur: %v", gitErr, furErr)
+		}
 
-				switch len(parts) {
-				case 1:
-				case 2:
-					furKey = parts[1]
-				case 3:
-					furSubsection = parts[1]
-					furKey = parts[2]
-				default:
-					t.Fatalf("unexpected split(%q): %v", gitKey, parts)
-				}
+		if furErr == nil {
+			parts := strings.SplitN(gitKey, ".", 3)
+			furSection := parts[0]
 
-				gitValue = strings.TrimSuffix(gitValue, "\n")
+			var furSubsection, furKey string
 
-				furValue, err := furConfig.Lookup(furSection, furSubsection, furKey).String()
-				if err != nil {
-					t.Fatalf("%s: %v", gitKey, err)
-				}
+			switch len(parts) {
+			case 1:
+			case 2:
+				furKey = parts[1]
+			case 3:
+				furSubsection = parts[1]
+				furKey = parts[2]
+			default:
+				t.Fatalf("unexpected split(%q): %v", gitKey, parts)
+			}
 
-				if gitValue != furValue {
-					t.Fatalf(
-						"key: %v (%v.%v.%v)\ngit: %q\nfur: %q",
-						gitKey, furSection, furSubsection, furKey, gitValue, furValue,
-					)
-				}
+			gitValue = strings.TrimSuffix(gitValue, "\n")
+
+			furValue, err := furConfig.Lookup(furSection, furSubsection, furKey).String()
+			if err != nil {
+				t.Fatalf("%s: %v", gitKey, err)
+			}
+
+			if gitValue != furValue {
+				t.Fatalf(
+					"key: %v (%v.%v.%v)\ngit: %q\nfur: %q",
+					gitKey, furSection, furSubsection, furKey, gitValue, furValue,
+				)
 			}
 		}
 	})
