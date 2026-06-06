@@ -38,6 +38,19 @@ func NewRepo(tb testing.TB, opts RepoOptions) (*Repo, error) {
 	return repo, repo.Command(tb, "git", "init", "--object-format="+repo.objectFormat.String(), "--", repo.path).Run() //nolint:wrapcheck
 }
 
-func (repo *Repo) ObjectFormat() id.ObjectFormat {
+func (repo *Repo) ObjectFormat(tb testing.TB) id.ObjectFormat {
+	tb.Helper()
+
 	return repo.objectFormat
+}
+
+func (repo *Repo) Root(tb testing.TB) *os.Root {
+	tb.Helper()
+
+	root, err := os.OpenRoot(repo.path)
+	if err != nil {
+		tb.Fatalf("failed opening repo root at %q: %v", repo.path, err)
+	}
+
+	return root
 }

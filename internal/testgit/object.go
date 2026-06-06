@@ -1,7 +1,9 @@
 package testgit
 
 import (
+	"fmt"
 	"io"
+	"strings"
 	"testing"
 
 	"lindenii.org/go/furgit/object/id"
@@ -10,18 +12,18 @@ import (
 
 // HashObject hashes and writes an object,
 // and returns its object ID.
-func (repo *Repo) HashObject(tb testing.TB, ty typ.Type, body io.Reader) id.ObjectID {
+func (repo *Repo) HashObject(tb testing.TB, ty typ.Type, body io.Reader) (id.ObjectID, error) {
 	tb.Helper()
 
 	stdout, err := repo.Run(tb, body, "git", "hash-object", "-t", ty.Name(), "-w", "--stdin", "--literally")
 	if err != nil {
-		tb.Fatalf("hash-object: %v", err)
+		return id.ObjectID{}, fmt.Errorf("hash-object: %w", err)
 	}
 
-	id, err := repo.objectFormat.FromString(string(stdout))
+	objectID, err := repo.objectFormat.FromString(strings.TrimSuffix(string(stdout), "\n"))
 	if err != nil {
-		tb.Fatalf("parse git hash-object output %q: %v", string(stdout), err)
+		return id.ObjectID{}, fmt.Errorf("parse git hash-object output %q: %w", string(stdout), err)
 	}
 
-	return id
+	return objectID, nil
 }
