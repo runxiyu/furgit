@@ -26,7 +26,7 @@ func ValidateUpdateName(name string, hasNewValue bool) error {
 func ValidateSymbolicTarget(name string, target string) error {
 	parsed := ParseWorktree(name)
 	if parsed.BareRefName == "HEAD" && !strings.HasPrefix(target, "refs/heads/") {
-		return fmt.Errorf("%w: %s must point to refs/heads/...", ErrInvalidName, name)
+		return fmt.Errorf("%w: %s must point to a refs/heads/ branch", ErrInvalidName, name)
 	}
 
 	if IsRoot(target) {
