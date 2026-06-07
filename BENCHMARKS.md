@@ -1,7 +1,7 @@
 # Benchmarks
 
 * See [gitbench](https://git.sr.ht/~runxiyu/gitbench).
-* `legacy` branch furgit is slightly faster due to buffer reuse and custom
+* `v0.1.9`  furgit is slightly faster due to buffer reuse and custom
   ZLIB. These will be re‐added.
 * Alpine edge, i5‐10210U, `performance` governor, `linux.git`.
 * go-git may become much faster when
