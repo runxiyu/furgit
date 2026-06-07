@@ -30,7 +30,7 @@ func TestRoundTrip(t *testing.T) {
 				t.Fatalf("HashObject(blob): %v", err)
 			}
 
-			treeID, err := repo.MkTree(t, []testgit.MkTreeEntry{
+			treeID, err := repo.MkTree(t, []testgit.TreeEntry{
 				{Mode: "100644", Type: typ.TypeBlob, OID: blobID, Name: "roundtrip.txt"},
 			})
 			if err != nil {

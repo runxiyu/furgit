@@ -10,8 +10,9 @@ import (
 	"lindenii.org/go/furgit/object/typ"
 )
 
-// MkTreeEntry is one entry of a tree built by [Repo.MkTree].
-type MkTreeEntry struct {
+// TreeEntry is one entry of a tree built by [Repo.MkTree]
+// or reported by [Repo.LsTree].
+type TreeEntry struct {
 	Mode string
 	Type typ.Type
 	OID  id.ObjectID
@@ -19,7 +20,7 @@ type MkTreeEntry struct {
 }
 
 // MkTree builds a tree object from entries and returns its object ID.
-func (repo *Repo) MkTree(tb testing.TB, entries []MkTreeEntry) (id.ObjectID, error) {
+func (repo *Repo) MkTree(tb testing.TB, entries []TreeEntry) (id.ObjectID, error) {
 	tb.Helper()
 
 	var stdin bytes.Buffer
