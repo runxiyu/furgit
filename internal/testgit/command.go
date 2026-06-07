@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func (repo *Repo) Command(
+func (repo *Repo) command(
 	tb testing.TB,
 	command string,
 	args ...string,
@@ -22,7 +22,7 @@ func (repo *Repo) Command(
 	return cmd
 }
 
-func (repo *Repo) Run(
+func (repo *Repo) run(
 	tb testing.TB,
 	stdin io.Reader,
 	command string,
@@ -30,7 +30,7 @@ func (repo *Repo) Run(
 ) (stdout []byte, err error) {
 	tb.Helper()
 
-	cmd := repo.Command(tb, command, args...)
+	cmd := repo.command(tb, command, args...)
 
 	cmd.Stdin = stdin
 

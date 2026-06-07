@@ -15,7 +15,7 @@ import (
 func (repo *Repo) HashObject(tb testing.TB, ty typ.Type, body io.Reader) (id.ObjectID, error) {
 	tb.Helper()
 
-	stdout, err := repo.Run(tb, body, "git", "hash-object", "-t", ty.Name(), "-w", "--stdin", "--literally")
+	stdout, err := repo.run(tb, body, "git", "hash-object", "-t", ty.Name(), "-w", "--stdin", "--literally")
 	if err != nil {
 		return id.ObjectID{}, fmt.Errorf("hash-object: %w", err)
 	}
@@ -33,7 +33,7 @@ func (repo *Repo) HashObject(tb testing.TB, ty typ.Type, body io.Reader) (id.Obj
 func (repo *Repo) CatFile(tb testing.TB, ty typ.Type, oid id.ObjectID) ([]byte, error) {
 	tb.Helper()
 
-	stdout, err := repo.Run(tb, nil, "git", "cat-file", ty.Name(), "--end-of-options", oid.String())
+	stdout, err := repo.run(tb, nil, "git", "cat-file", ty.Name(), "--end-of-options", oid.String())
 	if err != nil {
 		return nil, fmt.Errorf("cat-file: %w", err)
 	}

@@ -14,7 +14,7 @@ type RefFormatOptions struct {
 func (repo *Repo) CheckRefFormat(tb testing.TB, name string, opts RefFormatOptions) error {
 	tb.Helper()
 
-	_, err := repo.Run(tb, nil, "git", refFormatArgs("check-ref-format", name, opts)...)
+	_, err := repo.run(tb, nil, "git", refFormatArgs("check-ref-format", name, opts)...)
 
 	return err
 }
@@ -22,7 +22,7 @@ func (repo *Repo) CheckRefFormat(tb testing.TB, name string, opts RefFormatOptio
 func (repo *Repo) NormalizeRefFormat(tb testing.TB, name string, opts RefFormatOptions) (string, error) {
 	tb.Helper()
 
-	out, err := repo.Run(tb, nil, "git", refFormatArgs("check-ref-format", name, opts, "--normalize")...)
+	out, err := repo.run(tb, nil, "git", refFormatArgs("check-ref-format", name, opts, "--normalize")...)
 	if err != nil {
 		return "", err
 	}
@@ -33,7 +33,7 @@ func (repo *Repo) NormalizeRefFormat(tb testing.TB, name string, opts RefFormatO
 func (repo *Repo) CheckBranchName(tb testing.TB, name string) (string, error) {
 	tb.Helper()
 
-	out, err := repo.Run(tb, nil, "git", "check-ref-format", "--branch", name)
+	out, err := repo.run(tb, nil, "git", "check-ref-format", "--branch", name)
 	if err != nil {
 		return "", err
 	}
@@ -53,7 +53,7 @@ func (repo *Repo) CheckTagName(tb testing.TB, name string) (string, error) {
 		return "", exec.ErrNotFound
 	}
 
-	_, err := repo.Run(tb, nil, "git", "check-ref-format", "refs/tags/"+name)
+	_, err := repo.run(tb, nil, "git", "check-ref-format", "refs/tags/"+name)
 	if err != nil {
 		return "", err
 	}

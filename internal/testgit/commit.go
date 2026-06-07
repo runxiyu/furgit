@@ -43,7 +43,7 @@ func (repo *Repo) CommitTree(
 
 	args = append(args, "-m", opts.Message, "--end-of-options", tree.String())
 
-	cmd := repo.Command(tb, "git", args...)
+	cmd := repo.command(tb, "git", args...)
 	if opts.Author.Name != "" {
 		cmd.Env = setEnv(cmd.Env, "GIT_AUTHOR_NAME", opts.Author.Name)
 	}

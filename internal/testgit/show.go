@@ -11,7 +11,7 @@ import (
 func (repo *Repo) ShowFormat(tb testing.TB, oid id.ObjectID, format string) ([]byte, error) {
 	tb.Helper()
 
-	stdout, err := repo.Run(tb, nil, "git", "show", "--no-patch", "--no-color", "--format="+format, "--end-of-options", oid.String())
+	stdout, err := repo.run(tb, nil, "git", "show", "--no-patch", "--no-color", "--format="+format, "--end-of-options", oid.String())
 	if err != nil {
 		return nil, fmt.Errorf("show --format=%q %s: %w", format, oid, err)
 	}

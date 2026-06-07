@@ -27,7 +27,7 @@ func (repo *Repo) MkTree(tb testing.TB, entries []MkTreeEntry) (id.ObjectID, err
 		fmt.Fprintf(&stdin, "%s %s %s\t%s\n", entry.Mode, entry.Type.Name(), entry.OID.String(), entry.Name)
 	}
 
-	stdout, err := repo.Run(tb, &stdin, "git", "mktree")
+	stdout, err := repo.run(tb, &stdin, "git", "mktree")
 	if err != nil {
 		return id.ObjectID{}, fmt.Errorf("mktree: %w", err)
 	}
