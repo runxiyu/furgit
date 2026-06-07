@@ -15,6 +15,10 @@ type CommitTreeOptions struct {
 	Committer     Identity
 	AuthorDate    string
 	CommitterDate string
+
+	// Sign requests a signed commit via git commit-tree -S,
+	// using the gpg.format and user.signingkey configured on the repo.
+	Sign bool
 }
 
 // CommitTree creates a commit object from a tree and optional parents,
@@ -32,6 +36,10 @@ func (repo *Repo) CommitTree(
 
 	for _, parent := range parents {
 		args = append(args, "-p", parent.String())
+	}
+
+	if opts.Sign {
+		args = append(args, "-S")
 	}
 
 	args = append(args, "-m", opts.Message, "--end-of-options", tree.String())
