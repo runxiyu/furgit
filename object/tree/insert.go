@@ -26,7 +26,7 @@ func (tree *Tree) Insert(entry Entry) error {
 		return fmt.Errorf("%w: entry %q has invalid mode", ErrInvalidTree, entry.Name)
 	}
 
-	if _, found := tree.find(entry.Name); found {
+	if _, found := tree.Find(entry.Name); found {
 		return fmt.Errorf("%w: entry %q already exists", ErrInvalidTree, entry.Name)
 	}
 
@@ -39,23 +39,6 @@ func (tree *Tree) Insert(entry Entry) error {
 	tree.entries = slices.Insert(tree.entries, insertAt, entry)
 
 	return nil
-}
-
-// find returns the index of the entry with the given name, if present.
-//
-// A name conflicts whether stored as a blob-like or as a subtree entry,
-// so both orderings are searched.
-func (tree *Tree) find(name string) (int, bool) {
-	for _, searchIsTree := range [...]bool{true, false} {
-		index, ok := slices.BinarySearchFunc(tree.entries, name, func(existing Entry, target string) int {
-			return nameCompare(existing.Name, existing.Mode == mode.Directory, target, searchIsTree)
-		})
-		if ok && tree.entries[index].Name == name {
-			return index, true
-		}
-	}
-
-	return 0, false
 }
 
 // validateName checks that name is a structurally valid tree entry name.
