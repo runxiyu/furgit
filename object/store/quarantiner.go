@@ -8,6 +8,12 @@ type QuarantineBase interface {
 
 	// Promote publishes quarantined writes into their final destination.
 	//
+	// Promote is not atomic.
+	// Because objects are content-addressed and immutable,
+	// a partial promotion is safe:
+	// it only makes some objects visible early,
+	// which is harmless until a ref references them.
+	//
 	// Promote invalidates the receiver.
 	Promote() error
 
@@ -47,4 +53,24 @@ type PackQuarantineOptions struct{}
 // for pack-wise writes.
 type PackQuarantiner interface {
 	BeginPackQuarantine(opts PackQuarantineOptions) (PackQuarantine, error)
+}
+
+// CoordinatedQuarantineOptions controls the options
+// for one coordinated quarantine creation.
+type CoordinatedQuarantineOptions struct {
+	Object ObjectQuarantineOptions
+	Pack   PackQuarantineOptions
+}
+
+// CoordinatedQuarantiner creates coordinated quarantines
+// that accept both object-wise and pack-wise writes
+// behind a single Promote/Discard.
+//
+// The returned quarantine is usable
+// anywhere either split quarantine is expected.
+type CoordinatedQuarantiner interface {
+	BeginCoordinatedQuarantine(opts CoordinatedQuarantineOptions) (interface {
+		ObjectQuarantine
+		PackQuarantine
+	}, error)
 }
