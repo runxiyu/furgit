@@ -12,6 +12,10 @@ type TagAnnotatedOptions struct {
 	Message    string
 	Tagger     Identity
 	TaggerDate string
+
+	// Sign requests a signed tag via git tag -s,
+	// using the gpg.format and user.signingkey configured on the repo.
+	Sign bool
 }
 
 // TagAnnotated creates an annotated tag object and returns its object ID.
@@ -23,7 +27,14 @@ func (repo *Repo) TagAnnotated(
 ) (id.ObjectID, error) {
 	tb.Helper()
 
-	cmd := repo.command(tb, "git", "tag", "-a", "-m", opts.Message, "--end-of-options", name, target.String())
+	args := []string{"tag", "-a"}
+	if opts.Sign {
+		args = append(args, "-s")
+	}
+
+	args = append(args, "-m", opts.Message, "--end-of-options", name, target.String())
+
+	cmd := repo.command(tb, "git", args...)
 
 	if opts.Tagger.Name != "" {
 		cmd.Env = setEnv(cmd.Env, "GIT_COMMITTER_NAME", opts.Tagger.Name)
