@@ -17,6 +17,7 @@ import (
 func Parse(body []byte, objectFormat id.ObjectFormat) (*Tree, error) {
 	tree := new(Tree)
 	idSize := objectFormat.Size()
+	seen := make(map[string]struct{})
 
 	i := 0
 	for i < len(body) {
@@ -64,6 +65,12 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Tree, error) {
 				return nil, fmt.Errorf("%w: entry %q out of order or duplicated", ErrInvalidTree, entry.Name)
 			}
 		}
+
+		if _, dup := seen[entry.Name]; dup {
+			return nil, fmt.Errorf("%w: duplicate entry name %q", ErrInvalidTree, entry.Name)
+		}
+
+		seen[entry.Name] = struct{}{}
 
 		tree.entries = append(tree.entries, entry)
 	}
