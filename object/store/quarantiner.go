@@ -55,6 +55,14 @@ type PackQuarantiner interface {
 	BeginPackQuarantine(opts PackQuarantineOptions) (PackQuarantine, error)
 }
 
+// CoordinatedQuarantine represents one quarantine
+// that accepts both object-wise and pack-wise writes
+// behind a single Promote/Discard.
+type CoordinatedQuarantine interface {
+	ObjectQuarantine
+	PackQuarantine
+}
+
 // CoordinatedQuarantineOptions controls the options
 // for one coordinated quarantine creation.
 type CoordinatedQuarantineOptions struct {
@@ -69,8 +77,5 @@ type CoordinatedQuarantineOptions struct {
 // The returned quarantine is usable
 // anywhere either split quarantine is expected.
 type CoordinatedQuarantiner interface {
-	BeginCoordinatedQuarantine(opts CoordinatedQuarantineOptions) (interface {
-		ObjectQuarantine
-		PackQuarantine
-	}, error)
+	BeginCoordinatedQuarantine(opts CoordinatedQuarantineOptions) (CoordinatedQuarantine, error)
 }

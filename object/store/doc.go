@@ -13,4 +13,5 @@
 // Instead, we define distinct optional capabilities
 // for object-wise writes, pack-wise writes, etc.,
 // and compose them for quarantined writes.
+// However, a coordinated quarantine is defined as necessary.
 package store
