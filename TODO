@@ -6,3 +6,5 @@
 * Too strict about tagger?
 
 * Are refname.Tag really the same as tag names?
+
+* Interactions with hash-function-transition
