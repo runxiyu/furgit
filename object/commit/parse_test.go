@@ -2,7 +2,6 @@ package commit_test
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 	"testing"
 
@@ -36,118 +35,95 @@ func TestParse(t *testing.T) {
 				t.Fatalf("MkTree: %v", err)
 			}
 
-			commitID, err := repo.CommitTree(t, treeID, "subject\n\nbody")
+			rootID, err := repo.CommitTree(t, treeID, "root subject\n\nroot body")
 			if err != nil {
-				t.Fatalf("CommitTree: %v", err)
+				t.Fatalf("CommitTree(root): %v", err)
 			}
 
-			rawBody, err := repo.CatFile(t, typ.TypeCommit, commitID)
+			childID, err := repo.CommitTree(t, treeID, "child subject\n\nchild body", rootID)
 			if err != nil {
-				t.Fatalf("CatFile: %v", err)
+				t.Fatalf("CommitTree(child): %v", err)
 			}
 
-			parsed, err := commit.Parse(rawBody, objectFormat)
+			sideID, err := repo.CommitTree(t, treeID, "side subject\n\nside body")
 			if err != nil {
-				t.Fatalf("Parse: %v", err)
+				t.Fatalf("CommitTree(side): %v", err)
 			}
 
-			if parsed.Tree != treeID {
-				t.Fatalf("tree id mismatch: got %s want %s", parsed.Tree, treeID)
-			}
-
-			if len(parsed.Parents) != 0 {
-				t.Fatalf("parent count = %d, want 0", len(parsed.Parents))
-			}
-
-			if !bytes.Equal(parsed.Author.Name, []byte("Test Author")) {
-				t.Fatalf("author name = %q, want %q", parsed.Author.Name, "Test Author")
-			}
-
-			if !bytes.Equal(parsed.Committer.Name, []byte("Test Committer")) {
-				t.Fatalf("committer name = %q, want %q", parsed.Committer.Name, "Test Committer")
-			}
-
-			if !bytes.Contains(parsed.Message, []byte("subject")) {
-				t.Fatalf("commit message missing subject: %q", parsed.Message)
-			}
-		})
-	}
-}
-
-func TestParseMultipleParents(t *testing.T) {
-	t.Parallel()
-
-	for _, objectFormat := range id.SupportedObjectFormats() {
-		t.Run(objectFormat.String(), func(t *testing.T) {
-			t.Parallel()
-
-			repo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: objectFormat})
+			mergeID, err := repo.CommitTree(t, treeID, "merge subject\n\nmerge body", childID, sideID)
 			if err != nil {
-				t.Fatalf("NewRepo: %v", err)
+				t.Fatalf("CommitTree(merge): %v", err)
 			}
 
-			blobID, err := repo.HashObject(t, typ.TypeBlob, strings.NewReader("merge-content\n"))
-			if err != nil {
-				t.Fatalf("HashObject: %v", err)
-			}
+			for _, tc := range []struct {
+				name    string
+				oid     id.ObjectID
+				parents []id.ObjectID
+				message []byte
+			}{
+				{
+					name:    "root",
+					oid:     rootID,
+					message: []byte("root subject\n\nroot body\n"),
+				},
+				{
+					name:    "child",
+					oid:     childID,
+					parents: []id.ObjectID{rootID},
+					message: []byte("child subject\n\nchild body\n"),
+				},
+				{
+					name:    "merge",
+					oid:     mergeID,
+					parents: []id.ObjectID{childID, sideID},
+					message: []byte("merge subject\n\nmerge body\n"),
+				},
+			} {
+				t.Run(tc.name, func(t *testing.T) {
+					rawBody, err := repo.CatFile(t, typ.TypeCommit, tc.oid)
+					if err != nil {
+						t.Fatalf("CatFile: %v", err)
+					}
 
-			treeID, err := repo.MkTree(t, []testgit.MkTreeEntry{
-				{Mode: "100644", Type: typ.TypeBlob, OID: blobID, Name: "file.txt"},
-			})
-			if err != nil {
-				t.Fatalf("MkTree: %v", err)
-			}
+					parsed, err := commit.Parse(rawBody, objectFormat)
+					if err != nil {
+						t.Fatalf("Parse: %v", err)
+					}
 
-			parent1, err := repo.CommitTree(t, treeID, "parent-one")
-			if err != nil {
-				t.Fatalf("CommitTree(parent1): %v", err)
-			}
+					if parsed.Tree != treeID {
+						t.Fatalf("tree id mismatch: got %s want %s", parsed.Tree, treeID)
+					}
 
-			parent2, err := repo.CommitTree(t, treeID, "parent-two", parent1)
-			if err != nil {
-				t.Fatalf("CommitTree(parent2): %v", err)
-			}
+					if len(parsed.Parents) != len(tc.parents) {
+						t.Fatalf("parent count = %d, want %d", len(parsed.Parents), len(tc.parents))
+					}
 
-			rawCommit := fmt.Sprintf(
-				"tree %s\nparent %s\nparent %s\nauthor Test Author <test@example.org> 1234567890 +0000\ncommitter Test Committer <committer@example.org> 1234567890 +0000\n\nMerge commit\n",
-				treeID,
-				parent1,
-				parent2,
-			)
+					for i, parent := range tc.parents {
+						if parsed.Parents[i] != parent {
+							t.Fatalf("parent[%d] = %s, want %s", i, parsed.Parents[i], parent)
+						}
+					}
 
-			mergeID, err := repo.HashObject(t, typ.TypeCommit, strings.NewReader(rawCommit))
-			if err != nil {
-				t.Fatalf("HashObject(merge): %v", err)
-			}
+					if !bytes.Equal(parsed.Author.Name, []byte("Test Author")) {
+						t.Fatalf("author name = %q, want %q", parsed.Author.Name, "Test Author")
+					}
 
-			rawBody, err := repo.CatFile(t, typ.TypeCommit, mergeID)
-			if err != nil {
-				t.Fatalf("CatFile: %v", err)
-			}
+					if !bytes.Equal(parsed.Author.Email, []byte("author@example.org")) {
+						t.Fatalf("author email = %q, want %q", parsed.Author.Email, "author@example.org")
+					}
 
-			parsed, err := commit.Parse(rawBody, objectFormat)
-			if err != nil {
-				t.Fatalf("Parse(merge): %v", err)
-			}
+					if !bytes.Equal(parsed.Committer.Name, []byte("Test Committer")) {
+						t.Fatalf("committer name = %q, want %q", parsed.Committer.Name, "Test Committer")
+					}
 
-			if parsed.Tree != treeID {
-				t.Fatalf("merge tree = %s, want %s", parsed.Tree, treeID)
-			}
+					if !bytes.Equal(parsed.Committer.Email, []byte("committer@example.org")) {
+						t.Fatalf("committer email = %q, want %q", parsed.Committer.Email, "committer@example.org")
+					}
 
-			if len(parsed.Parents) != 2 {
-				t.Fatalf("merge parent count = %d, want 2", len(parsed.Parents))
-			}
-
-			if parsed.Parents[0] != parent1 {
-				t.Fatalf("merge parent[0] = %s, want %s", parsed.Parents[0], parent1)
-			}
-
-			if parsed.Parents[1] != parent2 {
-				t.Fatalf("merge parent[1] = %s, want %s", parsed.Parents[1], parent2)
-			}
-
-			if !bytes.Equal(parsed.Message, []byte("Merge commit\n")) {
-				t.Fatalf("merge message = %q, want %q", parsed.Message, "Merge commit\n")
+					if !bytes.Equal(parsed.Message, tc.message) {
+						t.Fatalf("message = %q, want %q", parsed.Message, tc.message)
+					}
+				})
 			}
 		})
 	}
