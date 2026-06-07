@@ -29,7 +29,6 @@ network/receivepack
 network/receivepack/hooks
 network/receivepack/service
 object
-object/blob
 object/fetch
 object/signed
 object/signed/commit
@@ -45,8 +44,6 @@ object/store/packed/internal
 object/store/packed/internal/ingest
 object/store/packed/internal/reading
 object/stored
-object/tag
-object/tree
 reachability
 ref/store
 ref/store/chain
