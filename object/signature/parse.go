@@ -2,15 +2,11 @@ package signature
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"strconv"
 
 	"lindenii.org/go/lgo/intconv"
 )
-
-// ErrInvalidSignature indicates a malformed signature.
-var ErrInvalidSignature = errors.New("object/signature: invalid signature")
 
 // Parse parses a canonical Git signature line.
 //
