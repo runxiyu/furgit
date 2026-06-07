@@ -1,12 +1,16 @@
 package store
 
 import (
+	"errors"
 	"io"
 
 	"lindenii.org/go/furgit/common/iowrap"
 	"lindenii.org/go/furgit/object/id"
 	"lindenii.org/go/furgit/object/typ"
 )
+
+// ErrInvalidObject indicates a malformed object passed to a write.
+var ErrInvalidObject = errors.New("object/store: invalid object")
 
 // ObjectWriter writes individual Git objects.
 type ObjectWriter interface {

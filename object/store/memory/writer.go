@@ -1,12 +1,12 @@
 package memory
 
 import (
-	"errors"
 	"fmt"
 	"io"
 
 	"lindenii.org/go/furgit/object/header"
 	"lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/store"
 	"lindenii.org/go/furgit/object/typ"
 	"lindenii.org/go/lgo/intconv"
 )
@@ -31,7 +31,7 @@ func (memory *Memory) WriteBytesFull(raw []byte) (id.ObjectID, error) {
 
 	content := raw[consumed:]
 	if uint64(len(content)) != size {
-		return id.ObjectID{}, errors.New("object/store/memory: object header size/content mismatch")
+		return id.ObjectID{}, fmt.Errorf("%w: header size/content mismatch", store.ErrInvalidObject)
 	}
 
 	return memory.WriteBytesContent(ty, content)
@@ -51,9 +51,9 @@ func (memory *Memory) WriteReaderContent(ty typ.Type, size uint64, src io.Reader
 
 	switch {
 	case uint64(len(content)) > size:
-		return id.ObjectID{}, errors.New("object/store/memory: object content longer than declared size")
+		return id.ObjectID{}, fmt.Errorf("%w: content longer than declared size", store.ErrInvalidObject)
 	case uint64(len(content)) < size:
-		return id.ObjectID{}, errors.New("object/store/memory: object content shorter than declared size")
+		return id.ObjectID{}, fmt.Errorf("%w: content shorter than declared size", store.ErrInvalidObject)
 	}
 
 	return memory.WriteBytesContent(ty, content)
