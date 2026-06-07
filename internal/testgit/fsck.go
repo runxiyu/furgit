@@ -27,6 +27,8 @@ func (repo *Repo) Fsck(tb testing.TB, opts FsckOptions, objects ...id.ObjectID) 
 		args = append(args, "--no-dangling")
 	}
 
+	args = append(args, "--end-of-options")
+
 	for _, object := range objects {
 		args = append(args, object.String())
 	}

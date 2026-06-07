@@ -41,7 +41,7 @@ func NewRepo(tb testing.TB, opts RepoOptions) (*Repo, error) {
 		),
 	}
 
-	return repo, repo.Command(tb, "git", "init", "--object-format="+repo.objectFormat.String(), "--", repo.path).Run() //nolint:wrapcheck
+	return repo, repo.Command(tb, "git", "init", "--object-format="+repo.objectFormat.String(), "--end-of-options", repo.path).Run() //nolint:wrapcheck
 }
 
 func (repo *Repo) ObjectFormat(tb testing.TB) id.ObjectFormat {
