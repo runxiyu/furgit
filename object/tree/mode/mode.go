@@ -20,5 +20,5 @@ const (
 	Gitlink Mode = 0o160000
 )
 
-// maxModeDigits is the largest number of octal digits in any canonical mode.
-const maxModeDigits = 6
+// MaxModeDigits is the largest number of octal digits in any canonical mode.
+const MaxModeDigits = 6

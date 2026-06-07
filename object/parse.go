@@ -9,6 +9,7 @@ import (
 	"lindenii.org/go/furgit/object/header"
 	"lindenii.org/go/furgit/object/id"
 	"lindenii.org/go/furgit/object/tag"
+	"lindenii.org/go/furgit/object/tree"
 	"lindenii.org/go/furgit/object/typ"
 )
 
@@ -43,7 +44,7 @@ func ParseWithoutHeader(ty typ.Type, body []byte, objectFormat id.ObjectFormat) 
 	case typ.TypeBlob:
 		return blob.Parse(body) //nolint:wrapcheck
 	case typ.TypeTree:
-		panic("TODO")
+		return tree.Parse(body, objectFormat) //nolint:wrapcheck
 	case typ.TypeCommit:
 		return commit.Parse(body, objectFormat) //nolint:wrapcheck
 	case typ.TypeTag:

@@ -21,7 +21,7 @@ func Parse(raw []byte) (Mode, error) {
 		return 0, fmt.Errorf("%w: zero-padded mode %q", ErrInvalidMode, raw)
 	}
 
-	if len(raw) > maxModeDigits {
+	if len(raw) > MaxModeDigits {
 		return 0, fmt.Errorf("%w: mode %q too long", ErrInvalidMode, raw)
 	}
 
