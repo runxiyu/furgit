@@ -8,6 +8,7 @@ import (
 	"lindenii.org/go/furgit/object/commit"
 	"lindenii.org/go/furgit/object/header"
 	"lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/tag"
 	"lindenii.org/go/furgit/object/typ"
 )
 
@@ -46,7 +47,7 @@ func ParseWithoutHeader(ty typ.Type, body []byte, objectFormat id.ObjectFormat) 
 	case typ.TypeCommit:
 		return commit.Parse(body, objectFormat) //nolint:wrapcheck
 	case typ.TypeTag:
-		panic("TODO")
+		return tag.Parse(body, objectFormat) //nolint:wrapcheck
 	case typ.TypeUnknown:
 		return nil, typ.ErrInvalidType
 	default:
