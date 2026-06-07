@@ -1,0 +1,8 @@
+* The append functions are not transactional.
+  Or perhaps we should make them transactional?
+
+* Perhaps no GIGO in serialization 
+
+* Too strict about tagger?
+
+* Are refname.Tag really the same as tag names?

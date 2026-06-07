@@ -16,7 +16,6 @@ internal/iolimit
 internal/lru
 internal/priorityqueue
 internal/progress
-internal/testgit
 internal/utils
 network
 network/protocol
