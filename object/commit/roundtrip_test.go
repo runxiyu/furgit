@@ -104,10 +104,11 @@ func TestRoundTrip(t *testing.T) {
 				t.Fatalf("HashObject(commit): %v", err)
 			}
 
-			if err := repo.Fsck(t, testgit.FsckOptions{
+			err = repo.Fsck(t, testgit.FsckOptions{
 				Strict:     true,
 				NoDangling: true,
-			}, roundTripID); err != nil {
+			}, roundTripID)
+			if err != nil {
 				t.Fatalf("Fsck: %v", err)
 			}
 
