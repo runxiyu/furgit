@@ -19,6 +19,7 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Commit, error) {
 	i := 0
 	state := parseStateTree
 	sawHeaderEnd := false
+
 	for i < len(body) {
 		lineStart := i
 
@@ -32,6 +33,7 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Commit, error) {
 
 		if len(line) == 0 {
 			sawHeaderEnd = true
+
 			break
 		}
 

@@ -157,6 +157,7 @@ func assertCommitEqual(t *testing.T, got *commit.Commit, want *commit.Commit) {
 		if gotHeader.Key != wantHeader.Key {
 			t.Fatalf("extra header[%d] key = %q, want %q", i, gotHeader.Key, wantHeader.Key)
 		}
+
 		if !bytes.Equal(gotHeader.Value, wantHeader.Value) {
 			t.Fatalf("extra header[%d] value = %q, want %q", i, gotHeader.Value, wantHeader.Value)
 		}
@@ -169,12 +170,15 @@ func assertSignatureEqual(t *testing.T, name string, got signature.Signature, wa
 	if !bytes.Equal(got.Name, want.Name) {
 		t.Fatalf("%s name = %q, want %q", name, got.Name, want.Name)
 	}
+
 	if !bytes.Equal(got.Email, want.Email) {
 		t.Fatalf("%s email = %q, want %q", name, got.Email, want.Email)
 	}
+
 	if got.WhenUnix != want.WhenUnix {
 		t.Fatalf("%s time = %d, want %d", name, got.WhenUnix, want.WhenUnix)
 	}
+
 	if got.OffsetMinutes != want.OffsetMinutes {
 		t.Fatalf("%s offset = %d, want %d", name, got.OffsetMinutes, want.OffsetMinutes)
 	}
