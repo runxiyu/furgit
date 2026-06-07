@@ -30,7 +30,6 @@ network/receivepack/hooks
 network/receivepack/service
 object
 object/blob
-object/commit
 object/fetch
 object/signed
 object/signed/commit
