@@ -1,11 +1,12 @@
 # Furgit
 
-[![builds.sr.ht status](https://builds.sr.ht/~runxiyu/furgit/commits/master.svg)](https://builds.sr.ht/~runxiyu/furgit/commits/master)
+[![builds.sr.ht status](https://builds.sr.ht/~runxiyu/furgit/commits/legacy.svg)](https://builds.sr.ht/~runxiyu/furgit/commits/legacy)
 [![Go Reference](https://pkg.go.dev/badge/lindenii.org/go/furgit.svg)](https://pkg.go.dev/lindenii.org/go/furgit)
 
 A low‐level Git plumbing library in Go.
 
-A refactor is pending on the `next` branch.
+This `legacy` branch will probably be deprecated sometime.
+See `main`.
 
 ## Status
 
