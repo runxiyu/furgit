@@ -8,18 +8,11 @@ import (
 	"lindenii.org/go/furgit/object/id"
 )
 
-// CommitTreeIdentity configures an author or committer identity
-// for [Repo.CommitTree].
-type CommitTreeIdentity struct {
-	Name  string
-	Email string
-}
-
 // CommitTreeOptions configures [Repo.CommitTree].
 type CommitTreeOptions struct {
 	Message       string
-	Author        CommitTreeIdentity
-	Committer     CommitTreeIdentity
+	Author        Identity
+	Committer     Identity
 	AuthorDate    string
 	CommitterDate string
 }

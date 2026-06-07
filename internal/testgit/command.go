@@ -25,7 +25,7 @@ func (repo *Repo) command(
 func (repo *Repo) run(
 	tb testing.TB,
 	stdin io.Reader,
-	command string,
+	command string, //nolint:unparam
 	args ...string,
 ) (stdout []byte, err error) {
 	tb.Helper()
