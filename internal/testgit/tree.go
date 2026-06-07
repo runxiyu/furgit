@@ -52,7 +52,7 @@ func (repo *Repo) LsTree(tb testing.TB, oid id.ObjectID) ([]TreeEntry, error) {
 
 	var entries []TreeEntry
 
-	for _, record := range bytes.Split(stdout, []byte{0}) {
+	for record := range bytes.SplitSeq(stdout, []byte{0}) {
 		if len(record) == 0 {
 			continue
 		}

@@ -17,7 +17,8 @@ var ErrInvalidTree = errors.New("object/tree: invalid tree")
 // It rejects entries with an invalid name or mode,
 // and entries whose name conflicts with one already present.
 func (tree *Tree) Insert(entry Entry) error {
-	if err := validateName(entry.Name); err != nil {
+	err := validateName(entry.Name)
+	if err != nil {
 		return err
 	}
 

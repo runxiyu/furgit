@@ -6,6 +6,10 @@ linters:
     paths:
       - internal/compress/flate
       - internal/compress/internal
+    rules:
+      - path: internal/testgit
+        linters:
+          - err113        # test helpers report ad-hoc git failures; static errors add no value here
   disable:
     - dupword          # extremely normal in tests and a pretty unnecessary linter
     - goconst          # unnecessary especially for our parsing code; many false positives

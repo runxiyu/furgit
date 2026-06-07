@@ -41,7 +41,8 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Tree, error) {
 		name := string(body[i : i+nul])
 		i += nul + 1
 
-		if err := validateName(name); err != nil {
+		err = validateName(name)
+		if err != nil {
 			return nil, err
 		}
 
