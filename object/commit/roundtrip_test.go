@@ -39,11 +39,11 @@ func TestRoundTrip(t *testing.T) {
 
 			parent1, err := repo.CommitTree(t, treeID, testgit.CommitTreeOptions{
 				Message: "parent one",
-				Author: testgit.CommitTreeIdentity{
+				Author: testgit.Identity{
 					Name:  "Parent Author",
 					Email: "parent-author@example.org",
 				},
-				Committer: testgit.CommitTreeIdentity{
+				Committer: testgit.Identity{
 					Name:  "Parent Committer",
 					Email: "parent-committer@example.org",
 				},
@@ -56,11 +56,11 @@ func TestRoundTrip(t *testing.T) {
 
 			parent2, err := repo.CommitTree(t, treeID, testgit.CommitTreeOptions{
 				Message: "parent two",
-				Author: testgit.CommitTreeIdentity{
+				Author: testgit.Identity{
 					Name:  "Parent Author",
 					Email: "parent-author@example.org",
 				},
-				Committer: testgit.CommitTreeIdentity{
+				Committer: testgit.Identity{
 					Name:  "Parent Committer",
 					Email: "parent-committer@example.org",
 				},

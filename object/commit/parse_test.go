@@ -17,11 +17,11 @@ func TestParse(t *testing.T) {
 	commitTreeOptions := func(message string) testgit.CommitTreeOptions {
 		return testgit.CommitTreeOptions{
 			Message: message,
-			Author: testgit.CommitTreeIdentity{
+			Author: testgit.Identity{
 				Name:  "Test Author",
 				Email: "author@example.org",
 			},
-			Committer: testgit.CommitTreeIdentity{
+			Committer: testgit.Identity{
 				Name:  "Test Committer",
 				Email: "committer@example.org",
 			},
