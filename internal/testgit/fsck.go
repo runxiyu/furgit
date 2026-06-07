@@ -8,8 +8,6 @@ import (
 )
 
 // FsckOptions configures [Repo.Fsck].
-//
-//exhaustruct:ignore
 type FsckOptions struct {
 	Strict     bool
 	NoDangling bool
