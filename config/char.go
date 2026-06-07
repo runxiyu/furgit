@@ -106,3 +106,31 @@ func (p *configParser) skipBOM() error {
 
 	return nil
 }
+
+func isKeyChar(ch byte) bool {
+	return isLetter(ch) || isDigit(ch) || ch == '-'
+}
+
+func isSpace(ch byte) bool {
+	return ch == ' ' || ch == '\t'
+}
+
+func isWhitespace(ch byte) bool {
+	return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '\v' || ch == '\f'
+}
+
+func isLetter(ch byte) bool {
+	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
+}
+
+func isDigit(ch byte) bool {
+	return ch >= '0' && ch <= '9'
+}
+
+func toLower(ch byte) byte {
+	if ch >= 'A' && ch <= 'Z' {
+		return ch + ('a' - 'A')
+	}
+
+	return ch
+}

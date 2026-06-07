@@ -109,3 +109,13 @@ func (p *configParser) parseValue() (string, error) {
 		value.WriteByte(ch)
 	}
 }
+
+func truncateAtNUL(value string) string {
+	for i := range len(value) {
+		if value[i] == 0 {
+			return value[:i]
+		}
+	}
+
+	return value
+}

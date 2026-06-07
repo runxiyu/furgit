@@ -44,3 +44,18 @@ func (p *configParser) parseSection() error {
 		name.WriteByte(toLower(ch))
 	}
 }
+
+func isValidSection(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+
+	for i := range len(s) {
+		ch := s[i]
+		if !isLetter(ch) && !isDigit(ch) && ch != '-' && ch != '.' {
+			return false
+		}
+	}
+
+	return true
+}
