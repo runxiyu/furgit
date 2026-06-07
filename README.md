@@ -1,6 +1,6 @@
 # Furgit
 
-[![builds.sr.ht status](https://builds.sr.ht/~runxiyu/furgit/commits/next.svg)](https://builds.sr.ht/~runxiyu/furgit/commits/next)
+[![builds.sr.ht status](https://builds.sr.ht/~runxiyu/furgit/commits/main.svg)](https://builds.sr.ht/~runxiyu/furgit/commits/main)
 [![Go Reference](https://pkg.go.dev/badge/lindenii.org/go/furgit.svg)](https://pkg.go.dev/lindenii.org/go/furgit)
 
 A low‐level Git plumbing library in Go.
