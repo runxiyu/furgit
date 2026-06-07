@@ -59,11 +59,10 @@ type ObjectReader interface {
 	Refresh() error
 }
 
-// ErrObjectNotFound indicates that
-// an object does not exist in a backend.
-// This error must only be produced by object stores,
-// when it has no specified object ID,
-// but no other unexpected conditions were encountered.
+// ErrObjectNotFound indicates that an object does not exist in a backend.
+// It must only be produced by an object store
+// when the store does not contain the requested object ID
+// and no other unexpected conditions were encountered.
 var ErrObjectNotFound = errors.New("object/store: object not found")
 
 // This is a sentinel with no details,

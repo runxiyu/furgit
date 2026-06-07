@@ -11,10 +11,10 @@ type LookupResult struct {
 }
 
 // String returns the explicit string value.
-func (r LookupResult) String() (string, error) {
-	switch r.Kind {
+func (result LookupResult) String() (string, error) {
+	switch result.Kind {
 	case KindString:
-		return r.Value, nil
+		return result.Value, nil
 	case KindValueless:
 		return "", ErrValueless
 	case KindMissing:
@@ -25,10 +25,10 @@ func (r LookupResult) String() (string, error) {
 }
 
 // Bool interprets this lookup result using Git config boolean rules.
-func (r LookupResult) Bool() (bool, error) {
-	switch r.Kind {
+func (result LookupResult) Bool() (bool, error) {
+	switch result.Kind {
 	case KindString:
-		return parseBool(r.Value)
+		return parseBool(result.Value)
 	case KindValueless:
 		return true, nil
 	case KindMissing:
@@ -39,10 +39,10 @@ func (r LookupResult) Bool() (bool, error) {
 }
 
 // Int interprets this lookup result as a Git integer value.
-func (r LookupResult) Int() (int, error) {
-	switch r.Kind {
+func (result LookupResult) Int() (int, error) {
+	switch result.Kind {
 	case KindString:
-		return parseInt(r.Value)
+		return parseInt(result.Value)
 	case KindValueless:
 		return 0, ErrValueless
 	case KindMissing:
@@ -53,10 +53,10 @@ func (r LookupResult) Int() (int, error) {
 }
 
 // Int64 interprets this lookup result as a Git int64 value.
-func (r LookupResult) Int64() (int64, error) {
-	switch r.Kind {
+func (result LookupResult) Int64() (int64, error) {
+	switch result.Kind {
 	case KindString:
-		return parseInt64(r.Value)
+		return parseInt64(result.Value)
 	case KindValueless:
 		return 0, ErrValueless
 	case KindMissing:

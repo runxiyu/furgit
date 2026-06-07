@@ -9,7 +9,7 @@ import (
 	"lindenii.org/go/lgo/intconv"
 )
 
-// ErrInvalidSignature indicates an attempt to parse an invalid signature.
+// ErrInvalidSignature indicates a malformed signature.
 var ErrInvalidSignature = errors.New("object/signature: invalid signature")
 
 // Parse parses a canonical Git signature line.

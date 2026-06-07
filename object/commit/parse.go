@@ -9,7 +9,7 @@ import (
 	"lindenii.org/go/furgit/object/signature"
 )
 
-// ErrInvalidCommit indicates an attempt to parse an invalid commit.
+// ErrInvalidCommit indicates a malformed commit object.
 var ErrInvalidCommit = errors.New("object/commit: invalid commit")
 
 // Parse decodes a commit object body.

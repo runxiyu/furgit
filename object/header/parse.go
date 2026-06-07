@@ -9,6 +9,7 @@ import (
 	"lindenii.org/go/furgit/object/typ"
 )
 
+// ErrInvalidHeader indicates a malformed loose-object header.
 var ErrInvalidHeader = errors.New("object/header: invalid header")
 
 // Parse parses a canonical loose-object header ("type size\x00").
