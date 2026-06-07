@@ -21,6 +21,7 @@ func (repo *Repo) Fsck(tb testing.TB, opts FsckOptions, objects ...id.ObjectID) 
 	if opts.Strict {
 		args = append(args, "--strict")
 	}
+
 	if opts.NoDangling {
 		args = append(args, "--no-dangling")
 	}
@@ -31,7 +32,8 @@ func (repo *Repo) Fsck(tb testing.TB, opts FsckOptions, objects ...id.ObjectID) 
 		args = append(args, object.String())
 	}
 
-	if _, err := repo.Run(tb, nil, "git", args...); err != nil {
+	_, err := repo.Run(tb, nil, "git", args...)
+	if err != nil {
 		return fmt.Errorf("fsck: %w", err)
 	}
 

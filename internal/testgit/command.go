@@ -39,9 +39,11 @@ func (repo *Repo) Run(
 
 func setEnv(env []string, key string, value string) []string {
 	prefix := key + "="
+
 	i := slices.IndexFunc(env, func(entry string) bool {
 		return strings.HasPrefix(entry, prefix)
 	})
+
 	if i >= 0 {
 		env[i] = prefix + value
 

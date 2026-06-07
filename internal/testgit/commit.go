@@ -34,7 +34,9 @@ func (repo *Repo) CommitTree(
 ) (id.ObjectID, error) {
 	tb.Helper()
 
-	args := []string{"commit-tree"}
+	args := make([]string, 0, 1+2*len(parents)+4)
+	args = append(args, "commit-tree")
+
 	for _, parent := range parents {
 		args = append(args, "-p", parent.String())
 	}
@@ -45,18 +47,23 @@ func (repo *Repo) CommitTree(
 	if opts.Author.Name != "" {
 		cmd.Env = setEnv(cmd.Env, "GIT_AUTHOR_NAME", opts.Author.Name)
 	}
+
 	if opts.Author.Email != "" {
 		cmd.Env = setEnv(cmd.Env, "GIT_AUTHOR_EMAIL", opts.Author.Email)
 	}
+
 	if opts.AuthorDate != "" {
 		cmd.Env = setEnv(cmd.Env, "GIT_AUTHOR_DATE", opts.AuthorDate)
 	}
+
 	if opts.Committer.Name != "" {
 		cmd.Env = setEnv(cmd.Env, "GIT_COMMITTER_NAME", opts.Committer.Name)
 	}
+
 	if opts.Committer.Email != "" {
 		cmd.Env = setEnv(cmd.Env, "GIT_COMMITTER_EMAIL", opts.Committer.Email)
 	}
+
 	if opts.CommitterDate != "" {
 		cmd.Env = setEnv(cmd.Env, "GIT_COMMITTER_DATE", opts.CommitterDate)
 	}
