@@ -27,3 +27,16 @@ func (repo *Repo) HashObject(tb testing.TB, ty typ.Type, body io.Reader) (id.Obj
 
 	return objectID, nil
 }
+
+// CatFile returns the raw content of an object
+// (without the "type size\x00" header).
+func (repo *Repo) CatFile(tb testing.TB, ty typ.Type, oid id.ObjectID) ([]byte, error) {
+	tb.Helper()
+
+	stdout, err := repo.Run(tb, nil, "git", "cat-file", ty.Name(), oid.String())
+	if err != nil {
+		return nil, fmt.Errorf("cat-file: %w", err)
+	}
+
+	return stdout, nil
+}
