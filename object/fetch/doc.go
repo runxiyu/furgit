@@ -1,7 +1,8 @@
 // Package fetch loads typed Git objects from object storage
 // and provides higher-level object queries.
 //
-// Fetching is above [objectstore]:
+// Fetching is above
+// [lindenii.org/go/furgit/object/store]:
 // it parses stored objects
 // into blobs, trees, commits, and tags,
 // exposes object metadata,
