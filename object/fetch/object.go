@@ -12,8 +12,8 @@ import (
 // its concrete object kind.
 //
 // Labels: Life-Parent.
-func (r *Fetcher) ExactObject(id oid.ObjectID) (*stored.Stored[object.Object], error) {
-	parsed, err := r.parseObject(id)
+func (fetcher *Fetcher) ExactObject(id oid.ObjectID) (*stored.Stored[object.Object], error) {
+	parsed, err := fetcher.parseObject(id)
 	if err != nil {
 		return nil, err
 	}
@@ -21,8 +21,8 @@ func (r *Fetcher) ExactObject(id oid.ObjectID) (*stored.Stored[object.Object], e
 	return stored.New(id, parsed), nil
 }
 
-func (r *Fetcher) parseObject(id oid.ObjectID) (object.Object, error) {
-	ty, content, err := r.store.ReadBytesContent(id)
+func (fetcher *Fetcher) parseObject(id oid.ObjectID) (object.Object, error) {
+	ty, content, err := fetcher.store.ReadBytesContent(id)
 	if err != nil {
 		return nil, wrapObjectReadError(id, err)
 	}

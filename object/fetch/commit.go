@@ -12,8 +12,8 @@ import (
 // ExactCommit reads, parses, and wraps the commit at id.
 //
 // Labels: Life-Parent.
-func (r *Fetcher) ExactCommit(id oid.ObjectID) (*stored.Stored[*commit.Commit], error) {
-	parsed, err := r.parseObject(id)
+func (fetcher *Fetcher) ExactCommit(id oid.ObjectID) (*stored.Stored[*commit.Commit], error) {
+	parsed, err := fetcher.parseObject(id)
 	if err != nil {
 		return nil, err
 	}
@@ -29,9 +29,9 @@ func (r *Fetcher) ExactCommit(id oid.ObjectID) (*stored.Stored[*commit.Commit], 
 // PeelToCommit peels tags until it reaches a commit.
 //
 // Labels: Life-Parent.
-func (r *Fetcher) PeelToCommit(id oid.ObjectID) (*stored.Stored[*commit.Commit], error) {
+func (fetcher *Fetcher) PeelToCommit(id oid.ObjectID) (*stored.Stored[*commit.Commit], error) {
 	for {
-		obj, err := r.ExactObject(id)
+		obj, err := fetcher.ExactObject(id)
 		if err != nil {
 			return nil, err
 		}
@@ -48,9 +48,9 @@ func (r *Fetcher) PeelToCommit(id oid.ObjectID) (*stored.Stored[*commit.Commit],
 }
 
 // PeelToCommitID peels tags until it reaches a commit object ID.
-func (r *Fetcher) PeelToCommitID(id oid.ObjectID) (oid.ObjectID, error) {
+func (fetcher *Fetcher) PeelToCommitID(id oid.ObjectID) (oid.ObjectID, error) {
 	for {
-		ty, _, err := r.Header(id)
+		ty, _, err := fetcher.Header(id)
 		if err != nil {
 			return oid.ObjectID{}, err
 		}
@@ -59,7 +59,7 @@ func (r *Fetcher) PeelToCommitID(id oid.ObjectID) (oid.ObjectID, error) {
 		case typ.TypeCommit:
 			return id, nil
 		case typ.TypeTag:
-			tag, err := r.ExactTag(id)
+			tag, err := fetcher.ExactTag(id)
 			if err != nil {
 				return oid.ObjectID{}, err
 			}

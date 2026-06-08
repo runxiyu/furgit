@@ -13,8 +13,8 @@ import (
 // ExactTree reads, parses, and wraps the tree at id.
 //
 // Labels: Life-Parent.
-func (r *Fetcher) ExactTree(id oid.ObjectID) (*stored.Stored[*tree.Tree], error) {
-	parsed, err := r.parseObject(id)
+func (fetcher *Fetcher) ExactTree(id oid.ObjectID) (*stored.Stored[*tree.Tree], error) {
+	parsed, err := fetcher.parseObject(id)
 	if err != nil {
 		return nil, err
 	}
@@ -31,9 +31,9 @@ func (r *Fetcher) ExactTree(id oid.ObjectID) (*stored.Stored[*tree.Tree], error)
 // commit, it returns the commit's root tree.
 //
 // Labels: Life-Parent.
-func (r *Fetcher) PeelToTree(id oid.ObjectID) (*stored.Stored[*tree.Tree], error) {
+func (fetcher *Fetcher) PeelToTree(id oid.ObjectID) (*stored.Stored[*tree.Tree], error) {
 	for {
-		obj, err := r.ExactObject(id)
+		obj, err := fetcher.ExactObject(id)
 		if err != nil {
 			return nil, err
 		}
@@ -42,7 +42,7 @@ func (r *Fetcher) PeelToTree(id oid.ObjectID) (*stored.Stored[*tree.Tree], error
 		case *tree.Tree:
 			return stored.New(id, parsed), nil
 		case *commit.Commit:
-			return r.ExactTree(parsed.Tree)
+			return fetcher.ExactTree(parsed.Tree)
 		case *tag.Tag:
 			id = parsed.TargetID
 		default:
@@ -53,9 +53,9 @@ func (r *Fetcher) PeelToTree(id oid.ObjectID) (*stored.Stored[*tree.Tree], error
 
 // PeelToTreeID peels tags until it reaches a tree object ID, or a commit whose
 // root tree object ID is then returned.
-func (r *Fetcher) PeelToTreeID(id oid.ObjectID) (oid.ObjectID, error) {
+func (fetcher *Fetcher) PeelToTreeID(id oid.ObjectID) (oid.ObjectID, error) {
 	for {
-		ty, _, err := r.Header(id)
+		ty, _, err := fetcher.Header(id)
 		if err != nil {
 			return oid.ObjectID{}, err
 		}
@@ -64,14 +64,14 @@ func (r *Fetcher) PeelToTreeID(id oid.ObjectID) (oid.ObjectID, error) {
 		case typ.TypeTree:
 			return id, nil
 		case typ.TypeCommit:
-			commit, err := r.ExactCommit(id)
+			commit, err := fetcher.ExactCommit(id)
 			if err != nil {
 				return oid.ObjectID{}, err
 			}
 
 			return commit.Object().Tree, nil
 		case typ.TypeTag:
-			tag, err := r.ExactTag(id)
+			tag, err := fetcher.ExactTag(id)
 			if err != nil {
 				return oid.ObjectID{}, err
 			}

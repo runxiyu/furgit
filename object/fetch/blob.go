@@ -14,8 +14,8 @@ import (
 // ExactBlob reads, parses, and wraps the blob at id.
 //
 // Labels: Life-Parent.
-func (r *Fetcher) ExactBlob(id oid.ObjectID) (*stored.Stored[*blob.Blob], error) {
-	parsed, err := r.parseObject(id)
+func (fetcher *Fetcher) ExactBlob(id oid.ObjectID) (*stored.Stored[*blob.Blob], error) {
+	parsed, err := fetcher.parseObject(id)
 	if err != nil {
 		return nil, err
 	}
@@ -32,16 +32,16 @@ func (r *Fetcher) ExactBlob(id oid.ObjectID) (*stored.Stored[*blob.Blob], error)
 // together with its content size in bytes.
 //
 // Labels: Life-Parent, Close-Caller.
-func (r *Fetcher) ExactBlobReader(id oid.ObjectID) (io.ReadCloser, int64, error) {
-	return r.exactReader(id, typ.TypeBlob)
+func (fetcher *Fetcher) ExactBlobReader(id oid.ObjectID) (io.ReadCloser, int64, error) {
+	return fetcher.exactReader(id, typ.TypeBlob)
 }
 
 // PeelToBlob peels tags until it reaches a blob.
 //
 // Labels: Life-Parent.
-func (r *Fetcher) PeelToBlob(id oid.ObjectID) (*stored.Stored[*blob.Blob], error) {
+func (fetcher *Fetcher) PeelToBlob(id oid.ObjectID) (*stored.Stored[*blob.Blob], error) {
 	for {
-		obj, err := r.ExactObject(id)
+		obj, err := fetcher.ExactObject(id)
 		if err != nil {
 			return nil, err
 		}
@@ -58,9 +58,9 @@ func (r *Fetcher) PeelToBlob(id oid.ObjectID) (*stored.Stored[*blob.Blob], error
 }
 
 // PeelToBlobID peels tags until it reaches a blob object ID.
-func (r *Fetcher) PeelToBlobID(id oid.ObjectID) (oid.ObjectID, error) {
+func (fetcher *Fetcher) PeelToBlobID(id oid.ObjectID) (oid.ObjectID, error) {
 	for {
-		ty, _, err := r.Header(id)
+		ty, _, err := fetcher.Header(id)
 		if err != nil {
 			return oid.ObjectID{}, err
 		}
@@ -69,7 +69,7 @@ func (r *Fetcher) PeelToBlobID(id oid.ObjectID) (oid.ObjectID, error) {
 		case typ.TypeBlob:
 			return id, nil
 		case typ.TypeTag:
-			tag, err := r.ExactTag(id)
+			tag, err := fetcher.ExactTag(id)
 			if err != nil {
 				return oid.ObjectID{}, err
 			}
@@ -87,11 +87,11 @@ func (r *Fetcher) PeelToBlobID(id oid.ObjectID) (oid.ObjectID, error) {
 // together with its content size in bytes.
 //
 // Labels: Life-Parent, Close-Caller.
-func (r *Fetcher) PeelToBlobReader(id oid.ObjectID) (io.ReadCloser, int64, error) {
-	blobID, err := r.PeelToBlobID(id)
+func (fetcher *Fetcher) PeelToBlobReader(id oid.ObjectID) (io.ReadCloser, int64, error) {
+	blobID, err := fetcher.PeelToBlobID(id)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	return r.ExactBlobReader(blobID)
+	return fetcher.ExactBlobReader(blobID)
 }
