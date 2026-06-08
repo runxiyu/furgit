@@ -1,7 +1,7 @@
 package fetch
 
 import (
-	giterrors "lindenii.org/go/furgit/errors"
+	"lindenii.org/go/furgit/errs"
 	oid "lindenii.org/go/furgit/object/id"
 	"lindenii.org/go/furgit/object/stored"
 	"lindenii.org/go/furgit/object/tag"
@@ -19,7 +19,7 @@ func (fetcher *Fetcher) ExactTag(id oid.ObjectID) (*stored.Stored[*tag.Tag], err
 
 	tag, ok := parsed.(*tag.Tag)
 	if !ok {
-		return nil, &giterrors.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: typ.TypeTag}
+		return nil, &errs.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: typ.TypeTag}
 	}
 
 	return stored.New(id, tag), nil
