@@ -37,55 +37,12 @@ var (
 	_ fs.SubFS      = (*TreeFS)(nil)
 )
 
-func (treeFS *TreeFS) resolvePath(op treeFSOp, name string) (treeEntryValue, error) {
-	if !treeFSValidPath(name) {
-		return treeEntryValue{}, treeFSPathError(op, name, fs.ErrInvalid)
-	}
-
-	if name == "." {
-		return treeEntryValue{
-			name:      ".",
-			mode:      mode.Directory,
-			treeID:    treeFS.rootTree,
-			treeEntry: treeFS.rootEntry,
-		}, nil
-	}
-
-	entry, err := treeFS.fetcher.Path(treeFS.rootTree, splitPath(name))
-	if err != nil {
-		return treeEntryValue{}, treeFS.pathResolveError(op, name, err)
-	}
-
-	return treeEntryValue{
-		name:      string(entry.Name),
-		mode:      entry.Mode,
-		objectID:  entry.ID,
-		treeEntry: &entry,
-	}, nil
-}
-
 func splitPath(path string) []string {
 	if len(path) == 0 {
 		return nil
 	}
 
 	return strings.Split(path, "/")
-}
-
-func (treeFS *TreeFS) pathResolveError(op treeFSOp, name string, err error) error {
-	if _, ok := errors.AsType[*PathNotFoundError](err); ok {
-		return treeFSPathError(op, name, fs.ErrNotExist)
-	}
-
-	if _, ok := errors.AsType[*PathNotTreeError](err); ok {
-		return treeFSPathError(op, name, fs.ErrInvalid)
-	}
-
-	if errors.Is(err, ErrPathInvalid) {
-		return treeFSPathError(op, name, fs.ErrInvalid)
-	}
-
-	return treeFSPathError(op, name, err)
 }
 
 type treeEntryValue struct {
@@ -155,35 +112,6 @@ func treeFSEntryMode(mod mode.Mode) fs.FileMode {
 	default:
 		return fs.ModeIrregular
 	}
-}
-
-func (treeFS *TreeFS) statEntry(entry treeEntryValue) (*treeFSInfo, error) {
-	size := int64(0)
-
-	if entry.mode == mode.Regular || entry.mode == mode.Executable || entry.mode == mode.Symlink {
-		sz, err := entry.blobSize(treeFS.fetcher)
-		if err != nil {
-			return nil, err
-		}
-
-		size, err = intconv.Uint64ToInt64(sz)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	var sys any
-	if entry.treeEntry != nil {
-		sys = *entry.treeEntry
-	}
-
-	return &treeFSInfo{
-		name:  entry.name,
-		mode:  treeFSEntryMode(entry.mode),
-		size:  size,
-		sys:   sys,
-		isDir: entry.isDir(),
-	}, nil
 }
 
 // TreeFS returns a new filesystem view rooted at root, which may be any
@@ -258,7 +186,7 @@ func (treeFS *TreeFS) Open(name string) (fs.File, error) {
 		entries := make([]fs.DirEntry, 0, len(tree.Object().Entries()))
 		for _, child := range tree.Object().Entries() {
 			childEntry := treeEntryValue{
-				name:      string(child.Name),
+				name:      child.Name,
 				mode:      child.Mode,
 				objectID:  child.ID,
 				treeEntry: &child,
@@ -434,5 +362,77 @@ func (treeFS *TreeFS) Sub(dir string) (fs.FS, error) {
 		fetcher:   treeFS.fetcher,
 		rootTree:  treeID,
 		rootEntry: entry.treeEntry,
+	}, nil
+}
+
+func (treeFS *TreeFS) resolvePath(op treeFSOp, name string) (treeEntryValue, error) {
+	if !treeFSValidPath(name) {
+		return treeEntryValue{}, treeFSPathError(op, name, fs.ErrInvalid)
+	}
+
+	if name == "." {
+		return treeEntryValue{
+			name:      ".",
+			mode:      mode.Directory,
+			treeID:    treeFS.rootTree,
+			treeEntry: treeFS.rootEntry,
+		}, nil
+	}
+
+	entry, err := treeFS.fetcher.Path(treeFS.rootTree, splitPath(name))
+	if err != nil {
+		return treeEntryValue{}, treeFS.pathResolveError(op, name, err)
+	}
+
+	return treeEntryValue{
+		name:      entry.Name,
+		mode:      entry.Mode,
+		objectID:  entry.ID,
+		treeEntry: &entry,
+	}, nil
+}
+
+func (treeFS *TreeFS) pathResolveError(op treeFSOp, name string, err error) error {
+	if _, ok := errors.AsType[*PathNotFoundError](err); ok {
+		return treeFSPathError(op, name, fs.ErrNotExist)
+	}
+
+	if _, ok := errors.AsType[*PathNotTreeError](err); ok {
+		return treeFSPathError(op, name, fs.ErrInvalid)
+	}
+
+	if errors.Is(err, ErrPathInvalid) {
+		return treeFSPathError(op, name, fs.ErrInvalid)
+	}
+
+	return treeFSPathError(op, name, err)
+}
+
+func (treeFS *TreeFS) statEntry(entry treeEntryValue) (*treeFSInfo, error) {
+	size := int64(0)
+
+	if entry.mode == mode.Regular || entry.mode == mode.Executable || entry.mode == mode.Symlink {
+		sz, err := entry.blobSize(treeFS.fetcher)
+		if err != nil {
+			return nil, err
+		}
+
+		size, err = intconv.Uint64ToInt64(sz)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var sys any
+	if entry.treeEntry != nil {
+		sys = *entry.treeEntry
+	}
+
+	return &treeFSInfo{
+		name:  entry.name,
+		mode:  treeFSEntryMode(entry.mode),
+		size:  size,
+		sys:   sys,
+		isDir: entry.isDir(),
 	}, nil
 }

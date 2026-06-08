@@ -21,7 +21,7 @@ func (fetcher *Fetcher) ExactObject(id oid.ObjectID) (*stored.Stored[object.Obje
 	return stored.New(id, parsed), nil
 }
 
-func (fetcher *Fetcher) parseObject(id oid.ObjectID) (object.Object, error) {
+func (fetcher *Fetcher) parseObject(id oid.ObjectID) (object.Object, error) { //nolint:ireturn
 	ty, content, err := fetcher.store.ReadBytesContent(id)
 	if err != nil {
 		return nil, wrapObjectReadError(id, err)
