@@ -18,6 +18,10 @@ and has breaking API changes every few days.
   on [irc.runxiyu.org](https://irc.runxiyu.org)
 * [#lindenii](https://web.libera.chat/#lindenii)
   on [Libera.Chat](https://libera.chat)
+* Development mailing list
+  [~runxiyu/furgit-devel@lists.sr.ht](https://lists.sr.ht/~runxiyu/furgit-devel)
+* Announcement mailing list
+  [~runxiyu/furgit-announce@lists.sr.ht](https://lists.sr.ht/~runxiyu/furgit-announce)
 
 See also `CONTRIBUTING.md`.
 
@@ -42,13 +46,3 @@ under the GNU Affero General Public License, Version 3.0 only, a public
 acceptance by the Designated Proxy of any subsequent version of the GNU Affero
 General Public License shall permanently authorize the use of that accepted
 version for this Program.
-
-## Repos and mirrors
-
-* [git.runxiyu.org](https://git.runxiyu.org/furgit.git//)
-* [Codeberg mirror](https://codeberg.org/lindenii/furgit)
-* [SourceHut mirror](https://git.sr.ht/~runxiyu/furgit)
-* [hjgit mirror](https://hjgit.org/runxiyu/furgit/HEAD/info.html)
-* [cgit.space mirror](https://cgit.space/~runxiyu/furgit.git/)
-* [tangled mirror](https://tangled.org/@runxiyu.tngl.sh/furgit)
-* [GitHub mirror](https://github.com/runxiyu/furgit)

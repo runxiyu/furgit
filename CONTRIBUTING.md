@@ -4,11 +4,13 @@ Refer to the README for community spaces.
 
 ## Repos and mirrors
 
-* [Main repository on Codeberg](https://codeberg.org/lindenii/furgit)
+* [git.runxiyu.org](https://git.runxiyu.org/furgit.git//)
 * [SourceHut mirror](https://git.sr.ht/~runxiyu/furgit)
+* [Codeberg mirror](https://codeberg.org/lindenii/furgit)
+* [hjgit mirror](https://hjgit.org/runxiyu/furgit/HEAD/info.html)
+* [cgit.space mirror](https://cgit.space/~runxiyu/furgit.git/)
 * [tangled mirror](https://tangled.org/@runxiyu.tngl.sh/furgit)
 * [GitHub mirror](https://github.com/runxiyu/furgit)
-* [git.runxiyu.org mirror](https://git.runxiyu.org/furgit.git//)
 
 ## Reporting bugs
 
@@ -18,11 +20,8 @@ and calls Furgit and/or Git commands
 to trigger undesirable behavior.
 Feel free to ask for help writing them.
 
-Choose any one of:
-
-* [Open an issue on Codeberg](https://codeberg.org/lindenii/furgit/issues/new/choose)
-* Send email to [my public inbox](https://lists.sr.ht/~runxiyu/public-inbox)
-* [Open an issue on GitHub](https://github.com/runxiyu/furgit/issues/new/choose)
+Please report bugs by sending Internet Mail to
+[~runxiyu/furgit-devel@lists.sr.ht](https://lists.sr.ht/~runxiyu/furgit-devel).
 
 ## Submitting changes
 
@@ -38,12 +37,8 @@ making the old code fail
 and making the new one succeed.
 Feel free to ask for help writing them.
 
-Choose any one of:
-
-* Open a [pull request on Codeberg](https://codeberg.org/lindenii/furgit/pulls)
-* [Send a patch](https://git-send-email.io) to
-  [my public inbox](https://lists.sr.ht/~runxiyu/public-inbox)
-* Open a [pull request on GitHub](https://github.com/runxiyu/furgit/pulls)
+Please [send a patch](https://git-send-email.io) to
+[~runxiyu/furgit-devel@lists.sr.ht](https://lists.sr.ht/~runxiyu/furgit-devel).
 
 ## DCO sign-off
 
