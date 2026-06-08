@@ -22,8 +22,6 @@ network/protocol/v0v1/server/receivepack
 network/receivepack
 network/receivepack/hooks
 network/receivepack/service
-object
-object/fetch
 object/store/dual
 object/store/loose
 object/store/packed
