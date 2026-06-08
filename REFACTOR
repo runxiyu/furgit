@@ -32,7 +32,6 @@ object/store/packed
 object/store/packed/internal
 object/store/packed/internal/ingest
 object/store/packed/internal/reading
-object/stored
 reachability
 ref/store
 ref/store/chain
