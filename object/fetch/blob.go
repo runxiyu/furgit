@@ -32,7 +32,7 @@ func (fetcher *Fetcher) ExactBlob(id oid.ObjectID) (*stored.Stored[*blob.Blob], 
 // together with its content size in bytes.
 //
 // Labels: Life-Parent, Close-Caller.
-func (fetcher *Fetcher) ExactBlobReader(id oid.ObjectID) (io.ReadCloser, int64, error) {
+func (fetcher *Fetcher) ExactBlobReader(id oid.ObjectID) (io.ReadCloser, uint64, error) {
 	return fetcher.exactReader(id, typ.TypeBlob)
 }
 
@@ -87,7 +87,7 @@ func (fetcher *Fetcher) PeelToBlobID(id oid.ObjectID) (oid.ObjectID, error) {
 // together with its content size in bytes.
 //
 // Labels: Life-Parent, Close-Caller.
-func (fetcher *Fetcher) PeelToBlobReader(id oid.ObjectID) (io.ReadCloser, int64, error) {
+func (fetcher *Fetcher) PeelToBlobReader(id oid.ObjectID) (io.ReadCloser, uint64, error) {
 	blobID, err := fetcher.PeelToBlobID(id)
 	if err != nil {
 		return nil, 0, err

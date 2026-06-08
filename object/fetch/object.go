@@ -29,12 +29,7 @@ func (fetcher *Fetcher) parseObject(id oid.ObjectID) (object.Object, error) {
 
 	parsed, err := object.ParseWithoutHeader(ty, content, id.ObjectFormat())
 	if err != nil {
-		tyName, ok := ty.Name()
-		if !ok {
-			tyName = fmt.Sprintf("type %d", ty)
-		}
-
-		return nil, fmt.Errorf("object/fetch: parse object %s (%s): %w", id, tyName, err)
+		return nil, fmt.Errorf("object/fetch: parse object %s (%s): %w", id, ty.Name(), err)
 	}
 
 	return parsed, nil

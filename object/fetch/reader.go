@@ -10,7 +10,7 @@ import (
 
 // exactReader reads one object's content stream
 // and verifies that its header type matches wantType.
-func (fetcher *Fetcher) exactReader(id oid.ObjectID, wantType typ.Type) (io.ReadCloser, int64, error) {
+func (fetcher *Fetcher) exactReader(id oid.ObjectID, wantType typ.Type) (io.ReadCloser, uint64, error) {
 	gotType, size, rc, err := fetcher.store.ReadReaderContent(id)
 	if err != nil {
 		return nil, 0, wrapObjectReadError(id, err)
