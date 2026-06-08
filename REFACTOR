@@ -15,7 +15,6 @@ internal/bufpool
 internal/iolimit
 internal/lru
 internal/progress
-internal/utils
 network
 network/protocol
 network/protocol/pktline
