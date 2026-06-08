@@ -4,9 +4,9 @@ import (
 	"errors"
 	"io"
 
-	"lindenii.org/go/furgit/common/iowrap"
 	"lindenii.org/go/furgit/object/id"
 	"lindenii.org/go/furgit/object/typ"
+	"lindenii.org/go/lgo/iowrap"
 )
 
 // ErrInvalidObject indicates a malformed object passed to a write.
