@@ -157,6 +157,7 @@ func TestDecompressor(t *testing.T) {
 	t.Parallel()
 
 	b := new(bytes.Buffer)
+
 	for _, tt := range zlibTests {
 		in := bytes.NewReader(tt.compressed)
 

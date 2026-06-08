@@ -41,7 +41,7 @@ import (
 	"sync"
 
 	"lindenii.org/go/furgit/internal/compress/flate"
-	"lindenii.org/go/furgit/internal/intconv"
+	"lindenii.org/go/lgo/intconv"
 )
 
 const (

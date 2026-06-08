@@ -12,7 +12,7 @@ import (
 
 	"lindenii.org/go/furgit/internal/adler32"
 	"lindenii.org/go/furgit/internal/compress/flate"
-	"lindenii.org/go/furgit/internal/intconv"
+	"lindenii.org/go/lgo/intconv"
 )
 
 // reset resets receiver to read a new zlib stream.
