@@ -38,10 +38,10 @@ import (
 	"errors"
 	"hash"
 	"io"
-	"sync"
 
 	"lindenii.org/go/furgit/internal/compress/flate"
 	"lindenii.org/go/lgo/intconv"
+	"lindenii.org/go/lgo/sync"
 )
 
 const (
@@ -59,13 +59,9 @@ var (
 )
 
 //nolint:gochecknoglobals
-var readerPool = sync.Pool{
-	New: func() any {
-		r := new(Reader)
-
-		return r
-	},
-}
+var readerPool = sync.NewPool(func() *Reader {
+	return new(Reader)
+})
 
 // Reader reads and verifies one zlib stream.
 //
@@ -93,12 +89,7 @@ func NewReader(r io.Reader) (*Reader, error) {
 // NewReaderDict ignores the dictionary if the compressed data does not refer to it.
 // If the compressed data refers to a different dictionary, NewReaderDict returns [ErrDictionary].
 func NewReaderDict(r io.Reader, dict []byte) (*Reader, error) {
-	v := readerPool.Get()
-
-	z, ok := v.(*Reader)
-	if !ok {
-		panic("zlib: pool returned unexpected type")
-	}
+	z := readerPool.Get()
 
 	err := z.reset(r, dict)
 	if err != nil {

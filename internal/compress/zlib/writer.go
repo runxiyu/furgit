@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"hash"
 	"io"
-	"sync"
 
 	"lindenii.org/go/furgit/internal/compress/flate"
+	"lindenii.org/go/lgo/sync"
 )
 
 // These constants are copied from the [flate] package, so that code that imports
@@ -38,11 +38,9 @@ type Writer struct {
 }
 
 //nolint:gochecknoglobals
-var writerPool = sync.Pool{
-	New: func() any {
-		return new(Writer)
-	},
-}
+var writerPool = sync.NewPool(func() *Writer {
+	return new(Writer)
+})
 
 // NewWriter creates a new [Writer].
 // Writes to the returned Writer are compressed and written to w.
@@ -75,12 +73,7 @@ func NewWriterLevelDict(w io.Writer, level int, dict []byte) (*Writer, error) {
 		return nil, fmt.Errorf("zlib: invalid compression level: %d", level)
 	}
 
-	v := writerPool.Get()
-
-	z, ok := v.(*Writer)
-	if !ok {
-		panic("zlib: pool returned unexpected type")
-	}
+	z := writerPool.Get()
 
 	// flate.Writer can only be Reset with the same level/dictionary mode.
 	// Reuse it only when the configuration is unchanged and dictionary-free.
