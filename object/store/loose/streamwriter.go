@@ -34,7 +34,7 @@ type streamWriter struct {
 	// tmpRelPath is the relative path of file under the objects root.
 	tmpRelPath string
 
-	// fullMode selects full-object input ("type size\0content")
+	// fullMode selects full-object input ("type size\x00content")
 	// as opposed to content-only input.
 	fullMode bool
 

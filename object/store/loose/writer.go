@@ -10,7 +10,7 @@ import (
 	"lindenii.org/go/furgit/object/typ"
 )
 
-// WriteBytesFull writes a full serialized object as "type size\0content".
+// WriteBytesFull writes a full serialized object as "type size\x00content".
 func (loose *Loose) WriteBytesFull(raw []byte) (id.ObjectID, error) {
 	return loose.WriteReaderFull(bytes.NewReader(raw))
 }
@@ -22,7 +22,7 @@ func (loose *Loose) WriteBytesContent(ty typ.Type, content []byte) (id.ObjectID,
 
 // WriteReaderContent writes one loose object from typed content bytes read from src.
 // src must provide exactly size bytes.
-// size is required because loose object headers are "type size\0content",
+// size is required because loose object headers are "type size\x00content",
 // so the header must be emitted before streaming content without buffering.
 func (loose *Loose) WriteReaderContent(ty typ.Type, size uint64, src io.Reader) (id.ObjectID, error) {
 	headerBytes := header.Append(nil, ty, size)
@@ -46,7 +46,7 @@ func (loose *Loose) WriteReaderContent(ty typ.Type, size uint64, src io.Reader) 
 	return writeReaderIntoStreamWriter(writer, src)
 }
 
-// WriteReaderFull writes one loose object from raw bytes "type size\0content" read from src.
+// WriteReaderFull writes one loose object from raw bytes "type size\x00content" read from src.
 func (loose *Loose) WriteReaderFull(src io.Reader) (id.ObjectID, error) {
 	writer, err := loose.newStreamWriter(true)
 	if err != nil {

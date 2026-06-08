@@ -16,7 +16,7 @@ import (
 	"lindenii.org/go/furgit/object/typ"
 )
 
-// ReadBytesFull reads a full serialized object as "type size\0content".
+// ReadBytesFull reads a full serialized object as "type size\x00content".
 //
 // It inflates and parses the full loose object,
 // including verifying the zlib Adler-32 trailer.
@@ -82,7 +82,7 @@ func (loose *Loose) ReadSize(objectID id.ObjectID) (uint64, error) {
 	return size, err
 }
 
-// ReadReaderFull reads a full serialized object stream as "type size\0content".
+// ReadReaderFull reads a full serialized object stream as "type size\x00content".
 //
 // Close releases resources only.
 // It does not drain unread data for additional validation.

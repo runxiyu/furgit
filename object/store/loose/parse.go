@@ -29,7 +29,7 @@ func decodeAll(file *os.File) ([]byte, error) {
 	return data, nil
 }
 
-// parseRaw parses a loose object payload in "type size\0content" format.
+// parseRaw parses a loose object payload in "type size\x00content" format.
 func parseRaw(raw []byte) (typ.Type, []byte, error) {
 	ty, size, consumed, err := header.Parse(raw)
 	if err != nil {
