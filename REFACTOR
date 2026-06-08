@@ -9,7 +9,6 @@ format/commitgraph/read
 format/packfile
 format/packfile/delta
 format/packfile/delta/apply
-internal
 internal/bufpool
 internal/iolimit
 internal/lru
