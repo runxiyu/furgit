@@ -31,7 +31,6 @@ object
 object/fetch
 object/store/dual
 object/store/loose
-object/store/memory
 object/store/packed
 object/store/packed/internal
 object/store/packed/internal/ingest
