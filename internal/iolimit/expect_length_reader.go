@@ -2,7 +2,10 @@ package iolimit
 
 import (
 	"errors"
+	"fmt"
 	"io"
+
+	"lindenii.org/go/lgo/intconv"
 )
 
 // ErrExpectedLengthExceeded reports that a stream
@@ -54,12 +57,22 @@ func (reader *expectLengthReader) Read(dst []byte) (int, error) {
 	}
 
 	if uint64(len(dst)) > reader.remaining {
-		dst = dst[:int(reader.remaining)]
+		limit, err := intconv.Uint64ToInt(reader.remaining)
+		if err != nil {
+			return 0, fmt.Errorf("iolimit: %w", err)
+		}
+
+		dst = dst[:limit]
 	}
 
 	n, err := reader.src.Read(dst)
 	if n > 0 {
-		reader.remaining -= uint64(n)
+		read, convErr := intconv.IntToUint64(n)
+		if convErr != nil {
+			return n, fmt.Errorf("iolimit: %w", convErr)
+		}
+
+		reader.remaining -= read
 	}
 
 	if errors.Is(err, io.EOF) {
