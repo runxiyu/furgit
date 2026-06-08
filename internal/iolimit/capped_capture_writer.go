@@ -1,6 +1,11 @@
 package iolimit
 
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+
+	"lindenii.org/go/lgo/intconv"
+)
 
 // CappedCaptureWriter captures written bytes up to a fixed limit.
 //
@@ -25,7 +30,11 @@ func (writer *CappedCaptureWriter) Write(src []byte) (int, error) {
 		return len(src), nil
 	}
 
-	used := uint64(writer.buf.Len())
+	used, err := intconv.IntToUint64(writer.buf.Len())
+	if err != nil {
+		return 0, fmt.Errorf("iolimit: %w", err)
+	}
+
 	if used >= writer.limit {
 		writer.full = true
 
@@ -34,7 +43,12 @@ func (writer *CappedCaptureWriter) Write(src []byte) (int, error) {
 
 	room := writer.limit - used
 	if uint64(len(src)) > room {
-		_, _ = writer.buf.Write(src[:int(room)])
+		take, err := intconv.Uint64ToInt(room)
+		if err != nil {
+			return 0, fmt.Errorf("iolimit: %w", err)
+		}
+
+		_, _ = writer.buf.Write(src[:take])
 		writer.full = true
 
 		return len(src), nil
