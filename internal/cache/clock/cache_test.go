@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"lindenii.org/go/furgit/internal/clock"
+	"lindenii.org/go/furgit/internal/cache/clock"
 	"lindenii.org/go/lgo/intconv"
 )
 
