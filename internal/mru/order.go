@@ -23,3 +23,29 @@ type Order[K comparable] struct {
 	snapshot atomic.Pointer[[]K]
 	mu       sync.Mutex
 }
+
+// New returns a new, empty order.
+func New[K comparable]() *Order[K] {
+	return &Order[K]{} //nolint:exhaustruct
+}
+
+// Len returns the number of keys in the order.
+func (order *Order[K]) Len() int {
+	return len(order.Keys())
+}
+
+// Keys returns the keys in most-recently-used order,
+// front first.
+//
+// The result is the immutable snapshot current at the call:
+// a concurrent Touch or Sync does not affect it.
+//
+// Labels: Mut-No.
+func (order *Order[K]) Keys() []K {
+	keys := order.snapshot.Load()
+	if keys == nil {
+		return nil
+	}
+
+	return *keys
+}
