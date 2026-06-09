@@ -10,8 +10,6 @@ format/packfile
 format/packfile/delta
 format/packfile/delta/apply
 internal/bufpool
-internal/iolimit
-internal/lru
 network
 network/protocol
 network/protocol/pktline
