@@ -70,7 +70,7 @@ func NewWriterLevel(w io.Writer, level int) (*Writer, error) {
 // the Writer is closed.
 func NewWriterLevelDict(w io.Writer, level int, dict []byte) (*Writer, error) {
 	if level < HuffmanOnly || level > BestCompression {
-		return nil, fmt.Errorf("zlib: invalid compression level: %d", level)
+		return nil, fmt.Errorf("zlib: invalid compression level: %d", level) //nolint:err113
 	}
 
 	z := writerPool.Get()
@@ -139,7 +139,7 @@ func (z *Writer) Write(p []byte) (n int, err error) {
 	if err != nil {
 		z.err = err
 
-		return n, err
+		return n, err //nolint:wrapcheck
 	}
 
 	_, err = z.digest.Write(p)
@@ -149,7 +149,7 @@ func (z *Writer) Write(p []byte) (n int, err error) {
 		return 0, z.err
 	}
 
-	return n, err
+	return n, err //nolint:wrapcheck
 }
 
 // Flush flushes the Writer to its underlying [io.Writer].

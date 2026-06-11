@@ -43,7 +43,7 @@ func (z *Writer) writeHeader() (err error) {
 
 	_, err = z.w.Write(z.scratch[0:2])
 	if err != nil {
-		return err
+		return err //nolint:wrapcheck
 	}
 
 	if z.dict != nil {
@@ -52,7 +52,7 @@ func (z *Writer) writeHeader() (err error) {
 
 		_, err = z.w.Write(z.scratch[0:4])
 		if err != nil {
-			return err
+			return err //nolint:wrapcheck
 		}
 	}
 
@@ -61,7 +61,7 @@ func (z *Writer) writeHeader() (err error) {
 		// after a Reset call.
 		z.compressor, err = flate.NewWriterDict(z.w, z.level, z.dict)
 		if err != nil {
-			return err
+			return err //nolint:wrapcheck
 		}
 
 		z.digest = adler32.New()
