@@ -1,2 +1,2 @@
 // Package cache provides caches for a few different access patterns.
-package clock
+package cache
