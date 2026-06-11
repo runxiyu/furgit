@@ -102,7 +102,7 @@ func TestParseEntryHeaderMalformed(t *testing.T) {
 		{name: "truncated type/size", data: []byte{0x95}},
 		{
 			name: "size overflow",
-			data: append([]byte{0x9f}, bytes.Repeat([]byte{0xff}, 8)...),
+			data: append([]byte{0x9f}, bytes.Repeat([]byte{0xff}, 9)...),
 		},
 		{
 			name: "overlong type/size",
