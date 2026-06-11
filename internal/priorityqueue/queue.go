@@ -19,7 +19,7 @@ func (queue *Queue[T]) Len() int {
 }
 
 // Pop removes one highest-priority item.
-func (queue *Queue[T]) Pop() (T, bool) {
+func (queue *Queue[T]) Pop() (T, bool) { //nolint:ireturn
 	if len(queue.items) == 0 {
 		var zero T
 
