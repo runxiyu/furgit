@@ -34,8 +34,8 @@ const (
 	EntryTypeRefDelta EntryType = 7
 )
 
-// ObjectTypeToEntryType converts an ordinary [typ.Type] into a packfile [EntryType].
-func ObjectTypeToEntryType(ty typ.Type) (EntryType, error) {
+// EntryTypeFromObjectType converts an ordinary [typ.Type] into a packfile [EntryType].
+func EntryTypeFromObjectType(ty typ.Type) (EntryType, error) {
 	switch ty {
 	case typ.Commit:
 		return EntryTypeCommit, nil
@@ -50,8 +50,8 @@ func ObjectTypeToEntryType(ty typ.Type) (EntryType, error) {
 	return EntryTypeInvalid, ErrUnrepresentableObjectType
 }
 
-// ObjectTypeToEntryType converts a a packfile [EntryType] into an ordinary [typ.Type].
-func (entryType EntryType) EntryTypeToObjectType() (typ.Type, error) {
+// ObjectType converts a packfile [EntryType] into an ordinary [typ.Type].
+func (entryType EntryType) ObjectType() (typ.Type, error) {
 	switch entryType {
 	case EntryTypeCommit:
 		return typ.Commit, nil
@@ -64,4 +64,22 @@ func (entryType EntryType) EntryTypeToObjectType() (typ.Type, error) {
 	}
 
 	return typ.Unknown, ErrInternalEntryType
+}
+
+// IsBase reports whether the entry type
+// is a base (non-delta) object type.
+func (entryType EntryType) IsBase() bool {
+	switch entryType {
+	case EntryTypeCommit, EntryTypeTree, EntryTypeBlob, EntryTypeTag:
+		return true
+	case EntryTypeInvalid, EntryTypeFuture, EntryTypeOfsDelta, EntryTypeRefDelta:
+		return false
+	default:
+		return false
+	}
+}
+
+// IsDelta reports whether the entry type is a delta type.
+func (entryType EntryType) IsDelta() bool {
+	return entryType == EntryTypeOfsDelta || entryType == EntryTypeRefDelta
 }
