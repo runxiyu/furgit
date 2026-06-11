@@ -5,5 +5,5 @@ package id
 //nolint:recvcheck
 type ObjectID struct {
 	objectFormat ObjectFormat
-	data         [maxObjectIDSize]byte
+	data         [MaxObjectIDSize]byte
 }

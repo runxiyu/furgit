@@ -50,8 +50,8 @@ var objectFormatTable = [...]objectFormatDetails{
 	},
 }
 
-// maxObjectIDSize MUST be >= the largest supported object format size.
-const maxObjectIDSize = sha256.Size
+// MaxObjectIDSize MUST be >= the largest supported object format size.
+const MaxObjectIDSize = sha256.Size
 
 var (
 	//nolint:gochecknoglobals

@@ -83,6 +83,6 @@ func (objectFormat ObjectFormat) Sum(data []byte) ObjectID {
 func (objectFormat ObjectFormat) Zero() ObjectID {
 	return ObjectID{
 		objectFormat: objectFormat,
-		data:         [maxObjectIDSize]byte{},
+		data:         [MaxObjectIDSize]byte{},
 	}
 }
