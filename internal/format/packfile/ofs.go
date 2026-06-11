@@ -1,4 +1,4 @@
-package delta
+package packfile
 
 import (
 	"errors"
