@@ -149,7 +149,7 @@ func (z *Writer) Write(p []byte) (n int, err error) {
 		return 0, z.err
 	}
 
-	return n, err //nolint:wrapcheck
+	return n, err
 }
 
 // Flush flushes the Writer to its underlying [io.Writer].

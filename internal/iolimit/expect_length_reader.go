@@ -53,7 +53,7 @@ func (reader *expectLengthReader) Read(dst []byte) (int, error) {
 			return 0, nil
 		}
 
-		return 0, err //nolint:wrapcheck
+		return 0, err
 	}
 
 	if uint64(len(dst)) > reader.remaining {
@@ -87,5 +87,5 @@ func (reader *expectLengthReader) Read(dst []byte) (int, error) {
 		return 0, io.EOF
 	}
 
-	return n, err //nolint:wrapcheck
+	return n, err
 }

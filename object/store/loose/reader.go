@@ -228,7 +228,7 @@ type objectReader struct {
 }
 
 func (reader *objectReader) Read(dst []byte) (int, error) {
-	return reader.reader.Read(dst) //nolint:wrapcheck
+	return reader.reader.Read(dst)
 }
 
 func (reader *objectReader) Close() error {

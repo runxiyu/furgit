@@ -43,7 +43,7 @@ func (z *Writer) writeHeader() (err error) {
 
 	_, err = z.w.Write(z.scratch[0:2])
 	if err != nil {
-		return err //nolint:wrapcheck
+		return err
 	}
 
 	if z.dict != nil {
@@ -52,7 +52,7 @@ func (z *Writer) writeHeader() (err error) {
 
 		_, err = z.w.Write(z.scratch[0:4])
 		if err != nil {
-			return err //nolint:wrapcheck
+			return err
 		}
 	}
 
