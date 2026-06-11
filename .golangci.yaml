@@ -31,6 +31,14 @@ linters:
   settings:
     perfsprint:
       errorf: false
+    wrapcheck:
+      ignore-interface-regexps:
+        - ^io\.
+      extra-ignore-sigs:
+        - (io.Reader).Read(
+        - (io.Writer).Write(
+        - (io.Closer).Close(
+
     depguard:
       rules:
         Main:
