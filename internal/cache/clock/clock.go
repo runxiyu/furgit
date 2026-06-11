@@ -17,14 +17,14 @@ const maxShards = 16
 // WeightFunc reports one entry's weight, used for eviction budgeting.
 type WeightFunc[K comparable, V any] func(key K, value V) uint64
 
-// Cache is a concurrent, weight-bounded cache
+// Clock is a concurrent, weight-bounded cache
 // with CLOCK eviction.
 //
 // Reads are lock-free;
 // writes lock only the shard that owns the key.
 //
 // Labels: MT-Safe.
-type Cache[K comparable, V any] struct {
+type Clock[K comparable, V any] struct {
 	shards   []*shard[K, V]
 	seed     maphash.Seed
 	mask     uint64
@@ -35,7 +35,7 @@ type Cache[K comparable, V any] struct {
 // weighing entries with weightFn.
 //
 // New panics if weightFn is nil.
-func New[K comparable, V any](maxWeight uint64, weightFn WeightFunc[K, V]) *Cache[K, V] {
+func New[K comparable, V any](maxWeight uint64, weightFn WeightFunc[K, V]) *Clock[K, V] {
 	if weightFn == nil {
 		panic("internal/clock: nil weight function")
 	}
@@ -48,7 +48,7 @@ func New[K comparable, V any](maxWeight uint64, weightFn WeightFunc[K, V]) *Cach
 		shards[i] = newShard[K, V](perShard)
 	}
 
-	return &Cache[K, V]{
+	return &Clock[K, V]{
 		shards:   shards,
 		seed:     maphash.MakeSeed(),
 		mask:     mask,
@@ -81,6 +81,6 @@ func shardLayout(maxWeight uint64) (int, uint64) {
 }
 
 // shardFor returns the shard that owns key.
-func (cache *Cache[K, V]) shardFor(key K) *shard[K, V] {
-	return cache.shards[maphash.Comparable(cache.seed, key)&cache.mask]
+func (clock *Clock[K, V]) shardFor(key K) *shard[K, V] {
+	return clock.shards[maphash.Comparable(clock.seed, key)&clock.mask]
 }

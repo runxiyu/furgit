@@ -79,10 +79,10 @@ func checkShard[K comparable, V any](t *testing.T, shard *shard[K, V]) {
 }
 
 // checkCache verifies every shard's invariants.
-func checkCache[K comparable, V any](t *testing.T, cache *Cache[K, V]) {
+func checkCache[K comparable, V any](t *testing.T, clock *Clock[K, V]) {
 	t.Helper()
 
-	for _, shard := range cache.shards {
+	for _, shard := range clock.shards {
 		checkShard(t, shard)
 	}
 }

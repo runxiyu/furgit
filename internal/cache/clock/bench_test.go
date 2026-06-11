@@ -28,9 +28,9 @@ func BenchmarkReadHeavy(b *testing.B) {
 	// ≈95% Get hits, ≈5% Add, and fits budget.
 	const n = 100_000
 
-	cache := New(n, benchWeight)
+	clock := New(n, benchWeight)
 	for k := range n {
-		cache.Add(k, k)
+		clock.Add(k, k)
 	}
 
 	b.ResetTimer()
@@ -41,9 +41,9 @@ func BenchmarkReadHeavy(b *testing.B) {
 
 			key := i % n
 			if i%20 == 0 {
-				cache.Add(key, key)
+				clock.Add(key, key)
 			} else {
-				_, _ = cache.Get(key)
+				_, _ = clock.Get(key)
 			}
 		}
 	})
@@ -56,9 +56,9 @@ func BenchmarkHotKey(b *testing.B) {
 		maxWeight = 4096
 	)
 
-	cache := New(maxWeight, benchWeight)
+	clock := New(maxWeight, benchWeight)
 	for k := range hot {
-		cache.Add(k, k)
+		clock.Add(k, k)
 	}
 
 	b.ResetTimer()
@@ -66,7 +66,7 @@ func BenchmarkHotKey(b *testing.B) {
 		i := workerOffset()
 		for pb.Next() {
 			i++
-			_, _ = cache.Get(i % hot)
+			_, _ = clock.Get(i % hot)
 		}
 	})
 }
@@ -75,9 +75,9 @@ func BenchmarkMixed(b *testing.B) {
 	// Even split of Get and Add over a working set that fits.
 	const n = 100_000
 
-	cache := New(n, benchWeight)
+	clock := New(n, benchWeight)
 	for k := range n {
-		cache.Add(k, k)
+		clock.Add(k, k)
 	}
 
 	b.ResetTimer()
@@ -88,9 +88,9 @@ func BenchmarkMixed(b *testing.B) {
 
 			key := i % n
 			if i%2 == 0 {
-				cache.Add(key, key)
+				clock.Add(key, key)
 			} else {
-				_, _ = cache.Get(key)
+				_, _ = clock.Get(key)
 			}
 		}
 	})
@@ -98,11 +98,11 @@ func BenchmarkMixed(b *testing.B) {
 
 func BenchmarkChurn(b *testing.B) {
 	// Every op inserts a fresh key into a small budget.
-	// I don't think this is likely to happen for git delta caches,
+	// I don't think this is likely to happen for git delta clocks,
 	// but this may matter if we use this for other workloads later.
 	const maxWeight = 4096
 
-	cache := New(maxWeight, benchWeight)
+	clock := New(maxWeight, benchWeight)
 
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
@@ -111,7 +111,7 @@ func BenchmarkChurn(b *testing.B) {
 		i := 0
 		for pb.Next() {
 			i++
-			cache.Add(base+i, i)
+			clock.Add(base+i, i)
 		}
 	})
 }

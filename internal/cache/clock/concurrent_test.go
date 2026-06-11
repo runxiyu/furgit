@@ -19,7 +19,7 @@ func TestConcurrentStress(t *testing.T) {
 		rounds    = 5000
 	)
 
-	cache := New(maxWeight, func(_ int, _ int) uint64 { return 1 })
+	clock := New(maxWeight, func(_ int, _ int) uint64 { return 1 })
 
 	var wg sync.WaitGroup
 
@@ -30,13 +30,13 @@ func TestConcurrentStress(t *testing.T) {
 
 				switch i % 4 {
 				case 0, 1:
-					cache.Add(key, keyValue(key))
+					clock.Add(key, keyValue(key))
 				case 2:
-					if got, ok := cache.Get(key); ok && got != keyValue(key) {
+					if got, ok := clock.Get(key); ok && got != keyValue(key) {
 						t.Errorf("Get(%d) = %d, want %d", key, got, keyValue(key))
 					}
 				case 3:
-					if got, ok := cache.Peek(key); ok && got != keyValue(key) {
+					if got, ok := clock.Peek(key); ok && got != keyValue(key) {
 						t.Errorf("Peek(%d) = %d, want %d", key, got, keyValue(key))
 					}
 				}
@@ -46,9 +46,9 @@ func TestConcurrentStress(t *testing.T) {
 
 	wg.Wait()
 
-	checkCache(t, cache)
+	checkCache(t, clock)
 
-	if got := cache.Weight(); got > maxWeight {
+	if got := clock.Weight(); got > maxWeight {
 		t.Fatalf("weight %d exceeds max %d", got, maxWeight)
 	}
 }
@@ -64,7 +64,7 @@ func TestReadDuringEviction(t *testing.T) {
 		rounds    = 20000
 	)
 
-	cache := New(maxWeight, func(_ int, _ int) uint64 { return 1 })
+	clock := New(maxWeight, func(_ int, _ int) uint64 { return 1 })
 
 	var wg sync.WaitGroup
 
@@ -72,7 +72,7 @@ func TestReadDuringEviction(t *testing.T) {
 		wg.Go(func() {
 			for i := range rounds {
 				key := i % hot
-				cache.Add(key, keyValue(key))
+				clock.Add(key, keyValue(key))
 			}
 		})
 	}
@@ -82,11 +82,11 @@ func TestReadDuringEviction(t *testing.T) {
 			for i := range rounds {
 				key := i % hot
 
-				if got, ok := cache.Get(key); ok && got != keyValue(key) {
+				if got, ok := clock.Get(key); ok && got != keyValue(key) {
 					t.Errorf("Get(%d) = %d, want %d", key, got, keyValue(key))
 				}
 
-				if got, ok := cache.Peek(key); ok && got != keyValue(key) {
+				if got, ok := clock.Peek(key); ok && got != keyValue(key) {
 					t.Errorf("Peek(%d) = %d, want %d", key, got, keyValue(key))
 				}
 			}
@@ -95,9 +95,9 @@ func TestReadDuringEviction(t *testing.T) {
 
 	wg.Wait()
 
-	checkCache(t, cache)
+	checkCache(t, clock)
 
-	if got := cache.Weight(); got > maxWeight {
+	if got := clock.Weight(); got > maxWeight {
 		t.Fatalf("weight %d exceeds max %d", got, maxWeight)
 	}
 }

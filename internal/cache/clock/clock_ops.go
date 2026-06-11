@@ -5,28 +5,28 @@ package clock
 // It reports whether the entry was admitted;
 // an entry heavier than the per-shard budget is rejected
 // and leaves the cache unchanged.
-func (cache *Cache[K, V]) Add(key K, value V) bool {
-	return cache.shardFor(key).add(key, value, cache.weightFn(key, value))
+func (clock *Clock[K, V]) Add(key K, value V) bool {
+	return clock.shardFor(key).add(key, value, clock.weightFn(key, value))
 }
 
 // Get returns the value for key and marks it recently used.
 //
 //nolint:ireturn
-func (cache *Cache[K, V]) Get(key K) (V, bool) {
-	return cache.shardFor(key).get(key)
+func (clock *Clock[K, V]) Get(key K) (V, bool) {
+	return clock.shardFor(key).get(key)
 }
 
 // Peek returns the value for key without changing its recency.
 //
 //nolint:ireturn
-func (cache *Cache[K, V]) Peek(key K) (V, bool) {
-	return cache.shardFor(key).peek(key)
+func (clock *Clock[K, V]) Peek(key K) (V, bool) {
+	return clock.shardFor(key).peek(key)
 }
 
 // Len returns the number of cached entries.
-func (cache *Cache[K, V]) Len() int {
+func (clock *Clock[K, V]) Len() int {
 	total := 0
-	for _, shard := range cache.shards {
+	for _, shard := range clock.shards {
 		total += shard.len()
 	}
 
@@ -34,9 +34,9 @@ func (cache *Cache[K, V]) Len() int {
 }
 
 // Weight returns the current total weight across all shards.
-func (cache *Cache[K, V]) Weight() uint64 {
+func (clock *Clock[K, V]) Weight() uint64 {
 	var total uint64
-	for _, shard := range cache.shards {
+	for _, shard := range clock.shards {
 		total += shard.loadWeight()
 	}
 
@@ -44,8 +44,8 @@ func (cache *Cache[K, V]) Weight() uint64 {
 }
 
 // Clear removes all entries.
-func (cache *Cache[K, V]) Clear() {
-	for _, shard := range cache.shards {
+func (clock *Clock[K, V]) Clear() {
+	for _, shard := range clock.shards {
 		shard.clear()
 	}
 }
