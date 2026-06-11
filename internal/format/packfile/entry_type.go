@@ -45,6 +45,7 @@ func EntryTypeFromObjectType(ty typ.Type) (EntryType, error) {
 		return EntryTypeBlob, nil
 	case typ.Tag:
 		return EntryTypeTag, nil
+	case typ.Unknown:
 	}
 
 	return EntryTypeInvalid, ErrUnrepresentableObjectType
@@ -61,6 +62,7 @@ func (entryType EntryType) ObjectType() (typ.Type, error) {
 		return typ.Blob, nil
 	case EntryTypeTag:
 		return typ.Tag, nil
+	case EntryTypeInvalid, EntryTypeFuture, EntryTypeOfsDelta, EntryTypeRefDelta:
 	}
 
 	return typ.Unknown, ErrInternalEntryType
@@ -73,10 +75,9 @@ func (entryType EntryType) IsBase() bool {
 	case EntryTypeCommit, EntryTypeTree, EntryTypeBlob, EntryTypeTag:
 		return true
 	case EntryTypeInvalid, EntryTypeFuture, EntryTypeOfsDelta, EntryTypeRefDelta:
-		return false
-	default:
-		return false
 	}
+
+	return false
 }
 
 // IsDelta reports whether the entry type is a delta type.
