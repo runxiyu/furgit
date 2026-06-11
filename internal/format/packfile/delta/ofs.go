@@ -2,7 +2,6 @@ package delta
 
 import (
 	"errors"
-	"fmt"
 )
 
 var ErrMalformedOfsDeltaDistance = errors.New("internal/format/packfile/delta: malformed ofs-delta distance")
@@ -19,7 +18,7 @@ func ParseOfsDeltaDistance(buf []byte) (dist uint64, consumed int, err error) {
 	consumed = 1
 	for b&0x80 != 0 {
 		if consumed >= len(buf) {
-			return 0, 0, fmt.Errorf("")
+			return 0, 0, ErrMalformedOfsDeltaDistance
 		}
 
 		b = buf[consumed]
@@ -27,5 +26,5 @@ func ParseOfsDeltaDistance(buf []byte) (dist uint64, consumed int, err error) {
 		dist = ((dist + 1) << 7) + uint64(b&0x7f)
 	}
 
-	return dist, consumed, ErrMalformedOfsDeltaDistance
+	return dist, consumed, nil
 }
