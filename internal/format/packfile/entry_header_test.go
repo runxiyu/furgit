@@ -130,10 +130,15 @@ func TestParseEntryHeaderBadHashSize(t *testing.T) {
 	t.Parallel()
 
 	for _, hashSize := range []int{-1, 0, id.MaxObjectIDSize + 1} {
-		_, err := packfile.ParseEntryHeader([]byte{0x95, 0x05}, hashSize)
-		if err == nil {
-			t.Fatalf("ParseEntryHeader hash size %d: expected error", hashSize)
-		}
+		func() {
+			defer func() {
+				if recover() == nil {
+					t.Fatalf("ParseEntryHeader hash size %d: expected panic", hashSize)
+				}
+			}()
+
+			_, _ = packfile.ParseEntryHeader([]byte{0x95, 0x05}, hashSize)
+		}()
 	}
 }
 

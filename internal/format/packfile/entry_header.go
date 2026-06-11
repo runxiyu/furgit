@@ -13,12 +13,6 @@ import (
 // or declares a size that overflows uint64.
 var ErrMalformedEntryHeader = errors.New("internal/format/packfile: malformed entry header")
 
-// ErrInvalidHashSize reports that
-// a supplied hash size is not a plausible object ID size.
-// This indicates a caller bug,
-// not malformed pack data.
-var ErrInvalidHashSize = errors.New("internal/format/packfile: invalid hash size")
-
 // MaxTypeSizeLen is the maximum encoded length
 // of the type/size prefix of an entry header.
 // Every uint64 size is encodable within this bound,
@@ -73,7 +67,8 @@ type EntryHeader struct {
 // from the beginning of data.
 //
 // hashSize must be the object ID size
-// of the pack's object format.
+// of the pack's object format;
+// ParseEntryHeader panics on implausible hash sizes.
 //
 // data need not contain the whole entry;
 // [MaxEntryHeaderLen] bytes always suffice.
@@ -83,7 +78,7 @@ func ParseEntryHeader(data []byte, hashSize int) (EntryHeader, error) {
 	var zero EntryHeader
 
 	if hashSize <= 0 || hashSize > id.MaxObjectIDSize {
-		return zero, fmt.Errorf("%w: %d", ErrInvalidHashSize, hashSize)
+		panic("internal/format/packfile: invalid hash size")
 	}
 
 	if len(data) == 0 {
