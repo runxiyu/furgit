@@ -37,6 +37,18 @@ var (
 	_ fs.SubFS      = (*TreeFS)(nil)
 )
 
+// ErrGitlinkNotFile reports that
+// a gitlink (submodule) entry was opened or read as a file.
+// It wraps [fs.ErrInvalid] so that
+// generic fs consumers classify it correctly.
+var ErrGitlinkNotFile = fmt.Errorf("%w: object/fetch: gitlink entries are not readable as files", fs.ErrInvalid)
+
+// ErrIsDirectory reports that
+// a directory entry was read as a file.
+// It wraps [fs.ErrInvalid] so that
+// generic fs consumers classify it correctly.
+var ErrIsDirectory = fmt.Errorf("%w: object/fetch: is a directory", fs.ErrInvalid)
+
 func splitPath(path string) []string {
 	if len(path) == 0 {
 		return nil
@@ -67,7 +79,7 @@ func (entry treeEntryValue) subtreeID() (oid.ObjectID, error) {
 	}
 
 	if entry.mode != mode.Directory {
-		return oid.ObjectID{}, fmt.Errorf("object/fetch: path %q is not a tree", entry.name)
+		return oid.ObjectID{}, fmt.Errorf("object/fetch: path %q is not a tree", entry.name) //nolint:err113 // Never user-visible.
 	}
 
 	return entry.objectID, nil
@@ -207,7 +219,7 @@ func (treeFS *TreeFS) Open(name string) (fs.File, error) {
 	}
 
 	if entry.mode == mode.Gitlink {
-		return nil, treeFSPathError(treeFSOpOpen, name, fmt.Errorf("object/fetch: gitlink entries are not readable as files"))
+		return nil, treeFSPathError(treeFSOpOpen, name, ErrGitlinkNotFile)
 	}
 
 	reader, _, err := treeFS.fetcher.ExactBlobReader(entry.objectID)
@@ -292,7 +304,12 @@ func (treeFS *TreeFS) ReadDir(name string) ([]fs.DirEntry, error) {
 		return nil, treeFSPathError(treeFSOpReadDir, name, fs.ErrInvalid)
 	}
 
-	return readDirFile.ReadDir(-1)
+	entries, err := readDirFile.ReadDir(-1)
+	if err != nil {
+		return nil, treeFSPathError(treeFSOpReadDir, name, err)
+	}
+
+	return entries, nil
 }
 
 // ReadFile reads the blob contents at name.
@@ -305,11 +322,11 @@ func (treeFS *TreeFS) ReadFile(name string) ([]byte, error) {
 	}
 
 	if entry.isDir() {
-		return nil, treeFSPathError(treeFSOpReadFile, name, fmt.Errorf("is a directory"))
+		return nil, treeFSPathError(treeFSOpReadFile, name, ErrIsDirectory)
 	}
 
 	if entry.mode == mode.Gitlink {
-		return nil, treeFSPathError(treeFSOpReadFile, name, fmt.Errorf("object/fetch: gitlink entries are not readable as files"))
+		return nil, treeFSPathError(treeFSOpReadFile, name, ErrGitlinkNotFile)
 	}
 
 	reader, _, err := treeFS.fetcher.ExactBlobReader(entry.objectID)
@@ -419,7 +436,7 @@ func (treeFS *TreeFS) statEntry(entry treeEntryValue) (*treeFSInfo, error) {
 
 		size, err = intconv.Uint64ToInt64(sz)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("object/fetch: blob size overflows int64: %w", err)
 		}
 	}
 
