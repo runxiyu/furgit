@@ -3,21 +3,29 @@ package clock //nolint:testpackage
 import (
 	"sync/atomic"
 	"testing"
+
+	"lindenii.org/go/lgo/intconv"
 )
 
 func benchWeight(_, _ int) uint64 { return 1 }
 
 // goroutineSeq hands each parallel worker a distinct starting offset
 // so workers don't go in lockstep over identical keys.
+//
+//nolint:gochecknoglobals
 var goroutineSeq atomic.Uint64
 
 func workerOffset() int {
-	return int(goroutineSeq.Add(1) * 0x9E3779B1)
+	result, err := intconv.Uint64ToInt(goroutineSeq.Add(1) * 0x9E3779B1)
+	if err != nil {
+		panic(err)
+	}
+
+	return result
 }
 
 func BenchmarkReadHeavy(b *testing.B) {
 	// ≈95% Get hits, ≈5% Add, and fits budget.
-
 	const n = 100_000
 
 	cache := New(n, benchWeight)
@@ -30,6 +38,7 @@ func BenchmarkReadHeavy(b *testing.B) {
 		i := workerOffset()
 		for pb.Next() {
 			i++
+
 			key := i % n
 			if i%20 == 0 {
 				cache.Add(key, key)
@@ -42,7 +51,6 @@ func BenchmarkReadHeavy(b *testing.B) {
 
 func BenchmarkHotKey(b *testing.B) {
 	// Every worker does Get over a relatively small hot set.
-
 	const (
 		hot       = 64
 		maxWeight = 4096
@@ -65,7 +73,6 @@ func BenchmarkHotKey(b *testing.B) {
 
 func BenchmarkMixed(b *testing.B) {
 	// Even split of Get and Add over a working set that fits.
-
 	const n = 100_000
 
 	cache := New(n, benchWeight)
@@ -78,6 +85,7 @@ func BenchmarkMixed(b *testing.B) {
 		i := workerOffset()
 		for pb.Next() {
 			i++
+
 			key := i % n
 			if i%2 == 0 {
 				cache.Add(key, key)
@@ -92,7 +100,6 @@ func BenchmarkChurn(b *testing.B) {
 	// Every op inserts a fresh key into a small budget.
 	// I don't think this is likely to happen for git delta caches,
 	// but this may matter if we use this for other workloads later.
-
 	const maxWeight = 4096
 
 	cache := New(maxWeight, benchWeight)
@@ -100,6 +107,7 @@ func BenchmarkChurn(b *testing.B) {
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		base := workerOffset()
+
 		i := 0
 		for pb.Next() {
 			i++
