@@ -42,8 +42,8 @@ func (chain *Chain) ReadReaderContent(id id.ObjectID) (typ.Type, uint64, io.Read
 			continue
 		}
 
-		return typ.TypeUnknown, 0, nil, fmt.Errorf("object/store/chain: read reader content: %w", err)
+		return typ.Unknown, 0, nil, fmt.Errorf("object/store/chain: read reader content: %w", err)
 	}
 
-	return typ.TypeUnknown, 0, nil, store.ErrObjectNotFound
+	return typ.Unknown, 0, nil, store.ErrObjectNotFound
 }

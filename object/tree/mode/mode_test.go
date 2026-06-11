@@ -14,12 +14,12 @@ func TestObjectType(t *testing.T) {
 		mode mode.Mode
 		want typ.Type
 	}{
-		{mode: mode.Directory, want: typ.TypeTree},
-		{mode: mode.Regular, want: typ.TypeBlob},
-		{mode: mode.Executable, want: typ.TypeBlob},
-		{mode: mode.Symlink, want: typ.TypeBlob},
-		{mode: mode.Gitlink, want: typ.TypeCommit},
-		{mode: mode.Mode(0), want: typ.TypeUnknown},
+		{mode: mode.Directory, want: typ.Tree},
+		{mode: mode.Regular, want: typ.Blob},
+		{mode: mode.Executable, want: typ.Blob},
+		{mode: mode.Symlink, want: typ.Blob},
+		{mode: mode.Gitlink, want: typ.Commit},
+		{mode: mode.Mode(0), want: typ.Unknown},
 	} {
 		if got := tc.mode.ObjectType(); got != tc.want {
 			t.Fatalf("Mode(%o).ObjectType() = %v, want %v", tc.mode, got, tc.want)

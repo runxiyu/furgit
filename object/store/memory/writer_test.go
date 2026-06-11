@@ -19,9 +19,9 @@ func TestWriteReaderContent(t *testing.T) {
 
 			store := memory.New(objectFormat)
 			content := []byte("memory-content\n")
-			raw := append(header.Append(nil, typ.TypeBlob, uint64(len(content))), content...)
+			raw := append(header.Append(nil, typ.Blob, uint64(len(content))), content...)
 
-			gotID, err := store.WriteReaderContent(typ.TypeBlob, uint64(len(content)), bytes.NewReader(content))
+			gotID, err := store.WriteReaderContent(typ.Blob, uint64(len(content)), bytes.NewReader(content))
 			if err != nil {
 				t.Fatalf("WriteReaderContent: %v", err)
 			}
@@ -36,8 +36,8 @@ func TestWriteReaderContent(t *testing.T) {
 				t.Fatalf("ReadBytesContent: %v", err)
 			}
 
-			if gotType != typ.TypeBlob {
-				t.Fatalf("ReadBytesContent type = %v, want %v", gotType, typ.TypeBlob)
+			if gotType != typ.Blob {
+				t.Fatalf("ReadBytesContent type = %v, want %v", gotType, typ.Blob)
 			}
 
 			if !bytes.Equal(gotContent, content) {
@@ -56,7 +56,7 @@ func TestWriteReaderFull(t *testing.T) {
 
 			store := memory.New(objectFormat)
 			content := []byte("memory-full\n")
-			raw := append(header.Append(nil, typ.TypeBlob, uint64(len(content))), content...)
+			raw := append(header.Append(nil, typ.Blob, uint64(len(content))), content...)
 
 			gotID, err := store.WriteReaderFull(bytes.NewReader(raw))
 			if err != nil {
@@ -89,9 +89,9 @@ func TestWriteBytes(t *testing.T) {
 
 			store := memory.New(objectFormat)
 			content := []byte("memory-bytes\n")
-			raw := append(header.Append(nil, typ.TypeBlob, uint64(len(content))), content...)
+			raw := append(header.Append(nil, typ.Blob, uint64(len(content))), content...)
 
-			gotID, err := store.WriteBytesContent(typ.TypeBlob, content)
+			gotID, err := store.WriteBytesContent(typ.Blob, content)
 			if err != nil {
 				t.Fatalf("WriteBytesContent: %v", err)
 			}
@@ -123,7 +123,7 @@ func TestWriteValidationErrors(t *testing.T) {
 		{
 			name: "content overflow",
 			run: func(store *memory.Memory) error {
-				_, err := store.WriteReaderContent(typ.TypeBlob, 1, bytes.NewReader([]byte("hello")))
+				_, err := store.WriteReaderContent(typ.Blob, 1, bytes.NewReader([]byte("hello")))
 
 				return err //nolint:wrapcheck
 			},
@@ -131,7 +131,7 @@ func TestWriteValidationErrors(t *testing.T) {
 		{
 			name: "content short",
 			run: func(store *memory.Memory) error {
-				_, err := store.WriteReaderContent(typ.TypeBlob, 5, bytes.NewReader([]byte("x")))
+				_, err := store.WriteReaderContent(typ.Blob, 5, bytes.NewReader([]byte("x")))
 
 				return err //nolint:wrapcheck
 			},

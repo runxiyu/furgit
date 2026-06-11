@@ -19,7 +19,7 @@ func (fetcher *Fetcher) ExactTag(id oid.ObjectID) (*stored.Stored[*tag.Tag], err
 
 	tag, ok := parsed.(*tag.Tag)
 	if !ok {
-		return nil, &errs.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: typ.TypeTag}
+		return nil, &errs.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: typ.Tag}
 	}
 
 	return stored.New(id, tag), nil

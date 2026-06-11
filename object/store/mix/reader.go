@@ -46,8 +46,8 @@ func (mix *Mix) ReadReaderContent(id id.ObjectID) (typ.Type, uint64, io.ReadClos
 			continue
 		}
 
-		return typ.TypeUnknown, 0, nil, fmt.Errorf("object/store/mix: read reader content: %w", err)
+		return typ.Unknown, 0, nil, fmt.Errorf("object/store/mix: read reader content: %w", err)
 	}
 
-	return typ.TypeUnknown, 0, nil, store.ErrObjectNotFound
+	return typ.Unknown, 0, nil, store.ErrObjectNotFound
 }

@@ -4,18 +4,18 @@ package typ
 type Type uint8
 
 const (
-	// TypeUnknown represents an unknown or unset Git object type.
-	TypeUnknown Type = iota
+	// Unknown represents an unknown or unset Git object type.
+	Unknown Type = iota
 
-	// TypeBlob represents a Git blob.
-	TypeBlob
+	// Blob represents a Git blob.
+	Blob
 
-	// TypeTree represents a Git tree.
-	TypeTree
+	// Tree represents a Git tree.
+	Tree
 
-	// TypeCommit represents a Git commit.
-	TypeCommit
+	// Commit represents a Git commit.
+	Commit
 
-	// TypeTag represents a Git tag.
-	TypeTag
+	// Tag represents a Git tag.
+	Tag
 )

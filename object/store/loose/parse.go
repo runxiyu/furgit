@@ -33,12 +33,12 @@ func decodeAll(file *os.File) ([]byte, error) {
 func parseRaw(raw []byte) (typ.Type, []byte, error) {
 	ty, size, consumed, err := header.Parse(raw)
 	if err != nil {
-		return typ.TypeUnknown, nil, fmt.Errorf("%w: %w", store.ErrInvalidObject, err)
+		return typ.Unknown, nil, fmt.Errorf("%w: %w", store.ErrInvalidObject, err)
 	}
 
 	content := raw[consumed:]
 	if uint64(len(content)) != size {
-		return typ.TypeUnknown, nil, fmt.Errorf("%w: header size/content mismatch", store.ErrInvalidObject)
+		return typ.Unknown, nil, fmt.Errorf("%w: header size/content mismatch", store.ErrInvalidObject)
 	}
 
 	return ty, content, nil
@@ -49,12 +49,12 @@ func parseRaw(raw []byte) (typ.Type, []byte, error) {
 func readHeader(br *bufio.Reader) ([]byte, typ.Type, uint64, error) {
 	headerBytes, err := br.ReadSlice(0)
 	if err != nil {
-		return nil, typ.TypeUnknown, 0, fmt.Errorf("object/store/loose: %w", err)
+		return nil, typ.Unknown, 0, fmt.Errorf("object/store/loose: %w", err)
 	}
 
 	ty, size, _, err := header.Parse(headerBytes)
 	if err != nil {
-		return nil, typ.TypeUnknown, 0, fmt.Errorf("%w: %w", store.ErrInvalidObject, err)
+		return nil, typ.Unknown, 0, fmt.Errorf("%w: %w", store.ErrInvalidObject, err)
 	}
 
 	return headerBytes, ty, size, nil

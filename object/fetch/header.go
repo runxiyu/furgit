@@ -11,7 +11,7 @@ import (
 func (fetcher *Fetcher) Header(id oid.ObjectID) (typ.Type, uint64, error) {
 	ty, size, err := fetcher.store.ReadHeader(id)
 	if err != nil {
-		return typ.TypeUnknown, 0, wrapObjectReadError(id, err)
+		return typ.Unknown, 0, wrapObjectReadError(id, err)
 	}
 
 	return ty, size, nil

@@ -23,19 +23,19 @@ func TestWrite(t *testing.T) {
 		{
 			name: "BytesContent",
 			write: func(looseStore *loose.Loose, content []byte) (id.ObjectID, error) {
-				return looseStore.WriteBytesContent(typ.TypeBlob, content)
+				return looseStore.WriteBytesContent(typ.Blob, content)
 			},
 		},
 		{
 			name: "ReaderContent",
 			write: func(looseStore *loose.Loose, content []byte) (id.ObjectID, error) {
-				return looseStore.WriteReaderContent(typ.TypeBlob, uint64(len(content)), bytes.NewReader(content))
+				return looseStore.WriteReaderContent(typ.Blob, uint64(len(content)), bytes.NewReader(content))
 			},
 		},
 		{
 			name: "BytesFull",
 			write: func(looseStore *loose.Loose, content []byte) (id.ObjectID, error) {
-				raw := header.Append(nil, typ.TypeBlob, uint64(len(content)))
+				raw := header.Append(nil, typ.Blob, uint64(len(content)))
 				raw = append(raw, content...)
 
 				return looseStore.WriteBytesFull(raw)
@@ -44,7 +44,7 @@ func TestWrite(t *testing.T) {
 		{
 			name: "ReaderFull",
 			write: func(looseStore *loose.Loose, content []byte) (id.ObjectID, error) {
-				raw := header.Append(nil, typ.TypeBlob, uint64(len(content)))
+				raw := header.Append(nil, typ.Blob, uint64(len(content)))
 				raw = append(raw, content...)
 
 				return looseStore.WriteReaderFull(bytes.NewReader(raw))
@@ -67,7 +67,7 @@ func TestWrite(t *testing.T) {
 				t.Run(w.name, func(t *testing.T) {
 					content := []byte("written via " + w.name + "\n")
 
-					want, err := repo.HashObject(t, typ.TypeBlob, bytes.NewReader(content))
+					want, err := repo.HashObject(t, typ.Blob, bytes.NewReader(content))
 					if err != nil {
 						t.Fatalf("HashObject: %v", err)
 					}
@@ -81,7 +81,7 @@ func TestWrite(t *testing.T) {
 						t.Fatalf("id = %s, want %s", got, want)
 					}
 
-					gotBody, err := repo.CatFile(t, typ.TypeBlob, got)
+					gotBody, err := repo.CatFile(t, typ.Blob, got)
 					if err != nil {
 						t.Fatalf("CatFile: %v", err)
 					}
@@ -121,7 +121,7 @@ func TestWriteRejects(t *testing.T) {
 			t.Run("ContentOverflow", func(t *testing.T) {
 				t.Parallel()
 
-				_, err := looseStore.WriteReaderContent(typ.TypeBlob, 1, bytes.NewReader([]byte("hello")))
+				_, err := looseStore.WriteReaderContent(typ.Blob, 1, bytes.NewReader([]byte("hello")))
 				if !errors.Is(err, store.ErrInvalidObject) {
 					t.Fatalf("err = %v, want ErrInvalidObject", err)
 				}
@@ -130,7 +130,7 @@ func TestWriteRejects(t *testing.T) {
 			t.Run("ContentShort", func(t *testing.T) {
 				t.Parallel()
 
-				_, err := looseStore.WriteReaderContent(typ.TypeBlob, 5, bytes.NewReader([]byte("x")))
+				_, err := looseStore.WriteReaderContent(typ.Blob, 5, bytes.NewReader([]byte("x")))
 				if !errors.Is(err, store.ErrInvalidObject) {
 					t.Fatalf("err = %v, want ErrInvalidObject", err)
 				}

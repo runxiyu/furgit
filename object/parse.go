@@ -41,15 +41,15 @@ func ParseWithHeader(raw []byte, objectFormat id.ObjectFormat) (Object, error) {
 //nolint:ireturn
 func ParseWithoutHeader(ty typ.Type, body []byte, objectFormat id.ObjectFormat) (Object, error) {
 	switch ty {
-	case typ.TypeBlob:
+	case typ.Blob:
 		return blob.Parse(body) //nolint:wrapcheck
-	case typ.TypeTree:
+	case typ.Tree:
 		return tree.Parse(body, objectFormat) //nolint:wrapcheck
-	case typ.TypeCommit:
+	case typ.Commit:
 		return commit.Parse(body, objectFormat) //nolint:wrapcheck
-	case typ.TypeTag:
+	case typ.Tag:
 		return tag.Parse(body, objectFormat) //nolint:wrapcheck
-	case typ.TypeUnknown:
+	case typ.Unknown:
 		return nil, typ.ErrInvalidType
 	default:
 		return nil, typ.ErrInvalidType

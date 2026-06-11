@@ -24,14 +24,14 @@ func TestAppend(t *testing.T) {
 				t.Fatalf("NewRepo: %v", err)
 			}
 
-			blobID, err := repo.HashObject(t, typ.TypeBlob, strings.NewReader("content\n"))
+			blobID, err := repo.HashObject(t, typ.Blob, strings.NewReader("content\n"))
 			if err != nil {
 				t.Fatalf("HashObject(blob): %v", err)
 			}
 
 			tagObject := &tag.Tag{
 				TargetID:   blobID,
-				TargetType: typ.TypeBlob,
+				TargetType: typ.Blob,
 				Name:       []byte("blob-tag"),
 				Tagger: signature.Signature{
 					Name:          []byte("Test Tagger"),
@@ -47,7 +47,7 @@ func TestAppend(t *testing.T) {
 				t.Fatalf("AppendWithoutHeader: %v", err)
 			}
 
-			tagID, err := repo.HashObject(t, typ.TypeTag, bytes.NewReader(rawBody))
+			tagID, err := repo.HashObject(t, typ.Tag, bytes.NewReader(rawBody))
 			if err != nil {
 				t.Fatalf("HashObject(tag): %v", err)
 			}

@@ -30,7 +30,7 @@ func TestRoundTrip(t *testing.T) {
 				t.Fatalf("AppendWithoutHeader: %v", err)
 			}
 
-			treeID, err := repo.HashObject(t, typ.TypeTree, bytes.NewReader(rawBody))
+			treeID, err := repo.HashObject(t, typ.Tree, bytes.NewReader(rawBody))
 			if err != nil {
 				t.Fatalf("HashObject(tree): %v", err)
 			}
@@ -43,7 +43,7 @@ func TestRoundTrip(t *testing.T) {
 				t.Fatalf("Fsck: %v", err)
 			}
 
-			gitBody, err := repo.CatFile(t, typ.TypeTree, treeID)
+			gitBody, err := repo.CatFile(t, typ.Tree, treeID)
 			if err != nil {
 				t.Fatalf("CatFile: %v", err)
 			}

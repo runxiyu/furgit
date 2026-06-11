@@ -233,7 +233,7 @@ func TestReadCorruptTrailer(t *testing.T) {
 
 			content := []byte("corrupt-trailer-check\n")
 
-			objectID, err := looseStore.WriteBytesContent(typ.TypeBlob, content)
+			objectID, err := looseStore.WriteBytesContent(typ.Blob, content)
 			if err != nil {
 				t.Fatalf("WriteBytesContent: %v", err)
 			}
@@ -246,8 +246,8 @@ func TestReadCorruptTrailer(t *testing.T) {
 				t.Fatalf("ReadHeader: %v", err)
 			}
 
-			if ty != typ.TypeBlob {
-				t.Fatalf("ReadHeader type = %v, want %v", ty, typ.TypeBlob)
+			if ty != typ.Blob {
+				t.Fatalf("ReadHeader type = %v, want %v", ty, typ.Blob)
 			}
 
 			if size != uint64(len(content)) {

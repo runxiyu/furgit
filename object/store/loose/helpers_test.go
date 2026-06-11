@@ -52,13 +52,13 @@ func openLooseStore(t *testing.T, repo *testgit.Repo) *loose.Loose {
 func gitOracleObjects(t *testing.T, repo *testgit.Repo) []gitOracleObject {
 	t.Helper()
 
-	blobID, err := repo.HashObject(t, typ.TypeBlob, strings.NewReader("blob body\n"))
+	blobID, err := repo.HashObject(t, typ.Blob, strings.NewReader("blob body\n"))
 	if err != nil {
 		t.Fatalf("HashObject(blob): %v", err)
 	}
 
 	treeID, err := repo.MkTree(t, []testgit.TreeEntry{
-		{Mode: "100644", Type: typ.TypeBlob, OID: blobID, Name: "file"},
+		{Mode: "100644", Type: typ.Blob, OID: blobID, Name: "file"},
 	})
 	if err != nil {
 		t.Fatalf("MkTree: %v", err)
@@ -79,10 +79,10 @@ func gitOracleObjects(t *testing.T, repo *testgit.Repo) []gitOracleObject {
 		ty   typ.Type
 		id   id.ObjectID
 	}{
-		{name: "blob", ty: typ.TypeBlob, id: blobID},
-		{name: "tree", ty: typ.TypeTree, id: treeID},
-		{name: "commit", ty: typ.TypeCommit, id: commitID},
-		{name: "tag", ty: typ.TypeTag, id: tagID},
+		{name: "blob", ty: typ.Blob, id: blobID},
+		{name: "tree", ty: typ.Tree, id: treeID},
+		{name: "commit", ty: typ.Commit, id: commitID},
+		{name: "tag", ty: typ.Tag, id: tagID},
 	}
 
 	objects := make([]gitOracleObject, 0, len(kinds))

@@ -41,8 +41,8 @@ func (chain *Chain) ReadBytesContent(id id.ObjectID) (typ.Type, []byte, error) {
 			continue
 		}
 
-		return typ.TypeUnknown, nil, fmt.Errorf("object/store/chain: read bytes content: %w", err)
+		return typ.Unknown, nil, fmt.Errorf("object/store/chain: read bytes content: %w", err)
 	}
 
-	return typ.TypeUnknown, nil, store.ErrObjectNotFound
+	return typ.Unknown, nil, store.ErrObjectNotFound
 }

@@ -6,5 +6,5 @@ import "lindenii.org/go/furgit/object/typ"
 func (blob *Blob) ObjectType() typ.Type {
 	_ = blob
 
-	return typ.TypeBlob
+	return typ.Blob
 }

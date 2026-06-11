@@ -12,7 +12,7 @@ func (blob *Blob) AppendWithoutHeader(dst []byte) ([]byte, error) {
 
 // AppendWithHeader renders the raw object (header + body).
 func (blob *Blob) AppendWithHeader(dst []byte) ([]byte, error) {
-	dst = header.Append(dst, typ.TypeBlob, uint64(len(blob.Data)))
+	dst = header.Append(dst, typ.Blob, uint64(len(blob.Data)))
 
 	return blob.AppendWithoutHeader(dst)
 }

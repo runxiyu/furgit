@@ -79,13 +79,13 @@ func setupSSHSignedCommit(
 		t.Fatalf("ConfigSet(user.signingkey): %v", err)
 	}
 
-	blobID, err := repo.HashObject(t, typ.TypeBlob, strings.NewReader("signed\n"))
+	blobID, err := repo.HashObject(t, typ.Blob, strings.NewReader("signed\n"))
 	if err != nil {
 		t.Fatalf("HashObject(blob): %v", err)
 	}
 
 	treeID, err := repo.MkTree(t, []testgit.TreeEntry{
-		{Mode: "100644", Type: typ.TypeBlob, OID: blobID, Name: "file.txt"},
+		{Mode: "100644", Type: typ.Blob, OID: blobID, Name: "file.txt"},
 	})
 	if err != nil {
 		t.Fatalf("MkTree: %v", err)
@@ -99,7 +99,7 @@ func setupSSHSignedCommit(
 		t.Fatalf("CommitTree: %v", err)
 	}
 
-	body, err := repo.CatFile(t, typ.TypeCommit, commitID)
+	body, err := repo.CatFile(t, typ.Commit, commitID)
 	if err != nil {
 		t.Fatalf("CatFile: %v", err)
 	}

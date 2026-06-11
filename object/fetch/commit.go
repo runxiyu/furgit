@@ -20,7 +20,7 @@ func (fetcher *Fetcher) ExactCommit(id oid.ObjectID) (*stored.Stored[*commit.Com
 
 	commit, ok := parsed.(*commit.Commit)
 	if !ok {
-		return nil, &errs.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: typ.TypeCommit}
+		return nil, &errs.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: typ.Commit}
 	}
 
 	return stored.New(id, commit), nil
@@ -42,7 +42,7 @@ func (fetcher *Fetcher) PeelToCommit(id oid.ObjectID) (*stored.Stored[*commit.Co
 		case *tag.Tag:
 			id = parsed.TargetID
 		default:
-			return nil, &errs.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: typ.TypeCommit}
+			return nil, &errs.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: typ.Commit}
 		}
 	}
 }
@@ -56,19 +56,19 @@ func (fetcher *Fetcher) PeelToCommitID(id oid.ObjectID) (oid.ObjectID, error) {
 		}
 
 		switch ty {
-		case typ.TypeCommit:
+		case typ.Commit:
 			return id, nil
-		case typ.TypeTag:
+		case typ.Tag:
 			tag, err := fetcher.ExactTag(id)
 			if err != nil {
 				return oid.ObjectID{}, err
 			}
 
 			id = tag.Object().TargetID
-		case typ.TypeUnknown, typ.TypeTree, typ.TypeBlob:
-			return oid.ObjectID{}, &errs.ObjectTypeError{OID: id, Got: ty, Want: typ.TypeCommit}
+		case typ.Unknown, typ.Tree, typ.Blob:
+			return oid.ObjectID{}, &errs.ObjectTypeError{OID: id, Got: ty, Want: typ.Commit}
 		default:
-			return oid.ObjectID{}, &errs.ObjectTypeError{OID: id, Got: ty, Want: typ.TypeCommit}
+			return oid.ObjectID{}, &errs.ObjectTypeError{OID: id, Got: ty, Want: typ.Commit}
 		}
 	}
 }

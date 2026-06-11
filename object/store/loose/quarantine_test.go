@@ -32,7 +32,7 @@ func TestQuarantinePromote(t *testing.T) {
 
 			content := []byte("quarantined object\n")
 
-			objectID, err := quarantine.WriteBytesContent(typ.TypeBlob, content)
+			objectID, err := quarantine.WriteBytesContent(typ.Blob, content)
 			if err != nil {
 				t.Fatalf("quarantine.WriteBytesContent: %v", err)
 			}
@@ -42,8 +42,8 @@ func TestQuarantinePromote(t *testing.T) {
 				t.Fatalf("quarantine.ReadBytesContent: %v", err)
 			}
 
-			if ty != typ.TypeBlob {
-				t.Fatalf("quarantine type = %v, want %v", ty, typ.TypeBlob)
+			if ty != typ.Blob {
+				t.Fatalf("quarantine type = %v, want %v", ty, typ.Blob)
 			}
 
 			if !bytes.Equal(got, content) {
@@ -65,8 +65,8 @@ func TestQuarantinePromote(t *testing.T) {
 				t.Fatalf("parent ReadBytesContent after promote: %v", err)
 			}
 
-			if ty != typ.TypeBlob {
-				t.Fatalf("parent type = %v, want %v", ty, typ.TypeBlob)
+			if ty != typ.Blob {
+				t.Fatalf("parent type = %v, want %v", ty, typ.Blob)
 			}
 
 			if !bytes.Equal(got, content) {
@@ -97,7 +97,7 @@ func TestQuarantineDiscard(t *testing.T) {
 
 			content := []byte("discarded object\n")
 
-			objectID, err := quarantine.WriteBytesContent(typ.TypeBlob, content)
+			objectID, err := quarantine.WriteBytesContent(typ.Blob, content)
 			if err != nil {
 				t.Fatalf("quarantine.WriteBytesContent: %v", err)
 			}

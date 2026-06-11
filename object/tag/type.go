@@ -6,5 +6,5 @@ import "lindenii.org/go/furgit/object/typ"
 func (tag *Tag) ObjectType() typ.Type {
 	_ = tag
 
-	return typ.TypeTag
+	return typ.Tag
 }

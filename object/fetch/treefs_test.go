@@ -24,12 +24,12 @@ func TestTreeFS(t *testing.T) {
 
 			store := memory.New(objectFormat)
 
-			plainID, err := store.WriteBytesContent(typ.TypeBlob, []byte("plain\n"))
+			plainID, err := store.WriteBytesContent(typ.Blob, []byte("plain\n"))
 			if err != nil {
 				t.Fatalf("WriteBytesContent(plain.txt): %v", err)
 			}
 
-			execID, err := store.WriteBytesContent(typ.TypeBlob, []byte("#!/bin/sh\nexit 0\n"))
+			execID, err := store.WriteBytesContent(typ.Blob, []byte("#!/bin/sh\nexit 0\n"))
 			if err != nil {
 				t.Fatalf("WriteBytesContent(exec.sh): %v", err)
 			}
@@ -133,7 +133,7 @@ func writeTree(t *testing.T, store *memory.Memory, entries []tree.Entry) id.Obje
 		t.Fatalf("tree.AppendWithoutHeader: %v", err)
 	}
 
-	treeID, err := store.WriteBytesContent(typ.TypeTree, body)
+	treeID, err := store.WriteBytesContent(typ.Tree, body)
 	if err != nil {
 		t.Fatalf("WriteBytesContent(tree): %v", err)
 	}
@@ -163,7 +163,7 @@ func writeCommit(t *testing.T, store *memory.Memory, tree id.ObjectID) id.Object
 		t.Fatalf("commit.AppendWithoutHeader: %v", err)
 	}
 
-	commitID, err := store.WriteBytesContent(typ.TypeCommit, body)
+	commitID, err := store.WriteBytesContent(typ.Commit, body)
 	if err != nil {
 		t.Fatalf("WriteBytesContent(commit): %v", err)
 	}

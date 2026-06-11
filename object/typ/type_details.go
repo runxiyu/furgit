@@ -10,16 +10,16 @@ func (ty Type) details() typeDetails {
 
 //nolint:gochecknoglobals
 var typeTable = [...]typeDetails{
-	TypeCommit: {name: "commit"},
-	TypeTree:   {name: "tree"},
-	TypeBlob:   {name: "blob"},
-	TypeTag:    {name: "tag"},
+	Commit: {name: "commit"},
+	Tree:   {name: "tree"},
+	Blob:   {name: "blob"},
+	Tag:    {name: "tag"},
 }
 
 //nolint:gochecknoglobals
 var typeByName = map[string]Type{
-	typeTable[TypeCommit].name: TypeCommit,
-	typeTable[TypeTree].name:   TypeTree,
-	typeTable[TypeBlob].name:   TypeBlob,
-	typeTable[TypeTag].name:    TypeTag,
+	typeTable[Commit].name: Commit,
+	typeTable[Tree].name:   Tree,
+	typeTable[Blob].name:   Blob,
+	typeTable[Tag].name:    Tag,
 }

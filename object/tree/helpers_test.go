@@ -15,23 +15,23 @@ import (
 func mixedEntries(tb testing.TB, repo *testgit.Repo) []tree.Entry {
 	tb.Helper()
 
-	blobA, err := repo.HashObject(tb, typ.TypeBlob, strings.NewReader("blob-A\n"))
+	blobA, err := repo.HashObject(tb, typ.Blob, strings.NewReader("blob-A\n"))
 	if err != nil {
 		tb.Fatalf("HashObject(blob-A): %v", err)
 	}
 
-	blobB, err := repo.HashObject(tb, typ.TypeBlob, strings.NewReader("blob-B\n"))
+	blobB, err := repo.HashObject(tb, typ.Blob, strings.NewReader("blob-B\n"))
 	if err != nil {
 		tb.Fatalf("HashObject(blob-B): %v", err)
 	}
 
-	blobC, err := repo.HashObject(tb, typ.TypeBlob, strings.NewReader("blob-C\n"))
+	blobC, err := repo.HashObject(tb, typ.Blob, strings.NewReader("blob-C\n"))
 	if err != nil {
 		tb.Fatalf("HashObject(blob-C): %v", err)
 	}
 
 	subTree, err := repo.MkTree(tb, []testgit.TreeEntry{
-		{Mode: "100644", Type: typ.TypeBlob, OID: blobA, Name: "leaf"},
+		{Mode: "100644", Type: typ.Blob, OID: blobA, Name: "leaf"},
 	})
 	if err != nil {
 		tb.Fatalf("MkTree(subtree): %v", err)

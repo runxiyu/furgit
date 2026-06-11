@@ -39,13 +39,13 @@ func TestParse(t *testing.T) {
 				t.Fatalf("NewRepo: %v", err)
 			}
 
-			blobID, err := repo.HashObject(t, typ.TypeBlob, strings.NewReader("content\n"))
+			blobID, err := repo.HashObject(t, typ.Blob, strings.NewReader("content\n"))
 			if err != nil {
 				t.Fatalf("HashObject: %v", err)
 			}
 
 			treeID, err := repo.MkTree(t, []testgit.TreeEntry{
-				{Mode: "100644", Type: typ.TypeBlob, OID: blobID, Name: "file.txt"},
+				{Mode: "100644", Type: typ.Blob, OID: blobID, Name: "file.txt"},
 			})
 			if err != nil {
 				t.Fatalf("MkTree: %v", err)
@@ -96,7 +96,7 @@ func TestParse(t *testing.T) {
 				},
 			} {
 				t.Run(tc.name, func(t *testing.T) {
-					rawBody, err := repo.CatFile(t, typ.TypeCommit, tc.oid)
+					rawBody, err := repo.CatFile(t, typ.Commit, tc.oid)
 					if err != nil {
 						t.Fatalf("CatFile: %v", err)
 					}

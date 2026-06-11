@@ -21,7 +21,7 @@ func (fetcher *Fetcher) ExactTree(id oid.ObjectID) (*stored.Stored[*tree.Tree], 
 
 	tree, ok := parsed.(*tree.Tree)
 	if !ok {
-		return nil, &errs.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: typ.TypeTree}
+		return nil, &errs.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: typ.Tree}
 	}
 
 	return stored.New(id, tree), nil
@@ -46,7 +46,7 @@ func (fetcher *Fetcher) PeelToTree(id oid.ObjectID) (*stored.Stored[*tree.Tree],
 		case *tag.Tag:
 			id = parsed.TargetID
 		default:
-			return nil, &errs.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: typ.TypeTree}
+			return nil, &errs.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: typ.Tree}
 		}
 	}
 }
@@ -61,26 +61,26 @@ func (fetcher *Fetcher) PeelToTreeID(id oid.ObjectID) (oid.ObjectID, error) {
 		}
 
 		switch ty {
-		case typ.TypeTree:
+		case typ.Tree:
 			return id, nil
-		case typ.TypeCommit:
+		case typ.Commit:
 			commit, err := fetcher.ExactCommit(id)
 			if err != nil {
 				return oid.ObjectID{}, err
 			}
 
 			return commit.Object().Tree, nil
-		case typ.TypeTag:
+		case typ.Tag:
 			tag, err := fetcher.ExactTag(id)
 			if err != nil {
 				return oid.ObjectID{}, err
 			}
 
 			id = tag.Object().TargetID
-		case typ.TypeUnknown, typ.TypeBlob:
-			return oid.ObjectID{}, &errs.ObjectTypeError{OID: id, Got: ty, Want: typ.TypeTree}
+		case typ.Unknown, typ.Blob:
+			return oid.ObjectID{}, &errs.ObjectTypeError{OID: id, Got: ty, Want: typ.Tree}
 		default:
-			return oid.ObjectID{}, &errs.ObjectTypeError{OID: id, Got: ty, Want: typ.TypeTree}
+			return oid.ObjectID{}, &errs.ObjectTypeError{OID: id, Got: ty, Want: typ.Tree}
 		}
 	}
 }

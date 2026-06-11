@@ -27,7 +27,7 @@ func (memory *Memory) ReadBytesFull(id id.ObjectID) ([]byte, error) {
 func (memory *Memory) ReadBytesContent(id id.ObjectID) (typ.Type, []byte, error) {
 	obj, ok := memory.objects.Load(id)
 	if !ok {
-		return typ.TypeUnknown, nil, store.ErrObjectNotFound
+		return typ.Unknown, nil, store.ErrObjectNotFound
 	}
 
 	return obj.ty, append([]byte(nil), obj.content...), nil
@@ -37,7 +37,7 @@ func (memory *Memory) ReadBytesContent(id id.ObjectID) (typ.Type, []byte, error)
 func (memory *Memory) ReadHeader(id id.ObjectID) (typ.Type, uint64, error) {
 	obj, ok := memory.objects.Load(id)
 	if !ok {
-		return typ.TypeUnknown, 0, store.ErrObjectNotFound
+		return typ.Unknown, 0, store.ErrObjectNotFound
 	}
 
 	return obj.ty, uint64(len(obj.content)), nil
@@ -67,7 +67,7 @@ func (memory *Memory) ReadReaderFull(id id.ObjectID) (io.ReadCloser, error) {
 func (memory *Memory) ReadReaderContent(id id.ObjectID) (typ.Type, uint64, io.ReadCloser, error) {
 	ty, content, err := memory.ReadBytesContent(id)
 	if err != nil {
-		return typ.TypeUnknown, 0, nil, err
+		return typ.Unknown, 0, nil, err
 	}
 
 	return ty, uint64(len(content)), io.NopCloser(bytes.NewReader(content)), nil

@@ -32,7 +32,7 @@ func (mode Mode) HasSameType(other Mode) bool {
 
 // ObjectType returns the type of object that an entry with this mode targets.
 //
-// It returns [typ.TypeUnknown] for invalid modes.
+// It returns [typ.Unknown] for invalid modes.
 func (mode Mode) ObjectType() typ.Type {
 	return mode.details().objectType
 }

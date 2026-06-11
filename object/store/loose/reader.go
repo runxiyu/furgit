@@ -37,7 +37,7 @@ func (loose *Loose) ReadBytesFull(objectID id.ObjectID) ([]byte, error) {
 func (loose *Loose) ReadBytesContent(objectID id.ObjectID) (typ.Type, []byte, error) {
 	_, ty, content, err := loose.readBytesParsed(objectID)
 	if err != nil {
-		return typ.TypeUnknown, nil, err
+		return typ.Unknown, nil, err
 	}
 
 	return ty, content, nil
@@ -51,21 +51,21 @@ func (loose *Loose) ReadBytesContent(objectID id.ObjectID) (typ.Type, []byte, er
 func (loose *Loose) ReadHeader(objectID id.ObjectID) (typ.Type, uint64, error) {
 	file, err := loose.openObject(objectID)
 	if err != nil {
-		return typ.TypeUnknown, 0, err
+		return typ.Unknown, 0, err
 	}
 
 	defer func() { _ = file.Close() }()
 
 	zr, err := zlib.NewReader(file)
 	if err != nil {
-		return typ.TypeUnknown, 0, fmt.Errorf("object/store/loose: %w", err)
+		return typ.Unknown, 0, fmt.Errorf("object/store/loose: %w", err)
 	}
 
 	defer func() { _ = zr.Close() }()
 
 	_, ty, size, err := readHeader(bufio.NewReader(zr))
 	if err != nil {
-		return typ.TypeUnknown, 0, err
+		return typ.Unknown, 0, err
 	}
 
 	return ty, size, nil
@@ -130,7 +130,7 @@ func (loose *Loose) ReadReaderFull(objectID id.ObjectID) (io.ReadCloser, error) 
 func (loose *Loose) ReadReaderContent(objectID id.ObjectID) (typ.Type, uint64, io.ReadCloser, error) {
 	file, zr, err := loose.openInflated(objectID)
 	if err != nil {
-		return typ.TypeUnknown, 0, nil, err
+		return typ.Unknown, 0, nil, err
 	}
 
 	br := bufio.NewReader(zr)
@@ -140,7 +140,7 @@ func (loose *Loose) ReadReaderContent(objectID id.ObjectID) (typ.Type, uint64, i
 		_ = zr.Close()
 		_ = file.Close()
 
-		return typ.TypeUnknown, 0, nil, err
+		return typ.Unknown, 0, nil, err
 	}
 
 	return ty, size, &objectReader{
@@ -180,19 +180,19 @@ func (loose *Loose) openObject(objectID id.ObjectID) (*os.File, error) {
 func (loose *Loose) readBytesParsed(objectID id.ObjectID) ([]byte, typ.Type, []byte, error) {
 	file, err := loose.openObject(objectID)
 	if err != nil {
-		return nil, typ.TypeUnknown, nil, err
+		return nil, typ.Unknown, nil, err
 	}
 
 	defer func() { _ = file.Close() }()
 
 	raw, err := decodeAll(file)
 	if err != nil {
-		return nil, typ.TypeUnknown, nil, err
+		return nil, typ.Unknown, nil, err
 	}
 
 	ty, content, err := parseRaw(raw)
 	if err != nil {
-		return nil, typ.TypeUnknown, nil, err
+		return nil, typ.Unknown, nil, err
 	}
 
 	return raw, ty, content, nil

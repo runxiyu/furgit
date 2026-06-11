@@ -25,14 +25,14 @@ func TestRoundTrip(t *testing.T) {
 				t.Fatalf("NewRepo: %v", err)
 			}
 
-			blobID, err := repo.HashObject(t, typ.TypeBlob, strings.NewReader("roundtrip\n"))
+			blobID, err := repo.HashObject(t, typ.Blob, strings.NewReader("roundtrip\n"))
 			if err != nil {
 				t.Fatalf("HashObject(blob): %v", err)
 			}
 
 			want := &tag.Tag{
 				TargetID:   blobID,
-				TargetType: typ.TypeBlob,
+				TargetType: typ.Blob,
 				Name:       []byte("roundtrip-tag"),
 				Tagger: signature.Signature{
 					Name:          []byte("Round Trip Tagger"),
@@ -52,7 +52,7 @@ func TestRoundTrip(t *testing.T) {
 				t.Fatalf("AppendWithoutHeader: %v", err)
 			}
 
-			roundTripID, err := repo.HashObject(t, typ.TypeTag, bytes.NewReader(rawBody))
+			roundTripID, err := repo.HashObject(t, typ.Tag, bytes.NewReader(rawBody))
 			if err != nil {
 				t.Fatalf("HashObject(tag): %v", err)
 			}
@@ -65,7 +65,7 @@ func TestRoundTrip(t *testing.T) {
 				t.Fatalf("Fsck: %v", err)
 			}
 
-			gitBody, err := repo.CatFile(t, typ.TypeTag, roundTripID)
+			gitBody, err := repo.CatFile(t, typ.Tag, roundTripID)
 			if err != nil {
 				t.Fatalf("CatFile: %v", err)
 			}

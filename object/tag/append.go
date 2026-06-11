@@ -47,7 +47,7 @@ func (tag *Tag) AppendWithHeader(dst []byte) ([]byte, error) {
 		return dst, err
 	}
 
-	dst = header.Append(dst, typ.TypeTag, uint64(len(body)))
+	dst = header.Append(dst, typ.Tag, uint64(len(body)))
 
 	return append(dst, body...), nil
 }

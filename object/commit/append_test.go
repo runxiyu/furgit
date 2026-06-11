@@ -24,13 +24,13 @@ func TestAppendGitFsck(t *testing.T) {
 				t.Fatalf("NewRepo: %v", err)
 			}
 
-			blobID, err := repo.HashObject(t, typ.TypeBlob, strings.NewReader("content\n"))
+			blobID, err := repo.HashObject(t, typ.Blob, strings.NewReader("content\n"))
 			if err != nil {
 				t.Fatalf("HashObject(blob): %v", err)
 			}
 
 			treeID, err := repo.MkTree(t, []testgit.TreeEntry{
-				{Mode: "100644", Type: typ.TypeBlob, OID: blobID, Name: "file.txt"},
+				{Mode: "100644", Type: typ.Blob, OID: blobID, Name: "file.txt"},
 			})
 			if err != nil {
 				t.Fatalf("MkTree: %v", err)
@@ -58,7 +58,7 @@ func TestAppendGitFsck(t *testing.T) {
 				t.Fatalf("AppendWithoutHeader: %v", err)
 			}
 
-			commitID, err := repo.HashObject(t, typ.TypeCommit, bytes.NewReader(rawBody))
+			commitID, err := repo.HashObject(t, typ.Commit, bytes.NewReader(rawBody))
 			if err != nil {
 				t.Fatalf("HashObject(commit): %v", err)
 			}

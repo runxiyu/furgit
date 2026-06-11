@@ -25,13 +25,13 @@ func TestRoundTrip(t *testing.T) {
 				t.Fatalf("NewRepo: %v", err)
 			}
 
-			blobID, err := repo.HashObject(t, typ.TypeBlob, strings.NewReader("roundtrip\n"))
+			blobID, err := repo.HashObject(t, typ.Blob, strings.NewReader("roundtrip\n"))
 			if err != nil {
 				t.Fatalf("HashObject(blob): %v", err)
 			}
 
 			treeID, err := repo.MkTree(t, []testgit.TreeEntry{
-				{Mode: "100644", Type: typ.TypeBlob, OID: blobID, Name: "roundtrip.txt"},
+				{Mode: "100644", Type: typ.Blob, OID: blobID, Name: "roundtrip.txt"},
 			})
 			if err != nil {
 				t.Fatalf("MkTree: %v", err)
@@ -99,7 +99,7 @@ func TestRoundTrip(t *testing.T) {
 				t.Fatalf("AppendWithoutHeader: %v", err)
 			}
 
-			roundTripID, err := repo.HashObject(t, typ.TypeCommit, bytes.NewReader(rawBody))
+			roundTripID, err := repo.HashObject(t, typ.Commit, bytes.NewReader(rawBody))
 			if err != nil {
 				t.Fatalf("HashObject(commit): %v", err)
 			}
@@ -112,7 +112,7 @@ func TestRoundTrip(t *testing.T) {
 				t.Fatalf("Fsck: %v", err)
 			}
 
-			gitBody, err := repo.CatFile(t, typ.TypeCommit, roundTripID)
+			gitBody, err := repo.CatFile(t, typ.Commit, roundTripID)
 			if err != nil {
 				t.Fatalf("CatFile: %v", err)
 			}

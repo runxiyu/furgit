@@ -28,7 +28,7 @@ func TestParse(t *testing.T) {
 				t.Fatalf("MkTree: %v", err)
 			}
 
-			rawBody, err := repo.CatFile(t, typ.TypeTree, treeID)
+			rawBody, err := repo.CatFile(t, typ.Tree, treeID)
 			if err != nil {
 				t.Fatalf("CatFile: %v", err)
 			}

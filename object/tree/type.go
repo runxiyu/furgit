@@ -6,5 +6,5 @@ import "lindenii.org/go/furgit/object/typ"
 func (tree *Tree) ObjectType() typ.Type {
 	_ = tree
 
-	return typ.TypeTree
+	return typ.Tree
 }

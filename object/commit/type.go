@@ -8,5 +8,5 @@ import (
 func (commit *Commit) ObjectType() typ.Type {
 	_ = commit
 
-	return typ.TypeCommit
+	return typ.Commit
 }

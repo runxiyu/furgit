@@ -24,10 +24,10 @@ func (mix *Mix) ReadHeader(id id.ObjectID) (typ.Type, uint64, error) {
 			continue
 		}
 
-		return typ.TypeUnknown, 0, fmt.Errorf("object/store/mix: read header: %w", err)
+		return typ.Unknown, 0, fmt.Errorf("object/store/mix: read header: %w", err)
 	}
 
-	return typ.TypeUnknown, 0, store.ErrObjectNotFound
+	return typ.Unknown, 0, store.ErrObjectNotFound
 }
 
 // ReadSize reads object content length

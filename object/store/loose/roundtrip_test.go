@@ -19,11 +19,11 @@ func TestRoundTrip(t *testing.T) {
 		ty      typ.Type
 		content []byte
 	}{
-		{name: "blob", ty: typ.TypeBlob, content: []byte("roundtrip blob\n")},
-		{name: "empty blob", ty: typ.TypeBlob, content: []byte{}},
-		{name: "tree", ty: typ.TypeTree, content: []byte("roundtrip tree bytes")},
-		{name: "commit", ty: typ.TypeCommit, content: []byte("roundtrip commit bytes")},
-		{name: "tag", ty: typ.TypeTag, content: []byte("roundtrip tag bytes")},
+		{name: "blob", ty: typ.Blob, content: []byte("roundtrip blob\n")},
+		{name: "empty blob", ty: typ.Blob, content: []byte{}},
+		{name: "tree", ty: typ.Tree, content: []byte("roundtrip tree bytes")},
+		{name: "commit", ty: typ.Commit, content: []byte("roundtrip commit bytes")},
+		{name: "tag", ty: typ.Tag, content: []byte("roundtrip tag bytes")},
 	}
 
 	for _, objectFormat := range id.SupportedObjectFormats() {

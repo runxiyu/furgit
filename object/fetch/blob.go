@@ -22,7 +22,7 @@ func (fetcher *Fetcher) ExactBlob(id oid.ObjectID) (*stored.Stored[*blob.Blob], 
 
 	blob, ok := parsed.(*blob.Blob)
 	if !ok {
-		return nil, &errs.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: typ.TypeBlob}
+		return nil, &errs.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: typ.Blob}
 	}
 
 	return stored.New(id, blob), nil
@@ -33,7 +33,7 @@ func (fetcher *Fetcher) ExactBlob(id oid.ObjectID) (*stored.Stored[*blob.Blob], 
 //
 // Labels: Life-Parent, Close-Caller.
 func (fetcher *Fetcher) ExactBlobReader(id oid.ObjectID) (io.ReadCloser, uint64, error) {
-	return fetcher.exactReader(id, typ.TypeBlob)
+	return fetcher.exactReader(id, typ.Blob)
 }
 
 // PeelToBlob peels tags until it reaches a blob.
@@ -52,7 +52,7 @@ func (fetcher *Fetcher) PeelToBlob(id oid.ObjectID) (*stored.Stored[*blob.Blob],
 		case *tag.Tag:
 			id = parsed.TargetID
 		default:
-			return nil, &errs.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: typ.TypeBlob}
+			return nil, &errs.ObjectTypeError{OID: id, Got: parsed.ObjectType(), Want: typ.Blob}
 		}
 	}
 }
@@ -66,19 +66,19 @@ func (fetcher *Fetcher) PeelToBlobID(id oid.ObjectID) (oid.ObjectID, error) {
 		}
 
 		switch ty {
-		case typ.TypeBlob:
+		case typ.Blob:
 			return id, nil
-		case typ.TypeTag:
+		case typ.Tag:
 			tag, err := fetcher.ExactTag(id)
 			if err != nil {
 				return oid.ObjectID{}, err
 			}
 
 			id = tag.Object().TargetID
-		case typ.TypeUnknown, typ.TypeCommit, typ.TypeTree:
-			return oid.ObjectID{}, &errs.ObjectTypeError{OID: id, Got: ty, Want: typ.TypeBlob}
+		case typ.Unknown, typ.Commit, typ.Tree:
+			return oid.ObjectID{}, &errs.ObjectTypeError{OID: id, Got: ty, Want: typ.Blob}
 		default:
-			return oid.ObjectID{}, &errs.ObjectTypeError{OID: id, Got: ty, Want: typ.TypeBlob}
+			return oid.ObjectID{}, &errs.ObjectTypeError{OID: id, Got: ty, Want: typ.Blob}
 		}
 	}
 }
