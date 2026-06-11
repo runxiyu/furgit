@@ -47,7 +47,7 @@ type Packidx struct {
 	off32Off int
 	off64Off int
 	// off64Count is the number of 64-bit offset table entries.
-	off64Count uint32
+	off64Count uint64
 }
 
 // Parse parses one pack index from data.
@@ -75,6 +75,7 @@ func Parse(data []byte, hashSize int) (Packidx, error) {
 	}
 
 	prev := uint32(0)
+
 	for i := range 256 {
 		count := binary.BigEndian.Uint32(data[headerLen+4*i:])
 		if count < prev {
@@ -116,7 +117,7 @@ func Parse(data []byte, hashSize int) (Packidx, error) {
 	idx := Packidx{
 		data:       data,
 		hashSize:   hashSize,
-		off64Count: uint32(off64Count),
+		off64Count: off64Count,
 	}
 
 	idx.numObjects, err = intconv.Uint64ToInt(numObjects)

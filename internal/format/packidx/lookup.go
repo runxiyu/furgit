@@ -53,7 +53,7 @@ func (idx *Packidx) OffsetAt(pos int) (uint64, error) {
 	}
 
 	slot := raw &^ largeOffsetFlag
-	if slot >= idx.off64Count {
+	if uint64(slot) >= idx.off64Count {
 		return 0, fmt.Errorf("%w: 64-bit offset reference out of range", ErrMalformedPackIndex)
 	}
 
