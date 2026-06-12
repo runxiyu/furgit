@@ -58,6 +58,22 @@ func TestSyncDropsAbsentAndKeepsSurvivorOrder(t *testing.T) {
 	}
 }
 
+func TestSyncPlacesNewKeysFirst(t *testing.T) {
+	t.Parallel()
+
+	order := mru.New[string]()
+	order.Sync(set("a", "b"))
+
+	order.Touch("a")
+	order.Touch("b")
+
+	order.Sync(set("a", "b", "z"))
+
+	if got, want := order.Keys(), []string{"z", "b", "a"}; !slices.Equal(got, want) {
+		t.Fatalf("after Sync, order = %v, want %v", got, want)
+	}
+}
+
 func TestTouchAbsentIsNoOp(t *testing.T) {
 	t.Parallel()
 
