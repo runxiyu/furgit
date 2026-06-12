@@ -2,7 +2,6 @@ package loose_test
 
 import (
 	"os"
-	"strings"
 	"testing"
 
 	"lindenii.org/go/furgit/internal/testgit"
@@ -47,62 +46,48 @@ func openLooseStore(t *testing.T, repo *testgit.Repo) *loose.Loose {
 	return looseStore
 }
 
-// gitOracleObjects builds one object of each kind with git
-// and precomputes each one's expected content body and full serialized form.
+// gitOracleObjects seeds the repository with history
+// and precomputes every seeded object's
+// expected content body and full serialized form.
 func gitOracleObjects(t *testing.T, repo *testgit.Repo) []gitOracleObject {
 	t.Helper()
 
-	blobID, err := repo.HashObject(t, typ.Blob, strings.NewReader("blob body\n"))
+	seeded, err := repo.SeedHistory(t)
 	if err != nil {
-		t.Fatalf("HashObject(blob): %v", err)
+		t.Fatalf("SeedHistory: %v", err)
 	}
 
-	treeID, err := repo.MkTree(t, []testgit.TreeEntry{
-		{Mode: "100644", Type: typ.Blob, OID: blobID, Name: "file"},
-	})
-	if err != nil {
-		t.Fatalf("MkTree: %v", err)
-	}
-
-	commitID, err := repo.CommitTree(t, treeID, testgit.CommitTreeOptions{Message: "subject\n\nbody"})
-	if err != nil {
-		t.Fatalf("CommitTree: %v", err)
-	}
-
-	tagID, err := repo.TagAnnotated(t, "v1", commitID, testgit.TagAnnotatedOptions{Message: "tag message"})
-	if err != nil {
-		t.Fatalf("TagAnnotated: %v", err)
-	}
-
-	kinds := []struct {
+	groups := []struct {
 		name string
 		ty   typ.Type
-		id   id.ObjectID
+		oids []id.ObjectID
 	}{
-		{name: "blob", ty: typ.Blob, id: blobID},
-		{name: "tree", ty: typ.Tree, id: treeID},
-		{name: "commit", ty: typ.Commit, id: commitID},
-		{name: "tag", ty: typ.Tag, id: tagID},
+		{name: "blob", ty: typ.Blob, oids: seeded.Blobs},
+		{name: "tree", ty: typ.Tree, oids: seeded.Trees},
+		{name: "commit", ty: typ.Commit, oids: seeded.Commits},
+		{name: "tag", ty: typ.Tag, oids: seeded.Tags},
 	}
 
-	objects := make([]gitOracleObject, 0, len(kinds))
+	objects := make([]gitOracleObject, 0, len(seeded.All()))
 
-	for _, kind := range kinds {
-		body, err := repo.CatFile(t, kind.ty, kind.id)
-		if err != nil {
-			t.Fatalf("CatFile(%s): %v", kind.name, err)
+	for _, group := range groups {
+		for _, oid := range group.oids {
+			body, err := repo.CatFile(t, group.ty, oid)
+			if err != nil {
+				t.Fatalf("CatFile(%s %s): %v", group.name, oid, err)
+			}
+
+			raw := header.Append(nil, group.ty, uint64(len(body)))
+			raw = append(raw, body...)
+
+			objects = append(objects, gitOracleObject{
+				name: group.name + " " + oid.String(),
+				ty:   group.ty,
+				id:   oid,
+				body: body,
+				raw:  raw,
+			})
 		}
-
-		raw := header.Append(nil, kind.ty, uint64(len(body)))
-		raw = append(raw, body...)
-
-		objects = append(objects, gitOracleObject{
-			name: kind.name,
-			ty:   kind.ty,
-			id:   kind.id,
-			body: body,
-			raw:  raw,
-		})
 	}
 
 	return objects
