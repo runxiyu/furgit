@@ -1,7 +1,6 @@
 package packidx_test
 
 import (
-	"fmt"
 	"os"
 	"slices"
 	"strconv"
@@ -11,11 +10,10 @@ import (
 	"lindenii.org/go/furgit/internal/format/packidx"
 	"lindenii.org/go/furgit/internal/testgit"
 	"lindenii.org/go/furgit/object/id"
-	"lindenii.org/go/furgit/object/typ"
 )
 
-// makeGitPack builds a repository with some blobs,
-// packs them with git pack-objects,
+// makeGitPack seeds a repository,
+// packs the seeded objects with git pack-objects,
 // and returns the repository, the artifact path prefix,
 // and the packed object IDs.
 func makeGitPack(t *testing.T, objectFormat id.ObjectFormat) (*testgit.Repo, string, []id.ObjectID) {
@@ -26,18 +24,12 @@ func makeGitPack(t *testing.T, objectFormat id.ObjectFormat) (*testgit.Repo, str
 		t.Fatalf("NewRepo: %v", err)
 	}
 
-	oids := make([]id.ObjectID, 0, 40)
-
-	for i := range 40 {
-		content := fmt.Sprintf("blob %d\n%s", i, strings.Repeat("filler\n", i))
-
-		oid, err := repo.HashObject(t, typ.Blob, strings.NewReader(content))
-		if err != nil {
-			t.Fatalf("HashObject: %v", err)
-		}
-
-		oids = append(oids, oid)
+	seeded, err := repo.SeedHistory(t)
+	if err != nil {
+		t.Fatalf("SeedHistory: %v", err)
 	}
+
+	oids := seeded.All()
 
 	prefix, err := repo.PackObjects(t, slices.Values(oids), testgit.PackObjectsOptions{})
 	if err != nil {
