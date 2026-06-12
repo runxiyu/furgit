@@ -2,7 +2,6 @@ package packed
 
 import (
 	"bytes"
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"os"
@@ -14,16 +13,10 @@ import (
 	"lindenii.org/go/lgo/intconv"
 )
 
-// packHeaderLen is the size of the on-disk pack header:
-// signature, version, and object count.
-const packHeaderLen = 12
-
 var (
-	errPackTruncated          = errors.New("truncated")
-	errPackBadSignature       = errors.New("bad signature")
-	errPackUnsupportedVersion = errors.New("unsupported pack version")
-	errPackCountMismatch      = errors.New("object count differs from index")
-	errPackTrailerMismatch    = errors.New("trailer hash differs from index")
+	errPackTruncated       = errors.New("truncated")
+	errPackCountMismatch   = errors.New("object count differs from index")
+	errPackTrailerMismatch = errors.New("trailer hash differs from index")
 )
 
 // pack is one discovered pack:
@@ -104,19 +97,16 @@ func mapFile(root *os.Root, name string) (*mmap.Mmap, error) {
 // validatePackData checks one mapped pack
 // against the pack format and its index.
 func validatePackData(data []byte, idx *packidx.Packidx, hashSize int) error {
-	if len(data) < packHeaderLen+hashSize {
+	if len(data) < packfile.HeaderLen+hashSize {
 		return errPackTruncated
 	}
 
-	if binary.BigEndian.Uint32(data) != packfile.Signature {
-		return errPackBadSignature
+	header, err := packfile.ParseHeader(data)
+	if err != nil {
+		return err
 	}
 
-	if !packfile.SupportedVersion(binary.BigEndian.Uint32(data[4:])) {
-		return errPackUnsupportedVersion
-	}
-
-	count := uint64(binary.BigEndian.Uint32(data[8:]))
+	count := uint64(header.ObjectCount)
 
 	numObjects, err := intconv.IntToUint64(idx.NumObjects())
 	if err != nil {
