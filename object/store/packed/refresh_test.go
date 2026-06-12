@@ -43,6 +43,7 @@ func TestRefreshIsExplicit(t *testing.T) {
 			}
 
 			t.Helper()
+
 			base := filepath.Base(prefix)
 			cp(t, prefix+".pack", filepath.Join(dir, base+".pack"))
 			cp(t, prefix+".idx", filepath.Join(dir, base+".idx"))
