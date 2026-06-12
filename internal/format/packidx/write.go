@@ -3,12 +3,12 @@ package packidx
 import (
 	"bufio"
 	"bytes"
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
 	"math"
 
+	"lindenii.org/go/furgit/internal/stickyio"
 	"lindenii.org/go/furgit/object/id"
 )
 
@@ -60,10 +60,10 @@ func Write(w io.Writer, objectFormat id.ObjectFormat, entries []Entry, packHash 
 	}
 
 	bw := bufio.NewWriter(io.MultiWriter(w, hashImpl))
-	sw := &stickyWriter{w: bw}
+	sw := stickyio.New(bw)
 
-	sw.writeUint32(signature)
-	sw.writeUint32(version)
+	sw.PutUint32(signature)
+	sw.PutUint32(version)
 
 	var counts [256]uint32
 	for i := range entries {
@@ -73,15 +73,15 @@ func Write(w io.Writer, objectFormat id.ObjectFormat, entries []Entry, packHash 
 	cumulative := uint32(0)
 	for _, count := range counts {
 		cumulative += count
-		sw.writeUint32(cumulative)
+		sw.PutUint32(cumulative)
 	}
 
 	for i := range entries {
-		sw.write(entries[i].OID[:hashSize])
+		sw.Put(entries[i].OID[:hashSize])
 	}
 
 	for i := range entries {
-		sw.writeUint32(entries[i].CRC32)
+		sw.PutUint32(entries[i].CRC32)
 	}
 
 	var largeOffsets []uint64
@@ -89,7 +89,7 @@ func Write(w io.Writer, objectFormat id.ObjectFormat, entries []Entry, packHash 
 	for i := range entries {
 		offset := entries[i].Offset
 		if offset < largeOffsetFlag {
-			sw.writeUint32(uint32(offset))
+			sw.PutUint32(uint32(offset))
 
 			continue
 		}
@@ -99,19 +99,20 @@ func Write(w io.Writer, objectFormat id.ObjectFormat, entries []Entry, packHash 
 			return fmt.Errorf("%w: too many large offsets", ErrInvalidEntries)
 		}
 
-		sw.writeUint32(largeOffsetFlag | uint32(slot))
+		sw.PutUint32(largeOffsetFlag | uint32(slot))
 
 		largeOffsets = append(largeOffsets, offset)
 	}
 
 	for _, offset := range largeOffsets {
-		sw.writeUint64(offset)
+		sw.PutUint64(offset)
 	}
 
-	sw.write(packHash)
+	sw.Put(packHash)
 
-	if sw.err != nil {
-		return fmt.Errorf("internal/format/packidx: %w", sw.err)
+	err = sw.Err()
+	if err != nil {
+		return fmt.Errorf("internal/format/packidx: %w", err)
 	}
 
 	err = bw.Flush()
@@ -125,34 +126,4 @@ func Write(w io.Writer, objectFormat id.ObjectFormat, entries []Entry, packHash 
 	}
 
 	return nil
-}
-
-// stickyWriter forwards writes to w
-// and retains the first error,
-// turning subsequent writes into no-ops.
-type stickyWriter struct {
-	w   io.Writer
-	err error
-}
-
-func (sw *stickyWriter) write(p []byte) {
-	if sw.err != nil {
-		return
-	}
-
-	_, sw.err = sw.w.Write(p)
-}
-
-func (sw *stickyWriter) writeUint32(v uint32) {
-	var buf [4]byte
-
-	binary.BigEndian.PutUint32(buf[:], v)
-	sw.write(buf[:])
-}
-
-func (sw *stickyWriter) writeUint64(v uint64) {
-	var buf [8]byte
-
-	binary.BigEndian.PutUint64(buf[:], v)
-	sw.write(buf[:])
 }
