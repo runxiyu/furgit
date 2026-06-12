@@ -12,10 +12,6 @@ import (
 	"lindenii.org/go/furgit/internal/format/packfile/delta"
 )
 
-// maxDeltaDepth bounds delta chain length,
-// guaranteeing termination on crafted ref-delta loops.
-const maxDeltaDepth = 1 << 12
-
 // deltaNode is a delta entry on a resolution chain.
 type deltaNode struct {
 	// payload is the entry's compressed delta payload view.
@@ -55,7 +51,7 @@ func (packed *Packed) unpackEntry(p *pack, offset uint64) (packfile.EntryType, [
 			break
 		}
 
-		if len(chain) >= maxDeltaDepth {
+		if len(chain) >= delta.MaxChainDepth {
 			return zero, nil, fmt.Errorf("%w: pack %q: delta chain too deep", ErrMalformedPackedStore, p.name)
 		}
 
@@ -176,7 +172,7 @@ func (packed *Packed) resolveType(p *pack, offset uint64, entryHeader packfile.E
 		}
 
 		depth++
-		if depth > maxDeltaDepth {
+		if depth > delta.MaxChainDepth {
 			return zero, fmt.Errorf("%w: pack %q: delta chain too deep", ErrMalformedPackedStore, p.name)
 		}
 
