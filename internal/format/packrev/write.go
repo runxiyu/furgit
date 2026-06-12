@@ -2,12 +2,12 @@ package packrev
 
 import (
 	"bufio"
-	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
 	"math"
 
+	"lindenii.org/go/furgit/internal/stickyio"
 	"lindenii.org/go/furgit/object/id"
 )
 
@@ -48,20 +48,21 @@ func Write(w io.Writer, objectFormat id.ObjectFormat, positions []uint32, packHa
 	}
 
 	bw := bufio.NewWriter(io.MultiWriter(w, hashImpl))
-	sw := &stickyWriter{w: bw}
+	sw := stickyio.New(bw)
 
-	sw.writeUint32(signature)
-	sw.writeUint32(version)
-	sw.writeUint32(hashID)
+	sw.PutUint32(signature)
+	sw.PutUint32(version)
+	sw.PutUint32(hashID)
 
 	for _, position := range positions {
-		sw.writeUint32(position)
+		sw.PutUint32(position)
 	}
 
-	sw.write(packHash)
+	sw.Put(packHash)
 
-	if sw.err != nil {
-		return fmt.Errorf("internal/format/packrev: %w", sw.err)
+	err = sw.Err()
+	if err != nil {
+		return fmt.Errorf("internal/format/packrev: %w", err)
 	}
 
 	err = bw.Flush()
@@ -75,27 +76,4 @@ func Write(w io.Writer, objectFormat id.ObjectFormat, positions []uint32, packHa
 	}
 
 	return nil
-}
-
-// stickyWriter forwards writes to w
-// and retains the first error,
-// turning subsequent writes into no-ops.
-type stickyWriter struct {
-	w   io.Writer
-	err error
-}
-
-func (sw *stickyWriter) write(p []byte) {
-	if sw.err != nil {
-		return
-	}
-
-	_, sw.err = sw.w.Write(p)
-}
-
-func (sw *stickyWriter) writeUint32(v uint32) {
-	var buf [4]byte
-
-	binary.BigEndian.PutUint32(buf[:], v)
-	sw.write(buf[:])
 }
