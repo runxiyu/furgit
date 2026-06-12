@@ -74,7 +74,7 @@ func (mmap *Mmap) Data() []byte {
 // Close unmaps the mapping,
 // invalidating previously returned data.
 //
-// Labels: Idem-Yes.
+// Labels: Idem-Yes, MT-Unsafe.
 func (mmap *Mmap) Close() error {
 	if mmap.data == nil {
 		return nil
