@@ -6,6 +6,11 @@ import (
 	"lindenii.org/go/lgo/intconv"
 )
 
+// MaxChainDepth is the maximum supported delta chain length.
+// Resolvers reject chains deeper than this
+// to bound recursion depth and reconstruction work.
+const MaxChainDepth = 1 << 12
+
 // Apply applies one inflated delta payload to base
 // and returns the reconstructed result.
 //
