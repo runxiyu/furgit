@@ -15,6 +15,7 @@ import (
 
 var (
 	errPackTruncated       = errors.New("truncated")
+	errPackMalformedHeader = errors.New("malformed header")
 	errPackCountMismatch   = errors.New("object count differs from index")
 	errPackTrailerMismatch = errors.New("trailer hash differs from index")
 )
@@ -103,7 +104,7 @@ func validatePackData(data []byte, idx *packidx.Packidx, hashSize int) error {
 
 	header, err := packfile.ParseHeader(data)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: %w", errPackMalformedHeader, err)
 	}
 
 	count := uint64(header.ObjectCount)
