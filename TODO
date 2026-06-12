@@ -10,3 +10,22 @@
 * Interactions with hash-function-transition
 
 * Check error wrapping in object/fetch
+
+* Pack ingestion
+  * v2 resolver: explicit work-stack with evicting clock.Clock base cache
+    bounds base-object memory so a zlib-bomb base can't OOM us
+    needed for parallelism
+  * Incremental thin completion: append one base then cascade, like git,
+    instead of batch collecting then cascade, maybe?
+  * Partial promote orphan cleanup; audit contract too
+  * Strict mode or otherwise structurally validate trees/commits/tags
+  * SHA-1 collision detection
+  * Accept a context
+  * Multithreading
+  * Over-read footgun
+
+* Object ownership
+  * how cloning objects works, how mutating objects from stored.Stored
+    behaves, who owns the memory object fields reference, and where copying
+    can be reduced.
+  * which object ID length mismatches should panic vs error
