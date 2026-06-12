@@ -4,25 +4,32 @@ package mru
 //
 // Surviving keys keep their relative recency order,
 // absent keys are dropped,
-// and newly present keys are appended after the survivors.
+// and newly present keys are placed before the survivors,
+// since new members are presumed recently used.
 func (order *Order[K]) Sync(present map[K]struct{}) {
 	order.mu.Lock()
 	defer order.mu.Unlock()
 
 	keys := order.Keys()
 
-	next := make([]K, 0, len(present))
-	seen := make(map[K]struct{}, len(present))
+	survivors := make(map[K]struct{}, len(present))
 
 	for _, key := range keys {
 		if _, ok := present[key]; ok {
-			next = append(next, key)
-			seen[key] = struct{}{}
+			survivors[key] = struct{}{}
 		}
 	}
 
+	next := make([]K, 0, len(present))
+
 	for key := range present {
-		if _, ok := seen[key]; !ok {
+		if _, ok := survivors[key]; !ok {
+			next = append(next, key)
+		}
+	}
+
+	for _, key := range keys {
+		if _, ok := survivors[key]; ok {
 			next = append(next, key)
 		}
 	}
