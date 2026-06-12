@@ -2,7 +2,6 @@ package packidx_test
 
 import (
 	"os"
-	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -31,7 +30,7 @@ func makeGitPack(t *testing.T, objectFormat id.ObjectFormat) (*testgit.Repo, str
 
 	oids := seeded.All()
 
-	prefix, err := repo.PackObjects(t, slices.Values(oids), testgit.PackObjectsOptions{})
+	prefix, err := repo.PackObjects(t, oids, testgit.PackObjectsOptions{})
 	if err != nil {
 		t.Fatalf("PackObjects: %v", err)
 	}

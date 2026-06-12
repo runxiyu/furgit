@@ -3,7 +3,6 @@ package packed_test
 import (
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 	"testing"
 
@@ -29,7 +28,7 @@ func makeGitPack(t *testing.T, objectFormat id.ObjectFormat) (*testgit.Repo, str
 		t.Fatalf("SeedHistory: %v", err)
 	}
 
-	prefix, err := repo.PackObjects(t, slices.Values(seeded.All()), testgit.PackObjectsOptions{})
+	prefix, err := repo.PackObjects(t, seeded.All(), testgit.PackObjectsOptions{})
 	if err != nil {
 		t.Fatalf("PackObjects: %v", err)
 	}

@@ -28,7 +28,7 @@ func makeGitPack(t *testing.T, objectFormat id.ObjectFormat) string {
 		t.Fatalf("SeedHistory: %v", err)
 	}
 
-	prefix, err := repo.PackObjects(t, slices.Values(seeded.All()), testgit.PackObjectsOptions{RevIndex: true})
+	prefix, err := repo.PackObjects(t, seeded.All(), testgit.PackObjectsOptions{RevIndex: true})
 	if err != nil {
 		t.Fatalf("PackObjects: %v", err)
 	}
