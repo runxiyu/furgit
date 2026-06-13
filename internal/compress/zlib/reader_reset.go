@@ -18,7 +18,7 @@ import (
 
 // reset resets receiver to read a new zlib stream.
 func (z *Reader) reset(r io.Reader, dict []byte) error {
-	*z = Reader{decompressor: z.decompressor}
+	*z = Reader{decompressor: z.decompressor, digest: z.digest}
 
 	var input flate.Reader
 	if fr, ok := r.(flate.Reader); ok {
@@ -96,7 +96,11 @@ func (z *Reader) reset(r io.Reader, dict []byte) error {
 			return z.err
 		}
 
-		z.digest = adler32.New()
+		if z.digest == nil {
+			z.digest = adler32.New()
+		} else {
+			z.digest.Reset()
+		}
 
 		return nil
 	}
