@@ -47,7 +47,7 @@ func (err *PathNotTreeError) Error() string {
 // for an io/fs.FS-like interface.
 //
 // Labels: Life-Parent.
-func (fetcher *Fetcher) Path(root oid.ObjectID, parts []string) (tree.Entry, error) {
+func (fetcher *Fetcher) Path(root oid.ObjectID, parts [][]byte) (tree.Entry, error) {
 	if len(parts) == 0 {
 		return tree.Entry{}, ErrPathInvalid
 	}

@@ -1,11 +1,11 @@
 package fetch
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
 	"io/fs"
-	"strings"
 	"time"
 
 	oid "lindenii.org/go/furgit/object/id"
@@ -48,12 +48,12 @@ var ErrGitlinkNotFile = fmt.Errorf("%w: object/fetch: gitlink entries are not re
 // generic fs consumers classify it correctly.
 var ErrIsDirectory = fmt.Errorf("%w: object/fetch: is a directory", fs.ErrInvalid)
 
-func splitPath(path string) []string {
+func splitPath(path string) [][]byte {
 	if len(path) == 0 {
 		return nil
 	}
 
-	return strings.Split(path, "/")
+	return bytes.Split([]byte(path), []byte("/"))
 }
 
 type treeEntryValue struct {
@@ -197,7 +197,7 @@ func (treeFS *TreeFS) Open(name string) (fs.File, error) {
 		entries := make([]fs.DirEntry, 0, len(tree.Object().Entries()))
 		for _, child := range tree.Object().Entries() {
 			childEntry := treeEntryValue{
-				name:      child.Name,
+				name:      string(child.Name),
 				mode:      child.Mode,
 				objectID:  child.ID,
 				treeEntry: &child,
@@ -401,7 +401,7 @@ func (treeFS *TreeFS) resolvePath(op treeFSOp, name string) (treeEntryValue, err
 	}
 
 	return treeEntryValue{
-		name:      entry.Name,
+		name:      string(entry.Name),
 		mode:      entry.Mode,
 		objectID:  entry.ID,
 		treeEntry: &entry,
