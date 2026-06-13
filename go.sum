@@ -1,2 +1,4 @@
+github.com/klauspost/compress v1.18.6 h1:2jupLlAwFm95+YDR+NwD2MEfFO9d4z4Prjl1XXDjuao=
+github.com/klauspost/compress v1.18.6/go.mod h1:cwPg85FWrGar70rWktvGQj8/hthj3wpl0PGDogxkrSQ=
 lindenii.org/go/lgo v0.1.10 h1:UdixxhTB2cLGu2PSU+hMf9/T6Yc/2MNUGUZRsd2wLY8=
 lindenii.org/go/lgo v0.1.10/go.mod h1:/ISiIVk/j7UFbnTLni1VA8cc2TJWa/WRqJPc3BStwn8=

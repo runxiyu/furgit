@@ -10,8 +10,9 @@ import (
 	"errors"
 	"io"
 
+	"github.com/klauspost/compress/flate"
+
 	"lindenii.org/go/furgit/internal/adler32"
-	"lindenii.org/go/furgit/internal/compress/flate"
 	"lindenii.org/go/lgo/intconv"
 )
 

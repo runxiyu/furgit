@@ -39,7 +39,8 @@ import (
 	"hash"
 	"io"
 
-	"lindenii.org/go/furgit/internal/compress/flate"
+	"github.com/klauspost/compress/flate"
+
 	"lindenii.org/go/lgo/intconv"
 	"lindenii.org/go/lgo/sync"
 )

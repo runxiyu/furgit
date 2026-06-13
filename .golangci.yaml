@@ -49,6 +49,7 @@ linters:
             - $gostd
             - lindenii.org/go/furgit
             - lindenii.org/go/lgo
+            - github.com/klauspost/compress
             - golang.org/x
     revive:
       rules:
