@@ -14,12 +14,12 @@ type Commit struct {
 	Author       signature.Signature
 	Committer    signature.Signature
 	Message      []byte
-	ChangeID     string
+	ChangeID     []byte
 	ExtraHeaders []ExtraHeader
 }
 
 // ExtraHeader represents an extra header in a Git object.
 type ExtraHeader struct {
-	Key   string
+	Key   []byte
 	Value []byte
 }

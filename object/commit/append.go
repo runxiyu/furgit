@@ -33,7 +33,7 @@ func (commit *Commit) AppendWithoutHeader(dst []byte) ([]byte, error) {
 
 	dst = append(dst, byte('\n'))
 
-	if commit.ChangeID != "" {
+	if len(commit.ChangeID) != 0 {
 		dst = append(dst, []byte("change-id ")...)
 		dst = append(dst, commit.ChangeID...)
 		dst = append(dst, byte('\n'))
@@ -41,7 +41,7 @@ func (commit *Commit) AppendWithoutHeader(dst []byte) ([]byte, error) {
 
 	for _, h := range commit.ExtraHeaders {
 		// GIGO on empty keys and such.
-		dst = append(dst, []byte(h.Key)...)
+		dst = append(dst, h.Key...)
 		dst = append(dst, byte(' '))
 		dst = append(dst, h.Value...)
 		dst = append(dst, byte('\n'))

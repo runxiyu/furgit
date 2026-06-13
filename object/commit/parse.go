@@ -13,6 +13,16 @@ import (
 var ErrInvalidCommit = errors.New("object/commit: invalid commit")
 
 // Parse decodes a commit object body.
+//
+// The returned commit aliases body:
+// its Message, ChangeID, and extra-header fields,
+// along with the byte fields of its signatures,
+// share body's backing array.
+// The commit inherits body's lifetime
+// and must not be mutated unless body may be.
+// Use [Commit.Clone] for an independent copy.
+//
+// Labels: Life-Parent, Mut-No.
 func Parse(body []byte, objectFormat id.ObjectFormat) (*Commit, error) {
 	c := new(Commit)
 
@@ -95,7 +105,7 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Commit, error) {
 				return nil, fmt.Errorf("%w: unexpected change-id header at offset %d", ErrInvalidCommit, lineStart)
 			}
 
-			c.ChangeID = string(value)
+			c.ChangeID = value
 		case "gpgsig", "gpgsig-sha256":
 			if state != parseStateExtra {
 				return nil, fmt.Errorf("%w: unexpected %s header at offset %d", ErrInvalidCommit, key, lineStart)
@@ -119,8 +129,8 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Commit, error) {
 			}
 
 			c.ExtraHeaders = append(c.ExtraHeaders, ExtraHeader{
-				Key:   string(key),
-				Value: append([]byte(nil), value...),
+				Key:   key,
+				Value: value,
 			})
 		}
 	}
@@ -141,7 +151,7 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Commit, error) {
 		panic("unreachable parse state")
 	}
 
-	c.Message = append([]byte(nil), body[i:]...)
+	c.Message = body[i:]
 
 	return c, nil
 }
