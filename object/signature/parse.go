@@ -31,7 +31,7 @@ func Parse(line []byte) (*Signature, error) {
 	gt := lt + 1 + gtRel
 
 	nameBytes := bytes.TrimRight(line[:lt], " ")
-	emailBytes := line[lt+1:gt]
+	emailBytes := line[lt+1 : gt]
 
 	rest := line[gt+1:]
 	if len(rest) == 0 || rest[0] != ' ' {
