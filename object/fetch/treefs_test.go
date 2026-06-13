@@ -35,12 +35,12 @@ func TestTreeFS(t *testing.T) {
 			}
 
 			subTreeID := writeTree(t, store, []tree.Entry{
-				{Mode: mode.Executable, Name: "exec.sh", ID: execID},
+				{Mode: mode.Executable, Name: []byte("exec.sh"), ID: execID},
 			})
 
 			rootTreeID := writeTree(t, store, []tree.Entry{
-				{Mode: mode.Regular, Name: "plain.txt", ID: plainID},
-				{Mode: mode.Directory, Name: "dir", ID: subTreeID},
+				{Mode: mode.Regular, Name: []byte("plain.txt"), ID: plainID},
+				{Mode: mode.Directory, Name: []byte("dir"), ID: subTreeID},
 			})
 
 			commitID := writeCommit(t, store, rootTreeID)
