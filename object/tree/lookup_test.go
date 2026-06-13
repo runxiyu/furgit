@@ -1,6 +1,7 @@
 package tree_test
 
 import (
+	"bytes"
 	"testing"
 
 	"lindenii.org/go/furgit/internal/testgit"
@@ -28,12 +29,12 @@ func TestFind(t *testing.T) {
 					t.Fatalf("Find(%q) not found", want.Name)
 				}
 
-				if got.Mode != want.Mode || got.Name != want.Name || got.ID != want.ID {
+				if got.Mode != want.Mode || !bytes.Equal(got.Name, want.Name) || got.ID != want.ID {
 					t.Fatalf("Find(%q) = %+v, want %+v", want.Name, got, want)
 				}
 			}
 
-			if _, ok := tr.Find("does-not-exist"); ok {
+			if _, ok := tr.Find([]byte("does-not-exist")); ok {
 				t.Fatalf("Find(does-not-exist) = true, want false")
 			}
 		})
