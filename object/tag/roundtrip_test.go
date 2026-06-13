@@ -42,8 +42,8 @@ func TestRoundTrip(t *testing.T) {
 				},
 				Message: []byte("roundtrip subject\n\nroundtrip body\n\n"),
 				ExtraHeaders: []tag.ExtraHeader{
-					{Key: "encoding", Value: []byte("UTF-8")},
-					{Key: "x-test-header", Value: []byte("value")},
+					{Key: []byte("encoding"), Value: []byte("UTF-8")},
+					{Key: []byte("x-test-header"), Value: []byte("value")},
 				},
 			}
 
@@ -102,7 +102,7 @@ func assertTagEqual(t *testing.T, got *tag.Tag, want *tag.Tag) {
 	}
 
 	if !slices.EqualFunc(got.ExtraHeaders, want.ExtraHeaders, func(gotHeader tag.ExtraHeader, wantHeader tag.ExtraHeader) bool {
-		return gotHeader.Key == wantHeader.Key && bytes.Equal(gotHeader.Value, wantHeader.Value)
+		return bytes.Equal(gotHeader.Key, wantHeader.Key) && bytes.Equal(gotHeader.Value, wantHeader.Value)
 	}) {
 		t.Fatalf("extra headers = %+v, want %+v", got.ExtraHeaders, want.ExtraHeaders)
 	}
