@@ -87,10 +87,10 @@ func TestRoundTrip(t *testing.T) {
 					OffsetMinutes: 330,
 				},
 				Message:  []byte("roundtrip subject\n\nroundtrip body\n\n"),
-				ChangeID: "zyxwvutsrqponmlk",
+				ChangeID: []byte("zyxwvutsrqponmlk"),
 				ExtraHeaders: []commit.ExtraHeader{
-					{Key: "encoding", Value: []byte("UTF-8")},
-					{Key: "x-test-header", Value: []byte("value")},
+					{Key: []byte("encoding"), Value: []byte("UTF-8")},
+					{Key: []byte("x-test-header"), Value: []byte("value")},
 				},
 			}
 
@@ -145,7 +145,7 @@ func assertCommitEqual(t *testing.T, got *commit.Commit, want *commit.Commit) {
 		t.Fatalf("message = %q, want %q", got.Message, want.Message)
 	}
 
-	if got.ChangeID != want.ChangeID {
+	if !bytes.Equal(got.ChangeID, want.ChangeID) {
 		t.Fatalf("change id = %q, want %q", got.ChangeID, want.ChangeID)
 	}
 
@@ -155,7 +155,7 @@ func assertCommitEqual(t *testing.T, got *commit.Commit, want *commit.Commit) {
 
 	for i, wantHeader := range want.ExtraHeaders {
 		gotHeader := got.ExtraHeaders[i]
-		if gotHeader.Key != wantHeader.Key {
+		if !bytes.Equal(gotHeader.Key, wantHeader.Key) {
 			t.Fatalf("extra header[%d] key = %q, want %q", i, gotHeader.Key, wantHeader.Key)
 		}
 
