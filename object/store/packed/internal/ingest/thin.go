@@ -25,8 +25,8 @@ func (ingestion *ingestion) fixThin(external []id.ObjectID, adjacency adjacency,
 		return ErrThinPackNotPermitted
 	}
 
-	hashSize := uint64(ingestion.objectFormat.Size()) //nolint:gosec
-	if ingestion.scanner.consumed < uint64(packfile.HeaderLen)+hashSize {
+	hashSize := ingestion.objectFormat.Size()
+	if ingestion.scanner.consumed < packfile.HeaderLen+hashSize {
 		return fmt.Errorf("%w: pack shorter than trailer", ErrMalformedPack)
 	}
 
@@ -96,11 +96,7 @@ func (ingestion *ingestion) appendBaseObject(objectID id.ObjectID, objectType ty
 	}
 
 	start := ingestion.scanner.consumed
-
-	startOffset, err := intconv.Uint64ToInt64(start)
-	if err != nil {
-		return 0, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
-	}
+	startOffset := int64(start)
 
 	headerBytes := packfile.AppendTypeSize(nil, entryType, uint64(len(content)))
 
@@ -129,17 +125,8 @@ func (ingestion *ingestion) appendBaseObject(objectID id.ObjectID, objectType ty
 		return 0, fmt.Errorf("object/store/packed/internal/ingest: compressing thin base: %w", err)
 	}
 
-	compressedLen, err := intconv.Int64ToUint64(writer.offset - dataOffset)
-	if err != nil {
-		return 0, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
-	}
-
-	headerLen, err := intconv.IntToUint64(len(headerBytes))
-	if err != nil {
-		return 0, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
-	}
-
-	packedLen := headerLen + compressedLen
+	headerLen := len(headerBytes)
+	packedLen := headerLen + writer.written
 	ingestion.scanner.consumed = start + packedLen
 
 	rec := record{
@@ -148,7 +135,7 @@ func (ingestion *ingestion) appendBaseObject(objectID id.ObjectID, objectType ty
 		packedLen:    packedLen,
 		crc32:        crc.Sum32(),
 		packedType:   entryType,
-		declaredSize: uint64(len(content)),
+		declaredSize: len(content),
 		baseOffset:   0,
 		baseOID:      id.ObjectID{},
 		objectType:   entryType,
@@ -178,10 +165,7 @@ func (ingestion *ingestion) rewriteHeaderTrailer() error {
 		return fmt.Errorf("object/store/packed/internal/ingest: rewriting header: %w", err)
 	}
 
-	bodyEnd, err := intconv.Uint64ToInt64(ingestion.scanner.consumed)
-	if err != nil {
-		return fmt.Errorf("object/store/packed/internal/ingest: %w", err)
-	}
+	bodyEnd := int64(ingestion.scanner.consumed)
 
 	hashImpl, err := ingestion.objectFormat.New()
 	if err != nil {
@@ -211,16 +195,19 @@ func (ingestion *ingestion) rewriteHeaderTrailer() error {
 }
 
 // offsetWriter writes to a file via WriteAt,
-// advancing sequentially from a base offset.
+// advancing sequentially from a base offset
+// and counting the bytes written.
 type offsetWriter struct {
-	file   *os.File
-	offset int64
+	file    *os.File
+	offset  int64
+	written int
 }
 
 // Write implements [io.Writer].
 func (writer *offsetWriter) Write(p []byte) (int, error) {
 	n, err := writer.file.WriteAt(p, writer.offset)
 	writer.offset += int64(n)
+	writer.written += n
 
 	return n, err //nolint:wrapcheck
 }

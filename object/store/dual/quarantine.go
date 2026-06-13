@@ -79,15 +79,15 @@ func (quarantine *coordinatedQuarantine) ReadReaderFull(id id.ObjectID) (io.Read
 	return quarantine.reader.ReadReaderFull(id) //nolint:wrapcheck
 }
 
-func (quarantine *coordinatedQuarantine) ReadReaderContent(id id.ObjectID) (typ.Type, uint64, io.ReadCloser, error) {
+func (quarantine *coordinatedQuarantine) ReadReaderContent(id id.ObjectID) (typ.Type, int, io.ReadCloser, error) {
 	return quarantine.reader.ReadReaderContent(id) //nolint:wrapcheck
 }
 
-func (quarantine *coordinatedQuarantine) ReadSize(id id.ObjectID) (uint64, error) {
+func (quarantine *coordinatedQuarantine) ReadSize(id id.ObjectID) (int, error) {
 	return quarantine.reader.ReadSize(id) //nolint:wrapcheck
 }
 
-func (quarantine *coordinatedQuarantine) ReadHeader(id id.ObjectID) (typ.Type, uint64, error) {
+func (quarantine *coordinatedQuarantine) ReadHeader(id id.ObjectID) (typ.Type, int, error) {
 	return quarantine.reader.ReadHeader(id) //nolint:wrapcheck
 }
 
@@ -107,7 +107,7 @@ func (quarantine *coordinatedQuarantine) WriteReaderFull(src io.Reader) (id.Obje
 	return quarantine.objectQ.WriteReaderFull(src) //nolint:wrapcheck
 }
 
-func (quarantine *coordinatedQuarantine) WriteReaderContent(ty typ.Type, size uint64, src io.Reader) (id.ObjectID, error) {
+func (quarantine *coordinatedQuarantine) WriteReaderContent(ty typ.Type, size int, src io.Reader) (id.ObjectID, error) {
 	return quarantine.objectQ.WriteReaderContent(ty, size, src) //nolint:wrapcheck
 }
 

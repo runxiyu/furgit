@@ -24,7 +24,7 @@ func (dual *Dual) WriteReaderFull(src io.Reader) (id.ObjectID, error) {
 }
 
 // WriteReaderContent writes one typed object content stream to the object side.
-func (dual *Dual) WriteReaderContent(ty typ.Type, size uint64, src io.Reader) (id.ObjectID, error) {
+func (dual *Dual) WriteReaderContent(ty typ.Type, size int, src io.Reader) (id.ObjectID, error) {
 	return dual.object.WriteReaderContent(ty, size, src) //nolint:wrapcheck
 }
 

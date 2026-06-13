@@ -70,7 +70,7 @@ func TestReadGitPack(t *testing.T) {
 						t.Fatalf("ReadHeader(%s) type = %v, want %v", oid, ty, group.ty)
 					}
 
-					if size != uint64(len(wantContent)) {
+					if size != len(wantContent) {
 						t.Fatalf("ReadHeader(%s) size = %d, want %d", oid, size, len(wantContent))
 					}
 
@@ -79,7 +79,7 @@ func TestReadGitPack(t *testing.T) {
 						t.Fatalf("ReadSize(%s): %v", oid, err)
 					}
 
-					if size != uint64(len(wantContent)) {
+					if size != len(wantContent) {
 						t.Fatalf("ReadSize(%s) = %d, want %d", oid, size, len(wantContent))
 					}
 
@@ -105,7 +105,7 @@ func checkReaderContent(t *testing.T, packedStore *packed.Packed, oid id.ObjectI
 		t.Fatalf("ReadReaderContent(%s) type = %v, want %v", oid, ty, wantType)
 	}
 
-	if size != uint64(len(wantContent)) {
+	if size != len(wantContent) {
 		t.Fatalf("ReadReaderContent(%s) size = %d, want %d", oid, size, len(wantContent))
 	}
 

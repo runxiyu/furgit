@@ -11,7 +11,6 @@ import (
 	oid "lindenii.org/go/furgit/object/id"
 	"lindenii.org/go/furgit/object/tree"
 	"lindenii.org/go/furgit/object/tree/mode"
-	"lindenii.org/go/lgo/intconv"
 )
 
 // TreeFS exposes one Git tree as an fs.FS view backed by a Fetcher.
@@ -69,7 +68,7 @@ func (entry treeEntryValue) isDir() bool {
 	return entry.mode == mode.Directory
 }
 
-func (entry treeEntryValue) blobSize(fetcher *Fetcher) (uint64, error) {
+func (entry treeEntryValue) blobSize(fetcher *Fetcher) (int, error) {
 	return fetcher.Size(entry.objectID)
 }
 
@@ -434,10 +433,7 @@ func (treeFS *TreeFS) statEntry(entry treeEntryValue) (*treeFSInfo, error) {
 			return nil, err
 		}
 
-		size, err = intconv.Uint64ToInt64(sz)
-		if err != nil {
-			return nil, fmt.Errorf("object/fetch: blob size overflows int64: %w", err)
-		}
+		size = int64(sz)
 	}
 
 	var sys any

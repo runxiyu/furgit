@@ -17,14 +17,14 @@ func (loose *Loose) WriteBytesFull(raw []byte) (id.ObjectID, error) {
 
 // WriteBytesContent writes typed content bytes as a loose object.
 func (loose *Loose) WriteBytesContent(ty typ.Type, content []byte) (id.ObjectID, error) {
-	return loose.WriteReaderContent(ty, uint64(len(content)), bytes.NewReader(content))
+	return loose.WriteReaderContent(ty, len(content), bytes.NewReader(content))
 }
 
 // WriteReaderContent writes one loose object from typed content bytes read from src.
 // src must provide exactly size bytes.
 // size is required because loose object headers are "type size\x00content",
 // so the header must be emitted before streaming content without buffering.
-func (loose *Loose) WriteReaderContent(ty typ.Type, size uint64, src io.Reader) (id.ObjectID, error) {
+func (loose *Loose) WriteReaderContent(ty typ.Type, size int, src io.Reader) (id.ObjectID, error) {
 	headerBytes := header.Append(nil, ty, size)
 
 	writer, err := loose.newStreamWriter(false)

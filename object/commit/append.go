@@ -61,7 +61,7 @@ func (commit *Commit) AppendWithHeader(dst []byte) ([]byte, error) {
 		return dst, err
 	}
 
-	dst = header.Append(dst, typ.Commit, uint64(len(body)))
+	dst = header.Append(dst, typ.Commit, len(body))
 
 	return append(dst, body...), nil
 }

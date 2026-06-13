@@ -19,9 +19,9 @@ func TestWriteReaderContent(t *testing.T) {
 
 			store := memory.New(objectFormat)
 			content := []byte("memory-content\n")
-			raw := append(header.Append(nil, typ.Blob, uint64(len(content))), content...)
+			raw := append(header.Append(nil, typ.Blob, len(content)), content...)
 
-			gotID, err := store.WriteReaderContent(typ.Blob, uint64(len(content)), bytes.NewReader(content))
+			gotID, err := store.WriteReaderContent(typ.Blob, len(content), bytes.NewReader(content))
 			if err != nil {
 				t.Fatalf("WriteReaderContent: %v", err)
 			}
@@ -56,7 +56,7 @@ func TestWriteReaderFull(t *testing.T) {
 
 			store := memory.New(objectFormat)
 			content := []byte("memory-full\n")
-			raw := append(header.Append(nil, typ.Blob, uint64(len(content))), content...)
+			raw := append(header.Append(nil, typ.Blob, len(content)), content...)
 
 			gotID, err := store.WriteReaderFull(bytes.NewReader(raw))
 			if err != nil {
@@ -89,7 +89,7 @@ func TestWriteBytes(t *testing.T) {
 
 			store := memory.New(objectFormat)
 			content := []byte("memory-bytes\n")
-			raw := append(header.Append(nil, typ.Blob, uint64(len(content))), content...)
+			raw := append(header.Append(nil, typ.Blob, len(content)), content...)
 
 			gotID, err := store.WriteBytesContent(typ.Blob, content)
 			if err != nil {

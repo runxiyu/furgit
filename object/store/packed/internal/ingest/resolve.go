@@ -10,13 +10,12 @@ import (
 	"lindenii.org/go/furgit/internal/progress"
 	"lindenii.org/go/furgit/object/header"
 	"lindenii.org/go/furgit/object/id"
-	"lindenii.org/go/lgo/intconv"
 )
 
 // adjacency maps each resolvable base to its delta children:
 // ofs-deltas keyed by base offset, ref-deltas keyed by base object ID.
 type adjacency struct {
-	byOffset map[uint64][]int
+	byOffset map[int][]int
 	byOID    map[id.ObjectID][]int
 }
 
@@ -60,7 +59,7 @@ func (ingestion *ingestion) resolveDeltas() error {
 // so a resolved base can find the children that delta against it.
 func (ingestion *ingestion) buildAdjacency() adjacency {
 	out := adjacency{
-		byOffset: make(map[uint64][]int),
+		byOffset: make(map[int][]int),
 		byOID:    make(map[id.ObjectID][]int),
 	}
 
@@ -192,20 +191,9 @@ func (ingestion *ingestion) resolveChild(
 func (ingestion *ingestion) inflateRecord(index int) ([]byte, error) {
 	rec := &ingestion.records[index]
 
-	offset, err := intconv.Uint64ToInt64(rec.dataOffset())
-	if err != nil {
-		return nil, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
-	}
-
-	compressedLen, err := intconv.Uint64ToInt64(rec.packedLen - rec.headerLen)
-	if err != nil {
-		return nil, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
-	}
-
-	size, err := intconv.Uint64ToInt(rec.declaredSize)
-	if err != nil {
-		return nil, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
-	}
+	offset := int64(rec.dataOffset())
+	compressedLen := int64(rec.packedLen - rec.headerLen)
+	size := rec.declaredSize
 
 	zr, err := zlib.NewReader(io.NewSectionReader(ingestion.packFile, offset, compressedLen))
 	if err != nil {
@@ -238,7 +226,7 @@ func (ingestion *ingestion) hashObject(objectType packfile.EntryType, content []
 		return zero, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
 	}
 
-	_, _ = hashImpl.Write(header.Append(nil, ty, uint64(len(content))))
+	_, _ = hashImpl.Write(header.Append(nil, ty, len(content)))
 	_, _ = hashImpl.Write(content)
 
 	oid, err := ingestion.objectFormat.FromBytes(hashImpl.Sum(nil))
@@ -263,7 +251,7 @@ func (ingestion *ingestion) resolvedRoots() []int {
 }
 
 // countDeltas returns the number of delta records.
-func (ingestion *ingestion) countDeltas() uint64 {
+func (ingestion *ingestion) countDeltas() int {
 	return ingestion.deltaCount
 }
 
@@ -272,7 +260,7 @@ func (ingestion *ingestion) countDeltas() uint64 {
 // Every base is resolved during scanning or thin completion,
 // so the unresolved records are exactly the unresolved deltas:
 // the delta records minus those already resolved.
-func (ingestion *ingestion) countUnresolved() uint64 {
+func (ingestion *ingestion) countUnresolved() int {
 	return ingestion.deltaCount - ingestion.deltasResolved
 }
 

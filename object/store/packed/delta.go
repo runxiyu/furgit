@@ -10,6 +10,7 @@ import (
 	"lindenii.org/go/furgit/internal/compress/zlib"
 	"lindenii.org/go/furgit/internal/format/packfile"
 	"lindenii.org/go/furgit/internal/format/packfile/delta"
+	"lindenii.org/go/lgo/intconv"
 )
 
 // deltaNode is a delta entry on a resolution chain.
@@ -21,14 +22,14 @@ type deltaNode struct {
 	size uint64
 
 	// baseOffset is the entry's base entry offset.
-	baseOffset uint64
+	baseOffset int
 }
 
 // unpackEntry reconstructs the object stored at offset in p,
 // following ref- and ofs-delta chains within the pack.
 //
 // Labels: Life-Independent.
-func (packed *Packed) unpackEntry(p *pack, offset uint64) (packfile.EntryType, []byte, error) {
+func (packed *Packed) unpackEntry(p *pack, offset int) (packfile.EntryType, []byte, error) {
 	var zero packfile.EntryType
 
 	var (
@@ -118,18 +119,19 @@ func (packed *Packed) unpackEntry(p *pack, offset uint64) (packfile.EntryType, [
 
 // deltaBaseOffset resolves a delta entry's base entry offset
 // within the same pack.
-func (packed *Packed) deltaBaseOffset(p *pack, offset uint64, header packfile.EntryHeader) (uint64, error) {
+func (packed *Packed) deltaBaseOffset(p *pack, offset int, header packfile.EntryHeader) (int, error) {
 	switch header.Type {
 	case packfile.EntryTypeOfsDelta:
-		if header.OfsDistance == 0 || header.OfsDistance > offset {
+		dist, err := intconv.Uint64ToInt(header.OfsDistance)
+		if err != nil || dist == 0 || dist > offset {
 			return 0, fmt.Errorf("%w: pack %q: invalid ofs-delta distance", ErrMalformedPackedStore, p.name)
 		}
 
-		return offset - header.OfsDistance, nil
+		return offset - dist, nil
 	case packfile.EntryTypeRefDelta:
 		refBase := header.RefBase[:packed.objectFormat.Size()]
 
-		baseOffset, found, err := p.idx.Lookup(refBase)
+		baseOffsetU, found, err := p.idx.Lookup(refBase)
 		if err != nil {
 			return 0, fmt.Errorf("%w: pack %q: %w", ErrMalformedPackedStore, p.name, err)
 		}
@@ -144,6 +146,11 @@ func (packed *Packed) deltaBaseOffset(p *pack, offset uint64, header packfile.En
 				"%w: resolving ref-delta: %w",
 				ErrMalformedPackedStore, &errs.ObjectMissingError{OID: baseID},
 			)
+		}
+
+		baseOffset, err := intconv.Uint64ToInt(baseOffsetU)
+		if err != nil {
+			return 0, fmt.Errorf("%w: pack %q: ref-delta base offset overflows int: %w", ErrMalformedPackedStore, p.name, err)
 		}
 
 		return baseOffset, nil
@@ -161,7 +168,7 @@ func (packed *Packed) deltaBaseOffset(p *pack, offset uint64, header packfile.En
 // resolveType walks one delta chain
 // to find the chained base object entry type,
 // without inflating any content.
-func (packed *Packed) resolveType(p *pack, offset uint64, entryHeader packfile.EntryHeader) (packfile.EntryType, error) {
+func (packed *Packed) resolveType(p *pack, offset int, entryHeader packfile.EntryHeader) (packfile.EntryType, error) {
 	var zero packfile.EntryType
 
 	depth := 0
@@ -194,7 +201,7 @@ func (packed *Packed) resolveType(p *pack, offset uint64, entryHeader packfile.E
 
 // deltaResultSize reads the declared result size
 // from one compressed delta payload prefix.
-func deltaResultSize(payload []byte, deltaSize uint64) (uint64, error) {
+func deltaResultSize(payload []byte, deltaSize uint64) (int, error) {
 	zr, err := zlib.NewReader(bytes.NewReader(payload))
 	if err != nil {
 		return 0, fmt.Errorf("reading delta header: %w", err)
@@ -216,5 +223,10 @@ func deltaResultSize(payload []byte, deltaSize uint64) (uint64, error) {
 		return 0, fmt.Errorf("reading delta header: %w", err)
 	}
 
-	return resultSize, nil
+	size, err := intconv.Uint64ToInt(resultSize)
+	if err != nil {
+		return 0, fmt.Errorf("reading delta header: result size overflows int: %w", err)
+	}
+
+	return size, nil
 }

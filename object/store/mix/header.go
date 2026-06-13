@@ -11,7 +11,7 @@ import (
 
 // ReadHeader reads object header data
 // from the most-recently-used backend that has it.
-func (mix *Mix) ReadHeader(id id.ObjectID) (typ.Type, uint64, error) {
+func (mix *Mix) ReadHeader(id id.ObjectID) (typ.Type, int, error) {
 	for _, backend := range mix.order.Keys() {
 		ty, size, err := backend.ReadHeader(id)
 		if err == nil {
@@ -32,7 +32,7 @@ func (mix *Mix) ReadHeader(id id.ObjectID) (typ.Type, uint64, error) {
 
 // ReadSize reads object content length
 // from the most-recently-used backend that has it.
-func (mix *Mix) ReadSize(id id.ObjectID) (uint64, error) {
+func (mix *Mix) ReadSize(id id.ObjectID) (int, error) {
 	for _, backend := range mix.order.Keys() {
 		size, err := backend.ReadSize(id)
 		if err == nil {

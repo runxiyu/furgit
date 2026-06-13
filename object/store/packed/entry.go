@@ -23,11 +23,11 @@ var errPayloadOverlong = errors.New("entry payload longer than declared")
 // not the slice length.
 //
 // Labels: Life-Parent, Mut-No.
-func (pack *pack) entryHeaderAt(offset uint64, objectFormat id.ObjectFormat) (packfile.EntryHeader, []byte, error) {
+func (pack *pack) entryHeaderAt(offset int, objectFormat id.ObjectFormat) (packfile.EntryHeader, []byte, error) {
 	var zero packfile.EntryHeader
 
-	pos, err := intconv.Uint64ToInt(offset)
-	if err != nil || pos >= len(pack.data) {
+	pos := offset
+	if pos < 0 || pos >= len(pack.data) {
 		return zero, nil, fmt.Errorf("%w: pack %q: entry offset out of bounds", ErrMalformedPackedStore, pack.name)
 	}
 

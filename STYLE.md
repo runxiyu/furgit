@@ -22,12 +22,21 @@ the package's central type, `New`, `Close`, etc.
 Options structs should be close to `New`.
 There should not be an `options.go`.
 
-## Sizes
+## Sizes and offsets
 
-Sizes are typically `uint64`.
-Use `intconv` for conversions where necessary.
+In-memory sizes and offsets are `int`.
+They are bounded by `len()`,
+and anything too large for `int` cannot be held in memory anyway.
 
-**TODO:** revisit this and consider whether to make sizes `int`.
+On-disk and wire-format fields stay `uint64`,
+faithful to their serialized representation.
+Convert at the boundary with `intconv`.
+
+Convert a value where it is stored or crosses into a domain,
+not for a transient one:
+a short-lived result can keep its producer's type,
+widening the other operand at a comparison
+rather than being narrowed to match.
 
 ## Comments
 

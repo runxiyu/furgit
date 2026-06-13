@@ -37,7 +37,7 @@ func parseRaw(raw []byte) (typ.Type, []byte, error) {
 	}
 
 	content := raw[consumed:]
-	if uint64(len(content)) != size {
+	if len(content) != size {
 		return typ.Unknown, nil, fmt.Errorf("%w: header size/content mismatch", store.ErrInvalidObject)
 	}
 
@@ -46,7 +46,7 @@ func parseRaw(raw []byte) (typ.Type, []byte, error) {
 
 // readHeader reads and parses a loose object header from br,
 // and returns the raw header bytes including the trailing NUL.
-func readHeader(br *bufio.Reader) ([]byte, typ.Type, uint64, error) {
+func readHeader(br *bufio.Reader) ([]byte, typ.Type, int, error) {
 	headerBytes, err := br.ReadSlice(0)
 	if err != nil {
 		return nil, typ.Unknown, 0, fmt.Errorf("object/store/loose: %w", err)

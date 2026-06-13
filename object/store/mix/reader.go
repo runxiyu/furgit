@@ -33,7 +33,7 @@ func (mix *Mix) ReadReaderFull(id id.ObjectID) (io.ReadCloser, error) {
 
 // ReadReaderContent reads an object's type, declared content length,
 // and content stream from the most-recently-used backend that has it.
-func (mix *Mix) ReadReaderContent(id id.ObjectID) (typ.Type, uint64, io.ReadCloser, error) {
+func (mix *Mix) ReadReaderContent(id id.ObjectID) (typ.Type, int, io.ReadCloser, error) {
 	for _, backend := range mix.order.Keys() {
 		ty, size, reader, err := backend.ReadReaderContent(id)
 		if err == nil {

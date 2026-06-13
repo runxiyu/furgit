@@ -3,7 +3,6 @@ package progress
 import (
 	"time"
 
-	"lindenii.org/go/lgo/intconv"
 	"lindenii.org/go/lgo/iowrap"
 )
 
@@ -17,7 +16,7 @@ type Meter struct {
 	writer iowrap.WriteFlusher
 
 	title      string
-	total      uint64
+	total      int
 	delay      time.Duration
 	sparse     bool
 	throughput bool
@@ -26,8 +25,8 @@ type Meter struct {
 	nextUpdateAt   time.Time
 	nextThroughput time.Time
 
-	lastDone     uint64
-	lastBytes    uint64
+	lastDone     int
+	lastBytes    int
 	lastPercent  int
 	lastCounterW int
 	sawValue     bool
@@ -58,7 +57,7 @@ type Options struct {
 	Writer iowrap.WriteFlusher
 
 	Title string
-	Total uint64
+	Total int
 
 	// Delay suppresses progress output until Delay has elapsed since Start.
 	Delay time.Duration
@@ -70,7 +69,7 @@ type Options struct {
 
 // Set records current progress
 // and renders when percent changed or the 1s tick elapsed.
-func (meter *Meter) Set(done uint64, bytes uint64) {
+func (meter *Meter) Set(done int, bytes int) {
 	meter.lastDone = done
 	meter.lastBytes = bytes
 	meter.sawValue = true
@@ -85,11 +84,7 @@ func (meter *Meter) Set(done uint64, bytes uint64) {
 	percentChanged := false
 
 	if meter.total > 0 {
-		percent, err := intconv.Uint64ToInt(done * 100 / meter.total)
-		if err != nil {
-			return // TODO
-		}
-
+		percent := int(int64(done) * 100 / int64(meter.total))
 		percentChanged = percent != meter.lastPercent
 	}
 

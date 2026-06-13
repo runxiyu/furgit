@@ -41,17 +41,17 @@ type ObjectReader interface {
 	// declared content length, and content stream.
 	//
 	// Labels: Life-Parent, Close-Caller.
-	ReadReaderContent(id id.ObjectID) (typ.Type, uint64, io.ReadCloser, error)
+	ReadReaderContent(id id.ObjectID) (typ.Type, int, io.ReadCloser, error)
 
 	// ReadSize reads an object's declared content length.
 	//
 	// This returns the same size as the second result of [ObjectReader.ReadHeader];
 	// for some implementations, this may be cheaper than ReadHeader
 	// when callers do not need the object type.
-	ReadSize(id id.ObjectID) (uint64, error)
+	ReadSize(id id.ObjectID) (int, error)
 
 	// ReadHeader reads an object's type and declared content length.
-	ReadHeader(id id.ObjectID) (typ.Type, uint64, error)
+	ReadHeader(id id.ObjectID) (typ.Type, int, error)
 
 	// Refresh updates any backend-local discovery/cache view of on-disk objects.
 	//

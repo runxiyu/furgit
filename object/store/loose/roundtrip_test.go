@@ -39,7 +39,7 @@ func TestRoundTrip(t *testing.T) {
 
 			for _, tc := range cases {
 				t.Run(tc.name, func(t *testing.T) {
-					wantRaw := header.Append(nil, tc.ty, uint64(len(tc.content)))
+					wantRaw := header.Append(nil, tc.ty, len(tc.content))
 					wantRaw = append(wantRaw, tc.content...)
 
 					objectID, err := looseStore.WriteBytesContent(tc.ty, tc.content)
@@ -78,7 +78,7 @@ func TestRoundTrip(t *testing.T) {
 						t.Fatalf("ReadHeader type = %v, want %v", headType, tc.ty)
 					}
 
-					if headSize != uint64(len(tc.content)) {
+					if headSize != len(tc.content) {
 						t.Fatalf("ReadHeader size = %d, want %d", headSize, len(tc.content))
 					}
 
@@ -124,7 +124,7 @@ func TestRoundTrip(t *testing.T) {
 						t.Fatalf("ReadReaderContent type = %v, want %v", contentType, tc.ty)
 					}
 
-					if contentSize != uint64(len(tc.content)) {
+					if contentSize != len(tc.content) {
 						t.Fatalf("ReadReaderContent size = %d, want %d", contentSize, len(tc.content))
 					}
 

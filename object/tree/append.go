@@ -39,7 +39,7 @@ func (tree *Tree) AppendWithHeader(dst []byte) ([]byte, error) {
 		return dst, err
 	}
 
-	dst = header.Append(dst, typ.Tree, uint64(len(body)))
+	dst = header.Append(dst, typ.Tree, len(body))
 
 	return append(dst, body...), nil
 }

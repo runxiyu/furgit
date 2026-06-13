@@ -29,7 +29,7 @@ func ParseWithHeader(raw []byte, objectFormat id.ObjectFormat) (Object, error) {
 	}
 
 	body := raw[headerLen:]
-	if uint64(len(body)) != size {
+	if len(body) != size {
 		return nil, fmt.Errorf("%w: header declares %d bytes, body has %d", ErrSizeMismatch, size, len(body))
 	}
 

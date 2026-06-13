@@ -96,9 +96,14 @@ func (ingestion *ingestion) indexEntries() ([]packidx.Entry, []uint32, error) {
 		var oidBytes [id.MaxObjectIDSize]byte
 		copy(oidBytes[:], rec.oid.RawBytes())
 
+		offset, err := intconv.IntToUint64(rec.offset)
+		if err != nil {
+			return nil, nil, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
+		}
+
 		entries[indexPosition] = packidx.Entry{
 			OID:    oidBytes,
-			Offset: rec.offset,
+			Offset: offset,
 			CRC32:  rec.crc32,
 		}
 

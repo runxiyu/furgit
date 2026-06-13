@@ -31,7 +31,7 @@ func (chain *Chain) ReadReaderFull(id id.ObjectID) (io.ReadCloser, error) {
 
 // ReadReaderContent reads an object's type, declared content length,
 // and content stream from the first backend that has it.
-func (chain *Chain) ReadReaderContent(id id.ObjectID) (typ.Type, uint64, io.ReadCloser, error) {
+func (chain *Chain) ReadReaderContent(id id.ObjectID) (typ.Type, int, io.ReadCloser, error) {
 	for _, backend := range chain.backends {
 		ty, size, reader, err := backend.ReadReaderContent(id)
 		if err == nil {

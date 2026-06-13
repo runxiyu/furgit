@@ -77,7 +77,7 @@ func gitOracleObjects(t *testing.T, repo *testgit.Repo) []gitOracleObject {
 				t.Fatalf("CatFile(%s %s): %v", group.name, oid, err)
 			}
 
-			raw := header.Append(nil, group.ty, uint64(len(body)))
+			raw := header.Append(nil, group.ty, len(body))
 			raw = append(raw, body...)
 
 			objects = append(objects, gitOracleObject{

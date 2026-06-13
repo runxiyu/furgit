@@ -29,13 +29,13 @@ func TestWrite(t *testing.T) {
 		{
 			name: "ReaderContent",
 			write: func(looseStore *loose.Loose, content []byte) (id.ObjectID, error) {
-				return looseStore.WriteReaderContent(typ.Blob, uint64(len(content)), bytes.NewReader(content))
+				return looseStore.WriteReaderContent(typ.Blob, len(content), bytes.NewReader(content))
 			},
 		},
 		{
 			name: "BytesFull",
 			write: func(looseStore *loose.Loose, content []byte) (id.ObjectID, error) {
-				raw := header.Append(nil, typ.Blob, uint64(len(content)))
+				raw := header.Append(nil, typ.Blob, len(content))
 				raw = append(raw, content...)
 
 				return looseStore.WriteBytesFull(raw)
@@ -44,7 +44,7 @@ func TestWrite(t *testing.T) {
 		{
 			name: "ReaderFull",
 			write: func(looseStore *loose.Loose, content []byte) (id.ObjectID, error) {
-				raw := header.Append(nil, typ.Blob, uint64(len(content)))
+				raw := header.Append(nil, typ.Blob, len(content))
 				raw = append(raw, content...)
 
 				return looseStore.WriteReaderFull(bytes.NewReader(raw))

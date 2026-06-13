@@ -46,17 +46,17 @@ type ingestion struct {
 
 	// byOffset maps an entry offset to its record index,
 	// and byOID maps a resolved object ID to its record index.
-	byOffset map[uint64]int
+	byOffset map[int]int
 	byOID    map[id.ObjectID]int
 
 	// headerCount is the object count declared by the pack header.
-	headerCount uint32
+	headerCount int
 
 	// deltaCount counts delta records, accumulated during scanning.
-	deltaCount uint64
+	deltaCount int
 
 	// deltasResolved counts resolved delta records, for progress.
-	deltasResolved uint64
+	deltasResolved int
 
 	// packHash is the final pack trailer hash.
 	packHash id.ObjectID
@@ -101,7 +101,7 @@ func WritePack(root *os.Root, objectFormat id.ObjectFormat, src io.Reader, opts 
 		temps:          nil,
 		scanner:        nil,
 		records:        nil,
-		byOffset:       make(map[uint64]int),
+		byOffset:       make(map[int]int),
 		byOID:          make(map[id.ObjectID]int),
 		headerCount:    count,
 		deltaCount:     0,

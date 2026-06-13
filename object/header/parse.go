@@ -7,13 +7,14 @@ import (
 	"strconv"
 
 	"lindenii.org/go/furgit/object/typ"
+	"lindenii.org/go/lgo/intconv"
 )
 
 // ErrInvalidHeader indicates a malformed loose-object header.
 var ErrInvalidHeader = errors.New("object/header: invalid header")
 
 // Parse parses a canonical loose-object header ("type size\x00").
-func Parse(data []byte) (ty typ.Type, size uint64, consumed int, err error) {
+func Parse(data []byte) (ty typ.Type, size int, consumed int, err error) {
 	space := bytes.IndexByte(data, ' ')
 	if space <= 0 {
 		return 0, 0, 0, fmt.Errorf("%w: missing ' ' type/size separator", ErrInvalidHeader)
@@ -36,7 +37,12 @@ func Parse(data []byte) (ty typ.Type, size uint64, consumed int, err error) {
 		return 0, 0, 0, fmt.Errorf("%w: empty size field", ErrInvalidHeader)
 	}
 
-	size, err = strconv.ParseUint(string(sizeBytes), 10, 64)
+	sizeU, err := strconv.ParseUint(string(sizeBytes), 10, 64)
+	if err != nil {
+		return 0, 0, 0, fmt.Errorf("%w: size %q: %w", ErrInvalidHeader, sizeBytes, err)
+	}
+
+	size, err = intconv.Uint64ToInt(sizeU)
 	if err != nil {
 		return 0, 0, 0, fmt.Errorf("%w: size %q: %w", ErrInvalidHeader, sizeBytes, err)
 	}

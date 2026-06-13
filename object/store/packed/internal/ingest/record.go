@@ -12,15 +12,15 @@ import (
 // so a record's index in the slice is also its pack order.
 type record struct {
 	// offset is the entry's start offset in the pack.
-	offset uint64
+	offset int
 
 	// headerLen is the entry header length in bytes,
 	// so the zlib payload begins at offset+headerLen.
-	headerLen uint64
+	headerLen int
 
 	// packedLen is the total on-disk entry length in bytes,
 	// covering the header and the compressed payload.
-	packedLen uint64
+	packedLen int
 
 	// crc32 is the CRC32 of the entry's packed bytes.
 	crc32 uint32
@@ -29,10 +29,10 @@ type record struct {
 	packedType packfile.EntryType
 
 	// declaredSize is the declared inflated payload size.
-	declaredSize uint64
+	declaredSize int
 
 	// baseOffset is the base entry offset for an ofs-delta.
-	baseOffset uint64
+	baseOffset int
 
 	// baseOID is the base object ID for a ref-delta.
 	baseOID id.ObjectID
@@ -50,6 +50,6 @@ type record struct {
 }
 
 // dataOffset returns the entry's compressed payload start offset.
-func (record *record) dataOffset() uint64 {
+func (record *record) dataOffset() int {
 	return record.offset + record.headerLen
 }

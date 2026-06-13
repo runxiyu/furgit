@@ -7,7 +7,6 @@ import (
 
 	"lindenii.org/go/furgit/internal/utils"
 	"lindenii.org/go/lgo/fmt/humanize"
-	"lindenii.org/go/lgo/intconv"
 )
 
 func (meter *Meter) render(now time.Time, eol string) {
@@ -42,13 +41,7 @@ func (meter *Meter) render(now time.Time, eol string) {
 
 func (meter *Meter) renderCounters() string {
 	if meter.total > 0 {
-		u, err := intconv.Uint64ToInt(meter.lastDone * 100 / meter.total)
-		if err != nil {
-			return "overflow"
-			// TODO
-		}
-
-		meter.lastPercent = u
+		meter.lastPercent = int(int64(meter.lastDone) * 100 / int64(meter.total))
 
 		return fmt.Sprintf("%3d%% (%d/%d)%s", meter.lastPercent, meter.lastDone, meter.total, meter.throughputSuffix)
 	}
@@ -75,5 +68,5 @@ func (meter *Meter) refreshThroughput(now time.Time) {
 	}
 
 	rate := uint64(float64(meter.lastBytes) / elapsed.Seconds())
-	meter.throughputSuffix = ", " + humanize.Bytes(meter.lastBytes) + " | " + humanize.Bytes(rate) + "/s"
+	meter.throughputSuffix = ", " + humanize.Bytes(uint64(meter.lastBytes)) + " | " + humanize.Bytes(rate) + "/s" //nolint:gosec
 }

@@ -14,7 +14,6 @@ import (
 	"lindenii.org/go/furgit/object/header"
 	"lindenii.org/go/furgit/object/id"
 	"lindenii.org/go/furgit/object/store"
-	"lindenii.org/go/lgo/intconv"
 )
 
 const tempObjectFilePrefix = "tmp_obj_"
@@ -43,7 +42,7 @@ type streamWriter struct {
 	// headerDone reports whether the full-object header has been parsed.
 	headerDone bool
 	// expectedContentLeft tracks remaining declared content bytes.
-	expectedContentLeft uint64
+	expectedContentLeft int
 
 	closed    bool
 	finalized bool
@@ -66,12 +65,7 @@ func (writer *streamWriter) Write(src []byte) (int, error) {
 			return 0, err
 		}
 	} else {
-		n, err := intconv.IntToUint64(len(src))
-		if err != nil {
-			return 0, fmt.Errorf("object/store/loose: %w", err)
-		}
-
-		err = writer.acceptContent(n)
+		err := writer.acceptContent(len(src))
 		if err != nil {
 			return 0, err
 		}
@@ -100,12 +94,7 @@ func (writer *streamWriter) Close() error {
 // acceptFull validates and accounts raw full-object input.
 func (writer *streamWriter) acceptFull(src []byte) error {
 	if writer.headerDone {
-		n, err := intconv.IntToUint64(len(src))
-		if err != nil {
-			return fmt.Errorf("object/store/loose: %w", err)
-		}
-
-		return writer.acceptContent(n)
+		return writer.acceptContent(len(src))
 	}
 
 	nul := bytes.IndexByte(src, 0)
@@ -126,16 +115,11 @@ func (writer *streamWriter) acceptFull(src []byte) error {
 	writer.headerDone = true
 	writer.expectedContentLeft = size
 
-	rest, err := intconv.IntToUint64(len(src) - headerChunkLen)
-	if err != nil {
-		return fmt.Errorf("object/store/loose: %w", err)
-	}
-
-	return writer.acceptContent(rest)
+	return writer.acceptContent(len(src) - headerChunkLen)
 }
 
 // acceptContent validates and accounts content byte counts.
-func (writer *streamWriter) acceptContent(n uint64) error {
+func (writer *streamWriter) acceptContent(n int) error {
 	if n > writer.expectedContentLeft {
 		return fmt.Errorf("%w: object content exceeds declared size", store.ErrInvalidObject)
 	}

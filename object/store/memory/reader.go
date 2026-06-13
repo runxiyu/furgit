@@ -17,7 +17,7 @@ func (memory *Memory) ReadBytesFull(id id.ObjectID) ([]byte, error) {
 		return nil, store.ErrObjectNotFound
 	}
 
-	raw := header.Append(nil, obj.ty, uint64(len(obj.content)))
+	raw := header.Append(nil, obj.ty, len(obj.content))
 	raw = append(raw, obj.content...)
 
 	return raw, nil
@@ -34,17 +34,17 @@ func (memory *Memory) ReadBytesContent(id id.ObjectID) (typ.Type, []byte, error)
 }
 
 // ReadHeader reads one object header.
-func (memory *Memory) ReadHeader(id id.ObjectID) (typ.Type, uint64, error) {
+func (memory *Memory) ReadHeader(id id.ObjectID) (typ.Type, int, error) {
 	obj, ok := memory.objects.Load(id)
 	if !ok {
 		return typ.Unknown, 0, store.ErrObjectNotFound
 	}
 
-	return obj.ty, uint64(len(obj.content)), nil
+	return obj.ty, len(obj.content), nil
 }
 
 // ReadSize reads one object size.
-func (memory *Memory) ReadSize(id id.ObjectID) (uint64, error) {
+func (memory *Memory) ReadSize(id id.ObjectID) (int, error) {
 	_, size, err := memory.ReadHeader(id)
 	if err != nil {
 		return 0, err
@@ -64,13 +64,13 @@ func (memory *Memory) ReadReaderFull(id id.ObjectID) (io.ReadCloser, error) {
 }
 
 // ReadReaderContent reads one object body through a reader.
-func (memory *Memory) ReadReaderContent(id id.ObjectID) (typ.Type, uint64, io.ReadCloser, error) {
+func (memory *Memory) ReadReaderContent(id id.ObjectID) (typ.Type, int, io.ReadCloser, error) {
 	ty, content, err := memory.ReadBytesContent(id)
 	if err != nil {
 		return typ.Unknown, 0, nil, err
 	}
 
-	return ty, uint64(len(content)), io.NopCloser(bytes.NewReader(content)), nil
+	return ty, len(content), io.NopCloser(bytes.NewReader(content)), nil
 }
 
 // Refresh is a no-op for in-memory object stores.

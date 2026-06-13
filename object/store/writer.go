@@ -24,7 +24,7 @@ type ObjectWriter interface {
 	WriteReaderFull(src io.Reader) (id.ObjectID, error)
 
 	// WriteReaderContent writes one typed object content stream.
-	WriteReaderContent(ty typ.Type, size uint64, src io.Reader) (id.ObjectID, error)
+	WriteReaderContent(ty typ.Type, size int, src io.Reader) (id.ObjectID, error)
 }
 
 // PackWriter writes Git pack streams.

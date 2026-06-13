@@ -36,7 +36,7 @@ type scanner struct {
 	n   int
 
 	// consumed counts stream bytes consumed so far.
-	consumed uint64
+	consumed int
 
 	// hash accumulates the pack hash over consumed bytes
 	// while hashing is true.
@@ -66,7 +66,7 @@ func newScanner(src io.Reader, dst io.Writer, packHash hash.Hash) *scanner {
 
 // readPackHeader reads and validates the pack header from src,
 // returning the raw header and its declared object count.
-func readPackHeader(src io.Reader) ([packfile.HeaderLen]byte, uint32, error) {
+func readPackHeader(src io.Reader) ([packfile.HeaderLen]byte, int, error) {
 	var raw [packfile.HeaderLen]byte
 
 	_, err := io.ReadFull(src, raw[:])
@@ -79,7 +79,12 @@ func readPackHeader(src io.Reader) ([packfile.HeaderLen]byte, uint32, error) {
 		return raw, 0, fmt.Errorf("%w: %w", ErrMalformedPack, err)
 	}
 
-	return raw, packHeader.ObjectCount, nil
+	count, err := intconv.Uint32ToInt(packHeader.ObjectCount)
+	if err != nil {
+		return raw, 0, fmt.Errorf("%w: object count: %w", ErrMalformedPack, err)
+	}
+
+	return raw, count, nil
 }
 
 // Read implements [io.Reader].
@@ -205,7 +210,7 @@ func (scanner *scanner) use(n int) error {
 	}
 
 	scanner.off += n
-	scanner.consumed += uint64(n) //nolint:gosec
+	scanner.consumed += n
 
 	return nil
 }
@@ -283,7 +288,7 @@ func (ingestion *ingestion) streamAndScan() error {
 	meter := progress.New(progress.Options{
 		Writer:     ingestion.opts.Progress,
 		Title:      "receiving objects",
-		Total:      uint64(ingestion.headerCount),
+		Total:      ingestion.headerCount,
 		Delay:      0,
 		Sparse:     false,
 		Throughput: true,
@@ -295,7 +300,7 @@ func (ingestion *ingestion) streamAndScan() error {
 			return err
 		}
 
-		meter.Set(uint64(done)+1, ingestion.scanner.consumed)
+		meter.Set(done+1, ingestion.scanner.consumed)
 	}
 
 	meter.Stop("done")
@@ -316,7 +321,7 @@ func (ingestion *ingestion) streamAndScan() error {
 }
 
 // scanEntry scans the entry beginning at start into one record.
-func (ingestion *ingestion) scanEntry(start uint64) error {
+func (ingestion *ingestion) scanEntry(start int) error {
 	ingestion.scanner.beginCRC()
 
 	rec, err := ingestion.scanHeader(start)
@@ -329,7 +334,7 @@ func (ingestion *ingestion) scanEntry(start uint64) error {
 		return err
 	}
 
-	if inflated != rec.declaredSize {
+	if inflated != int64(rec.declaredSize) {
 		return fmt.Errorf(
 			"%w: entry at %d: inflated size %d differs from declared %d",
 			ErrMalformedPack, start, inflated, rec.declaredSize,
@@ -359,7 +364,7 @@ func (ingestion *ingestion) scanEntry(start uint64) error {
 }
 
 // scanHeader parses and consumes the entry header at start.
-func (ingestion *ingestion) scanHeader(start uint64) (record, error) {
+func (ingestion *ingestion) scanHeader(start int) (record, error) {
 	var rec record
 
 	rec.offset = start
@@ -374,23 +379,24 @@ func (ingestion *ingestion) scanHeader(start uint64) (record, error) {
 		return rec, fmt.Errorf("%w: entry at %d: %w", ErrMalformedPack, start, err)
 	}
 
-	headerLen, err := intconv.IntToUint64(entryHeader.HeaderLen)
+	declaredSize, err := intconv.Uint64ToInt(entryHeader.Size)
 	if err != nil {
-		return rec, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
+		return rec, fmt.Errorf("%w: entry at %d: declared size overflows int: %w", ErrMalformedPack, start, err)
 	}
 
 	rec.packedType = entryHeader.Type
-	rec.declaredSize = entryHeader.Size
-	rec.headerLen = headerLen
+	rec.declaredSize = declaredSize
+	rec.headerLen = entryHeader.HeaderLen
 
 	switch entryHeader.Type {
 	case packfile.EntryTypeCommit, packfile.EntryTypeTree, packfile.EntryTypeBlob, packfile.EntryTypeTag:
 	case packfile.EntryTypeOfsDelta:
-		if entryHeader.OfsDistance == 0 || entryHeader.OfsDistance > start {
+		dist, err := intconv.Uint64ToInt(entryHeader.OfsDistance)
+		if err != nil || dist == 0 || dist > start {
 			return rec, fmt.Errorf("%w: entry at %d: ofs-delta base out of bounds", ErrMalformedPack, start)
 		}
 
-		rec.baseOffset = start - entryHeader.OfsDistance
+		rec.baseOffset = start - dist
 	case packfile.EntryTypeRefDelta:
 		baseID, err := ingestion.objectFormat.FromBytes(entryHeader.RefBase[:ingestion.objectFormat.Size()])
 		if err != nil {
@@ -412,7 +418,7 @@ func (ingestion *ingestion) scanHeader(start uint64) (record, error) {
 
 // drainPayload consumes one entry's compressed payload from the stream,
 // returning its inflated length and, for base entries, its object ID.
-func (ingestion *ingestion) drainPayload(rec *record) (uint64, id.ObjectID, error) {
+func (ingestion *ingestion) drainPayload(rec *record) (int64, id.ObjectID, error) {
 	var zero id.ObjectID
 
 	zr, err := zlib.NewReader(ingestion.scanner)
@@ -428,12 +434,7 @@ func (ingestion *ingestion) drainPayload(rec *record) (uint64, id.ObjectID, erro
 			return 0, zero, fmt.Errorf("%w: entry at %d: %w", ErrMalformedPack, rec.offset, err)
 		}
 
-		inflated, err := intconv.Int64ToUint64(read)
-		if err != nil {
-			return 0, zero, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
-		}
-
-		return inflated, zero, nil
+		return read, zero, nil
 	}
 
 	objectType, err := rec.packedType.ObjectType()
@@ -458,10 +459,5 @@ func (ingestion *ingestion) drainPayload(rec *record) (uint64, id.ObjectID, erro
 		return 0, zero, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
 	}
 
-	inflated, err := intconv.Int64ToUint64(read)
-	if err != nil {
-		return 0, zero, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
-	}
-
-	return inflated, oid, nil
+	return read, oid, nil
 }

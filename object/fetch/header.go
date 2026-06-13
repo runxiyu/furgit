@@ -8,7 +8,7 @@ import (
 // Header returns the object type and content size at id.
 //
 // Labels: Life-Parent.
-func (fetcher *Fetcher) Header(id oid.ObjectID) (typ.Type, uint64, error) {
+func (fetcher *Fetcher) Header(id oid.ObjectID) (typ.Type, int, error) {
 	ty, size, err := fetcher.store.ReadHeader(id)
 	if err != nil {
 		return typ.Unknown, 0, wrapObjectReadError(id, err)
@@ -20,7 +20,7 @@ func (fetcher *Fetcher) Header(id oid.ObjectID) (typ.Type, uint64, error) {
 // Size returns the object content size at id.
 //
 // Labels: Life-Parent.
-func (fetcher *Fetcher) Size(id oid.ObjectID) (uint64, error) {
+func (fetcher *Fetcher) Size(id oid.ObjectID) (int, error) {
 	size, err := fetcher.store.ReadSize(id)
 	if err != nil {
 		return 0, wrapObjectReadError(id, err)

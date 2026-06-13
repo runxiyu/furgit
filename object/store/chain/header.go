@@ -11,7 +11,7 @@ import (
 
 // ReadHeader reads object header data
 // from the first backend that has it.
-func (chain *Chain) ReadHeader(id id.ObjectID) (typ.Type, uint64, error) {
+func (chain *Chain) ReadHeader(id id.ObjectID) (typ.Type, int, error) {
 	for _, backend := range chain.backends {
 		ty, size, err := backend.ReadHeader(id)
 		if err == nil {
@@ -30,7 +30,7 @@ func (chain *Chain) ReadHeader(id id.ObjectID) (typ.Type, uint64, error) {
 
 // ReadSize reads object content length
 // from the first backend that has it.
-func (chain *Chain) ReadSize(id id.ObjectID) (uint64, error) {
+func (chain *Chain) ReadSize(id id.ObjectID) (int, error) {
 	for _, backend := range chain.backends {
 		size, err := backend.ReadSize(id)
 		if err == nil {

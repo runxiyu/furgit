@@ -12,7 +12,7 @@ const baseCacheMaxWeight = 96 << 20
 // as a delta base cache key.
 type baseKey struct {
 	pack   *pack
-	offset uint64
+	offset int
 }
 
 // cachedBase is a cached delta base, i.e.,

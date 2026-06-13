@@ -75,7 +75,7 @@ func TestRead(t *testing.T) {
 						t.Fatalf("%s: ReadHeader type = %v, want %v", o.name, gotType, o.ty)
 					}
 
-					if gotSize != uint64(len(o.body)) {
+					if gotSize != len(o.body) {
 						t.Fatalf("%s: ReadHeader size = %d, want %d", o.name, gotSize, len(o.body))
 					}
 				}
@@ -133,7 +133,7 @@ func TestRead(t *testing.T) {
 						t.Fatalf("%s: ReadReaderContent type = %v, want %v", o.name, gotType, o.ty)
 					}
 
-					if gotSize != uint64(len(o.body)) {
+					if gotSize != len(o.body) {
 						t.Fatalf("%s: ReadReaderContent size = %d, want %d", o.name, gotSize, len(o.body))
 					}
 
@@ -250,7 +250,7 @@ func TestReadCorruptTrailer(t *testing.T) {
 				t.Fatalf("ReadHeader type = %v, want %v", ty, typ.Blob)
 			}
 
-			if size != uint64(len(content)) {
+			if size != len(content) {
 				t.Fatalf("ReadHeader size = %d, want %d", size, len(content))
 			}
 

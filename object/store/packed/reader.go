@@ -11,6 +11,7 @@ import (
 	"lindenii.org/go/furgit/object/header"
 	"lindenii.org/go/furgit/object/id"
 	"lindenii.org/go/furgit/object/typ"
+	"lindenii.org/go/lgo/intconv"
 )
 
 // ReadBytesContent reads an object's type and content bytes,
@@ -42,7 +43,7 @@ func (packed *Packed) ReadBytesFull(objectID id.ObjectID) ([]byte, error) {
 		return nil, err
 	}
 
-	raw := header.Append(make([]byte, 0, len(content)+32), ty, uint64(len(content)))
+	raw := header.Append(make([]byte, 0, len(content)+32), ty, len(content))
 
 	return append(raw, content...), nil
 }
@@ -52,7 +53,7 @@ func (packed *Packed) ReadBytesFull(objectID id.ObjectID) ([]byte, error) {
 // For delta entries this resolves the chained base type
 // and the declared delta result size,
 // without reconstructing content.
-func (packed *Packed) ReadHeader(objectID id.ObjectID) (typ.Type, uint64, error) {
+func (packed *Packed) ReadHeader(objectID id.ObjectID) (typ.Type, int, error) {
 	p, offset, err := packed.lookup(objectID)
 	if err != nil {
 		return typ.Unknown, 0, err
@@ -63,12 +64,17 @@ func (packed *Packed) ReadHeader(objectID id.ObjectID) (typ.Type, uint64, error)
 		return typ.Unknown, 0, err
 	}
 
-	size := entryHeader.Size
+	var size int
 
 	if entryHeader.Type.IsDelta() {
 		size, err = deltaResultSize(payload, entryHeader.Size)
 		if err != nil {
 			return typ.Unknown, 0, fmt.Errorf("%w: pack %q: %w", ErrMalformedPackedStore, p.name, err)
+		}
+	} else {
+		size, err = intconv.Uint64ToInt(entryHeader.Size)
+		if err != nil {
+			return typ.Unknown, 0, fmt.Errorf("%w: pack %q: object size overflows int: %w", ErrMalformedPackedStore, p.name, err)
 		}
 	}
 
@@ -89,7 +95,7 @@ func (packed *Packed) ReadHeader(objectID id.ObjectID) (typ.Type, uint64, error)
 //
 // Unlike ReadHeader,
 // this never walks delta chains.
-func (packed *Packed) ReadSize(objectID id.ObjectID) (uint64, error) {
+func (packed *Packed) ReadSize(objectID id.ObjectID) (int, error) {
 	p, offset, err := packed.lookup(objectID)
 	if err != nil {
 		return 0, err
@@ -101,7 +107,12 @@ func (packed *Packed) ReadSize(objectID id.ObjectID) (uint64, error) {
 	}
 
 	if !entryHeader.Type.IsDelta() {
-		return entryHeader.Size, nil
+		size, err := intconv.Uint64ToInt(entryHeader.Size)
+		if err != nil {
+			return 0, fmt.Errorf("%w: pack %q: object size overflows int: %w", ErrMalformedPackedStore, p.name, err)
+		}
+
+		return size, nil
 	}
 
 	size, err := deltaResultSize(payload, entryHeader.Size)
@@ -119,7 +130,7 @@ func (packed *Packed) ReadSize(objectID id.ObjectID) (uint64, error) {
 // delta entries are fully resolved in memory first.
 // Close releases resources only
 // and does not drain unread data for additional validation.
-func (packed *Packed) ReadReaderContent(objectID id.ObjectID) (typ.Type, uint64, io.ReadCloser, error) {
+func (packed *Packed) ReadReaderContent(objectID id.ObjectID) (typ.Type, int, io.ReadCloser, error) {
 	p, offset, err := packed.lookup(objectID)
 	if err != nil {
 		return typ.Unknown, 0, nil, err
@@ -141,7 +152,7 @@ func (packed *Packed) ReadReaderContent(objectID id.ObjectID) (typ.Type, uint64,
 			return typ.Unknown, 0, nil, err
 		}
 
-		return ty, uint64(len(content)), io.NopCloser(bytes.NewReader(content)), nil
+		return ty, len(content), io.NopCloser(bytes.NewReader(content)), nil
 	}
 
 	ty, err := objectTypeOf(entryHeader.Type)
@@ -149,13 +160,18 @@ func (packed *Packed) ReadReaderContent(objectID id.ObjectID) (typ.Type, uint64,
 		return typ.Unknown, 0, nil, err
 	}
 
+	size, err := intconv.Uint64ToInt(entryHeader.Size)
+	if err != nil {
+		return typ.Unknown, 0, nil, fmt.Errorf("%w: pack %q: object size overflows int: %w", ErrMalformedPackedStore, p.name, err)
+	}
+
 	zr, err := zlib.NewReader(bytes.NewReader(payload))
 	if err != nil {
 		return typ.Unknown, 0, nil, fmt.Errorf("%w: pack %q: %w", ErrMalformedPackedStore, p.name, err)
 	}
 
-	return ty, entryHeader.Size, &objectReader{
-		reader: iolimit.ExpectLengthReader(zr, entryHeader.Size),
+	return ty, size, &objectReader{
+		reader: iolimit.ExpectLengthReader(zr, size),
 		zr:     zr,
 	}, nil
 }

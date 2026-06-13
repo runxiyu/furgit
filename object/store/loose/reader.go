@@ -48,7 +48,7 @@ func (loose *Loose) ReadBytesContent(objectID id.ObjectID) (typ.Type, []byte, er
 // It parses only enough of the zlib-decoded object to recover the object header.
 // It does not verify that the remaining object content is readable
 // and does not verify the zlib Adler-32 trailer.
-func (loose *Loose) ReadHeader(objectID id.ObjectID) (typ.Type, uint64, error) {
+func (loose *Loose) ReadHeader(objectID id.ObjectID) (typ.Type, int, error) {
 	file, err := loose.openObject(objectID)
 	if err != nil {
 		return typ.Unknown, 0, err
@@ -76,7 +76,7 @@ func (loose *Loose) ReadHeader(objectID id.ObjectID) (typ.Type, uint64, error) {
 // Like ReadHeader,
 // it parses only enough of the zlib-decoded object to recover the header
 // and does not verify the zlib Adler-32 trailer.
-func (loose *Loose) ReadSize(objectID id.ObjectID) (uint64, error) {
+func (loose *Loose) ReadSize(objectID id.ObjectID) (int, error) {
 	_, size, err := loose.ReadHeader(objectID)
 
 	return size, err
@@ -127,7 +127,7 @@ func (loose *Loose) ReadReaderFull(objectID id.ObjectID) (io.ReadCloser, error) 
 // trailing bytes past the declared object size,
 // and the zlib Adler-32 trailer
 // may go unverified unless the caller reads to io.EOF.
-func (loose *Loose) ReadReaderContent(objectID id.ObjectID) (typ.Type, uint64, io.ReadCloser, error) {
+func (loose *Loose) ReadReaderContent(objectID id.ObjectID) (typ.Type, int, io.ReadCloser, error) {
 	file, zr, err := loose.openInflated(objectID)
 	if err != nil {
 		return typ.Unknown, 0, nil, err

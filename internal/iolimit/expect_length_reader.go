@@ -2,10 +2,7 @@ package iolimit
 
 import (
 	"errors"
-	"fmt"
 	"io"
-
-	"lindenii.org/go/lgo/intconv"
 )
 
 // ErrExpectedLengthExceeded reports that a stream
@@ -24,7 +21,7 @@ var ErrExpectedLengthExceeded = errors.New("iolimit: stream exceeded expected le
 // As a result,
 // overlength streams are detected only
 // when a caller reads at or past the boundary.
-func ExpectLengthReader(src io.Reader, expected uint64) io.Reader {
+func ExpectLengthReader(src io.Reader, expected int) io.Reader {
 	return &expectLengthReader{
 		src:       src,
 		remaining: expected,
@@ -33,7 +30,7 @@ func ExpectLengthReader(src io.Reader, expected uint64) io.Reader {
 
 type expectLengthReader struct {
 	src       io.Reader
-	remaining uint64
+	remaining int
 }
 
 func (reader *expectLengthReader) Read(dst []byte) (int, error) {
@@ -56,23 +53,13 @@ func (reader *expectLengthReader) Read(dst []byte) (int, error) {
 		return 0, err
 	}
 
-	if uint64(len(dst)) > reader.remaining {
-		limit, err := intconv.Uint64ToInt(reader.remaining)
-		if err != nil {
-			return 0, fmt.Errorf("iolimit: %w", err)
-		}
-
-		dst = dst[:limit]
+	if len(dst) > reader.remaining {
+		dst = dst[:reader.remaining]
 	}
 
 	n, err := reader.src.Read(dst)
 	if n > 0 {
-		read, convErr := intconv.IntToUint64(n)
-		if convErr != nil {
-			return n, fmt.Errorf("iolimit: %w", convErr)
-		}
-
-		reader.remaining -= read
+		reader.remaining -= n
 	}
 
 	if errors.Is(err, io.EOF) {
