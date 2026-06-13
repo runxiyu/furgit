@@ -24,13 +24,15 @@ func (memory *Memory) ReadBytesFull(id id.ObjectID) ([]byte, error) {
 }
 
 // ReadBytesContent reads one object body.
+//
+// The returned slice aliases the store's own copy of the object content.
 func (memory *Memory) ReadBytesContent(id id.ObjectID) (typ.Type, []byte, error) {
 	obj, ok := memory.objects.Load(id)
 	if !ok {
 		return typ.Unknown, nil, store.ErrObjectNotFound
 	}
 
-	return obj.ty, append([]byte(nil), obj.content...), nil
+	return obj.ty, obj.content, nil
 }
 
 // ReadHeader reads one object header.
