@@ -70,7 +70,7 @@ func assertEntriesEqual(t *testing.T, got []tree.Entry, want []tree.Entry) {
 			t.Fatalf("entry[%d] mode = %o, want %o", i, got[i].Mode, want[i].Mode)
 		}
 
-		if got[i].Name != want[i].Name {
+		if !bytes.Equal(got[i].Name, want[i].Name) {
 			t.Fatalf("entry[%d] name = %q, want %q", i, got[i].Name, want[i].Name)
 		}
 
