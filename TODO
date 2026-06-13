@@ -24,8 +24,4 @@
   * Multithreading
   * Over-read footgun
 
-* Object ownership
-  * how cloning objects works, how mutating objects from stored.Stored
-    behaves, who owns the memory object fields reference, and where copying
-    can be reduced.
-  * which object ID length mismatches should panic vs error
+* which object ID length mismatches should panic vs error
