@@ -28,7 +28,11 @@ type deltaNode struct {
 // unpackEntry reconstructs the object stored at offset in p,
 // following ref- and ofs-delta chains within the pack.
 //
-// Labels: Life-Independent.
+// A direct base-cache hit returns the shared cache buffer itself,
+// so the result may alias cache storage and must not be mutated;
+// delta-applied results are freshly allocated.
+//
+// Labels: Life-Parent, Mut-No.
 func (packed *Packed) unpackEntry(p *pack, offset int) (packfile.EntryType, []byte, error) {
 	var zero packfile.EntryType
 
@@ -86,9 +90,11 @@ func (packed *Packed) unpackEntry(p *pack, offset int) (packfile.EntryType, []by
 		cur = baseOffset
 	}
 
-	// A direct cache hit with no deltas to apply must be copied.
+	// A direct cache hit with no deltas to apply
+	// returns the shared cache buffer directly;
+	// callers are contractually Mut-No.
 	if len(chain) == 0 && fromCache {
-		return baseType, bytes.Clone(base), nil
+		return baseType, base, nil
 	}
 
 	// Apply deltas back up the chain, caching each consumed base.
