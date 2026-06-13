@@ -27,7 +27,7 @@ func (tag *Tag) AppendWithoutHeader(dst []byte) ([]byte, error) {
 
 	for _, h := range tag.ExtraHeaders {
 		// GIGO on empty keys and such.
-		dst = append(dst, []byte(h.Key)...)
+		dst = append(dst, h.Key...)
 		dst = append(dst, byte(' '))
 		dst = append(dst, h.Value...)
 		dst = append(dst, byte('\n'))

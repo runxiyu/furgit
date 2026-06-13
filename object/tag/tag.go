@@ -20,6 +20,6 @@ type Tag struct {
 
 // ExtraHeader represents an extra header in a Git tag object.
 type ExtraHeader struct {
-	Key   string
+	Key   []byte
 	Value []byte
 }

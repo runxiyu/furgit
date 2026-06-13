@@ -15,6 +15,16 @@ import (
 var ErrInvalidTag = errors.New("object/tag: invalid tag")
 
 // Parse decodes a tag object body.
+//
+// The returned tag aliases body:
+// its Name, Message, and extra-header fields,
+// along with the byte fields of its tagger signature,
+// share body's backing array.
+// The tag inherits body's lifetime
+// and must not be mutated unless body may be.
+// Use [Tag.Clone] for an independent copy.
+//
+// Labels: Life-Parent, Mut-No.
 func Parse(body []byte, objectFormat id.ObjectFormat) (*Tag, error) {
 	t := new(Tag)
 
@@ -56,7 +66,7 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Tag, error) {
 		return nil, fmt.Errorf("%w: tag name: %w", ErrInvalidTag, err)
 	}
 
-	t.Name = append([]byte(nil), line...)
+	t.Name = line
 	i = next
 
 	line, next, err = requiredHeaderLine(body, i, "tagger")
@@ -84,7 +94,7 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Tag, error) {
 		i += rel + 1
 
 		if len(line) == 0 {
-			t.Message = append([]byte(nil), body[i:]...)
+			t.Message = body[i:]
 
 			return t, nil
 		}
@@ -112,8 +122,8 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Tag, error) {
 			}
 		default:
 			t.ExtraHeaders = append(t.ExtraHeaders, ExtraHeader{
-				Key:   string(key),
-				Value: append([]byte(nil), value...),
+				Key:   key,
+				Value: value,
 			})
 		}
 	}
