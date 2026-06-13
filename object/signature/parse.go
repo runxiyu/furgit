@@ -10,7 +10,13 @@ import (
 
 // Parse parses a canonical Git signature line.
 //
-// Labels: Life-Independent.
+// The returned signature aliases line:
+// its Name and Email share line's backing array,
+// so the signature inherits line's lifetime
+// and must not be mutated unless line may be.
+// Use [Signature.Clone] for an independent copy.
+//
+// Labels: Life-Parent, Mut-No.
 func Parse(line []byte) (*Signature, error) {
 	lt := bytes.IndexByte(line, '<')
 	if lt < 0 {
@@ -24,8 +30,8 @@ func Parse(line []byte) (*Signature, error) {
 
 	gt := lt + 1 + gtRel
 
-	nameBytes := append([]byte(nil), bytes.TrimRight(line[:lt], " ")...)
-	emailBytes := append([]byte(nil), line[lt+1:gt]...)
+	nameBytes := bytes.TrimRight(line[:lt], " ")
+	emailBytes := line[lt+1:gt]
 
 	rest := line[gt+1:]
 	if len(rest) == 0 || rest[0] != ' ' {
