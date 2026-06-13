@@ -20,12 +20,6 @@ network/protocol/v0v1/server/receivepack
 network/receivepack
 network/receivepack/hooks
 network/receivepack/service
-object/store/dual
-object/store/loose
-object/store/packed
-object/store/packed/internal
-object/store/packed/internal/ingest
-object/store/packed/internal/reading
 reachability
 ref/store
 ref/store/chain
