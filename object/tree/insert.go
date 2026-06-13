@@ -1,10 +1,10 @@
 package tree
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"slices"
-	"strings"
 
 	"lindenii.org/go/furgit/object/tree/mode"
 )
@@ -42,16 +42,16 @@ func (tree *Tree) Insert(entry Entry) error {
 }
 
 // validateName checks that name is a structurally valid tree entry name.
-func validateName(name string) error {
-	if name == "" {
+func validateName(name []byte) error {
+	if len(name) == 0 {
 		return fmt.Errorf("%w: empty entry name", ErrInvalidTree)
 	}
 
-	if strings.IndexByte(name, 0) >= 0 {
+	if bytes.IndexByte(name, 0) >= 0 {
 		return fmt.Errorf("%w: entry name %q contains NUL", ErrInvalidTree, name)
 	}
 
-	if strings.IndexByte(name, '/') >= 0 {
+	if bytes.IndexByte(name, '/') >= 0 {
 		return fmt.Errorf("%w: entry name %q contains '/'", ErrInvalidTree, name)
 	}
 

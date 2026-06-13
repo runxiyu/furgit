@@ -1,6 +1,7 @@
 package tree
 
 import (
+	"bytes"
 	"slices"
 
 	"lindenii.org/go/furgit/object/tree/mode"
@@ -10,13 +11,18 @@ import (
 //
 // A name matches whether stored as a blob-like or as a subtree entry,
 // so both orderings are searched.
-// The returned entry is a copy; mutating it does not affect the tree.
-func (tree *Tree) Find(name string) (Entry, bool) {
+//
+// The returned entry is a shallow copy:
+// its Name aliases the tree's internal storage,
+// so it must not be mutated and shares the tree's lifetime.
+//
+// Labels: Life-Parent, Mut-No.
+func (tree *Tree) Find(name []byte) (Entry, bool) {
 	for _, searchIsTree := range [...]bool{true, false} {
-		index, ok := slices.BinarySearchFunc(tree.entries, name, func(existing Entry, target string) int {
+		index, ok := slices.BinarySearchFunc(tree.entries, name, func(existing Entry, target []byte) int {
 			return nameCompare(existing.Name, existing.Mode == mode.Directory, target, searchIsTree)
 		})
-		if ok && tree.entries[index].Name == name {
+		if ok && bytes.Equal(tree.entries[index].Name, name) {
 			return tree.entries[index], true
 		}
 	}

@@ -6,7 +6,7 @@ package tree
 // treating directory names as if they carried a trailing '/'.
 // entryIsTree and searchIsTree indicate
 // whether the respective names belong to subtree entries.
-func nameCompare(entryName string, entryIsTree bool, searchName string, searchIsTree bool) int {
+func nameCompare(entryName []byte, entryIsTree bool, searchName []byte, searchIsTree bool) int {
 	entryLen := len(entryName)
 	if entryIsTree {
 		entryLen++

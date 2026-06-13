@@ -1,8 +1,6 @@
 package tree
 
 import (
-	"slices"
-
 	"lindenii.org/go/furgit/object/id"
 	"lindenii.org/go/furgit/object/tree/mode"
 )
@@ -21,15 +19,19 @@ type Tree struct {
 // Entry represents a single entry in a tree.
 type Entry struct {
 	Mode mode.Mode
-	Name string
+	Name []byte
 	ID   id.ObjectID
 }
 
-// Entries returns a copy of the tree's entries in Git tree order.
+// Entries returns the tree's entries in Git tree order.
 //
-// Mutating the returned slice does not affect the tree.
+// The returned slice aliases the tree's internal storage,
+// so it must not be mutated,
+// and it is invalidated by any subsequent call that mutates the tree,
+// such as [Tree.Insert].
+// Use [Tree.Clone] for an independent tree.
 //
-// Labels: Life-Independent.
+// Labels: Life-Parent, Mut-No.
 func (tree *Tree) Entries() []Entry {
-	return slices.Clone(tree.entries)
+	return tree.entries
 }

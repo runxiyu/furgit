@@ -6,6 +6,7 @@ import (
 
 	"lindenii.org/go/furgit/object/id"
 	"lindenii.org/go/furgit/object/tree/mode"
+	"lindenii.org/go/lgo/unsafe"
 )
 
 // Parse decodes a tree object body into a fully materialized Tree.
@@ -14,6 +15,14 @@ import (
 // correctly sized object IDs, and strictly increasing Git tree order.
 // It does not enforce fsck-level name policy
 // (for example ".", "..", ".git", or platform-specific aliases).
+//
+// The returned tree aliases body:
+// each entry's Name shares body's backing array.
+// The tree inherits body's lifetime
+// and must not be mutated unless body may be.
+// Use [Tree.Clone] for an independent copy.
+//
+// Labels: Life-Parent, Mut-No.
 func Parse(body []byte, objectFormat id.ObjectFormat) (*Tree, error) {
 	tree := new(Tree)
 	idSize := objectFormat.Size()
@@ -38,7 +47,7 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Tree, error) {
 			return nil, fmt.Errorf("%w: missing name terminator at offset %d", ErrInvalidTree, i)
 		}
 
-		name := string(body[i : i+nul])
+		name := body[i : i+nul]
 		i += nul + 1
 
 		err = validateName(name)
@@ -67,11 +76,11 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Tree, error) {
 			}
 		}
 
-		if _, dup := seen[entry.Name]; dup {
+		if _, dup := seen[unsafe.String(entry.Name)]; dup {
 			return nil, fmt.Errorf("%w: duplicate entry name %q", ErrInvalidTree, entry.Name)
 		}
 
-		seen[entry.Name] = struct{}{}
+		seen[unsafe.String(entry.Name)] = struct{}{}
 
 		tree.entries = append(tree.entries, entry)
 	}
