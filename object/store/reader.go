@@ -23,12 +23,21 @@ type ObjectReader interface {
 	// Users should treat this as an invariant;
 	// implementations should not re-verify it on every read.
 	//
-	// Labels: Life-Parent.
+	// The returned slice may alias storage owned by the backend,
+	// such as a memory-mapped pack or a shared cache buffer.
+	// Callers must not mutate it
+	// and must not retain it past the backend's lifetime.
+	//
+	// Labels: Life-Parent, Mut-No.
 	ReadBytesFull(id id.ObjectID) ([]byte, error)
 
 	// ReadBytesContent reads an object's type and content bytes.
 	//
-	// Labels: Life-Parent.
+	// The returned slice may alias backend-owned storage.
+	// Callers must not mutate it
+	// and must not retain it past the backend's lifetime.
+	//
+	// Labels: Life-Parent, Mut-No.
 	ReadBytesContent(id id.ObjectID) (typ.Type, []byte, error)
 
 	// ReadReaderFull reads a full serialized object stream
