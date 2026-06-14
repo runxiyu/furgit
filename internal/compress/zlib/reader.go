@@ -34,6 +34,7 @@ and to read that data back:
 package zlib
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"hash"
@@ -75,6 +76,7 @@ type Reader struct {
 	trailerRead  uint64
 	err          error
 	scratch      [4]byte
+	br           bytes.Reader
 }
 
 // NewReader creates a new ReadCloser.
@@ -93,6 +95,23 @@ func NewReaderDict(r io.Reader, dict []byte) (*Reader, error) {
 	z := readerPool.Get()
 
 	err := z.reset(r, dict)
+	if err != nil {
+		return nil, err
+	}
+
+	return z, nil
+}
+
+// NewReaderBytes is like [NewReader] but reads directly from payload,
+// reusing a [bytes.Reader] pooled with the returned Reader
+// instead of allocating a fresh one per call.
+// It is the caller's responsibility to call Close on the ReadCloser when done.
+func NewReaderBytes(payload []byte) (*Reader, error) {
+	z := readerPool.Get()
+
+	z.br.Reset(payload)
+
+	err := z.reset(&z.br, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -168,6 +187,7 @@ func (z *Reader) Close() error {
 		return z.err
 	}
 
+	z.br.Reset(nil)
 	readerPool.Put(z)
 
 	return nil

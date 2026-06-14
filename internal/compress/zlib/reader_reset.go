@@ -18,7 +18,7 @@ import (
 
 // reset resets receiver to read a new zlib stream.
 func (z *Reader) reset(r io.Reader, dict []byte) error {
-	*z = Reader{decompressor: z.decompressor, digest: z.digest}
+	*z = Reader{decompressor: z.decompressor, digest: z.digest, br: z.br}
 
 	var input flate.Reader
 	if fr, ok := r.(flate.Reader); ok {
