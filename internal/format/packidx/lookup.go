@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"math/bits"
 )
 
 // Lookup searches the index for one object ID
@@ -18,6 +19,52 @@ func (idx *Packidx) Lookup(oid []byte) (offset uint64, found bool, err error) {
 
 	lo, hi := idx.fanoutRange(oid[0])
 
+	// Object IDs are uniform for honest inputs,
+	// interp on next 8 octets converges in O(log log n).
+	//
+	// OIDs are public unkeyed hashes,
+	// so an attacker may sample/filter/mine prefix clusters,
+	// making interpolation mis-estimate every probe.
+	// See https://runxiyu.org/comp/ch4ht/
+	// for why cryptographic hash algorithms are insufficient.
+	//
+	// Cap the interp at bisect's probe count and finish by bisect;
+	// adversarial at O(log n) plus small interpolation overhead,
+	// honest exit well under the cap.
+	target := binary.BigEndian.Uint64(oid[1:9])
+
+	for budget := bits.Len(uint(hi - lo)); hi-lo > 8 && budget > 0; budget-- {
+		loKey := binary.BigEndian.Uint64(idx.OIDAt(lo)[1:9])
+		hiKey := binary.BigEndian.Uint64(idx.OIDAt(hi - 1)[1:9])
+
+		var mid int
+
+		switch {
+		case target <= loKey:
+			mid = lo
+		case target >= hiKey:
+			mid = hi - 1
+		default:
+			frac := float64(target-loKey) / float64(hiKey-loKey)
+			mid = lo + int(frac*float64(hi-lo-1))
+		}
+
+		switch cmp := bytes.Compare(oid, idx.OIDAt(mid)); {
+		case cmp == 0:
+			offset, err = idx.OffsetAt(mid)
+			if err != nil {
+				return 0, false, err
+			}
+
+			return offset, true, nil
+		case cmp < 0:
+			hi = mid
+		default:
+			lo = mid + 1
+		}
+	}
+
+	// Interpolation narrowed or capped; bisect to finish.
 	for lo < hi {
 		mid := lo + (hi-lo)/2
 
