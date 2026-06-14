@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"lindenii.org/go/furgit/internal/format/packidx"
+	"lindenii.org/go/furgit/internal/format/packidx/bloom"
 	"lindenii.org/go/furgit/internal/testgit"
 	"lindenii.org/go/furgit/object/id"
 	"lindenii.org/go/furgit/object/store"
@@ -83,6 +85,77 @@ func TestWritePackMatchesGit(t *testing.T) {
 
 				if !bytes.Equal(ours, want) {
 					t.Errorf("%s differs from git: %d bytes vs %d", artifact.kind, len(ours), len(want))
+				}
+			}
+		})
+	}
+}
+
+// TestWritePackBloom verifies that ingesting a pack writes a Bloom filter
+// that reports every object in the pack as present.
+func TestWritePackBloom(t *testing.T) {
+	t.Parallel()
+
+	for _, objectFormat := range id.SupportedObjectFormats() {
+		t.Run(objectFormat.String(), func(t *testing.T) {
+			t.Parallel()
+
+			repo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: objectFormat})
+			if err != nil {
+				t.Fatalf("NewRepo: %v", err)
+			}
+
+			seeded, err := repo.SeedHistory(t)
+			if err != nil {
+				t.Fatalf("SeedHistory: %v", err)
+			}
+
+			gitPrefix, err := repo.PackObjects(t, seeded.All(), testgit.PackObjectsOptions{
+				RevIndex: true,
+				Revs:     false,
+				Exclude:  nil,
+			})
+			if err != nil {
+				t.Fatalf("PackObjects: %v", err)
+			}
+
+			stream, err := os.ReadFile(gitPrefix + ".pack") //nolint:gosec
+			if err != nil {
+				t.Fatalf("ReadFile pack: %v", err)
+			}
+
+			dir, result := writePack(t, objectFormat, bytes.NewReader(stream), store.PackWriteOptions{
+				ThinBase: nil,
+				Progress: nil,
+			})
+
+			if result.BloomName == "" {
+				t.Fatal("BloomName is empty")
+			}
+
+			bloomBytes, err := os.ReadFile(filepath.Join(dir, result.BloomName)) //nolint:gosec
+			if err != nil {
+				t.Fatalf("ReadFile bloom: %v", err)
+			}
+
+			filter, err := bloom.Parse(bloomBytes, objectFormat)
+			if err != nil {
+				t.Fatalf("bloom.Parse: %v", err)
+			}
+
+			idxBytes, err := os.ReadFile(filepath.Join(dir, result.IdxName)) //nolint:gosec
+			if err != nil {
+				t.Fatalf("ReadFile idx: %v", err)
+			}
+
+			index, err := packidx.Parse(idxBytes, objectFormat.Size())
+			if err != nil {
+				t.Fatalf("packidx.Parse: %v", err)
+			}
+
+			for pos := range index.NumObjects() {
+				if !filter.MayContain(index.OIDAt(pos)) {
+					t.Fatalf("filter rejects object at index position %d", pos)
 				}
 			}
 		})
