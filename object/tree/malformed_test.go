@@ -44,6 +44,7 @@ func TestParseMalformed(t *testing.T) {
 				{name: "unsorted", body: append(record("100644", "b", size), record("100644", "a", size)...)},
 				{name: "duplicate", body: append(record("100644", "a", size), record("100644", "a", size)...)},
 				{name: "conflicting-tree-blob", body: append(record("100644", "foo", size), record("40000", "foo", size)...)},
+				{name: "conflicting-tree-blob-nonadjacent", body: append(append(record("100644", "foo", size), record("100644", "foo.c", size)...), record("40000", "foo", size)...)},
 			} {
 				t.Run(tc.name, func(t *testing.T) {
 					t.Parallel()
