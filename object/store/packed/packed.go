@@ -63,7 +63,7 @@ func New(root *os.Root, objectFormat id.ObjectFormat) (*Packed, error) {
 	packed := &Packed{
 		root:         root,
 		objectFormat: objectFormat,
-		order:        mru.New[*pack](),
+		order:        mru.New[*pack](mru.Options{Interval: 48}),
 		baseCache:    newBaseCache(),
 		refreshMu:    sync.Mutex{},
 		byName:       nil,

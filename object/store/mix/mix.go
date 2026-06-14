@@ -28,7 +28,7 @@ func New(backends ...store.ObjectReader) *Mix {
 		present[backend] = struct{}{}
 	}
 
-	order := mru.New[store.ObjectReader]()
+	order := mru.New[store.ObjectReader](mru.Options{Interval: 48})
 	order.Sync(present)
 
 	return &Mix{
