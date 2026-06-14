@@ -133,7 +133,7 @@ func Parse(data []byte, objectFormat id.ObjectFormat) (Bloom, error) {
 		return zero, fmt.Errorf("%w: %w", ErrMalformedBloomFilter, err)
 	}
 
-	want := uint64(HeaderLen) + uint64(BucketLen)*uint64(bucketCount) + 2*uint64(hashSize)
+	want := uint64(HeaderLen) + uint64(BucketLen)*uint64(bucketCount) + 2*uint64(hashSize) //#nosec G115
 	if uint64(len(data)) != want {
 		return zero, fmt.Errorf("%w: file size disagrees with bucket count", ErrMalformedBloomFilter)
 	}

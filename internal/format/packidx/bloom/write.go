@@ -74,7 +74,7 @@ func NewBuilder(objectFormat id.ObjectFormat, bucketCount uint32, k uint16, pack
 		return nil, fmt.Errorf("%w: %w", ErrInvalidParameters, err)
 	}
 
-	total, err := intconv.Uint64ToInt(uint64(HeaderLen) + uint64(BucketLen)*uint64(bucketCount) + 2*uint64(hashSize))
+	total, err := intconv.Uint64ToInt(uint64(HeaderLen) + uint64(BucketLen)*uint64(bucketCount) + 2*uint64(hashSize)) //#nosec G115
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidParameters, err)
 	}
