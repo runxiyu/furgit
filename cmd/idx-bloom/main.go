@@ -86,7 +86,7 @@ func buildFilter(objectFormat id.ObjectFormat, index *packidx.Packidx) ([]byte, 
 		return nil, fmt.Errorf("choosing parameters: %w", err)
 	}
 
-	builder, err := bloom.NewBuilder(objectFormat, bucketCount, k)
+	builder, err := bloom.NewBuilder(objectFormat, bucketCount, k, index.PackHash())
 	if err != nil {
 		return nil, fmt.Errorf("creating builder: %w", err)
 	}

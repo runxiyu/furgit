@@ -73,7 +73,7 @@ func openPack(root *os.Root, name string, objectFormat id.ObjectFormat) (*pack, 
 		return nil, fmt.Errorf("%w: pack %q: %w", ErrMalformedPackedStore, name, err)
 	}
 
-	bloomMapping, filter := openBloom(root, name, objectFormat)
+	bloomMapping, filter := openBloom(root, name, objectFormat, idx.PackHash())
 
 	return &pack{
 		name:         name,
@@ -86,7 +86,7 @@ func openPack(root *os.Root, name string, objectFormat id.ObjectFormat) (*pack, 
 	}, nil
 }
 
-func openBloom(root *os.Root, name string, objectFormat id.ObjectFormat) (*mmap.Mmap, *bloom.Bloom) {
+func openBloom(root *os.Root, name string, objectFormat id.ObjectFormat, packHash []byte) (*mmap.Mmap, *bloom.Bloom) {
 	mapping, err := mapFile(root, name+".bloom")
 	if err != nil {
 		return nil, nil
@@ -94,6 +94,12 @@ func openBloom(root *os.Root, name string, objectFormat id.ObjectFormat) (*mmap.
 
 	filter, err := bloom.Parse(mapping.Data(), objectFormat)
 	if err != nil {
+		_ = mapping.Close()
+
+		return nil, nil
+	}
+
+	if !bytes.Equal(filter.PackHash(), packHash) {
 		_ = mapping.Close()
 
 		return nil, nil

@@ -39,7 +39,7 @@ func (ingestion *ingestion) finalize() (Result, error) {
 		return Result{}, err
 	}
 
-	bloomBuilder, err := ingestion.buildBloom(entries)
+	bloomBuilder, err := ingestion.buildBloom(entries, packHash)
 	if err != nil {
 		return Result{}, err
 	}
@@ -97,14 +97,15 @@ func (ingestion *ingestion) finalize() (Result, error) {
 	}, nil
 }
 
-// buildBloom builds a Bloom filter over the index entries' object IDs.
-func (ingestion *ingestion) buildBloom(entries []packidx.Entry) (*bloom.Builder, error) {
+// buildBloom builds a Bloom filter over the index entries' object IDs,
+// bound to packHash.
+func (ingestion *ingestion) buildBloom(entries []packidx.Entry, packHash []byte) (*bloom.Builder, error) {
 	bucketCount, k, err := bloom.RecommendParams(ingestion.objectFormat, len(entries))
 	if err != nil {
 		return nil, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
 	}
 
-	builder, err := bloom.NewBuilder(ingestion.objectFormat, bucketCount, k)
+	builder, err := bloom.NewBuilder(ingestion.objectFormat, bucketCount, k, packHash)
 	if err != nil {
 		return nil, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
 	}
