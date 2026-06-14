@@ -10,6 +10,10 @@ linters:
       - path: internal/testgit
         linters:
           - err113        # test helpers report ad-hoc git failures; static errors add no value here
+      - path: cmd/
+        linters:
+          - err113
+          - wrapcheck
   disable:
     - dupword          # extremely normal in tests and a pretty unnecessary linter
     - goconst          # unnecessary especially for our parsing code; many false positives
