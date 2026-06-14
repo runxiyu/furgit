@@ -13,6 +13,9 @@ type Result struct {
 	// RevName is the destination-relative name of the written reverse index.
 	RevName string
 
+	// BloomName is the destination-relative name of the written Bloom filter.
+	BloomName string
+
 	// PackHash is the pack trailer hash
 	// shared by the pack, index, and reverse index.
 	PackHash id.ObjectID

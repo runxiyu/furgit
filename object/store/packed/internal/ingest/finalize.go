@@ -8,6 +8,7 @@ import (
 	"slices"
 
 	"lindenii.org/go/furgit/internal/format/packidx"
+	"lindenii.org/go/furgit/internal/format/packidx/bloom"
 	"lindenii.org/go/furgit/internal/format/packrev"
 	"lindenii.org/go/furgit/object/id"
 	"lindenii.org/go/lgo/intconv"
@@ -38,12 +39,27 @@ func (ingestion *ingestion) finalize() (Result, error) {
 		return Result{}, err
 	}
 
+	bloomBuilder, err := ingestion.buildBloom(entries)
+	if err != nil {
+		return Result{}, err
+	}
+
+	bloomTmp, err := ingestion.writeTemp("tmp_bloom_", func(w io.Writer) error {
+		_, err := bloomBuilder.WriteTo(w)
+
+		return err
+	})
+	if err != nil {
+		return Result{}, err
+	}
+
 	base := "pack-" + ingestion.packHash.String()
 	packFinal := base + ".pack"
 	idxFinal := base + ".idx"
 	revFinal := base + ".rev"
+	bloomFinal := base + ".bloom"
 
-	// Link the pack and reverse index before the index,
+	// Link the pack, reverse index, and Bloom filter before the index,
 	// since the index is what publishes the pack to readers.
 	err = ingestion.link(ingestion.packTmp, packFinal)
 	if err != nil {
@@ -51,6 +67,11 @@ func (ingestion *ingestion) finalize() (Result, error) {
 	}
 
 	err = ingestion.link(revTmp, revFinal)
+	if err != nil {
+		return Result{}, err
+	}
+
+	err = ingestion.link(bloomTmp, bloomFinal)
 	if err != nil {
 		return Result{}, err
 	}
@@ -69,10 +90,31 @@ func (ingestion *ingestion) finalize() (Result, error) {
 		PackName:    packFinal,
 		IdxName:     idxFinal,
 		RevName:     revFinal,
+		BloomName:   bloomFinal,
 		PackHash:    ingestion.packHash,
 		ObjectCount: objectCount,
 		ThinFixed:   ingestion.thinFixed,
 	}, nil
+}
+
+// buildBloom builds a Bloom filter over the index entries' object IDs.
+func (ingestion *ingestion) buildBloom(entries []packidx.Entry) (*bloom.Builder, error) {
+	bucketCount, k, err := bloom.RecommendParams(ingestion.objectFormat, len(entries))
+	if err != nil {
+		return nil, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
+	}
+
+	builder, err := bloom.NewBuilder(ingestion.objectFormat, bucketCount, k)
+	if err != nil {
+		return nil, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
+	}
+
+	size := ingestion.objectFormat.Size()
+	for i := range entries {
+		builder.Add(entries[i].OID[:size])
+	}
+
+	return builder, nil
 }
 
 // indexEntries returns the index entries in object-ID order

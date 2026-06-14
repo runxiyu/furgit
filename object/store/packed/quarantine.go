@@ -156,6 +156,8 @@ func packPromotionPriority(name string) int {
 		return 1
 	case strings.HasPrefix(name, "pack-") && strings.HasSuffix(name, ".rev"):
 		return 2
+	case strings.HasPrefix(name, "pack-") && strings.HasSuffix(name, ".bloom"):
+		return 2
 	case strings.HasPrefix(name, "pack-") && strings.HasSuffix(name, ".idx"):
 		return 3
 	default:
