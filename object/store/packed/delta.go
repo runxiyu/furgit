@@ -10,7 +10,13 @@ import (
 	"lindenii.org/go/furgit/internal/format/packfile"
 	"lindenii.org/go/furgit/internal/format/packfile/delta"
 	"lindenii.org/go/lgo/intconv"
+	"lindenii.org/go/lgo/sync"
 )
+
+//nolint:gochecknoglobals
+var deltaHeaderPool = sync.NewPool(func() *[delta.MaxHeaderSizesLen]byte {
+	return new([delta.MaxHeaderSizesLen]byte)
+})
 
 // deltaNode is a delta entry on a resolution chain.
 type deltaNode struct {
@@ -214,9 +220,12 @@ func deltaResultSize(payload []byte, deltaSize uint64) (int, error) {
 
 	defer func() { _ = zr.Close() }()
 
+	buf := deltaHeaderPool.Get()
+	defer deltaHeaderPool.Put(buf)
+
 	prefixLen := min(uint64(delta.MaxHeaderSizesLen), deltaSize)
 
-	prefix := make([]byte, prefixLen)
+	prefix := buf[:prefixLen]
 
 	_, err = io.ReadFull(zr, prefix)
 	if err != nil {
