@@ -13,7 +13,7 @@ func validFilter(t *testing.T, format id.ObjectFormat) []byte {
 	// TODO: maybe testgit should have something like this?
 	t.Helper()
 
-	builder, err := bloom.NewBuilder(format, 4, 2)
+	builder, err := bloom.NewBuilder(format, 4, 2, make([]byte, format.Size()))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -25,7 +25,7 @@ func TestRecommendParams(t *testing.T) {
 					t.Errorf("n=%d: bucket count %d not a power of two", n, bucketCount)
 				}
 
-				_, err = bloom.NewBuilder(format, bucketCount, k)
+				_, err = bloom.NewBuilder(format, bucketCount, k, make([]byte, format.Size()))
 				if err != nil {
 					t.Errorf("n=%d: recommended parameters rejected: %v", n, err)
 				}
@@ -55,7 +55,7 @@ func TestNewBuilderRejects(t *testing.T) {
 				t.Run(tc.name, func(t *testing.T) {
 					t.Parallel()
 
-					_, err := bloom.NewBuilder(format, tc.bucketCount, tc.k)
+					_, err := bloom.NewBuilder(format, tc.bucketCount, tc.k, make([]byte, format.Size()))
 					if !errors.Is(err, bloom.ErrInvalidParameters) {
 						t.Fatalf("error = %v, want ErrInvalidParameters", err)
 					}
@@ -68,7 +68,7 @@ func TestNewBuilderRejects(t *testing.T) {
 func TestAddBadLength(t *testing.T) {
 	t.Parallel()
 
-	builder, err := bloom.NewBuilder(id.ObjectFormatSHA256, 4, 2)
+	builder, err := bloom.NewBuilder(id.ObjectFormatSHA256, 4, 2, make([]byte, id.ObjectFormatSHA256.Size()))
 	if err != nil {
 		t.Fatal(err)
 	}

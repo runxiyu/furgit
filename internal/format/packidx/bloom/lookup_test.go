@@ -12,7 +12,7 @@ func TestMayContainBadLength(t *testing.T) {
 
 	format := id.ObjectFormatSHA256
 
-	builder, err := bloom.NewBuilder(format, 4, 2)
+	builder, err := bloom.NewBuilder(format, 4, 2, make([]byte, format.Size()))
 	if err != nil {
 		t.Fatal(err)
 	}

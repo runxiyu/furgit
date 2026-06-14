@@ -1,6 +1,7 @@
 package bloom_test
 
 import (
+	"bytes"
 	"encoding/binary"
 	"testing"
 
@@ -38,12 +39,14 @@ func TestRoundTrip(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			builder, err := bloom.NewBuilder(format, bucketCount, k)
+			size := format.Size()
+			packHash := makeOID(size, 0xC0FFEE)
+
+			builder, err := bloom.NewBuilder(format, bucketCount, k, packHash)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			size := format.Size()
 			for i := range objects {
 				builder.Add(makeOID(size, uint64(i)))
 			}
@@ -51,6 +54,15 @@ func TestRoundTrip(t *testing.T) {
 			filter, err := bloom.Parse(builder.Bytes(), format)
 			if err != nil {
 				t.Fatal(err)
+			}
+
+			if !bytes.Equal(filter.PackHash(), packHash) {
+				t.Fatalf("PackHash = %x, want %x", filter.PackHash(), packHash)
+			}
+
+			err = filter.Verify()
+			if err != nil {
+				t.Fatalf("Verify on a freshly built filter: %v", err)
 			}
 
 			for i := range objects {
