@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"io"
 	"math/bits"
 
 	"lindenii.org/go/furgit/object/id"
@@ -106,16 +105,6 @@ func (b *Builder) Add(oid []byte) {
 // Labels: Life-Parent, Mut-No.
 func (b *Builder) Bytes() []byte {
 	return b.data
-}
-
-// WriteTo writes the serialized filter to w.
-func (b *Builder) WriteTo(w io.Writer) (int64, error) {
-	n, err := w.Write(b.data)
-	if err != nil {
-		return int64(n), fmt.Errorf("internal/format/packidx/bloom: %w", err)
-	}
-
-	return int64(n), nil
 }
 
 // RecommendParams returns filter parameters for an index of n objects,

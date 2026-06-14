@@ -45,7 +45,7 @@ func (ingestion *ingestion) finalize() (Result, error) {
 	}
 
 	bloomTmp, err := ingestion.writeTemp("tmp_bloom_", func(w io.Writer) error {
-		_, err := bloomBuilder.WriteTo(w)
+		_, err := w.Write(bloomBuilder.Bytes())
 
 		return err
 	})

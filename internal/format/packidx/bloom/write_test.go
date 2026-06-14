@@ -1,7 +1,6 @@
 package bloom_test
 
 import (
-	"bytes"
 	"errors"
 	"testing"
 
@@ -81,28 +80,4 @@ func TestAddBadLength(t *testing.T) {
 	}()
 
 	builder.Add(make([]byte, id.ObjectFormatSHA256.Size()-1))
-}
-
-func TestWriteTo(t *testing.T) {
-	t.Parallel()
-
-	builder, err := bloom.NewBuilder(id.ObjectFormatSHA256, 4, 2)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	var buf bytes.Buffer
-
-	n, err := builder.WriteTo(&buf)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if int(n) != len(builder.Bytes()) {
-		t.Fatalf("WriteTo wrote %d bytes, want %d", n, len(builder.Bytes()))
-	}
-
-	if !bytes.Equal(buf.Bytes(), builder.Bytes()) {
-		t.Fatal("WriteTo output differs from Bytes")
-	}
 }
