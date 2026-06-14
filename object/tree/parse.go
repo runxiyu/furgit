@@ -28,6 +28,11 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Tree, error) {
 	idSize := objectFormat.Size()
 	seen := make(map[string]struct{})
 
+	const minEntryOverhead = 5 + 1 + 1 + 1 // mode, space, name, NUL
+	if estimate := len(body) / (minEntryOverhead + idSize); estimate > 0 {
+		tree.entries = make([]Entry, 0, estimate)
+	}
+
 	i := 0
 	for i < len(body) {
 		space := bytes.IndexByte(body[i:], ' ')
