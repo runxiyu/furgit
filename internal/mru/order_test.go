@@ -20,7 +20,7 @@ func set(keys ...string) map[string]struct{} {
 func TestTouchMovesToFront(t *testing.T) {
 	t.Parallel()
 
-	order := mru.New[string]()
+	order := mru.New[string](mru.Options{Interval: 1})
 	order.Sync(set("a", "b", "c"))
 
 	order.Touch("a")
@@ -36,10 +36,60 @@ func TestTouchMovesToFront(t *testing.T) {
 	}
 }
 
+func TestIntervalThrottlesReorder(t *testing.T) {
+	t.Parallel()
+
+	const interval = 4
+
+	order := mru.New[string](mru.Options{Interval: interval})
+	order.Sync(set("a", "b", "c"))
+
+	front := order.Keys()[0]
+
+	other := "a"
+	if other == front {
+		other = "b"
+	}
+
+	for range interval - 1 {
+		order.Touch(other)
+
+		if got := order.Keys()[0]; got != front {
+			t.Fatalf("reordered early: front = %q, want %q", got, front)
+		}
+	}
+
+	order.Touch(other)
+
+	if got := order.Keys()[0]; got != other {
+		t.Fatalf("after interval touches, front = %q, want %q", got, other)
+	}
+}
+
+func TestIntervalKeepsMembershipUnderReorder(t *testing.T) {
+	t.Parallel()
+
+	order := mru.New[string](mru.Options{Interval: 8})
+	order.Sync(set("a", "b", "c", "d"))
+
+	for range 100 {
+		for _, key := range []string{"a", "b", "c", "d"} {
+			order.Touch(key)
+		}
+	}
+
+	got := slices.Clone(order.Keys())
+	slices.Sort(got)
+
+	if want := []string{"a", "b", "c", "d"}; !slices.Equal(got, want) {
+		t.Fatalf("membership corrupted: %v", got)
+	}
+}
+
 func TestSyncDropsAbsentAndKeepsSurvivorOrder(t *testing.T) {
 	t.Parallel()
 
-	order := mru.New[string]()
+	order := mru.New[string](mru.Options{Interval: 1})
 	order.Sync(set("a", "b", "c"))
 
 	// Establish a deterministic recency order: c, b, a.
@@ -61,7 +111,7 @@ func TestSyncDropsAbsentAndKeepsSurvivorOrder(t *testing.T) {
 func TestSyncPlacesNewKeysFirst(t *testing.T) {
 	t.Parallel()
 
-	order := mru.New[string]()
+	order := mru.New[string](mru.Options{Interval: 1})
 	order.Sync(set("a", "b"))
 
 	order.Touch("a")
@@ -77,7 +127,7 @@ func TestSyncPlacesNewKeysFirst(t *testing.T) {
 func TestTouchAbsentIsNoOp(t *testing.T) {
 	t.Parallel()
 
-	order := mru.New[string]()
+	order := mru.New[string](mru.Options{Interval: 1})
 	order.Sync(set("a", "b"))
 	order.Touch("a")
 	order.Touch("z")
@@ -90,7 +140,7 @@ func TestTouchAbsentIsNoOp(t *testing.T) {
 func TestKeysIsConsistentSnapshot(t *testing.T) {
 	t.Parallel()
 
-	order := mru.New[string]()
+	order := mru.New[string](mru.Options{Interval: 1})
 	order.Sync(set("a", "b"))
 
 	snapshot := order.Keys()
@@ -111,7 +161,7 @@ func TestKeysIsConsistentSnapshot(t *testing.T) {
 func TestConcurrentTouchAndKeys(t *testing.T) {
 	t.Parallel()
 
-	order := mru.New[string]()
+	order := mru.New[string](mru.Options{Interval: 1})
 	order.Sync(set("a", "b", "c", "d"))
 
 	var wg sync.WaitGroup

@@ -10,9 +10,18 @@ package mru
 // A contended attempt,
 // or a key that is not a member,
 // leaves the order unchanged.
+//
+// When the order has a reorder interval above 1,
+// an eligible (non-front) Touch records its recency
+// but applies the reorder only once per interval such calls;
+// the recording itself is lock-free and allocation-free.
 func (order *Order[K]) Touch(key K) {
 	keys := order.Keys()
 	if len(keys) == 0 || keys[0] == key {
+		return
+	}
+
+	if order.interval > 1 && order.pending.Add(1)%order.interval != 0 {
 		return
 	}
 
