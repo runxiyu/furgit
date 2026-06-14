@@ -15,7 +15,7 @@ func (repo *Repo) command(
 ) *exec.Cmd {
 	tb.Helper()
 
-	cmd := exec.CommandContext(tb.Context(), command, args...) //nolint:gosec // Test helper runs caller-selected commands.
+	cmd := exec.CommandContext(tb.Context(), command, args...) //nolint:gosec
 	cmd.Dir = repo.path
 	cmd.Env = repo.env
 
