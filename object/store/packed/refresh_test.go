@@ -101,7 +101,7 @@ func cp(t *testing.T, src, dst string) {
 		t.Fatalf("ReadFile: %v", err)
 	}
 
-	err = os.WriteFile(dst, data, 0o600)
+	err = os.WriteFile(dst, data, 0o600) //#nosec G703
 	if err != nil {
 		t.Fatalf("WriteFile: %v", err)
 	}
