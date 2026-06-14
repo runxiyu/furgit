@@ -33,7 +33,7 @@ func (ingestion *ingestion) fixThin(external []id.ObjectID, adjacency adjacency,
 	// Drop the trailer from the write cursor.
 	ingestion.scanner.consumed -= hashSize
 
-	var appended []int
+	appended := make([]int, 0, len(external))
 
 	for _, baseOID := range external {
 		ty, content, err := ingestion.opts.ThinBase.ReadBytesContent(baseOID)

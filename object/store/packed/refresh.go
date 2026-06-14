@@ -23,7 +23,7 @@ func (packed *Packed) Refresh() error {
 
 	next := make(map[string]*pack, len(packed.byName))
 
-	var opened []*pack
+	opened := make([]*pack, 0, len(dirEntries))
 
 	for _, dirEntry := range dirEntries {
 		name, ok := strings.CutSuffix(dirEntry.Name(), ".idx")

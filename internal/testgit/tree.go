@@ -50,7 +50,7 @@ func (repo *Repo) LsTree(tb testing.TB, oid id.ObjectID) ([]TreeEntry, error) {
 		return nil, fmt.Errorf("ls-tree: %w", err)
 	}
 
-	var entries []TreeEntry
+	entries := make([]TreeEntry, 0, bytes.Count(stdout, []byte{0}))
 
 	for record := range bytes.SplitSeq(stdout, []byte{0}) {
 		if len(record) == 0 {

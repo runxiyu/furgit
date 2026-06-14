@@ -270,7 +270,7 @@ func (ingestion *ingestion) countUnresolved() int {
 func (ingestion *ingestion) unresolvedExternalBases() []id.ObjectID {
 	seen := make(map[id.ObjectID]struct{})
 
-	var out []id.ObjectID
+	out := make([]id.ObjectID, 0, ingestion.deltaCount-ingestion.deltasResolved)
 
 	for index := range ingestion.records {
 		rec := &ingestion.records[index]

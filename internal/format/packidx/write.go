@@ -84,7 +84,7 @@ func Write(w io.Writer, objectFormat id.ObjectFormat, entries []Entry, packHash 
 		sw.PutUint32(entries[i].CRC32)
 	}
 
-	var largeOffsets []uint64
+	largeOffsets := make([]uint64, 0, len(entries))
 
 	for i := range entries {
 		offset := entries[i].Offset
