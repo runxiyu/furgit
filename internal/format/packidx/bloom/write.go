@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"hash"
 	"math/bits"
 
 	"lindenii.org/go/furgit/object/id"
@@ -29,37 +30,51 @@ const targetLoad = 48
 //
 // Labels: MT-Unsafe.
 type Builder struct {
-	// data is the full filter file, header included.
+	// data is the full filter file, header and trailer included.
 	data []byte
 
-	// buckets aliases the bucket region of data, after the header.
+	// buckets aliases the bucket region of data, between header and trailer.
 	buckets []byte
 
-	log2B    uint
-	k        int
-	hashSize int
+	// hashImpl computes the trailing checksum and gives the hash size.
+	hashImpl hash.Hash
+
+	log2B uint
+	k     int
 }
 
 // NewBuilder creates a filter builder
-// for bucketCount buckets and k probes per object ID.
+// for bucketCount buckets and k probes per object ID,
+// binding the filter to packHash.
 //
 // bucketCount must be a nonzero power of two,
 // k must be nonzero,
 // and log2(bucketCount) + 9*k must not exceed the hash length in bits.
-func NewBuilder(objectFormat id.ObjectFormat, bucketCount uint32, k uint16) (*Builder, error) {
+// packHash must be the pack's trailer hash;
+// NewBuilder panics when its length does not match the object format.
+func NewBuilder(objectFormat id.ObjectFormat, bucketCount uint32, k uint16, packHash []byte) (*Builder, error) {
 	hashID, err := hashFunctionID(objectFormat)
 	if err != nil {
 		return nil, err
 	}
 
+	hashImpl, err := objectFormat.New()
+	if err != nil {
+		return nil, fmt.Errorf("internal/format/packidx/bloom: %w", err)
+	}
+
 	hashSize := objectFormat.Size()
+
+	if len(packHash) != hashSize {
+		panic("internal/format/packidx/bloom: invalid pack hash length")
+	}
 
 	log2B, err := checkParams(bucketCount, k, hashSize)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidParameters, err)
 	}
 
-	total, err := intconv.Uint64ToInt(uint64(HeaderLen) + uint64(BucketLen)*uint64(bucketCount))
+	total, err := intconv.Uint64ToInt(uint64(HeaderLen) + uint64(BucketLen)*uint64(bucketCount) + 2*uint64(hashSize))
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrInvalidParameters, err)
 	}
@@ -71,12 +86,15 @@ func NewBuilder(objectFormat id.ObjectFormat, bucketCount uint32, k uint16) (*Bu
 	binary.BigEndian.PutUint32(data[12:], bucketCount)
 	binary.BigEndian.PutUint16(data[16:], k)
 
+	bucketsEnd := total - 2*hashSize
+	copy(data[bucketsEnd:], packHash)
+
 	return &Builder{
 		data:     data,
-		buckets:  data[HeaderLen:],
+		buckets:  data[HeaderLen:bucketsEnd],
+		hashImpl: hashImpl,
 		log2B:    log2B,
 		k:        int(k),
-		hashSize: hashSize,
 	}, nil
 }
 
@@ -85,7 +103,7 @@ func NewBuilder(objectFormat id.ObjectFormat, bucketCount uint32, k uint16) (*Bu
 // oid must be exactly the filter's hash size;
 // Add panics otherwise.
 func (b *Builder) Add(oid []byte) {
-	if len(oid) != b.hashSize {
+	if len(oid) != b.hashImpl.Size() {
 		panic("internal/format/packidx/bloom: invalid object ID length")
 	}
 
@@ -100,10 +118,16 @@ func (b *Builder) Add(oid []byte) {
 	}
 }
 
-// Bytes returns the serialized filter.
+// Bytes returns the serialized filter, including its trailing checksum.
 //
 // Labels: Life-Parent, Mut-No.
 func (b *Builder) Bytes() []byte {
+	checksumOff := len(b.data) - b.hashImpl.Size()
+
+	b.hashImpl.Reset()
+	_, _ = b.hashImpl.Write(b.data[:checksumOff])
+	b.hashImpl.Sum(b.data[checksumOff:checksumOff])
+
 	return b.data
 }
 

@@ -12,7 +12,7 @@ import (
 //
 // Labels: Mut-No.
 func (f *Bloom) MayContain(oid []byte) bool {
-	if len(oid) != f.hashSize {
+	if len(oid) != f.objectFormat.Size() {
 		panic("internal/format/packidx/bloom: invalid object ID length")
 	}
 

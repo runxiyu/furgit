@@ -1,6 +1,7 @@
 package bloom
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -72,8 +73,14 @@ func hashFunctionID(objectFormat id.ObjectFormat) (uint32, error) {
 //
 // Labels: Deps-Borrowed, Life-Parent, MT-Safe.
 type Bloom struct {
-	// buckets is the bucket region, after the header.
+	// data is the entire filter payload.
+	data []byte
+
+	// buckets is the bucket region, between the header and the trailer.
 	buckets []byte
+
+	// objectFormat is the filter's object format.
+	objectFormat id.ObjectFormat
 
 	// log2B is the base-2 logarithm of the bucket count,
 	// i.e. the number of leading object ID bits that select a bucket.
@@ -81,9 +88,6 @@ type Bloom struct {
 
 	// k is the number of bits set and tested per object ID.
 	k int
-
-	// hashSize is the object ID size of the filter's object format.
-	hashSize int
 }
 
 // Parse parses one Bloom filter from data.
@@ -129,15 +133,48 @@ func Parse(data []byte, objectFormat id.ObjectFormat) (Bloom, error) {
 		return zero, fmt.Errorf("%w: %w", ErrMalformedBloomFilter, err)
 	}
 
-	want := uint64(HeaderLen) + uint64(BucketLen)*uint64(bucketCount)
+	want := uint64(HeaderLen) + uint64(BucketLen)*uint64(bucketCount) + 2*uint64(hashSize)
 	if uint64(len(data)) != want {
 		return zero, fmt.Errorf("%w: file size disagrees with bucket count", ErrMalformedBloomFilter)
 	}
 
 	return Bloom{
-		buckets:  data[HeaderLen:],
-		log2B:    log2B,
-		k:        int(k),
-		hashSize: hashSize,
+		data:         data,
+		buckets:      data[HeaderLen : len(data)-2*hashSize],
+		objectFormat: objectFormat,
+		log2B:        log2B,
+		k:            int(k),
 	}, nil
+}
+
+// PackHash returns the pack hash recorded in the filter trailer.
+//
+// Labels: Life-Parent, Mut-No.
+func (f *Bloom) PackHash() []byte {
+	hashSize := f.objectFormat.Size()
+	end := len(f.data) - hashSize
+
+	return f.data[end-hashSize : end]
+}
+
+// Verify recomputes the filter's trailing checksum and reports any mismatch.
+//
+// Verify reads the whole filter,
+// so callers should treat it as a deliberate integrity check
+// rather than part of the open path.
+func (f *Bloom) Verify() error {
+	hashImpl, err := f.objectFormat.New()
+	if err != nil {
+		return fmt.Errorf("internal/format/packidx/bloom: %w", err)
+	}
+
+	checksumOff := len(f.data) - f.objectFormat.Size()
+
+	_, _ = hashImpl.Write(f.data[:checksumOff])
+
+	if !bytes.Equal(hashImpl.Sum(nil), f.data[checksumOff:]) {
+		return fmt.Errorf("%w: checksum mismatch", ErrMalformedBloomFilter)
+	}
+
+	return nil
 }
