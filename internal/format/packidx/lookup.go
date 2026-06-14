@@ -45,8 +45,9 @@ func (idx *Packidx) Lookup(oid []byte) (offset uint64, found bool, err error) {
 		case target >= hiKey:
 			mid = hi - 1
 		default:
-			frac := float64(target-loKey) / float64(hiKey-loKey)
-			mid = lo + int(frac*float64(hi-lo-1))
+			hi128, lo128 := bits.Mul64(target-loKey, uint64(hi-lo-1)) //#nosec G115
+			q, _ := bits.Div64(hi128, lo128, hiKey-loKey)
+			mid = lo + int(q) //#nosec G115
 		}
 
 		switch cmp := bytes.Compare(oid, idx.OIDAt(mid)); {
