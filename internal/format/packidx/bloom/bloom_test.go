@@ -112,6 +112,37 @@ func TestParseMalformed(t *testing.T) {
 	}
 }
 
+// TestVerifyDetectsCorruption checks that Verify accepts a sound filter
+// and rejects one whose bucket bytes have been altered.
+func TestVerifyDetectsCorruption(t *testing.T) {
+	t.Parallel()
+
+	for _, format := range id.SupportedObjectFormats() {
+		t.Run(format.String(), func(t *testing.T) {
+			t.Parallel()
+
+			data := validFilter(t, format)
+
+			filter, err := bloom.Parse(data, format)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			err = filter.Verify()
+			if err != nil {
+				t.Fatalf("Verify on a sound filter: %v", err)
+			}
+
+			data[bloom.HeaderLen] ^= 0xff
+
+			err = filter.Verify()
+			if !errors.Is(err, bloom.ErrMalformedBloomFilter) {
+				t.Fatalf("Verify error = %v, want ErrMalformedBloomFilter", err)
+			}
+		})
+	}
+}
+
 func TestParseHashMismatch(t *testing.T) {
 	t.Parallel()
 

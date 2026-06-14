@@ -46,8 +46,9 @@
 //
 // # File format
 //
-// A filter file is a 64-octet header
-// followed by B buckets of 64 octets each:
+// A filter file is a 64-octet header,
+// then B buckets of 64 octets each,
+// then a two-hash trailer:
 //
 //   - 4-octet signature: {'I', 'D', 'B', 'L'}.
 //   - 4-octet version identifier (= 1).
@@ -57,6 +58,12 @@
 //   - 2-octet K, the number of bits set and tested per object ID.
 //   - 46-octet padding, which must be all zero.
 //   - B buckets of 64 octets each.
+//   - the pack trailer hash, which binds the filter to its pack.
+//   - the checksum of everything before it, over the filter's hash function.
+//
+// The hash length is that of the object format,
+// so the trailer is 2 hashes wide
+// and the file size is exactly 64 + 64*B + 2*hashlen octets.
 //
 // A reader must validate that
 // the signature matches,
@@ -66,7 +73,16 @@
 // K is nonzero,
 // log2(B) + 9*K does not exceed the hash length in bits,
 // the padding is all zero,
-// and the file size is exactly 64 + 64*B octets.
+// and the file size is exactly 64 + 64*B + 2*hashlen octets.
+//
+// # Binding and integrity
+//
+// The pack hash binds a filter to one pack;
+// a reader trusts a filter only when the recorded pack hash
+// matches the pack it accompanies.
+//
+// The checksum guards against corruption of the filter itself.
+// Recomputing it reads the whole file and rehashes it as fsck.
 //
 // # Lookup
 //

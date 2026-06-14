@@ -65,6 +65,18 @@ func TestNewBuilderRejects(t *testing.T) {
 	}
 }
 
+func TestNewBuilderBadPackHash(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if recover() == nil {
+			t.Fatal("NewBuilder did not panic on a short pack hash")
+		}
+	}()
+
+	_, _ = bloom.NewBuilder(id.ObjectFormatSHA256, 4, 2, make([]byte, id.ObjectFormatSHA256.Size()-1))
+}
+
 func TestAddBadLength(t *testing.T) {
 	t.Parallel()
 
