@@ -6,7 +6,6 @@ import (
 
 	"lindenii.org/go/furgit/object/id"
 	"lindenii.org/go/furgit/object/tree/mode"
-	"lindenii.org/go/lgo/unsafe"
 )
 
 // Parse decodes a tree object body into a fully materialized Tree.
@@ -26,7 +25,6 @@ import (
 func Parse(body []byte, objectFormat id.ObjectFormat) (*Tree, error) {
 	tree := new(Tree)
 	idSize := objectFormat.Size()
-	seen := make(map[string]struct{})
 
 	const minEntryOverhead = 5 + 1 + 1 + 1 // mode, space, name, NUL
 	if estimate := len(body) / (minEntryOverhead + idSize); estimate > 0 {
@@ -81,14 +79,44 @@ func Parse(body []byte, objectFormat id.ObjectFormat) (*Tree, error) {
 			}
 		}
 
-		if _, dup := seen[unsafe.String(entry.Name)]; dup {
+		if entryMode == mode.Directory && hasNonDirNamed(tree.entries, entry.Name) {
 			return nil, fmt.Errorf("%w: duplicate entry name %q", ErrInvalidTree, entry.Name)
 		}
-
-		seen[unsafe.String(entry.Name)] = struct{}{}
 
 		tree.entries = append(tree.entries, entry)
 	}
 
 	return tree, nil
+}
+
+// hasNonDirNamed reports whether entries, sorted in Git tree order,
+// holds a non-directory entry whose name equals name.
+//
+// The match sorts immediately below a directory of the same name,
+// so the search gallops from the back before binary searching the bracket.
+func hasNonDirNamed(entries []Entry, name []byte) bool {
+	lo, hi := 0, len(entries)
+
+	for stride := 1; stride < hi-lo; stride *= 2 {
+		mid := hi - stride
+		if nameCompare(entries[mid].Name, entries[mid].Mode == mode.Directory, name, false) < 0 {
+			lo = mid + 1
+
+			break
+		}
+
+		hi = mid
+	}
+
+	for lo < hi {
+		mid := lo + (hi-lo)/2
+		if nameCompare(entries[mid].Name, entries[mid].Mode == mode.Directory, name, false) < 0 {
+			lo = mid + 1
+		} else {
+			hi = mid
+		}
+	}
+
+	return lo < len(entries) &&
+		nameCompare(entries[lo].Name, entries[lo].Mode == mode.Directory, name, false) == 0
 }
