@@ -153,6 +153,10 @@ func TestWritePackBloom(t *testing.T) {
 				t.Fatalf("packidx.Parse: %v", err)
 			}
 
+			if !bytes.Equal(filter.PackHash(), index.PackHash()) {
+				t.Fatalf("filter pack hash %x, want %x", filter.PackHash(), index.PackHash())
+			}
+
 			for pos := range index.NumObjects() {
 				if !filter.MayContain(index.OIDAt(pos)) {
 					t.Fatalf("filter rejects object at index position %d", pos)
