@@ -8,6 +8,7 @@ import (
 
 	"lindenii.org/go/furgit/internal/format/packfile"
 	"lindenii.org/go/furgit/internal/format/packidx"
+	"lindenii.org/go/furgit/internal/format/packidx/bloom"
 	"lindenii.org/go/furgit/internal/mmap"
 	"lindenii.org/go/furgit/object/id"
 	"lindenii.org/go/lgo/intconv"
@@ -36,6 +37,9 @@ type pack struct {
 	// and data aliases them.
 	dataMapping *mmap.Mmap
 	data        []byte
+
+	bloomMapping *mmap.Mmap
+	filter       *bloom.Bloom
 }
 
 // openPack opens, maps, and validates
@@ -69,13 +73,33 @@ func openPack(root *os.Root, name string, objectFormat id.ObjectFormat) (*pack, 
 		return nil, fmt.Errorf("%w: pack %q: %w", ErrMalformedPackedStore, name, err)
 	}
 
+	bloomMapping, filter := openBloom(root, name, objectFormat)
+
 	return &pack{
-		name:        name,
-		idxMapping:  idxMapping,
-		idx:         idx,
-		dataMapping: dataMapping,
-		data:        dataMapping.Data(),
+		name:         name,
+		idxMapping:   idxMapping,
+		idx:          idx,
+		dataMapping:  dataMapping,
+		data:         dataMapping.Data(),
+		bloomMapping: bloomMapping,
+		filter:       filter,
 	}, nil
+}
+
+func openBloom(root *os.Root, name string, objectFormat id.ObjectFormat) (*mmap.Mmap, *bloom.Bloom) {
+	mapping, err := mapFile(root, name+".bloom")
+	if err != nil {
+		return nil, nil
+	}
+
+	filter, err := bloom.Parse(mapping.Data(), objectFormat)
+	if err != nil {
+		_ = mapping.Close()
+
+		return nil, nil
+	}
+
+	return mapping, &filter
 }
 
 // mapFile opens and maps one file under root.
@@ -125,10 +149,16 @@ func validatePackData(data []byte, idx *packidx.Packidx, hashSize int) error {
 	return nil
 }
 
-// close releases the pack data and index mappings.
+// close releases the pack data, index, and filter mappings.
 func (pack *pack) close() error {
-	return errors.Join(
+	errs := []error{
 		pack.dataMapping.Close(),
 		pack.idxMapping.Close(),
-	)
+	}
+
+	if pack.bloomMapping != nil {
+		errs = append(errs, pack.bloomMapping.Close())
+	}
+
+	return errors.Join(errs...)
 }

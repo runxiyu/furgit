@@ -24,6 +24,10 @@ func (packed *Packed) lookup(objectID id.ObjectID) (*pack, int, error) {
 	oid := objectID.RawBytes()
 
 	for _, p := range packed.order.Keys() {
+		if p.filter != nil && !p.filter.MayContain(oid) {
+			continue
+		}
+
 		offsetU, found, err := p.idx.Lookup(oid)
 		if err != nil {
 			return nil, 0, fmt.Errorf("%w: pack %q: %w", ErrMalformedPackedStore, p.name, err)
