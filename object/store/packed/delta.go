@@ -1,7 +1,6 @@
 package packed
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"slices"
@@ -208,7 +207,7 @@ func (packed *Packed) resolveType(p *pack, offset int, entryHeader packfile.Entr
 // deltaResultSize reads the declared result size
 // from one compressed delta payload prefix.
 func deltaResultSize(payload []byte, deltaSize uint64) (int, error) {
-	zr, err := zlib.NewReader(bytes.NewReader(payload))
+	zr, err := zlib.NewReaderBytes(payload)
 	if err != nil {
 		return 0, fmt.Errorf("reading delta header: %w", err)
 	}

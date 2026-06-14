@@ -165,7 +165,7 @@ func (packed *Packed) ReadReaderContent(objectID id.ObjectID) (typ.Type, int, io
 		return typ.Unknown, 0, nil, fmt.Errorf("%w: pack %q: object size overflows int: %w", ErrMalformedPackedStore, p.name, err)
 	}
 
-	zr, err := zlib.NewReader(bytes.NewReader(payload))
+	zr, err := zlib.NewReaderBytes(payload)
 	if err != nil {
 		return typ.Unknown, 0, nil, fmt.Errorf("%w: pack %q: %w", ErrMalformedPackedStore, p.name, err)
 	}

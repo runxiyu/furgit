@@ -1,7 +1,6 @@
 package packed
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -49,7 +48,7 @@ func inflate(payload []byte, expectedSize uint64) ([]byte, error) {
 		return nil, fmt.Errorf("declared size: %w", err)
 	}
 
-	zr, err := zlib.NewReader(bytes.NewReader(payload))
+	zr, err := zlib.NewReaderBytes(payload)
 	if err != nil {
 		return nil, fmt.Errorf("inflating entry payload: %w", err)
 	}
