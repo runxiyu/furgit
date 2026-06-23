@@ -2,6 +2,7 @@ package ingest
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"errors"
 	"fmt"
@@ -19,6 +20,8 @@ var errTempNamesExhausted = errors.New("object/store/packed/internal/ingest: exh
 
 // ingestion holds the state for one WritePack call.
 type ingestion struct {
+	ctx context.Context
+
 	// root is the destination objects/pack directory.
 	root *os.Root
 
@@ -84,7 +87,7 @@ type ingestion struct {
 // The pack must be the last thing the peer sends before that response:
 // any bytes arriving immediately after the trailer
 // are rejected as a malformed pack.
-func WritePack(root *os.Root, objectFormat id.ObjectFormat, src io.Reader, opts store.PackWriteOptions) (Result, error) {
+func WritePack(ctx context.Context, root *os.Root, objectFormat id.ObjectFormat, src io.Reader, opts store.PackWriteOptions) (Result, error) {
 	if objectFormat.Size() == 0 {
 		return Result{}, id.ErrInvalidObjectFormat
 	}
@@ -95,6 +98,7 @@ func WritePack(root *os.Root, objectFormat id.ObjectFormat, src io.Reader, opts 
 	}
 
 	ingestion := &ingestion{
+		ctx:            ctx,
 		root:           root,
 		objectFormat:   objectFormat,
 		opts:           opts,

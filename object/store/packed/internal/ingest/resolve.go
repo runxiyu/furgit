@@ -97,6 +97,11 @@ func (ingestion *ingestion) resolveFrom(roots []int, adjacency adjacency, meter 
 	}
 
 	for len(stack) > 0 {
+		err := ingestion.ctx.Err()
+		if err != nil {
+			return fmt.Errorf("object/store/packed/internal/ingest: %w", err)
+		}
+
 		frame := stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
 

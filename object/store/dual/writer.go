@@ -1,6 +1,7 @@
 package dual
 
 import (
+	"context"
 	"io"
 
 	"lindenii.org/go/furgit/object/id"
@@ -29,6 +30,6 @@ func (dual *Dual) WriteReaderContent(ty typ.Type, size int, src io.Reader) (id.O
 }
 
 // WritePack ingests one pack stream into the pack side.
-func (dual *Dual) WritePack(src io.Reader, opts store.PackWriteOptions) error {
-	return dual.pack.WritePack(src, opts) //nolint:wrapcheck
+func (dual *Dual) WritePack(ctx context.Context, src io.Reader, opts store.PackWriteOptions) error {
+	return dual.pack.WritePack(ctx, src, opts) //nolint:wrapcheck
 }

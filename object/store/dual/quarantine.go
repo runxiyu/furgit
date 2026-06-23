@@ -1,6 +1,7 @@
 package dual
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -111,8 +112,8 @@ func (quarantine *coordinatedQuarantine) WriteReaderContent(ty typ.Type, size in
 	return quarantine.objectQ.WriteReaderContent(ty, size, src) //nolint:wrapcheck
 }
 
-func (quarantine *coordinatedQuarantine) WritePack(src io.Reader, opts store.PackWriteOptions) error {
-	return quarantine.packQ.WritePack(src, opts) //nolint:wrapcheck
+func (quarantine *coordinatedQuarantine) WritePack(ctx context.Context, src io.Reader, opts store.PackWriteOptions) error {
+	return quarantine.packQ.WritePack(ctx, src, opts) //nolint:wrapcheck
 }
 
 // Promote publishes both halves and joins their errors.

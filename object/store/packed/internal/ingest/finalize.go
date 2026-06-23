@@ -18,6 +18,11 @@ import (
 // then links the pack, reverse index, and index
 // to their content-addressed names.
 func (ingestion *ingestion) finalize() (Result, error) {
+	err := ingestion.ctx.Err()
+	if err != nil {
+		return Result{}, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
+	}
+
 	entries, positions, err := ingestion.indexEntries()
 	if err != nil {
 		return Result{}, err

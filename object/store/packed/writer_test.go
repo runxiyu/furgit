@@ -42,7 +42,7 @@ func TestWritePack(t *testing.T) {
 
 			packedStore := openEmptyStore(t, objectFormat)
 
-			err = packedStore.WritePack(bytes.NewReader(stream), store.PackWriteOptions{
+			err = packedStore.WritePack(t.Context(), bytes.NewReader(stream), store.PackWriteOptions{
 				ThinBase: nil,
 				Progress: nil,
 			})

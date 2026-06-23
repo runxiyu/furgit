@@ -295,7 +295,12 @@ func (ingestion *ingestion) streamAndScan() error {
 	})
 
 	for done := range ingestion.headerCount {
-		err := ingestion.scanEntry(ingestion.scanner.consumed)
+		err := ingestion.ctx.Err()
+		if err != nil {
+			return fmt.Errorf("object/store/packed/internal/ingest: %w", err)
+		}
+
+		err = ingestion.scanEntry(ingestion.scanner.consumed)
 		if err != nil {
 			return err
 		}

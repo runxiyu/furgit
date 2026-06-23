@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"errors"
 	"io"
 
@@ -32,7 +33,7 @@ type PackWriter interface {
 	// WritePack ingests one pack stream,
 	// such that the objects contained therein
 	// become available in the relevant store.
-	WritePack(src io.Reader, opts PackWriteOptions) error
+	WritePack(ctx context.Context, src io.Reader, opts PackWriteOptions) error
 }
 
 // PackWriteOptions controls one pack write operation.

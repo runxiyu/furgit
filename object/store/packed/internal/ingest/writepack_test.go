@@ -2,6 +2,7 @@ package ingest_test
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"io"
 	"os"
@@ -256,7 +257,7 @@ func TestWritePackIdempotent(t *testing.T) {
 
 			t.Cleanup(func() { _ = root.Close() })
 
-			first, err := ingest.WritePack(root, objectFormat, bytes.NewReader(stream), store.PackWriteOptions{
+			first, err := ingest.WritePack(t.Context(), root, objectFormat, bytes.NewReader(stream), store.PackWriteOptions{
 				ThinBase: nil,
 				Progress: nil,
 			})
@@ -264,7 +265,7 @@ func TestWritePackIdempotent(t *testing.T) {
 				t.Fatalf("first WritePack: %v", err)
 			}
 
-			second, err := ingest.WritePack(root, objectFormat, bytes.NewReader(stream), store.PackWriteOptions{
+			second, err := ingest.WritePack(t.Context(), root, objectFormat, bytes.NewReader(stream), store.PackWriteOptions{
 				ThinBase: nil,
 				Progress: nil,
 			})
@@ -305,7 +306,7 @@ func writePack(
 
 	t.Cleanup(func() { _ = root.Close() })
 
-	result, err := ingest.WritePack(root, objectFormat, src, opts)
+	result, err := ingest.WritePack(t.Context(), root, objectFormat, src, opts)
 	if err != nil {
 		t.Fatalf("WritePack: %v", err)
 	}
@@ -355,7 +356,7 @@ func TestWritePackThinWithoutBase(t *testing.T) {
 			repo, seeded := seedHistory(t, objectFormat)
 			stream := thinStream(t, repo, seeded)
 
-			_, err := ingest.WritePack(freshRoot(t), objectFormat, bytes.NewReader(stream), store.PackWriteOptions{
+			_, err := ingest.WritePack(t.Context(), freshRoot(t), objectFormat, bytes.NewReader(stream), store.PackWriteOptions{
 				ThinBase: nil,
 				Progress: nil,
 			})
@@ -381,7 +382,7 @@ func TestWritePackThinMissingBase(t *testing.T) {
 			emptyBase := emptyStore(t, objectFormat)
 			stream := thinStream(t, repo, seeded)
 
-			_, err := ingest.WritePack(freshRoot(t), objectFormat, bytes.NewReader(stream), store.PackWriteOptions{
+			_, err := ingest.WritePack(t.Context(), freshRoot(t), objectFormat, bytes.NewReader(stream), store.PackWriteOptions{
 				ThinBase: emptyBase,
 				Progress: nil,
 			})
@@ -393,6 +394,63 @@ func TestWritePackThinMissingBase(t *testing.T) {
 
 			if len(missing.OIDs) == 0 {
 				t.Fatalf("ThinBasesMissingError reported no object IDs")
+			}
+		})
+	}
+}
+
+// TestWritePackContextCancelled verifies that a cancelled context
+// aborts ingestion and publishes no artifacts.
+func TestWritePackContextCancelled(t *testing.T) {
+	t.Parallel()
+
+	for _, objectFormat := range id.SupportedObjectFormats() {
+		t.Run(objectFormat.String(), func(t *testing.T) {
+			t.Parallel()
+
+			repo, seeded := seedHistory(t, objectFormat)
+
+			gitPrefix, err := repo.PackObjects(t, seeded.All(), testgit.PackObjectsOptions{
+				RevIndex: false,
+				Revs:     false,
+				Exclude:  nil,
+			})
+			if err != nil {
+				t.Fatalf("PackObjects: %v", err)
+			}
+
+			stream, err := os.ReadFile(gitPrefix + ".pack") //nolint:gosec
+			if err != nil {
+				t.Fatalf("ReadFile pack: %v", err)
+			}
+
+			ctx, cancel := context.WithCancel(t.Context())
+			cancel()
+
+			dir := t.TempDir()
+
+			root, err := os.OpenRoot(dir)
+			if err != nil {
+				t.Fatalf("OpenRoot: %v", err)
+			}
+
+			t.Cleanup(func() { _ = root.Close() })
+
+			_, err = ingest.WritePack(ctx, root, objectFormat, bytes.NewReader(stream), store.PackWriteOptions{
+				ThinBase: nil,
+				Progress: nil,
+			})
+			if !errors.Is(err, context.Canceled) {
+				t.Fatalf("err = %v, want context.Canceled", err)
+			}
+
+			entries, err := os.ReadDir(dir)
+			if err != nil {
+				t.Fatalf("ReadDir: %v", err)
+			}
+
+			if len(entries) != 0 {
+				t.Fatalf("cancelled ingestion left %d files behind", len(entries))
 			}
 		})
 	}

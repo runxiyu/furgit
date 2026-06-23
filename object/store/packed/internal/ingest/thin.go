@@ -36,6 +36,11 @@ func (ingestion *ingestion) fixThin(external []id.ObjectID, adjacency adjacency,
 	appended := make([]int, 0, len(external))
 
 	for _, baseOID := range external {
+		err := ingestion.ctx.Err()
+		if err != nil {
+			return fmt.Errorf("object/store/packed/internal/ingest: %w", err)
+		}
+
 		ty, content, err := ingestion.opts.ThinBase.ReadBytesContent(baseOID)
 		if errors.Is(err, store.ErrObjectNotFound) {
 			continue

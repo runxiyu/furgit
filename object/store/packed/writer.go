@@ -1,6 +1,7 @@
 package packed
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -23,8 +24,8 @@ var _ store.PackWriter = (*Packed)(nil)
 // The pack must be the last thing the peer sends before that response:
 // any bytes arriving immediately after the trailer
 // are rejected as a malformed pack.
-func (packed *Packed) WritePack(src io.Reader, opts store.PackWriteOptions) error {
-	_, err := ingest.WritePack(packed.root, packed.objectFormat, src, opts)
+func (packed *Packed) WritePack(ctx context.Context, src io.Reader, opts store.PackWriteOptions) error {
+	_, err := ingest.WritePack(ctx, packed.root, packed.objectFormat, src, opts)
 	if err != nil {
 		return err //nolint:wrapcheck
 	}
