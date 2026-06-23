@@ -456,6 +456,61 @@ func TestWritePackContextCancelled(t *testing.T) {
 	}
 }
 
+// TestWritePackObjectTooLarge verifies that an object exceeding MaxObjectSize
+// is rejected and no artifacts are published.
+func TestWritePackObjectTooLarge(t *testing.T) {
+	t.Parallel()
+
+	for _, objectFormat := range id.SupportedObjectFormats() {
+		t.Run(objectFormat.String(), func(t *testing.T) {
+			t.Parallel()
+
+			repo, seeded := seedHistory(t, objectFormat)
+
+			gitPrefix, err := repo.PackObjects(t, seeded.All(), testgit.PackObjectsOptions{
+				RevIndex: false,
+				Revs:     false,
+				Exclude:  nil,
+			})
+			if err != nil {
+				t.Fatalf("PackObjects: %v", err)
+			}
+
+			stream, err := os.ReadFile(gitPrefix + ".pack") //nolint:gosec
+			if err != nil {
+				t.Fatalf("ReadFile pack: %v", err)
+			}
+
+			dir := t.TempDir()
+
+			root, err := os.OpenRoot(dir)
+			if err != nil {
+				t.Fatalf("OpenRoot: %v", err)
+			}
+
+			t.Cleanup(func() { _ = root.Close() })
+
+			_, err = ingest.WritePack(t.Context(), root, objectFormat, bytes.NewReader(stream), store.PackWriteOptions{
+				ThinBase:      nil,
+				Progress:      nil,
+				MaxObjectSize: 1,
+			})
+			if !errors.Is(err, store.ErrObjectTooLarge) {
+				t.Fatalf("err = %v, want ErrObjectTooLarge", err)
+			}
+
+			entries, err := os.ReadDir(dir)
+			if err != nil {
+				t.Fatalf("ReadDir: %v", err)
+			}
+
+			if len(entries) != 0 {
+				t.Fatalf("rejected ingestion left %d files behind", len(entries))
+			}
+		})
+	}
+}
+
 // seedHistory creates one repository with a seeded history.
 func seedHistory(t *testing.T, objectFormat id.ObjectFormat) (*testgit.Repo, testgit.Seeded) {
 	t.Helper()

@@ -10,6 +10,7 @@ import (
 	"lindenii.org/go/furgit/internal/progress"
 	"lindenii.org/go/furgit/object/header"
 	"lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/store"
 	"lindenii.org/go/furgit/object/typ"
 )
 
@@ -245,6 +246,11 @@ func (ingestion *ingestion) applyDelta(index int, baseContent []byte) ([]byte, e
 	baseSize, resultSize, _, err := delta.ParseHeaderSizes(deltaPayload)
 	if err != nil {
 		return nil, fmt.Errorf("%w: entry at %d: %w", ErrMalformedPack, rec.offset, err)
+	}
+
+	limit := ingestion.opts.MaxObjectSize
+	if limit > 0 && resultSize > uint64(limit) {
+		return nil, fmt.Errorf("%w: entry at %d: result size %d exceeds limit %d", store.ErrObjectTooLarge, rec.offset, resultSize, limit)
 	}
 
 	if baseSize != uint64(len(baseContent)) {

@@ -13,6 +13,10 @@ import (
 // ErrInvalidObject indicates a malformed object passed to a write.
 var ErrInvalidObject = errors.New("object/store: invalid object")
 
+// ErrObjectTooLarge indicates that an object exceeds
+// the size limit configured for the write.
+var ErrObjectTooLarge = errors.New("object/store: object too large")
+
 // ObjectWriter writes individual Git objects.
 type ObjectWriter interface {
 	// WriteBytesFull writes one full serialized object byte slice as "type size\x00content".
@@ -66,4 +70,11 @@ type PackWriteOptions struct {
 	//
 	// When nil, no progress output is emitted.
 	Progress iowrap.WriteFlusher
+
+	// MaxObjectSize rejects ingestion of any object
+	// whose declared inflated size or delta result size exceeds it,
+	// bounding the memory spent reconstructing a single object.
+	//
+	// Zero or negative means no limit.
+	MaxObjectSize int
 }

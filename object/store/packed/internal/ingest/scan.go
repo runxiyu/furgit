@@ -13,6 +13,7 @@ import (
 	"lindenii.org/go/furgit/internal/progress"
 	"lindenii.org/go/furgit/object/header"
 	"lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/store"
 	"lindenii.org/go/lgo/intconv"
 )
 
@@ -386,6 +387,11 @@ func (ingestion *ingestion) scanHeader(start int) (record, error) {
 	declaredSize, err := intconv.Uint64ToInt(entryHeader.Size)
 	if err != nil {
 		return rec, fmt.Errorf("%w: entry at %d: declared size overflows int: %w", ErrMalformedPack, start, err)
+	}
+
+	limit := ingestion.opts.MaxObjectSize
+	if limit > 0 && declaredSize > limit {
+		return rec, fmt.Errorf("%w: entry at %d: declared size %d exceeds limit %d", store.ErrObjectTooLarge, start, declaredSize, limit)
 	}
 
 	rec.packedType = entryHeader.Type
