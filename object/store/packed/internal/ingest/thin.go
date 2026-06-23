@@ -86,7 +86,7 @@ func (ingestion *ingestion) appendBaseObject(objectID id.ObjectID, objectType ty
 		return 0, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
 	}
 
-	computed, err := ingestion.hashObject(entryType, content)
+	computed, err := ingestion.hashObject(objectType, content)
 	if err != nil {
 		return 0, err
 	}
@@ -138,7 +138,6 @@ func (ingestion *ingestion) appendBaseObject(objectID id.ObjectID, objectType ty
 		declaredSize: len(content),
 		baseOffset:   0,
 		baseOID:      id.ObjectID{},
-		objectType:   entryType,
 		oid:          objectID,
 		resolved:     true,
 	}

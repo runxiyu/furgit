@@ -345,7 +345,6 @@ func (ingestion *ingestion) scanEntry(start int) error {
 	rec.crc32 = ingestion.scanner.endCRC()
 
 	if rec.packedType.IsBase() {
-		rec.objectType = rec.packedType
 		rec.oid = oid
 		rec.resolved = true
 	} else {

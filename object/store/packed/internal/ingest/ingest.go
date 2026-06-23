@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"os"
 
+	"lindenii.org/go/furgit/internal/cache/clock"
 	"lindenii.org/go/furgit/internal/format/packfile"
 	"lindenii.org/go/furgit/object/id"
 	"lindenii.org/go/furgit/object/store"
@@ -48,6 +49,8 @@ type ingestion struct {
 	// and byOID maps a resolved object ID to its record index.
 	byOffset map[int]int
 	byOID    map[id.ObjectID]int
+
+	baseCache *clock.Clock[baseCacheKey, cachedContent]
 
 	// headerCount is the object count declared by the pack header.
 	headerCount int
@@ -103,6 +106,7 @@ func WritePack(root *os.Root, objectFormat id.ObjectFormat, src io.Reader, opts 
 		records:        nil,
 		byOffset:       make(map[int]int),
 		byOID:          make(map[id.ObjectID]int),
+		baseCache:      newBaseCache(),
 		headerCount:    count,
 		deltaCount:     0,
 		deltasResolved: 0,

@@ -37,15 +37,11 @@ type record struct {
 	// baseOID is the base object ID for a ref-delta.
 	baseOID id.ObjectID
 
-	// objectType is the resolved object type,
-	// meaningful once resolved is true.
-	objectType packfile.EntryType
-
 	// oid is the resolved object ID,
 	// meaningful once resolved is true.
 	oid id.ObjectID
 
-	// resolved reports whether oid and objectType are final.
+	// resolved reports whether oid is final.
 	resolved bool
 }
 

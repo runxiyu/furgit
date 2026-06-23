@@ -10,6 +10,7 @@ import (
 	"lindenii.org/go/furgit/internal/progress"
 	"lindenii.org/go/furgit/object/header"
 	"lindenii.org/go/furgit/object/id"
+	"lindenii.org/go/furgit/object/typ"
 )
 
 // adjacency maps each resolvable base to its delta children:
@@ -83,92 +84,65 @@ func (ingestion *ingestion) buildAdjacency() adjacency {
 	return out
 }
 
-// resolveFrom resolves the delta subtree rooted at each resolved record.
+// resolveFrame is a resolved record whose delta children remain to be resolved.
+type resolveFrame struct {
+	index int
+	depth int
+}
+
 func (ingestion *ingestion) resolveFrom(roots []int, adjacency adjacency, meter *progress.Meter) error {
+	stack := make([]resolveFrame, 0, len(roots))
 	for _, root := range roots {
-		content, err := ingestion.inflateRecord(root)
+		stack = append(stack, resolveFrame{index: root, depth: 0})
+	}
+
+	for len(stack) > 0 {
+		frame := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		rec := &ingestion.records[frame.index]
+
+		children := [2][]int{adjacency.byOffset[rec.offset], adjacency.byOID[rec.oid]}
+		if len(children[0]) == 0 && len(children[1]) == 0 {
+			continue
+		}
+
+		baseType, baseContent, err := ingestion.materialize(frame.index)
 		if err != nil {
 			return err
 		}
 
-		err = ingestion.resolveSubtree(root, content, ingestion.records[root].objectType, 0, adjacency, meter)
-		if err != nil {
-			return err
+		childDepth := frame.depth + 1
+
+		for _, group := range children {
+			for _, child := range group {
+				if ingestion.records[child].resolved {
+					continue
+				}
+
+				if childDepth > delta.MaxChainDepth {
+					return fmt.Errorf("%w: entry at %d: delta chain too deep", ErrMalformedPack, ingestion.records[child].offset)
+				}
+
+				err = ingestion.resolveOneChild(child, baseType, baseContent, meter)
+				if err != nil {
+					return err
+				}
+
+				stack = append(stack, resolveFrame{index: child, depth: childDepth})
+			}
 		}
 	}
 
 	return nil
 }
 
-// resolveSubtree resolves every delta child of one resolved record at depth,
-// holding the record's content as the base for its children.
-func (ingestion *ingestion) resolveSubtree(
-	index int,
-	content []byte,
-	objectType packfile.EntryType,
-	depth int,
-	adjacency adjacency,
-	meter *progress.Meter,
-) error {
+func (ingestion *ingestion) resolveOneChild(index int, baseType typ.Type, baseContent []byte, meter *progress.Meter) error {
 	rec := &ingestion.records[index]
 
-	for _, child := range adjacency.byOffset[rec.offset] {
-		err := ingestion.resolveChild(child, content, objectType, depth+1, adjacency, meter)
-		if err != nil {
-			return err
-		}
-	}
-
-	for _, child := range adjacency.byOID[rec.oid] {
-		err := ingestion.resolveChild(child, content, objectType, depth+1, adjacency, meter)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// resolveChild applies one delta record at depth against its base content,
-// finalizes the record, and recurses into its own children.
-func (ingestion *ingestion) resolveChild(
-	index int,
-	baseContent []byte,
-	baseType packfile.EntryType,
-	depth int,
-	adjacency adjacency,
-	meter *progress.Meter,
-) error {
-	rec := &ingestion.records[index]
-	if rec.resolved {
-		return nil
-	}
-
-	if depth > delta.MaxChainDepth {
-		return fmt.Errorf("%w: entry at %d: delta chain too deep", ErrMalformedPack, rec.offset)
-	}
-
-	deltaPayload, err := ingestion.inflateRecord(index)
+	content, err := ingestion.applyDelta(index, baseContent)
 	if err != nil {
 		return err
-	}
-
-	baseSize, resultSize, _, err := delta.ParseHeaderSizes(deltaPayload)
-	if err != nil {
-		return fmt.Errorf("%w: entry at %d: %w", ErrMalformedPack, rec.offset, err)
-	}
-
-	if baseSize != uint64(len(baseContent)) {
-		return fmt.Errorf("%w: entry at %d: delta base size mismatch", ErrMalformedPack, rec.offset)
-	}
-
-	content, err := delta.Apply(baseContent, deltaPayload)
-	if err != nil {
-		return fmt.Errorf("%w: entry at %d: %w", ErrMalformedPack, rec.offset, err)
-	}
-
-	if uint64(len(content)) != resultSize {
-		return fmt.Errorf("%w: entry at %d: delta result size mismatch", ErrMalformedPack, rec.offset)
 	}
 
 	oid, err := ingestion.hashObject(baseType, content)
@@ -176,15 +150,133 @@ func (ingestion *ingestion) resolveChild(
 		return err
 	}
 
-	rec.objectType = baseType
 	rec.oid = oid
 	rec.resolved = true
 	ingestion.byOID[oid] = index
+	ingestion.baseCache.Add(baseCacheKey{offset: rec.offset}, cachedContent{objectType: baseType, content: content})
 
 	ingestion.deltasResolved++
 	meter.Set(ingestion.deltasResolved, 0)
 
-	return ingestion.resolveSubtree(index, content, baseType, depth, adjacency, meter)
+	return nil
+}
+
+// materialize returns the inflated content of an already-resolved record,
+// from the base cache,
+// or re-derived from the nearest cached or base ancestor on a miss.
+func (ingestion *ingestion) materialize(index int) (typ.Type, []byte, error) {
+	var (
+		zero     typ.Type
+		chain    []int
+		base     []byte
+		baseType typ.Type
+	)
+
+	cur := index
+
+	for {
+		rec := &ingestion.records[cur]
+
+		if cached, ok := ingestion.baseCache.Get(baseCacheKey{offset: rec.offset}); ok {
+			base = cached.content
+			baseType = cached.objectType
+
+			break
+		}
+
+		if rec.packedType.IsBase() {
+			objectType, err := rec.packedType.ObjectType()
+			if err != nil {
+				return zero, nil, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
+			}
+
+			content, err := ingestion.inflateRecord(cur)
+			if err != nil {
+				return zero, nil, err
+			}
+
+			base = content
+			baseType = objectType
+
+			break
+		}
+
+		if len(chain) >= delta.MaxChainDepth {
+			return zero, nil, fmt.Errorf("%w: entry at %d: delta chain too deep", ErrMalformedPack, rec.offset)
+		}
+
+		chain = append(chain, cur)
+
+		next, ok := ingestion.baseRecordIndex(rec)
+		if !ok {
+			return zero, nil, fmt.Errorf("%w: entry at %d: base unavailable while reconstructing", ErrMalformedPack, rec.offset)
+		}
+
+		cur = next
+	}
+
+	for i := len(chain) - 1; i >= 0; i-- {
+		content, err := ingestion.applyDelta(chain[i], base)
+		if err != nil {
+			return zero, nil, err
+		}
+
+		ingestion.baseCache.Add(baseCacheKey{offset: ingestion.records[chain[i]].offset}, cachedContent{objectType: baseType, content: content})
+
+		base = content
+	}
+
+	return baseType, base, nil
+}
+
+func (ingestion *ingestion) applyDelta(index int, baseContent []byte) ([]byte, error) {
+	rec := &ingestion.records[index]
+
+	deltaPayload, err := ingestion.inflateRecord(index)
+	if err != nil {
+		return nil, err
+	}
+
+	baseSize, resultSize, _, err := delta.ParseHeaderSizes(deltaPayload)
+	if err != nil {
+		return nil, fmt.Errorf("%w: entry at %d: %w", ErrMalformedPack, rec.offset, err)
+	}
+
+	if baseSize != uint64(len(baseContent)) {
+		return nil, fmt.Errorf("%w: entry at %d: delta base size mismatch", ErrMalformedPack, rec.offset)
+	}
+
+	content, err := delta.Apply(baseContent, deltaPayload)
+	if err != nil {
+		return nil, fmt.Errorf("%w: entry at %d: %w", ErrMalformedPack, rec.offset, err)
+	}
+
+	if uint64(len(content)) != resultSize {
+		return nil, fmt.Errorf("%w: entry at %d: delta result size mismatch", ErrMalformedPack, rec.offset)
+	}
+
+	return content, nil
+}
+
+func (ingestion *ingestion) baseRecordIndex(rec *record) (int, bool) {
+	switch rec.packedType {
+	case packfile.EntryTypeOfsDelta:
+		index, ok := ingestion.byOffset[rec.baseOffset]
+
+		return index, ok
+	case packfile.EntryTypeRefDelta:
+		index, ok := ingestion.byOID[rec.baseOID]
+
+		return index, ok
+	case packfile.EntryTypeInvalid,
+		packfile.EntryTypeCommit,
+		packfile.EntryTypeTree,
+		packfile.EntryTypeBlob,
+		packfile.EntryTypeTag,
+		packfile.EntryTypeFuture:
+	}
+
+	return 0, false
 }
 
 // inflateRecord inflates one record's payload from the temporary pack file.
@@ -213,20 +305,15 @@ func (ingestion *ingestion) inflateRecord(index int) ([]byte, error) {
 }
 
 // hashObject computes the object ID of one resolved object.
-func (ingestion *ingestion) hashObject(objectType packfile.EntryType, content []byte) (id.ObjectID, error) {
+func (ingestion *ingestion) hashObject(objectType typ.Type, content []byte) (id.ObjectID, error) {
 	var zero id.ObjectID
-
-	ty, err := objectType.ObjectType()
-	if err != nil {
-		return zero, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
-	}
 
 	hashImpl, err := ingestion.objectFormat.New()
 	if err != nil {
 		return zero, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
 	}
 
-	_, _ = hashImpl.Write(header.Append(nil, ty, len(content)))
+	_, _ = hashImpl.Write(header.Append(nil, objectType, len(content)))
 	_, _ = hashImpl.Write(content)
 
 	oid, err := ingestion.objectFormat.FromBytes(hashImpl.Sum(nil))
