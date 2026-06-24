@@ -1,17 +1,22 @@
 package progress
 
 import (
+	"sync/atomic"
 	"time"
 
 	"lindenii.org/go/lgo/iowrap"
 )
 
 const (
-	updateInterval     = time.Second
+	renderInterval     = 100 * time.Millisecond
+	forceInterval      = time.Second
 	throughputInterval = 500 * time.Millisecond
 )
 
 // Meter renders one in-place progress line.
+//
+// Add is safe for concurrent use; a single background goroutine renders.
+// Stop must be called exactly once to flush the final line and release it.
 type Meter struct {
 	writer iowrap.WriteFlusher
 
@@ -21,24 +26,29 @@ type Meter struct {
 	sparse     bool
 	throughput bool
 
-	startedAt      time.Time
-	nextUpdateAt   time.Time
-	nextThroughput time.Time
+	done     atomic.Int64
+	bytes    atomic.Int64
+	sawValue atomic.Bool
 
-	lastDone     int
-	lastBytes    int
-	lastPercent  int
-	lastCounterW int
-	sawValue     bool
+	startedAt time.Time
 
+	stop   chan struct{}
+	exited chan struct{}
+
+	// The following are owned by the render goroutine while it runs,
+	// then by Stop once exited is closed.
+	nextForceAt      time.Time
+	nextThroughput   time.Time
+	lastPercent      int
+	lastCounterW     int
 	throughputSuffix string
 }
 
-// New creates one progress meter.
+// New creates one progress meter and starts its render goroutine.
 func New(opts Options) *Meter {
 	now := time.Now()
 
-	return &Meter{
+	meter := &Meter{
 		writer:         opts.Writer,
 		title:          opts.Title,
 		total:          opts.Total,
@@ -46,10 +56,20 @@ func New(opts Options) *Meter {
 		sparse:         opts.Sparse,
 		throughput:     opts.Throughput,
 		startedAt:      now,
-		nextUpdateAt:   now.Add(updateInterval),
+		stop:           make(chan struct{}),
+		exited:         make(chan struct{}),
+		nextForceAt:    now.Add(forceInterval),
 		nextThroughput: now.Add(throughputInterval),
 		lastPercent:    -1,
 	}
+
+	if meter.writer != nil {
+		go meter.loop()
+	} else {
+		close(meter.exited)
+	}
+
+	return meter
 }
 
 // Options configures one progress meter.
@@ -67,37 +87,21 @@ type Options struct {
 	Throughput bool
 }
 
-// Set records current progress
-// and renders when percent changed or the 1s tick elapsed.
-func (meter *Meter) Set(done int, bytes int) {
-	meter.lastDone = done
-	meter.lastBytes = bytes
-	meter.sawValue = true
-
-	if meter.writer == nil {
-		return
-	}
-
-	now := time.Now()
-	forced := meter.consumeUpdateTick(now)
-
-	percentChanged := false
-
-	if meter.total > 0 {
-		percent := int(int64(done) * 100 / int64(meter.total))
-		percentChanged = percent != meter.lastPercent
-	}
-
-	if !percentChanged && !forced {
-		return
-	}
-
-	meter.render(now, "\r")
+// Add increments the done and byte counters.
+//
+// Labels: MT-Safe.
+func (meter *Meter) Add(done, bytes int64) {
+	meter.done.Add(done)
+	meter.bytes.Add(bytes)
+	meter.sawValue.Store(true)
 }
 
-// Stop forces the final progress line and appends ", <msg>.".
+// Stop ends the render goroutine, forces the final line, and appends ", <msg>.".
 func (meter *Meter) Stop(msg string) {
-	if !meter.sawValue || meter.writer == nil {
+	close(meter.stop)
+	<-meter.exited
+
+	if !meter.sawValue.Load() || meter.writer == nil {
 		return
 	}
 
@@ -105,21 +109,49 @@ func (meter *Meter) Stop(msg string) {
 		msg = "done"
 	}
 
-	if meter.sparse && meter.total > 0 && meter.lastDone != meter.total {
-		meter.lastDone = meter.total
+	if meter.sparse && meter.total > 0 && int(meter.done.Load()) != meter.total {
+		meter.done.Store(int64(meter.total))
 	}
 
 	meter.render(time.Now(), ", "+msg+".\n")
 }
 
-func (meter *Meter) consumeUpdateTick(now time.Time) bool {
-	if now.Before(meter.nextUpdateAt) {
-		return false
+func (meter *Meter) loop() {
+	defer close(meter.exited)
+
+	ticker := time.NewTicker(renderInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-meter.stop:
+			return
+		case now := <-ticker.C:
+			meter.maybeRender(now)
+		}
+	}
+}
+
+func (meter *Meter) maybeRender(now time.Time) {
+	if !meter.sawValue.Load() {
+		return
 	}
 
-	for !now.Before(meter.nextUpdateAt) {
-		meter.nextUpdateAt = meter.nextUpdateAt.Add(updateInterval)
+	forced := false
+
+	for !now.Before(meter.nextForceAt) {
+		meter.nextForceAt = meter.nextForceAt.Add(forceInterval)
+		forced = true
 	}
 
-	return true
+	percentChanged := false
+
+	if meter.total > 0 {
+		percent := int(meter.done.Load() * 100 / int64(meter.total))
+		percentChanged = percent != meter.lastPercent
+	}
+
+	if percentChanged || forced {
+		meter.render(now, "\r")
+	}
 }

@@ -40,13 +40,15 @@ func (meter *Meter) render(now time.Time, eol string) {
 }
 
 func (meter *Meter) renderCounters() string {
-	if meter.total > 0 {
-		meter.lastPercent = int(int64(meter.lastDone) * 100 / int64(meter.total))
+	done := meter.done.Load()
 
-		return fmt.Sprintf("%3d%% (%d/%d)%s", meter.lastPercent, meter.lastDone, meter.total, meter.throughputSuffix)
+	if meter.total > 0 {
+		meter.lastPercent = int(done * 100 / int64(meter.total))
+
+		return fmt.Sprintf("%3d%% (%d/%d)%s", meter.lastPercent, done, meter.total, meter.throughputSuffix)
 	}
 
-	return fmt.Sprintf("%d%s", meter.lastDone, meter.throughputSuffix)
+	return fmt.Sprintf("%d%s", done, meter.throughputSuffix)
 }
 
 func (meter *Meter) refreshThroughput(now time.Time) {
@@ -67,6 +69,7 @@ func (meter *Meter) refreshThroughput(now time.Time) {
 		return
 	}
 
-	rate := uint64(float64(meter.lastBytes) / elapsed.Seconds())
-	meter.throughputSuffix = ", " + humanize.Bytes(uint64(meter.lastBytes)) + " | " + humanize.Bytes(rate) + "/s" //nolint:gosec
+	bytes := meter.bytes.Load()
+	rate := uint64(float64(bytes) / elapsed.Seconds())
+	meter.throughputSuffix = ", " + humanize.Bytes(uint64(bytes)) + " | " + humanize.Bytes(rate) + "/s" //nolint:gosec
 }
