@@ -9,11 +9,14 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"runtime"
+	"sync/atomic"
 
 	"lindenii.org/go/furgit/internal/cache/clock"
 	"lindenii.org/go/furgit/internal/format/packfile"
 	"lindenii.org/go/furgit/object/id"
 	"lindenii.org/go/furgit/object/store"
+	"lindenii.org/go/lgo/sync"
 )
 
 var errTempNamesExhausted = errors.New("object/store/packed/internal/ingest: exhausted temporary file names")
@@ -51,9 +54,12 @@ type ingestion struct {
 	// byOffset maps an entry offset to its record index,
 	// and byOID maps a resolved object ID to its record index.
 	byOffset map[int]int
-	byOID    map[id.ObjectID]int
+	byOID    sync.Map[id.ObjectID, int]
 
 	baseCache *clock.Clock[baseCacheKey, cachedContent]
+
+	// workers is the delta-resolution concurrency.
+	workers int
 
 	// headerCount is the object count declared by the pack header.
 	headerCount int
@@ -61,8 +67,8 @@ type ingestion struct {
 	// deltaCount counts delta records, accumulated during scanning.
 	deltaCount int
 
-	// deltasResolved counts resolved delta records, for progress.
-	deltasResolved int
+	// deltasResolved counts resolved delta records.
+	deltasResolved atomic.Int64
 
 	// packHash is the final pack trailer hash.
 	packHash id.ObjectID
@@ -97,26 +103,27 @@ func WritePack(ctx context.Context, root *os.Root, objectFormat id.ObjectFormat,
 		return Result{}, err
 	}
 
+	workers := runtime.GOMAXPROCS(0)
+
 	ingestion := &ingestion{
-		ctx:            ctx,
-		root:           root,
-		objectFormat:   objectFormat,
-		opts:           opts,
-		src:            src,
-		packFile:       nil,
-		packTmp:        "",
-		temps:          nil,
-		scanner:        nil,
-		records:        nil,
-		byOffset:       make(map[int]int),
-		byOID:          make(map[id.ObjectID]int),
-		baseCache:      newBaseCache(),
-		headerCount:    count,
-		deltaCount:     0,
-		deltasResolved: 0,
-		packHash:       id.ObjectID{},
-		thinFixed:      false,
-		committed:      false,
+		ctx:          ctx,
+		root:         root,
+		objectFormat: objectFormat,
+		opts:         opts,
+		src:          src,
+		packFile:     nil,
+		packTmp:      "",
+		temps:        nil,
+		scanner:      nil,
+		records:      nil,
+		byOffset:     make(map[int]int),
+		baseCache:    newBaseCache(workers),
+		workers:      workers,
+		headerCount:  count,
+		deltaCount:   0,
+		packHash:     id.ObjectID{},
+		thinFixed:    false,
+		committed:    false,
 	}
 
 	defer ingestion.cleanup()

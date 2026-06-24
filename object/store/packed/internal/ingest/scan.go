@@ -366,7 +366,7 @@ func (ingestion *ingestion) scanEntry(start int) error {
 	ingestion.byOffset[rec.offset] = index
 
 	if rec.resolved {
-		ingestion.byOID[rec.oid] = index
+		ingestion.byOID.Store(rec.oid, index)
 	}
 
 	return nil

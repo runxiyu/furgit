@@ -150,7 +150,7 @@ func (ingestion *ingestion) appendBaseObject(objectID id.ObjectID, objectType ty
 	index := len(ingestion.records)
 	ingestion.records = append(ingestion.records, rec)
 	ingestion.byOffset[start] = index
-	ingestion.byOID[objectID] = index
+	ingestion.byOID.Store(objectID, index)
 
 	return index, nil
 }

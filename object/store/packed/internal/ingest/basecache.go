@@ -16,8 +16,8 @@ type cachedContent struct {
 	content    []byte
 }
 
-func newBaseCache() *clock.Clock[baseCacheKey, cachedContent] {
-	return clock.New(baseCacheMaxWeight, baseContentWeight)
+func newBaseCache(workers int) *clock.Clock[baseCacheKey, cachedContent] {
+	return clock.New(baseCacheMaxWeight*uint64(workers), baseContentWeight)
 }
 
 func baseContentWeight(_ baseCacheKey, base cachedContent) uint64 {
