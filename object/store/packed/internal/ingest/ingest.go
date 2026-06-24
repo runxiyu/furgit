@@ -23,7 +23,7 @@ var errTempNamesExhausted = errors.New("object/store/packed/internal/ingest: exh
 
 // ingestion holds the state for one WritePack call.
 type ingestion struct {
-	ctx context.Context
+	ctx context.Context //nolint:containedctx
 
 	// root is the destination objects/pack directory.
 	root *os.Root

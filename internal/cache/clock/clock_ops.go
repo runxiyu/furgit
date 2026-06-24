@@ -10,15 +10,11 @@ func (clock *Clock[K, V]) Add(key K, value V) bool {
 }
 
 // Get returns the value for key and marks it recently used.
-//
-//nolint:ireturn
 func (clock *Clock[K, V]) Get(key K) (V, bool) {
 	return clock.shardFor(key).get(key)
 }
 
 // Peek returns the value for key without changing its recency.
-//
-//nolint:ireturn
 func (clock *Clock[K, V]) Peek(key K) (V, bool) {
 	return clock.shardFor(key).peek(key)
 }

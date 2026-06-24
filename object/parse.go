@@ -20,8 +20,6 @@ var ErrSizeMismatch = errors.New("object: size mismatch")
 
 // ParseWithHeader parses a loose object
 // in "type size\x00body" format.
-//
-//nolint:ireturn
 func ParseWithHeader(raw []byte, objectFormat id.ObjectFormat) (Object, error) {
 	ty, size, headerLen, err := header.Parse(raw)
 	if err != nil {
@@ -37,8 +35,6 @@ func ParseWithHeader(raw []byte, objectFormat id.ObjectFormat) (Object, error) {
 }
 
 // ParseWithoutHeader parses a typed object body.
-//
-//nolint:ireturn
 func ParseWithoutHeader(ty typ.Type, body []byte, objectFormat id.ObjectFormat) (Object, error) {
 	switch ty {
 	case typ.Blob:

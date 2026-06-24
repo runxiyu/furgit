@@ -1,8 +1,6 @@
 package clock
 
 // get returns the value for key and marks it referenced.
-//
-//nolint:ireturn
 func (shard *shard[K, V]) get(key K) (V, bool) {
 	e, ok := shard.items.Load(key)
 	if !ok {
@@ -19,8 +17,6 @@ func (shard *shard[K, V]) get(key K) (V, bool) {
 }
 
 // peek returns the value for key without affecting eviction.
-//
-//nolint:ireturn
 func (shard *shard[K, V]) peek(key K) (V, bool) {
 	e, ok := shard.items.Load(key)
 	if !ok {

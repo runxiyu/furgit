@@ -18,7 +18,7 @@ func New[T object.Object](id id.ObjectID, obj T) *Stored[T] {
 }
 
 // Object returns the wrapped object as itself.
-func (stored *Stored[T]) Object() T { //nolint:ireturn
+func (stored *Stored[T]) Object() T {
 	return stored.obj
 }
 

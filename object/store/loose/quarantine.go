@@ -30,7 +30,7 @@ type objectQuarantine struct {
 // beneath the destination loose root.
 //
 // Labels: Deps-Borrowed, Life-Parent, Close-No.
-func (loose *Loose) BeginObjectQuarantine(_ store.ObjectQuarantineOptions) (store.ObjectQuarantine, error) { //nolint:ireturn
+func (loose *Loose) BeginObjectQuarantine(_ store.ObjectQuarantineOptions) (store.ObjectQuarantine, error) {
 	tempName, tempRoot, err := createLooseQuarantineRoot(loose.root)
 	if err != nil {
 		return nil, err

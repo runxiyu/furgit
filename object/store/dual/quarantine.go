@@ -13,15 +13,11 @@ import (
 )
 
 // BeginObjectQuarantine begins an object-wise quarantine on the object side.
-//
-//nolint:ireturn
 func (dual *Dual) BeginObjectQuarantine(opts store.ObjectQuarantineOptions) (store.ObjectQuarantine, error) {
 	return dual.object.BeginObjectQuarantine(opts) //nolint:wrapcheck
 }
 
 // BeginPackQuarantine begins a pack-wise quarantine on the pack side.
-//
-//nolint:ireturn
 func (dual *Dual) BeginPackQuarantine(opts store.PackQuarantineOptions) (store.PackQuarantine, error) {
 	return dual.pack.BeginPackQuarantine(opts) //nolint:wrapcheck
 }
@@ -30,8 +26,6 @@ func (dual *Dual) BeginPackQuarantine(opts store.PackQuarantineOptions) (store.P
 //
 // If the pack side fails to begin,
 // the already-begun object side is discarded before returning.
-//
-//nolint:ireturn
 func (dual *Dual) BeginCoordinatedQuarantine(opts store.CoordinatedQuarantineOptions) (store.CoordinatedQuarantine, error) {
 	objectQ, err := dual.object.BeginObjectQuarantine(opts.Object)
 	if err != nil {
