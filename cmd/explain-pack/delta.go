@@ -59,7 +59,7 @@ func (explainer *explainer) decodeCopy(base, payload []byte, pos int, op byte) (
 	offset := 0
 
 	for i := range 4 {
-		if op&(1<<uint(i)) == 0 {
+		if op&(1<<uint(i)) == 0 { //#nosec G115
 			continue
 		}
 
@@ -67,14 +67,14 @@ func (explainer *explainer) decodeCopy(base, payload []byte, pos int, op byte) (
 			return 0, nil, fmt.Errorf("truncated copy offset")
 		}
 
-		offset |= int(payload[pos]) << (8 * uint(i))
+		offset |= int(payload[pos]) << (8 * uint(i)) //#nosec G115
 		pos++
 	}
 
 	size := 0
 
 	for i := range 3 {
-		if op&(1<<uint(4+i)) == 0 {
+		if op&(1<<uint(4+i)) == 0 { //#nosec G115
 			continue
 		}
 
@@ -82,7 +82,7 @@ func (explainer *explainer) decodeCopy(base, payload []byte, pos int, op byte) (
 			return 0, nil, fmt.Errorf("truncated copy size")
 		}
 
-		size |= int(payload[pos]) << (8 * uint(i))
+		size |= int(payload[pos]) << (8 * uint(i)) //#nosec G115
 		pos++
 	}
 

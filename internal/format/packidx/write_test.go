@@ -16,8 +16,8 @@ func syntheticEntries(n int) []packidx.Entry {
 	for i := range entries {
 		entries[i].OID[0] = byte(i * 7)
 		entries[i].OID[1] = byte(i + 1)
-		entries[i].Offset = uint64(i+1) * 100
-		entries[i].CRC32 = uint32(i+1) * 0x01010101
+		entries[i].Offset = uint64(i+1) * 100       //#nosec G115
+		entries[i].CRC32 = uint32(i+1) * 0x01010101 //#nosec G115
 	}
 
 	return entries

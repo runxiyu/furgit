@@ -106,7 +106,7 @@ func parseCopyOperand(delta []byte, pos *int, op byte, firstBit uint, count int)
 	value := 0
 
 	for i := range count {
-		if op&(1<<(firstBit+uint(i))) == 0 {
+		if op&(1<<(firstBit+uint(i))) == 0 { //#nosec G115
 			continue
 		}
 

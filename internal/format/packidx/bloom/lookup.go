@@ -31,7 +31,7 @@ func (f *Bloom) MayContain(oid []byte) bool {
 // probe returns the bucket word index and single-bit mask
 // addressed by the i-th probe of oid.
 func probe(oid []byte, log2B uint, i int) (word int, mask uint64) {
-	bitOff := log2B + fieldBits*uint(i)
+	bitOff := log2B + fieldBits*uint(i) //#nosec G115
 	byteOff := bitOff >> 3
 	bitInByte := bitOff & 7
 

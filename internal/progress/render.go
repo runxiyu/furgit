@@ -71,5 +71,5 @@ func (meter *Meter) refreshThroughput(now time.Time) {
 
 	bytes := meter.bytes.Load()
 	rate := uint64(float64(bytes) / elapsed.Seconds())
-	meter.throughputSuffix = ", " + humanize.Bytes(uint64(bytes)) + " | " + humanize.Bytes(rate) + "/s" //nolint:gosec
+	meter.throughputSuffix = ", " + humanize.Bytes(uint64(bytes)) + " | " + humanize.Bytes(rate) + "/s" //#nosec G115
 }

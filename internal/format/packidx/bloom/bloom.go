@@ -47,8 +47,8 @@ func checkParams(bucketCount uint32, k uint16, hashSize int) (uint, error) {
 		return 0, errors.New("zero probe count") //nolint:err113
 	}
 
-	log2B := uint(bits.TrailingZeros32(bucketCount))
-	if log2B+fieldBits*uint(k) > uint(hashSize)*8 {
+	log2B := uint(bits.TrailingZeros32(bucketCount)) //#nosec G115
+	if log2B+fieldBits*uint(k) > uint(hashSize)*8 {  //#nosec G115
 		return 0, errors.New("parameters exceed hash length") //nolint:err113
 	}
 
