@@ -58,37 +58,41 @@ func (ingestion *ingestion) finalize() (Result, error) {
 		return Result{}, err
 	}
 
+	objectCount, err := intconv.IntToUint32(len(ingestion.records))
+	if err != nil {
+		return Result{}, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
+	}
+
 	base := "pack-" + ingestion.packHash.String()
 	packFinal := base + ".pack"
 	idxFinal := base + ".idx"
 	revFinal := base + ".rev"
 	bloomFinal := base + ".bloom"
 
-	// Link the pack, reverse index, and Bloom filter before the index,
+	// Link the data files before the index,
 	// since the index is what publishes the pack to readers.
-	err = ingestion.link(ingestion.packTmp, packFinal)
-	if err != nil {
-		return Result{}, err
+	artifacts := [...]struct{ tmp, final string }{
+		{ingestion.packTmp, packFinal},
+		{revTmp, revFinal},
+		{bloomTmp, bloomFinal},
+		{idxTmp, idxFinal},
 	}
 
-	err = ingestion.link(revTmp, revFinal)
-	if err != nil {
-		return Result{}, err
-	}
+	var created []string
 
-	err = ingestion.link(bloomTmp, bloomFinal)
-	if err != nil {
-		return Result{}, err
-	}
+	for _, artifact := range artifacts {
+		linked, err := ingestion.promote(artifact.tmp, artifact.final)
+		if err != nil {
+			for i := len(created) - 1; i >= 0; i-- {
+				_ = ingestion.root.Remove(created[i])
+			}
 
-	err = ingestion.link(idxTmp, idxFinal)
-	if err != nil {
-		return Result{}, err
-	}
+			return Result{}, err
+		}
 
-	objectCount, err := intconv.IntToUint32(len(ingestion.records))
-	if err != nil {
-		return Result{}, fmt.Errorf("object/store/packed/internal/ingest: %w", err)
+		if linked {
+			created = append(created, artifact.final)
+		}
 	}
 
 	return Result{
@@ -189,15 +193,21 @@ func (ingestion *ingestion) writeTemp(prefix string, write func(io.Writer) error
 	return name, nil
 }
 
-// link hard-links tmp to final,
-// treating an already-present destination as success.
-func (ingestion *ingestion) link(tmp, final string) error {
+// promote hard-links tmp to final and reports whether final was newly created.
+// A pre-existing final is treated as success; rollback must not remove it.
+func (ingestion *ingestion) promote(tmp, final string) (bool, error) {
 	err := ingestion.root.Link(tmp, final)
-	if err != nil && !errors.Is(err, fs.ErrExist) {
-		return fmt.Errorf("object/store/packed/internal/ingest: linking %q: %w", final, err)
+
+	switch {
+	case err == nil:
+		_ = ingestion.root.Remove(tmp)
+
+		return true, nil
+	case errors.Is(err, fs.ErrExist):
+		_ = ingestion.root.Remove(tmp)
+
+		return false, nil
+	default:
+		return false, fmt.Errorf("object/store/packed/internal/ingest: linking %q: %w", final, err)
 	}
-
-	_ = ingestion.root.Remove(tmp)
-
-	return nil
 }

@@ -95,29 +95,46 @@ func (quarantine *packQuarantine) promoteAll() error {
 		return packPromotionPriority(left.Name()) - packPromotionPriority(right.Name())
 	})
 
+	var created []string
+
 	for _, entry := range entries {
-		err := quarantine.promoteFile(entry.Name())
+		linked, err := quarantine.promoteFile(entry.Name())
 		if err != nil {
+			for i := len(created) - 1; i >= 0; i-- {
+				_ = quarantine.parent.root.Remove(created[i])
+			}
+
 			return err
+		}
+
+		if linked {
+			created = append(created, entry.Name())
 		}
 	}
 
 	return nil
 }
 
-// promoteFile links one quarantined artifact into the parent store,
-// treating an already-present destination as success.
-func (quarantine *packQuarantine) promoteFile(name string) error {
+// promoteFile links one quarantined artifact into the parent store
+// and reports whether the destination was newly created.
+// A pre-existing destination is treated as success; rollback must not remove it.
+func (quarantine *packQuarantine) promoteFile(name string) (bool, error) {
 	src := quarantine.tempName + "/" + name
 
 	err := quarantine.parent.root.Link(src, name)
-	if err != nil && !errors.Is(err, fs.ErrExist) {
-		return fmt.Errorf("object/store/packed: promoting %q: %w", name, err)
+
+	switch {
+	case err == nil:
+		_ = quarantine.parent.root.Remove(src)
+
+		return true, nil
+	case errors.Is(err, fs.ErrExist):
+		_ = quarantine.parent.root.Remove(src)
+
+		return false, nil
+	default:
+		return false, fmt.Errorf("object/store/packed: promoting %q: %w", name, err)
 	}
-
-	_ = quarantine.parent.root.Remove(src)
-
-	return nil
 }
 
 // createPackQuarantineRoot creates a private quarantine directory beneath parent
