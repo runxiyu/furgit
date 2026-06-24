@@ -153,6 +153,7 @@ func (res *resolver) run(workers int) error {
 
 		go func() {
 			defer wg.Done()
+
 			res.worker()
 		}()
 	}
@@ -263,6 +264,7 @@ func (ingestion *ingestion) resolveOneChild(index int, baseType typ.Type, baseCo
 
 	rec.oid = oid
 	rec.resolved = true
+
 	ingestion.byOID.Store(oid, index)
 	ingestion.baseCache.Add(baseCacheKey{offset: rec.offset}, cachedContent{objectType: baseType, content: content})
 
