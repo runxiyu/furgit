@@ -5,19 +5,19 @@ const (
 	Size = 4
 
 	// mod is the largest prime that is less than 65536.
-	mod = 65521
+	mod = 65521 //nolint:unused
 	// nmax is the largest n such that
 	// 255 * n * (n+1) / 2 + (n+1) * (mod-1) <= 2^32-1.
 	// It is mentioned in RFC 1950 (search for "5552").
-	nmax = 5552
+	nmax = 5552 //nolint:unused
 
 	// binary representation compatible with standard library.
-	magic         = "adl\x01"
-	marshaledSize = len(magic) + 4
+	magic         = "adl\x01"      //nolint:unused
+	marshaledSize = len(magic) + 4 //nolint:unused
 )
 
 // Add p to the running checksum d.
-func update(d uint32, p []byte) uint32 {
+func update(d uint32, p []byte) uint32 { //nolint:unused
 	s1, s2 := d&0xffff, d>>16
 
 	for len(p) > 0 {
