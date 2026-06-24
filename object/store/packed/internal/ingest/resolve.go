@@ -162,7 +162,7 @@ func (ingestion *ingestion) resolveOneChild(index int, baseType typ.Type, baseCo
 	ingestion.baseCache.Add(baseCacheKey{offset: rec.offset}, cachedContent{objectType: baseType, content: content})
 
 	ingestion.deltasResolved++
-	meter.Set(ingestion.deltasResolved, 0)
+	meter.Add(1, 0)
 
 	return nil
 }

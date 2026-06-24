@@ -295,7 +295,9 @@ func (ingestion *ingestion) streamAndScan() error {
 		Throughput: true,
 	})
 
-	for done := range ingestion.headerCount {
+	prevConsumed := ingestion.scanner.consumed
+
+	for range ingestion.headerCount {
 		err := ingestion.ctx.Err()
 		if err != nil {
 			return fmt.Errorf("object/store/packed/internal/ingest: %w", err)
@@ -306,7 +308,9 @@ func (ingestion *ingestion) streamAndScan() error {
 			return err
 		}
 
-		meter.Set(done+1, ingestion.scanner.consumed)
+		consumed := ingestion.scanner.consumed
+		meter.Add(1, int64(consumed-prevConsumed))
+		prevConsumed = consumed
 	}
 
 	meter.Stop("done")
