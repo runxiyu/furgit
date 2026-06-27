@@ -48,7 +48,7 @@ func TestRoundTrip(t *testing.T) {
 			}
 
 			for i := range objects {
-				builder.Add(makeOID(size, uint64(i))) //#nosec G115
+				builder.Add(makeOID(size, uint64(i))) //nolint:gosec
 			}
 
 			filter, err := bloom.Parse(builder.Bytes(), format)
@@ -66,7 +66,7 @@ func TestRoundTrip(t *testing.T) {
 			}
 
 			for i := range objects {
-				if !filter.MayContain(makeOID(size, uint64(i))) { //#nosec G115
+				if !filter.MayContain(makeOID(size, uint64(i))) { //nolint:gosec
 					t.Fatalf("false negative for added object %d", i)
 				}
 			}
@@ -76,7 +76,7 @@ func TestRoundTrip(t *testing.T) {
 			falsePositives := 0
 
 			for i := range probes {
-				if filter.MayContain(makeOID(size, uint64(1)<<40+uint64(i))) { //#nosec G115
+				if filter.MayContain(makeOID(size, uint64(1)<<40+uint64(i))) { //nolint:gosec
 					falsePositives++
 				}
 			}

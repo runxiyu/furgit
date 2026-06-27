@@ -33,7 +33,7 @@ func (idx *Packidx) Lookup(oid []byte) (offset uint64, found bool, err error) {
 	// honest exit well under the cap.
 	target := binary.BigEndian.Uint64(oid[1:9])
 
-	for budget := bits.Len(uint(hi - lo)); hi-lo > 8 && budget > 0; budget-- { //#nosec G115
+	for budget := bits.Len(uint(hi - lo)); hi-lo > 8 && budget > 0; budget-- { //nolint:gosec
 		loKey := binary.BigEndian.Uint64(idx.OIDAt(lo)[1:9])
 		hiKey := binary.BigEndian.Uint64(idx.OIDAt(hi - 1)[1:9])
 

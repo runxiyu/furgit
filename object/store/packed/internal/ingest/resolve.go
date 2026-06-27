@@ -149,9 +149,7 @@ func (res *resolver) run(workers int) error {
 	var wg sync.WaitGroup
 
 	for range workers {
-
 		wg.Go(func() {
-
 			res.worker()
 		})
 	}
