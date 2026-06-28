@@ -2,13 +2,13 @@ Format:
 
 * Append-only-ish rolling packfiles
 * All objects are uncompressed with no zlib framing
-* Compression relies on filesystem block-level compression instead
 * uint64 instead of varints
 
 Rationale for the lack of compression:
 
 * Non-delta objects become readable via mmap with no copies at all
 * Delta instructions become easier to stream
+* FS-level compression works
 
 Indexes:
 
