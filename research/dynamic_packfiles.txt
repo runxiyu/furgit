@@ -1,3 +1,40 @@
+Format:
+
+* Append-only-ish rolling packfiles
+* All objects are uncompressed with no zlib framing
+* Compression relies on filesystem block-level compression instead
+
+Rationale for the lack of compression:
+
+* Non-delta objects become readable via mmap with no copies at all
+* Delta instructions become easier to stream
+
+Indexes:
+
+* B+ tree for general-purpose use
+* Extendible hashing with SipHash-2-4 when prefix scans unnecessary
+
+GC:
+
+* Reachability, compaction
+* Cheap mode: tombstones + hole-punching on live packs
+* Defragmentation: COW, then delete tombstone areas and holes
+* ofs-delta compacted by simple subtraction
+
+Ingest:
+
+* Can't stream network packs to disk
+  but you have to decompress and resolve deltas in the first place
+* Stream decompression directly into dynamic packs
+
+Serving:
+
+* Serving normal packfiles from dynamic packs
+  re-adds zlib framing
+* Many forges already serve at near-zero effective compression
+
+===================================
+
 dynamic packfiles to append objects
 
 gc/refcount process punches page-sized holes in them for pages fully
