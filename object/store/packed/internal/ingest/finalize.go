@@ -83,8 +83,8 @@ func (ingestion *ingestion) finalize() (Result, error) {
 	for _, artifact := range artifacts {
 		linked, err := ingestion.promote(artifact.tmp, artifact.final)
 		if err != nil {
-			for i := len(created) - 1; i >= 0; i-- {
-				_ = ingestion.root.Remove(created[i])
+			for _, v := range slices.Backward(created) {
+				_ = ingestion.root.Remove(v)
 			}
 
 			return Result{}, err

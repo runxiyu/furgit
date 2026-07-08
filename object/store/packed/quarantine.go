@@ -100,8 +100,8 @@ func (quarantine *packQuarantine) promoteAll() error {
 	for _, entry := range entries {
 		linked, err := quarantine.promoteFile(entry.Name())
 		if err != nil {
-			for i := len(created) - 1; i >= 0; i-- {
-				_ = quarantine.parent.root.Remove(created[i])
+			for _, v := range slices.Backward(created) {
+				_ = quarantine.parent.root.Remove(v)
 			}
 
 			return err

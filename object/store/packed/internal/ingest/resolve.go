@@ -3,6 +3,7 @@ package ingest
 import (
 	"fmt"
 	"io"
+	"slices"
 	"sync"
 
 	"lindenii.org/go/furgit/internal/compress/zlib"
@@ -324,13 +325,13 @@ func (ingestion *ingestion) materialize(index int) (typ.Type, []byte, error) {
 		cur = next
 	}
 
-	for i := len(chain) - 1; i >= 0; i-- {
-		content, err := ingestion.applyDelta(chain[i], base)
+	for _, v := range slices.Backward(chain) {
+		content, err := ingestion.applyDelta(v, base)
 		if err != nil {
 			return zero, nil, err
 		}
 
-		ingestion.baseCache.Add(baseCacheKey{offset: ingestion.records[chain[i]].offset}, cachedContent{objectType: baseType, content: content})
+		ingestion.baseCache.Add(baseCacheKey{offset: ingestion.records[v].offset}, cachedContent{objectType: baseType, content: content})
 
 		base = content
 	}
