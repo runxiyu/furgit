@@ -32,6 +32,7 @@ linters:
     - gomodguard       # deprecated
     - exhaustruct      # currently broken, will turn it on again when v4 gets into golangci-lint
     - ireturn          # much more noise than info
+    - noinlineerr      # thought about it, inline errors actually make sense
 
   settings:
     perfsprint:
