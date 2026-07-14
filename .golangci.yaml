@@ -30,7 +30,7 @@ linters:
     - funlen           # long functions are fine
     - dogsled          # definitely not an issue, ignoring returns is normal
     - gomodguard       # deprecated
-    - exhaustruct      # currently broken, will turn it on again when v4 gets into golangci-lint
+    - exhaustruct      # deprecated in favor of exhaustruct_v5
     - ireturn          # much more noise than info
     - noinlineerr      # thought about it, inline errors actually make sense
 
