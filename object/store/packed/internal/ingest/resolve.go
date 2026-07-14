@@ -106,11 +106,11 @@ type resolver struct {
 	adjacency adjacency
 	meter     *progress.Meter
 
-	mu       sync.Mutex
-	cond     *sync.Cond
+	mu       sync.Mutex //exhaustruct:optional
+	cond     *sync.Cond //exhaustruct:optional
 	stack    []item
-	active   int
-	firstErr error
+	active   int   //exhaustruct:optional
+	firstErr error //exhaustruct:optional
 }
 
 func (ingestion *ingestion) resolveFrom(roots []int, adjacency adjacency, meter *progress.Meter) error {

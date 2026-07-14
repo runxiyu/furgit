@@ -20,11 +20,11 @@ import (
 //
 // Labels: MT-Safe.
 type Order[K comparable] struct {
-	snapshot atomic.Pointer[[]K]
-	mu       sync.Mutex
+	snapshot atomic.Pointer[[]K] //exhaustruct:optional
+	mu       sync.Mutex          //exhaustruct:optional
 
 	interval uint64
-	pending  atomic.Uint64
+	pending  atomic.Uint64 //exhaustruct:optional
 }
 
 // Options configures a new Order.
@@ -48,7 +48,7 @@ func New[K comparable](opts Options) *Order[K] {
 		panic("internal/mru: Options.Interval must be at least 1")
 	}
 
-	return &Order[K]{interval: opts.Interval} //nolint:exhaustruct
+	return &Order[K]{interval: opts.Interval}
 }
 
 // Len returns the number of keys in the order.

@@ -14,8 +14,8 @@ import (
 // Write still reports success for the full input length.
 type CappedCaptureWriter struct {
 	limit uint64
-	buf   bytes.Buffer
-	full  bool
+	buf   bytes.Buffer //exhaustruct:optional
+	full  bool         //exhaustruct:optional
 }
 
 // NewCappedCaptureWriter constructs one capped capture writer.

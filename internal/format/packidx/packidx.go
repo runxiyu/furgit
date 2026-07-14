@@ -37,15 +37,15 @@ type Packidx struct {
 	hashSize int
 
 	// numObjects is the object count from the last fanout entry.
-	numObjects int
+	numObjects int //exhaustruct:optional
 
 	// namesOff, crcOff, off32Off, and off64Off are
 	// the byte offsets of the object ID, CRC32,
 	// 32-bit offset, and 64-bit offset tables.
-	namesOff int
-	crcOff   int
-	off32Off int
-	off64Off int
+	namesOff int //exhaustruct:optional
+	crcOff   int //exhaustruct:optional
+	off32Off int //exhaustruct:optional
+	off64Off int //exhaustruct:optional
 	// off64Count is the number of 64-bit offset table entries.
 	off64Count uint64
 }

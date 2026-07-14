@@ -40,12 +40,12 @@ type streamWriter struct {
 	// headerBuf accumulates header bytes while fullMode parses up to the first NUL.
 	headerBuf []byte
 	// headerDone reports whether the full-object header has been parsed.
-	headerDone bool
+	headerDone bool //exhaustruct:optional
 	// expectedContentLeft tracks remaining declared content bytes.
-	expectedContentLeft int
+	expectedContentLeft int //exhaustruct:optional
 
-	closed    bool
-	finalized bool
+	closed    bool //exhaustruct:optional
+	finalized bool //exhaustruct:optional
 }
 
 // Write validates and writes raw bytes into the stream.

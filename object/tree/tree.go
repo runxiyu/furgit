@@ -13,7 +13,7 @@ import (
 //
 // Labels: MT-Unsafe.
 type Tree struct {
-	entries []Entry
+	entries []Entry //exhaustruct:optional
 }
 
 // Entry represents a single entry in a tree.

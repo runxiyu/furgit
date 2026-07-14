@@ -6,7 +6,7 @@ import "lindenii.org/go/furgit/object/id"
 // parsed from a raw commit object.
 type Commit struct {
 	body       []byte
-	payload    []byteRange
+	payload    []byteRange //exhaustruct:optional
 	signatures map[id.ObjectFormat][]byteRange
 }
 

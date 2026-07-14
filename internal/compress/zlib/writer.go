@@ -33,9 +33,9 @@ type Writer struct {
 	dict        []byte
 	compressor  *flate.Writer
 	digest      hash.Hash32
-	err         error
-	scratch     [4]byte
-	wroteHeader bool
+	err         error   //exhaustruct:optional
+	scratch     [4]byte //exhaustruct:optional
+	wroteHeader bool    //exhaustruct:optional
 }
 
 //nolint:gochecknoglobals

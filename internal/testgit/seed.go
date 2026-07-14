@@ -148,7 +148,7 @@ func (seeder *historySeeder) commit(i int, readme, empty, link id.ObjectID, pare
 	return seeder.repo.CommitTree(
 		seeder.tb,
 		root,
-		CommitTreeOptions{Message: fmt.Sprintf("commit %d", i)}, //nolint:exhaustruct
+		CommitTreeOptions{Message: fmt.Sprintf("commit %d", i)},
 		parents...,
 	)
 }
@@ -184,7 +184,7 @@ func (seeder *historySeeder) tag(name string, target id.ObjectID) error {
 		seeder.tb,
 		name,
 		target,
-		TagAnnotatedOptions{Message: "tag " + name}, //nolint:exhaustruct
+		TagAnnotatedOptions{Message: "tag " + name},
 	)
 	if err != nil {
 		return err

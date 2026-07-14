@@ -26,9 +26,9 @@ type Meter struct {
 	sparse     bool
 	throughput bool
 
-	done     atomic.Int64
-	bytes    atomic.Int64
-	sawValue atomic.Bool
+	done     atomic.Int64 //exhaustruct:optional
+	bytes    atomic.Int64 //exhaustruct:optional
+	sawValue atomic.Bool  //exhaustruct:optional
 
 	startedAt time.Time
 
@@ -40,8 +40,8 @@ type Meter struct {
 	nextForceAt      time.Time
 	nextThroughput   time.Time
 	lastPercent      int
-	lastCounterW     int
-	throughputSuffix string
+	lastCounterW     int    //exhaustruct:optional
+	throughputSuffix string //exhaustruct:optional
 }
 
 // New creates one progress meter and starts its render goroutine.

@@ -12,29 +12,29 @@ type entry[K comparable, V any] struct {
 	key        K
 	value      V
 	weight     uint64
-	prev, next *entry[K, V]
+	prev, next *entry[K, V] //exhaustruct:optional
 
 	// referenced is set on access and cleared by the eviction sweep;
 	// prev and next link the entry into its shard's ring.
-	referenced atomic.Bool
+	referenced atomic.Bool //exhaustruct:optional
 }
 
 // shard is an independently locked CLOCK cache.
 type shard[K comparable, V any] struct {
-	items lsync.Map[K, *entry[K, V]]
+	items lsync.Map[K, *entry[K, V]] //exhaustruct:optional
 
-	hand      *entry[K, V]
-	weight    uint64
-	count     int
+	hand      *entry[K, V] //exhaustruct:optional
+	weight    uint64       //exhaustruct:optional
+	count     int          //exhaustruct:optional
 	maxWeight uint64
 
 	// mu protects the ring, hand, totals, and writes.
-	mu sync.Mutex
+	mu sync.Mutex //exhaustruct:optional
 }
 
 // newShard returns an empty shard with the given weight budget.
 func newShard[K comparable, V any](maxWeight uint64) *shard[K, V] {
-	return &shard[K, V]{ //nolint:exhaustruct
+	return &shard[K, V]{
 		maxWeight: maxWeight,
 	}
 }

@@ -20,7 +20,7 @@ func (shard *shard[K, V]) add(key K, value V, weight uint64) bool {
 		shard.count--
 	}
 
-	e := &entry[K, V]{ //nolint:exhaustruct
+	e := &entry[K, V]{
 		key:    key,
 		value:  value,
 		weight: weight,

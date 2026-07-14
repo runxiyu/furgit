@@ -80,6 +80,7 @@ func TestParse(t *testing.T) {
 				{
 					name:    "root",
 					oid:     rootID,
+					parents: nil,
 					message: []byte("root subject\n\nroot body\n"),
 				},
 				{

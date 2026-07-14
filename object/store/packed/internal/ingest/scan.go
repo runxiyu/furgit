@@ -33,8 +33,8 @@ type scanner struct {
 
 	// buf[off:n] is the unread window.
 	buf []byte
-	off int
-	n   int
+	off int //exhaustruct:optional
+	n   int //exhaustruct:optional
 
 	// consumed counts stream bytes consumed so far.
 	consumed int

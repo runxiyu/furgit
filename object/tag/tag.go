@@ -15,7 +15,7 @@ type Tag struct {
 	Name         []byte
 	Tagger       signature.Signature
 	Message      []byte
-	ExtraHeaders []ExtraHeader
+	ExtraHeaders []ExtraHeader //exhaustruct:optional
 }
 
 // ExtraHeader represents an extra header in a Git tag object.

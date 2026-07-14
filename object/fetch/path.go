@@ -87,5 +87,5 @@ func (fetcher *Fetcher) Path(root oid.ObjectID, parts [][]byte) (tree.Entry, err
 		}
 	}
 
-	return tree.Entry{}, &PathNotFoundError{Index: len(parts) - 1}
+	panic("object/fetch: unreachable")
 }

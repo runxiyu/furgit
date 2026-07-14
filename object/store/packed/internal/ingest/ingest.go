@@ -54,7 +54,7 @@ type ingestion struct {
 	// byOffset maps an entry offset to its record index,
 	// and byOID maps a resolved object ID to its record index.
 	byOffset map[int]int
-	byOID    sync.Map[id.ObjectID, int]
+	byOID    sync.Map[id.ObjectID, int] //exhaustruct:optional
 
 	baseCache *clock.Clock[baseCacheKey, cachedContent]
 
@@ -68,7 +68,7 @@ type ingestion struct {
 	deltaCount int
 
 	// deltasResolved counts resolved delta records.
-	deltasResolved atomic.Int64
+	deltasResolved atomic.Int64 //exhaustruct:optional
 
 	// packHash is the final pack trailer hash.
 	packHash id.ObjectID
@@ -192,6 +192,7 @@ func (ingestion *ingestion) finishEmpty(headerRaw [packfile.HeaderLen]byte) (Res
 		PackName:    "",
 		IdxName:     "",
 		RevName:     "",
+		BloomName:   "",
 		PackHash:    packHash,
 		ObjectCount: 0,
 		ThinFixed:   false,

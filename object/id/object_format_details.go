@@ -19,7 +19,7 @@ func (objectFormat ObjectFormat) details() objectFormatDetails {
 
 //nolint:gochecknoglobals
 var objectFormatTable = [...]objectFormatDetails{
-	ObjectFormatUnknown: {}, //nolint:exhaustruct
+	ObjectFormatUnknown: {}, //exhaustruct:ignore
 	ObjectFormatSHA1: {
 		name: "sha1",
 		size: sha1.Size,

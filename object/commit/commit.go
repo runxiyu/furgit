@@ -10,12 +10,12 @@ import (
 // Labels: MT-Unsafe.
 type Commit struct {
 	Tree         id.ObjectID
-	Parents      []id.ObjectID
+	Parents      []id.ObjectID //exhaustruct:optional
 	Author       signature.Signature
 	Committer    signature.Signature
 	Message      []byte
-	ChangeID     []byte
-	ExtraHeaders []ExtraHeader
+	ChangeID     []byte        //exhaustruct:optional
+	ExtraHeaders []ExtraHeader //exhaustruct:optional
 }
 
 // ExtraHeader represents an extra header in a Git object.

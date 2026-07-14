@@ -54,13 +54,13 @@ type EntryHeader struct {
 	// RefBase holds the base object ID
 	// for ref-delta entries.
 	// Only the first hashSize bytes are meaningful.
-	RefBase [id.MaxObjectIDSize]byte
+	RefBase [id.MaxObjectIDSize]byte //exhaustruct:optional
 
 	// OfsDistance is the backward distance
 	// from the start of this entry
 	// to the start of the base entry,
 	// for ofs-delta entries.
-	OfsDistance uint64
+	OfsDistance uint64 //exhaustruct:optional
 }
 
 // ParseEntryHeader parses one packfile entry header

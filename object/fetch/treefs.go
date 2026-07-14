@@ -25,7 +25,7 @@ import (
 type TreeFS struct {
 	fetcher   *Fetcher
 	rootTree  oid.ObjectID
-	rootEntry *tree.Entry
+	rootEntry *tree.Entry //exhaustruct:optional
 }
 
 var (
@@ -59,8 +59,8 @@ func splitPath(path string) [][]byte {
 type treeEntryValue struct {
 	name      string
 	mode      mode.Mode
-	objectID  oid.ObjectID
-	treeID    oid.ObjectID
+	objectID  oid.ObjectID //exhaustruct:optional
+	treeID    oid.ObjectID //exhaustruct:optional
 	treeEntry *tree.Entry
 }
 
@@ -246,7 +246,7 @@ func (file *treeFSBlob) Close() error               { return file.reader.Close()
 type treeFSDir struct {
 	info    *treeFSInfo
 	entries []fs.DirEntry
-	offset  int
+	offset  int //exhaustruct:optional
 }
 
 var (

@@ -204,7 +204,7 @@ func (ingestion *ingestion) rewriteHeaderTrailer() error {
 type offsetWriter struct {
 	file    *os.File
 	offset  int64
-	written int
+	written int //exhaustruct:optional
 }
 
 // Write implements [io.Writer].

@@ -13,7 +13,7 @@ import (
 func TestConfig(t *testing.T) {
 	t.Parallel()
 
-	testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{}) //nolint:exhaustruct
+	testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{})
 	if err != nil {
 		t.Fatalf("NewRepo: %v", err)
 	}

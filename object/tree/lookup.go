@@ -27,5 +27,5 @@ func (tree *Tree) Find(name []byte) (Entry, bool) {
 		}
 	}
 
-	return Entry{}, false
+	return Entry{}, false //exhaustruct:ignore
 }

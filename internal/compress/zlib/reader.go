@@ -69,13 +69,13 @@ var readerPool = sync.NewPool(func() *Reader {
 //
 // Reader implements io.ReadCloser.
 type Reader struct {
-	r            flate.Reader
+	r            flate.Reader //exhaustruct:optional
 	decompressor io.ReadCloser
 	digest       hash.Hash32
-	headerRead   uint64
-	trailerRead  uint64
-	err          error
-	scratch      [4]byte
+	headerRead   uint64 //exhaustruct:optional
+	trailerRead  uint64 //exhaustruct:optional
+	err          error  //exhaustruct:optional
+	scratch      [4]byte //exhaustruct:optional
 	br           bytes.Reader
 }
 

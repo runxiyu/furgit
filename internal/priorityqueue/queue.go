@@ -4,7 +4,7 @@ package priorityqueue
 //
 // Labels: MT-Unsafe.
 type Queue[T any] struct {
-	items []T
+	items []T //exhaustruct:optional
 	less  func(left, right T) bool
 }
 
