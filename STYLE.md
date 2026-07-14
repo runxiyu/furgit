@@ -7,6 +7,9 @@ These only really document things that the linter won't check.
 Try to avoid package aliases.
 `object/store` should simply be imported implicity as `store`,
 `object/id` as `id`, `object/typ` as `typ`, etc.
+In cases like `ref/name`
+where `name` really does conflict with variable names a lot,
+`refname` may be considered.
 
 Avoid letting local variables shadow an imported package.
 
