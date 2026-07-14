@@ -8,6 +8,8 @@ import (
 )
 
 // TagAnnotatedOptions configures [Repo.TagAnnotated].
+//
+//exhaustruct:optional
 type TagAnnotatedOptions struct {
 	Message    string
 	Tagger     Identity

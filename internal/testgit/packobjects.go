@@ -16,6 +16,8 @@ import (
 var ErrInvalidPackObjectsOptions = errors.New("internal/testgit: invalid pack-objects options")
 
 // PackObjectsOptions controls one on-disk pack-objects invocation.
+//
+//exhaustruct:optional
 type PackObjectsOptions struct {
 	// RevIndex requests writing a .rev reverse index alongside the pack.
 	RevIndex bool

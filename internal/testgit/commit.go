@@ -9,6 +9,8 @@ import (
 )
 
 // CommitTreeOptions configures [Repo.CommitTree].
+//
+//exhaustruct:optional
 type CommitTreeOptions struct {
 	Message       string
 	Author        Identity

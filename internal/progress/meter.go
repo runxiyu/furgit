@@ -73,6 +73,8 @@ func New(opts Options) *Meter {
 }
 
 // Options configures one progress meter.
+//
+//exhaustruct:optional
 type Options struct {
 	Writer iowrap.WriteFlusher
 

@@ -13,6 +13,7 @@ type Repo struct {
 	env          []string
 }
 
+//exhaustruct:optional
 type RepoOptions struct {
 	ObjectFormat id.ObjectFormat
 }

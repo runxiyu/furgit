@@ -41,6 +41,8 @@ type PackWriter interface {
 }
 
 // PackWriteOptions controls one pack write operation.
+//
+//exhaustruct:optional
 type PackWriteOptions struct {
 	// ThinBase supplies the wider object reader
 	// used to complete thin packs during ingestion.
