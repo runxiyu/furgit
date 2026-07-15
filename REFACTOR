@@ -21,7 +21,4 @@ network/receivepack
 network/receivepack/hooks
 network/receivepack/service
 reachability
-ref/store
-ref/store/chain
-ref/store/files
 repository
