@@ -1,16 +1,9 @@
 commitquery
-diff
 diff/lines
 diff/trees
-format
 format/commitgraph
 format/commitgraph/bloom
 format/commitgraph/read
-format/packfile
-format/packfile/delta
-format/packfile/delta/apply
-internal/bufpool
-network
 network/protocol
 network/protocol/pktline
 network/protocol/sideband64k
