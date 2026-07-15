@@ -77,6 +77,38 @@ func TestAnyVersionExtensionsAccepted(t *testing.T) {
 	)
 }
 
+func TestDuplicateRefStorageTakesLast(t *testing.T) {
+	t.Parallel()
+
+	requireOpens(
+		t, id.ObjectFormatSHA256,
+		"[extensions]\n\trefstorage = reftable\n\trefstorage = files\n",
+	)
+}
+
+func TestDuplicateRefStorageTakesLastReftable(t *testing.T) {
+	t.Parallel()
+
+	requireErrConfig(
+		t, id.ObjectFormatSHA256,
+		"[extensions]\n\trefstorage = files\n\trefstorage = reftable\n",
+	)
+}
+
+func TestDuplicateObjectFormatTakesLast(t *testing.T) {
+	t.Parallel()
+
+	repo := newRepo(t, id.ObjectFormatSHA256)
+
+	appendConfig(t, repo, "[extensions]\n\tobjectformat = sha1\n\tobjectformat = sha256\n")
+
+	opened := openRepository(t, repo)
+
+	if opened.ObjectFormat() != id.ObjectFormatSHA256 {
+		t.Fatalf("ObjectFormat = %v, want %v", opened.ObjectFormat(), id.ObjectFormatSHA256)
+	}
+}
+
 func TestRejectsCompatObjectFormat(t *testing.T) {
 	t.Parallel()
 
@@ -109,7 +141,6 @@ func TestRejectsFutureVersion(t *testing.T) {
 
 func TestRejectsReftable(t *testing.T) {
 	// TODO
-
 	t.Parallel()
 
 	repo, err := testgit.NewRepo(t, testgit.RepoOptions{
