@@ -2,6 +2,7 @@ package repository_test
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"lindenii.org/go/furgit/internal/testgit"
@@ -40,12 +41,16 @@ func openGitDir(t *testing.T, repo *testgit.Repo) *os.Root {
 	return gitDir
 }
 
-func openRepository(t *testing.T, repo *testgit.Repo) *repository.Repository {
+func openRepository(
+	t *testing.T,
+	repo *testgit.Repo,
+	options repository.Options,
+) *repository.Repository {
 	t.Helper()
 
 	gitDir := openGitDir(t, repo)
 
-	opened, err := repository.Open(gitDir, gitDir)
+	opened, err := repository.Open(gitDir, gitDir, options)
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}
@@ -53,6 +58,37 @@ func openRepository(t *testing.T, repo *testgit.Repo) *repository.Repository {
 	t.Cleanup(func() { _ = opened.Close() })
 
 	return opened
+}
+
+// repoPath returns the path of the working tree of repo.
+func repoPath(t *testing.T, repo *testgit.Repo) string {
+	t.Helper()
+
+	root := repo.Root(t)
+
+	t.Cleanup(func() { _ = root.Close() })
+
+	return root.Name()
+}
+
+// objectsPath returns the path of the objects directory of repo.
+func objectsPath(t *testing.T, repo *testgit.Repo) string {
+	t.Helper()
+
+	return filepath.Join(repoPath(t, repo), ".git", "objects")
+}
+
+// writeAlternates writes the alternates file of repo.
+func writeAlternates(t *testing.T, repo *testgit.Repo, content string) {
+	t.Helper()
+
+	err := os.WriteFile(
+		filepath.Join(objectsPath(t, repo), "info", "alternates"),
+		[]byte(content), 0o600,
+	)
+	if err != nil {
+		t.Fatalf("write alternates: %v", err)
+	}
 }
 
 func appendConfig(t *testing.T, repo *testgit.Repo, text string) {

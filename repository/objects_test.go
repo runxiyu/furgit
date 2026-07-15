@@ -18,7 +18,7 @@ func TestObjects(t *testing.T) {
 			repo := newRepo(t, objectFormat)
 			commitID := makeCommit(t, repo, "objects")
 
-			opened := openRepository(t, repo)
+			opened := openRepository(t, repo, repository.Options{})
 
 			objectType, _, err := opened.Objects().ReadBytesContent(commitID)
 			if err != nil {
@@ -42,7 +42,7 @@ func TestFetcher(t *testing.T) {
 			repo := newRepo(t, objectFormat)
 			commitID := makeCommit(t, repo, "fetcher")
 
-			opened := openRepository(t, repo)
+			opened := openRepository(t, repo, repository.Options{})
 
 			fetched, err := opened.Fetcher().ExactCommit(commitID)
 			if err != nil {
@@ -76,7 +76,7 @@ func TestOpenCreatesPackDirectory(t *testing.T) {
 
 	gitDir := openGitDir(t, repo)
 
-	opened, err := repository.Open(gitDir, gitDir)
+	opened, err := repository.Open(gitDir, gitDir, repository.Options{})
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}

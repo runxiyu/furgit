@@ -19,7 +19,7 @@ func TestConfig(t *testing.T) {
 		t.Fatalf("ConfigSet: %v", err)
 	}
 
-	opened := openRepository(t, repo)
+	opened := openRepository(t, repo, repository.Options{})
 
 	value, err := opened.Config().Lookup("furgit", "", "marker").String()
 	if err != nil {
@@ -59,7 +59,7 @@ func TestWorktreeConfigOverridesCommon(t *testing.T) {
 		t.Fatalf("ConfigSetWorktree: %v", err)
 	}
 
-	opened := openRepository(t, repo)
+	opened := openRepository(t, repo, repository.Options{})
 
 	value, err := opened.Config().Lookup("core", "", "packedrefstimeout").Int()
 	if err != nil {
@@ -95,7 +95,7 @@ func TestWorktreeConfigIgnoredWhenUndeclared(t *testing.T) {
 		t.Fatalf("ConfigSet: %v", err)
 	}
 
-	opened := openRepository(t, repo)
+	opened := openRepository(t, repo, repository.Options{})
 
 	value, err := opened.Config().Lookup("core", "", "packedrefstimeout").Int()
 	if err != nil {
@@ -121,7 +121,7 @@ func TestWorktreeConfigDoesNotCarryFormat(t *testing.T) {
 		t.Fatalf("ConfigSetWorktree: %v", err)
 	}
 
-	opened := openRepository(t, repo)
+	opened := openRepository(t, repo, repository.Options{})
 
 	if opened.ObjectFormat() != id.ObjectFormatSHA256 {
 		t.Fatalf("ObjectFormat = %v, want %v", opened.ObjectFormat(), id.ObjectFormatSHA256)
@@ -137,7 +137,7 @@ func TestRejectsMalformedWorktreeConfigDeclaration(t *testing.T) {
 
 	gitDir := openGitDir(t, repo)
 
-	_, err := repository.Open(gitDir, gitDir)
+	_, err := repository.Open(gitDir, gitDir, repository.Options{})
 	if !errors.Is(err, repository.ErrConfig) {
 		t.Fatalf("Open = %v, want ErrConfig", err)
 	}

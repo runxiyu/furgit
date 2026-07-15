@@ -20,7 +20,7 @@ func TestOpenClose(t *testing.T) {
 			repo := newRepo(t, objectFormat)
 			gitDir := openGitDir(t, repo)
 
-			opened, err := repository.Open(gitDir, gitDir)
+			opened, err := repository.Open(gitDir, gitDir, repository.Options{})
 			if err != nil {
 				t.Fatalf("Open: %v", err)
 			}
@@ -43,7 +43,7 @@ func TestOpenMissingConfig(t *testing.T) {
 
 	defer func() { _ = root.Close() }()
 
-	_, err = repository.Open(root, root)
+	_, err = repository.Open(root, root, repository.Options{})
 	if !errors.Is(err, fs.ErrNotExist) {
 		t.Fatalf("Open = %v, want fs.ErrNotExist", err)
 	}

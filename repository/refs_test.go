@@ -25,7 +25,7 @@ func TestRefs(t *testing.T) {
 				t.Fatalf("UpdateRef: %v", err)
 			}
 
-			opened := openRepository(t, repo)
+			opened := openRepository(t, repo, repository.Options{})
 
 			direct, err := opened.Refs().ResolveToDirect("refs/heads/main")
 			if err != nil {
@@ -66,7 +66,7 @@ func TestRefsLinkedWorktree(t *testing.T) {
 
 	t.Cleanup(func() { _ = worktreeGitDir.Close() })
 
-	opened, err := repository.Open(worktreeGitDir, commonDir)
+	opened, err := repository.Open(worktreeGitDir, commonDir, repository.Options{})
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}
@@ -123,7 +123,7 @@ func TestLockTimeoutsFromConfig(t *testing.T) {
 				t.Fatalf("ConfigSet: %v", err)
 			}
 
-			opened := openRepository(t, repo)
+			opened := openRepository(t, repo, repository.Options{})
 
 			direct, err := opened.Refs().ResolveToDirect("refs/heads/main")
 			if err != nil {
@@ -146,7 +146,7 @@ func TestRejectsMalformedLockTimeout(t *testing.T) {
 
 	gitDir := openGitDir(t, repo)
 
-	_, err := repository.Open(gitDir, gitDir)
+	_, err := repository.Open(gitDir, gitDir, repository.Options{})
 	if !errors.Is(err, repository.ErrConfig) {
 		t.Fatalf("Open = %v, want ErrConfig", err)
 	}

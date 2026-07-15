@@ -39,6 +39,20 @@ type PackObjectsOptions struct {
 	Exclude []id.ObjectID
 }
 
+// Repack packs the reachable objects of the repository into one pack,
+// and removes the loose objects that this makes redundant,
+// leaving those objects readable only through the pack.
+func (repo *Repo) Repack(tb testing.TB) error {
+	tb.Helper()
+
+	_, err := repo.run(tb, nil, "git", "repack", "-a", "-d", "--quiet", "--end-of-options")
+	if err != nil {
+		return fmt.Errorf("repack: %w", err)
+	}
+
+	return nil
+}
+
 // PackObjects packs the include objects with git pack-objects
 // into a temporary directory,
 // and returns the artifact path prefix "<dir>/pack-<hash>",

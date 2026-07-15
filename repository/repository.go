@@ -7,11 +7,23 @@ import (
 	"lindenii.org/go/furgit/config"
 	"lindenii.org/go/furgit/object/fetch"
 	"lindenii.org/go/furgit/object/id"
-	"lindenii.org/go/furgit/object/store/dual"
 	"lindenii.org/go/furgit/object/store/loose"
 	"lindenii.org/go/furgit/object/store/packed"
 	"lindenii.org/go/furgit/ref/store/files"
 )
+
+// Options configures how one repository is opened.
+//
+//exhaustruct:optional
+type Options struct {
+	// AllowAlternates permits reading objects from the directories
+	// that "objects/info/alternates" names,
+	// which lie outside the roots given to [Open].
+	//
+	// A repository that names alternates does not open without it,
+	// since only part of its objects could be read.
+	AllowAlternates bool
+}
 
 // Repository composes the stores and helpers
 // of one on-disk Git repository.
@@ -21,8 +33,11 @@ type Repository struct {
 	config       *config.Config
 	objectFormat id.ObjectFormat
 
-	objects *dual.Dual
+	objects *objectStore
 	fetcher *fetch.Fetcher
+
+	// alternates are opened by Open, and so are closed by Close.
+	alternates []*alternate
 
 	// objectsRoot and objectsPackRoot are opened by Open,
 	// so unlike the roots passed to Open,
@@ -50,7 +65,7 @@ type Repository struct {
 // Both roots must be non-nil.
 //
 // Labels: Deps-Borrowed, Life-Parent, Close-Caller.
-func Open(gitRoot, commonRoot *os.Root) (*Repository, error) {
+func Open(gitRoot, commonRoot *os.Root, options Options) (*Repository, error) {
 	common, err := parseConfig(commonRoot)
 	if err != nil {
 		return nil, err
@@ -71,7 +86,7 @@ func Open(gitRoot, commonRoot *os.Root) (*Repository, error) {
 		return nil, err
 	}
 
-	objects, err := openObjects(commonRoot, objectFormat)
+	objects, err := openObjects(commonRoot, objectFormat, options)
 	if err != nil {
 		return nil, err
 	}
@@ -79,8 +94,9 @@ func Open(gitRoot, commonRoot *os.Root) (*Repository, error) {
 	return &Repository{
 		config:          cfg,
 		objectFormat:    objectFormat,
-		objects:         objects.dual,
-		fetcher:         fetch.New(objects.dual),
+		objects:         objects.store,
+		fetcher:         fetch.New(objects.store),
+		alternates:      objects.alternates,
 		objectsRoot:     objects.root,
 		objectsPackRoot: objects.packRoot,
 		objectsLoose:    objects.loose,
@@ -95,11 +111,22 @@ func Open(gitRoot, commonRoot *os.Root) (*Repository, error) {
 //
 // Labels: MT-Unsafe, Idem-2UB.
 func (repo *Repository) Close() error {
-	return errors.Join(
+	errs := make([]error, 0, 5+len(repo.alternates))
+
+	errs = append(errs,
 		repo.objectsPacked.Close(),
 		repo.objectsLoose.Close(),
 		repo.refs.Close(),
+	)
+
+	for _, alt := range repo.alternates {
+		errs = append(errs, alt.close())
+	}
+
+	errs = append(errs,
 		repo.objectsPackRoot.Close(),
 		repo.objectsRoot.Close(),
 	)
+
+	return errors.Join(errs...)
 }

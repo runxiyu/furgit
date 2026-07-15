@@ -17,7 +17,7 @@ func TestObjectFormat(t *testing.T) {
 			t.Parallel()
 
 			repo := newRepo(t, objectFormat)
-			opened := openRepository(t, repo)
+			opened := openRepository(t, repo, repository.Options{})
 
 			if opened.ObjectFormat() != objectFormat {
 				t.Fatalf("ObjectFormat = %v, want %v", opened.ObjectFormat(), objectFormat)
@@ -32,7 +32,7 @@ func requireOpens(t *testing.T, objectFormat id.ObjectFormat, text string) {
 	repo := newRepo(t, objectFormat)
 
 	appendConfig(t, repo, text)
-	openRepository(t, repo)
+	openRepository(t, repo, repository.Options{})
 }
 
 func requireErrConfig(t *testing.T, objectFormat id.ObjectFormat, text string) {
@@ -44,7 +44,7 @@ func requireErrConfig(t *testing.T, objectFormat id.ObjectFormat, text string) {
 
 	gitDir := openGitDir(t, repo)
 
-	_, err := repository.Open(gitDir, gitDir)
+	_, err := repository.Open(gitDir, gitDir, repository.Options{})
 	if !errors.Is(err, repository.ErrConfig) {
 		t.Fatalf("Open = %v, want ErrConfig", err)
 	}
@@ -102,7 +102,7 @@ func TestDuplicateObjectFormatTakesLast(t *testing.T) {
 
 	appendConfig(t, repo, "[extensions]\n\tobjectformat = sha1\n\tobjectformat = sha256\n")
 
-	opened := openRepository(t, repo)
+	opened := openRepository(t, repo, repository.Options{})
 
 	if opened.ObjectFormat() != id.ObjectFormatSHA256 {
 		t.Fatalf("ObjectFormat = %v, want %v", opened.ObjectFormat(), id.ObjectFormatSHA256)
@@ -133,7 +133,7 @@ func TestRejectsFutureVersion(t *testing.T) {
 
 	gitDir := openGitDir(t, repo)
 
-	_, err = repository.Open(gitDir, gitDir)
+	_, err = repository.Open(gitDir, gitDir, repository.Options{})
 	if !errors.Is(err, repository.ErrConfig) {
 		t.Fatalf("Open = %v, want ErrConfig", err)
 	}
@@ -153,7 +153,7 @@ func TestRejectsReftable(t *testing.T) {
 
 	gitDir := openGitDir(t, repo)
 
-	_, err = repository.Open(gitDir, gitDir)
+	_, err = repository.Open(gitDir, gitDir, repository.Options{})
 	if !errors.Is(err, repository.ErrConfig) {
 		t.Fatalf("Open = %v, want ErrConfig", err)
 	}
