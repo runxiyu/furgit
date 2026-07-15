@@ -15,6 +15,18 @@ import (
 
 const looseReadAttempts = 3
 
+// errBrokenRef indicates that an on-disk reference exists
+// but its content cannot be parsed.
+var errBrokenRef = errors.New("ref/store/files: broken reference")
+
+// errRefDirectory indicates that a loose reference path is a directory,
+// possibly shadowing a packed reference.
+var errRefDirectory = errors.New("ref/store/files: reference path is a directory")
+
+// errUnstableRef indicates that a loose reference kept changing shape
+// between snapshots while being read.
+var errUnstableRef = errors.New("ref/store/files: reference changed repeatedly during read")
+
 // Resolve resolves one reference name from the visible namespace,
 // reading the loose reference first
 // and falling back to packed-refs when the loose reference is missing
@@ -94,7 +106,10 @@ func (files *Files) readLooseRef(name string) (ref.Ref, error) {
 	for range looseReadAttempts {
 		info, err := root.Lstat(loc.path)
 		if err != nil {
-			if errors.Is(err, os.ErrNotExist) {
+			// A non-directory in the path means the reference
+			// cannot exist loose,
+			// such as refs/heads/a shadowing refs/heads/a/b.
+			if errors.Is(err, os.ErrNotExist) || errors.Is(err, syscall.ENOTDIR) {
 				return nil, store.ErrReferenceNotFound
 			}
 

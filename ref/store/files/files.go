@@ -57,7 +57,11 @@ type Files struct {
 	options      Options
 }
 
-var _ store.Reader = (*Files)(nil)
+var (
+	_ store.Reader        = (*Files)(nil)
+	_ store.Transactioner = (*Files)(nil)
+	_ store.Batcher       = (*Files)(nil)
+)
 
 // New creates one files reference store.
 //

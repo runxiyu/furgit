@@ -43,12 +43,18 @@ func openGitDirRoot(t *testing.T, repo *testgit.Repo) *os.Root {
 func openStore(t *testing.T, repo *testgit.Repo, objectFormat id.ObjectFormat) *files.Files {
 	t.Helper()
 
-	gitdir := openGitDirRoot(t, repo)
-
-	filesStore := files.New(gitdir, gitdir, objectFormat, files.Options{
+	return openStoreOptions(t, repo, objectFormat, files.Options{
 		LooseLockTimeout:  files.DefaultLooseLockTimeout,
 		PackedLockTimeout: files.DefaultPackedLockTimeout,
 	})
+}
+
+func openStoreOptions(t *testing.T, repo *testgit.Repo, objectFormat id.ObjectFormat, options files.Options) *files.Files {
+	t.Helper()
+
+	gitdir := openGitDirRoot(t, repo)
+
+	filesStore := files.New(gitdir, gitdir, objectFormat, options)
 
 	t.Cleanup(func() { _ = filesStore.Close() })
 

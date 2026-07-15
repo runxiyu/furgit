@@ -14,6 +14,9 @@ import (
 
 const packedRefsHeaderPrefix = "# pack-refs with: "
 
+// errInvalidPackedRefs indicates that the packed-refs file is malformed.
+var errInvalidPackedRefs = errors.New("ref/store/files: invalid packed-refs")
+
 // packedRefs is one parsed packed-refs file.
 type packedRefs struct {
 	byName  map[string]ref.Direct
