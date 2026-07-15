@@ -127,6 +127,41 @@ func checkExtensions(cfg *config.Config, version int) error {
 		}
 	}
 
+	return checkExtensionValues(cfg)
+}
+
+// checkExtensionValues validates the effective values of extensions
+// whose names carry a value type.
+func checkExtensionValues(cfg *config.Config) error {
+	boolean := []string{
+		"preciousobjects",
+		"worktreeconfig",
+		"relativeworktrees",
+		"submodulepathconfig",
+	}
+
+	for _, name := range boolean {
+		result := cfg.Lookup("extensions", "", name)
+		if result.Kind == config.KindMissing {
+			continue
+		}
+
+		_, err := result.Bool()
+		if err != nil {
+			return fmt.Errorf("%w: extension %q: %w", ErrConfig, name, err)
+		}
+	}
+
+	result := cfg.Lookup("extensions", "", "partialclone")
+	if result.Kind == config.KindMissing {
+		return nil
+	}
+
+	_, err := result.String()
+	if err != nil {
+		return fmt.Errorf("%w: extension %q: %w", ErrConfig, "partialclone", err)
+	}
+
 	return nil
 }
 
@@ -152,9 +187,9 @@ func checkRefStorage(cfg *config.Config) error {
 		return fmt.Errorf("%w: reference storage: %w", ErrConfig, err)
 	}
 
-	name, _, found := strings.Cut(value, "://")
-	if !found {
-		name = value
+	name, _, hasPayload := strings.Cut(value, "://")
+	if hasPayload {
+		return fmt.Errorf("%w: unsupported reference storage URI %q", ErrConfig, value)
 	}
 
 	if name != "files" {

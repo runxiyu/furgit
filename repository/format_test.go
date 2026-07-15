@@ -95,6 +95,50 @@ func TestDuplicateRefStorageTakesLastReftable(t *testing.T) {
 	)
 }
 
+func TestRejectsRefStorageURI(t *testing.T) {
+	t.Parallel()
+
+	requireErrConfig(
+		t, id.ObjectFormatSHA256,
+		"[extensions]\n\trefstorage = files:///srv/references\n",
+	)
+}
+
+func TestRejectsInvalidBooleanExtensionValues(t *testing.T) {
+	t.Parallel()
+
+	for _, name := range []string{
+		"preciousobjects",
+		"worktreeconfig",
+		"relativeworktrees",
+		"submodulepathconfig",
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			requireErrConfig(
+				t, id.ObjectFormatSHA256,
+				"[extensions]\n\t"+name+" = nonsense\n",
+			)
+		})
+	}
+}
+
+func TestExtensionValidationUsesEffectiveValue(t *testing.T) {
+	t.Parallel()
+
+	requireOpens(
+		t, id.ObjectFormatSHA256,
+		"[extensions]\n\trelativeworktrees = nonsense\n\trelativeworktrees = true\n",
+	)
+}
+
+func TestRejectsValuelessPartialClone(t *testing.T) {
+	t.Parallel()
+
+	requireErrConfig(t, id.ObjectFormatSHA256, "[extensions]\n\tpartialclone\n")
+}
+
 func TestDuplicateObjectFormatTakesLast(t *testing.T) {
 	t.Parallel()
 

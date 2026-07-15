@@ -24,7 +24,7 @@ func parseConfig(commonRoot *os.Root) (*config.Config, error) {
 
 	cfg, err := config.Parse(file)
 	if err != nil {
-		return nil, fmt.Errorf("repository: parse config: %w", err)
+		return nil, fmt.Errorf("%w: parse config: %w", ErrConfig, err)
 	}
 
 	return cfg, nil
@@ -66,7 +66,7 @@ func effectiveConfig(gitRoot *os.Root, common *config.Config) (*config.Config, e
 
 	worktree, err := config.Parse(file)
 	if err != nil {
-		return nil, fmt.Errorf("repository: parse config.worktree: %w", err)
+		return nil, fmt.Errorf("%w: parse config.worktree: %w", ErrConfig, err)
 	}
 
 	return config.Merge(common, worktree), nil
