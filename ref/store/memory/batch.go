@@ -1,6 +1,8 @@
 package memory
 
 import (
+	"maps"
+
 	"lindenii.org/go/furgit/object/id"
 	"lindenii.org/go/furgit/ref/store"
 )
@@ -120,7 +122,7 @@ func (batch *Batch) applyRemaining(results []store.BatchResult, remainingIdx []i
 	for len(remainingOps) > 0 {
 		prepared, failedName, err := prepareUpdates(batch.store.refs, remainingOps)
 		if err == nil {
-			next := cloneRefs(batch.store.refs)
+			next := maps.Clone(batch.store.refs)
 			applyPreparedUpdates(next, prepared)
 			batch.store.refs = next
 

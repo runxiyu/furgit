@@ -198,7 +198,7 @@ func directRead(refs map[string]storedRef, name string) storedRef {
 		return storedRef{kind: storedMissing}
 	}
 
-	return cloneStoredRef(stored)
+	return stored
 }
 
 func collectPreparedWrites(prepared []preparedUpdate) (deleted map[string]struct{}, written []string) {

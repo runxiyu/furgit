@@ -1,6 +1,8 @@
 package memory
 
 import (
+	"maps"
+
 	"lindenii.org/go/furgit/object/id"
 	"lindenii.org/go/furgit/ref/store"
 )
@@ -71,7 +73,7 @@ func (tx *Transaction) Commit() error {
 		return err
 	}
 
-	next := cloneRefs(tx.store.refs)
+	next := maps.Clone(tx.store.refs)
 	applyPreparedUpdates(next, prepared)
 	tx.store.refs = next
 

@@ -61,13 +61,12 @@ func (memory *Memory) resolveToDirectLocked(name string) (ref.Direct, error) {
 func publicRef(name string, stored storedRef) (ref.Ref, error) {
 	switch stored.kind {
 	case storedDirect:
-		direct := ref.Direct{RefName: name, ID: stored.id, Peeled: nil}
-		if stored.peeled != nil {
-			peeled := *stored.peeled
-			direct.Peeled = &peeled
-		}
-
-		return direct, nil
+		return ref.Direct{
+			RefName:   name,
+			ID:        stored.id,
+			PeelState: stored.peelState,
+			PeeledID:  stored.peeledID,
+		}, nil
 	case storedSymbolic:
 		return ref.Symbolic{RefName: name, Target: stored.target}, nil
 	case storedMissing:
