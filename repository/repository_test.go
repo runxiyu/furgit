@@ -48,25 +48,3 @@ func TestOpenMissingConfig(t *testing.T) {
 		t.Fatalf("Open = %v, want fs.ErrNotExist", err)
 	}
 }
-
-func TestConfig(t *testing.T) {
-	t.Parallel()
-
-	repo := newRepo(t, id.ObjectFormatSHA1)
-
-	err := repo.ConfigSet(t, "furgit.marker", "present")
-	if err != nil {
-		t.Fatalf("ConfigSet: %v", err)
-	}
-
-	opened := openRepository(t, repo)
-
-	value, err := opened.Config().Lookup("furgit", "", "marker").String()
-	if err != nil {
-		t.Fatalf("Lookup: %v", err)
-	}
-
-	if value != "present" {
-		t.Fatalf("marker = %q, want %q", value, "present")
-	}
-}

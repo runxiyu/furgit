@@ -51,12 +51,17 @@ type Repository struct {
 //
 // Labels: Deps-Borrowed, Life-Parent, Close-Caller.
 func Open(gitRoot, commonRoot *os.Root) (*Repository, error) {
-	cfg, err := parseConfig(commonRoot)
+	common, err := parseConfig(commonRoot)
 	if err != nil {
 		return nil, err
 	}
 
-	objectFormat, err := detectObjectFormat(cfg)
+	objectFormat, err := detectObjectFormat(common)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg, err := effectiveConfig(gitRoot, common)
 	if err != nil {
 		return nil, err
 	}
