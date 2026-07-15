@@ -193,6 +193,71 @@ func TestConfigMultiValue(t *testing.T) {
 	}
 }
 
+func TestConfigLookupLastWins(t *testing.T) {
+	t.Parallel()
+
+	testRepo, err := testgit.NewRepo(t, testgit.RepoOptions{ObjectFormat: id.ObjectFormatSHA256})
+	if err != nil {
+		t.Fatalf("NewRepo: %v", err)
+	}
+
+	for _, value := range []string{"first", "second", "third"} {
+		err = testRepo.ConfigAdd(t, "test.single", value)
+		if err != nil {
+			t.Fatalf("add test.single: %v", err)
+		}
+	}
+
+	cfgFile, err := testRepo.Root(t).Open(".git/config")
+	if err != nil {
+		t.Fatalf("open config: %v", err)
+	}
+
+	defer func() { _ = cfgFile.Close() }()
+
+	cfg, err := config.Parse(cfgFile)
+	if err != nil {
+		t.Fatalf("Parse failed: %v", err)
+	}
+
+	got, err := cfg.Lookup("test", "", "single").String()
+	if err != nil {
+		t.Fatalf("test.single: %v", err)
+	}
+
+	want, err := testRepo.ConfigGet(t, "test.single")
+	if err != nil {
+		t.Fatalf("ConfigGet: %v", err)
+	}
+
+	want = strings.TrimSuffix(want, "\n")
+	if got != want {
+		t.Errorf("test.single: got %q, want %q", got, want)
+	}
+
+	if got != "third" {
+		t.Errorf("test.single: got %q, want %q", got, "third")
+	}
+}
+
+func TestConfigLookupLastWinsOverValueless(t *testing.T) {
+	t.Parallel()
+
+	cfg, err := config.Parse(strings.NewReader("[test]\n\tflag\n\tflag = false\n"))
+	if err != nil {
+		t.Fatalf("Parse failed: %v", err)
+	}
+
+	got, err := cfg.Lookup("test", "", "flag").String()
+	if err != nil {
+		t.Fatalf("test.flag: %v", err)
+	}
+
+	if got != "false" {
+		t.Errorf("test.flag: got %q, want %q", got, "false")
+	}
+}
+
 func TestConfigCaseInsensitive(t *testing.T) {
 	t.Parallel()
 

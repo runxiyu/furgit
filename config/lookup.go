@@ -1,6 +1,7 @@
 package config
 
 import (
+	"slices"
 	"strings"
 )
 
@@ -66,13 +67,17 @@ func (result LookupResult) Int64() (int64, error) {
 	}
 }
 
-// Lookup retrieves the first value for a given section, optional subsection,
-// and key.
+// Lookup retrieves the value for a given section,
+// optional subsection, and key.
+//
+// A key declared more than once takes its last declaration,
+// which is how a single-valued key is resolved.
+// Use [Config.LookupAll] for keys that are meant to hold several values.
 func (config *Config) Lookup(section, subsection, key string) LookupResult {
 	section = strings.ToLower(section)
 
 	key = strings.ToLower(key)
-	for _, entry := range config.entries {
+	for _, entry := range slices.Backward(config.entries) {
 		if strings.EqualFold(entry.Section, section) &&
 			entry.Subsection == subsection &&
 			strings.EqualFold(entry.Key, key) {
