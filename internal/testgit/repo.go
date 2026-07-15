@@ -34,7 +34,8 @@ func NewRepo(tb testing.TB, opts RepoOptions) (*Repo, error) {
 	repo := &Repo{
 		path:         tb.TempDir(),
 		objectFormat: objectFormat,
-		env: append(os.Environ(),
+		env: append(
+			os.Environ(),
 			"GIT_CONFIG_GLOBAL=/dev/null",
 			"GIT_CONFIG_SYSTEM=/dev/null",
 			"GIT_AUTHOR_NAME=Test Author",

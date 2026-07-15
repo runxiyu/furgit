@@ -72,9 +72,9 @@ type Reader struct {
 	r            flate.Reader //exhaustruct:optional
 	decompressor io.ReadCloser
 	digest       hash.Hash32
-	headerRead   uint64 //exhaustruct:optional
-	trailerRead  uint64 //exhaustruct:optional
-	err          error  //exhaustruct:optional
+	headerRead   uint64  //exhaustruct:optional
+	trailerRead  uint64  //exhaustruct:optional
+	err          error   //exhaustruct:optional
 	scratch      [4]byte //exhaustruct:optional
 	br           bytes.Reader
 }

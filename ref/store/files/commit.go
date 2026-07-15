@@ -244,7 +244,7 @@ func (executor *updateExecutor) applyPackedDeletes(prepared []preparedUpdate) er
 
 // formatPackedRefs serializes packed-refs content,
 // propagating the input file's peel traits.
-// 
+//
 // TODO: Possibility of peeling objects here.
 func formatPackedRefs(traits packedTraits, entries []ref.Direct) string {
 	headerTraits := make([]string, 0, 3)
