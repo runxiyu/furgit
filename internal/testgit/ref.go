@@ -19,6 +19,30 @@ func (repo *Repo) UpdateRef(tb testing.TB, name string, oid id.ObjectID) error {
 	return nil
 }
 
+// SymbolicRefUpdate points a symbolic ref at a target reference name.
+func (repo *Repo) SymbolicRefUpdate(tb testing.TB, name, target string) error {
+	tb.Helper()
+
+	_, err := repo.run(tb, nil, "git", "symbolic-ref", "--end-of-options", name, target)
+	if err != nil {
+		return fmt.Errorf("symbolic-ref %s %s: %w", name, target, err)
+	}
+
+	return nil
+}
+
+// PackRefs packs all refs into packed-refs and prunes the loose copies.
+func (repo *Repo) PackRefs(tb testing.TB) error {
+	tb.Helper()
+
+	_, err := repo.run(tb, nil, "git", "pack-refs", "--all", "--prune")
+	if err != nil {
+		return fmt.Errorf("pack-refs: %w", err)
+	}
+
+	return nil
+}
+
 // ForEachRefFormat returns git-for-each-ref output for one ref and one format.
 func (repo *Repo) ForEachRefFormat(tb testing.TB, pattern string, format string) ([]byte, error) {
 	tb.Helper()

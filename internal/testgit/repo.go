@@ -16,6 +16,11 @@ type Repo struct {
 //exhaustruct:optional
 type RepoOptions struct {
 	ObjectFormat id.ObjectFormat
+
+	// RefFormat selects the format of the reference store,
+	// passed verbatim to git init --ref-format;
+	// empty means git's default.
+	RefFormat string
 }
 
 func NewRepo(tb testing.TB, opts RepoOptions) (*Repo, error) {
@@ -41,7 +46,14 @@ func NewRepo(tb testing.TB, opts RepoOptions) (*Repo, error) {
 		),
 	}
 
-	return repo, repo.command(tb, "git", "init", "--object-format="+repo.objectFormat.String(), "--end-of-options", repo.path).Run() //nolint:wrapcheck
+	args := []string{"init", "--object-format=" + repo.objectFormat.String()}
+	if opts.RefFormat != "" {
+		args = append(args, "--ref-format="+opts.RefFormat)
+	}
+
+	args = append(args, "--end-of-options", repo.path)
+
+	return repo, repo.command(tb, "git", args...).Run() //nolint:wrapcheck
 }
 
 func (repo *Repo) ObjectFormat(tb testing.TB) id.ObjectFormat {
