@@ -240,6 +240,59 @@ func TestConfigLookupLastWins(t *testing.T) {
 	}
 }
 
+func TestConfigMerge(t *testing.T) {
+	t.Parallel()
+
+	first, err := config.Parse(strings.NewReader("[test]\n\tkey = one\n\tonly = first\n"))
+	if err != nil {
+		t.Fatalf("Parse failed: %v", err)
+	}
+
+	second, err := config.Parse(strings.NewReader("[test]\n\tkey = two\n"))
+	if err != nil {
+		t.Fatalf("Parse failed: %v", err)
+	}
+
+	merged := config.Merge(first, second)
+
+	got, err := merged.Lookup("test", "", "key").String()
+	if err != nil {
+		t.Fatalf("test.key: %v", err)
+	}
+
+	if got != "two" {
+		t.Errorf("test.key: got %q, want %q", got, "two")
+	}
+
+	got, err = merged.Lookup("test", "", "only").String()
+	if err != nil {
+		t.Fatalf("test.only: %v", err)
+	}
+
+	if got != "first" {
+		t.Errorf("test.only: got %q, want %q", got, "first")
+	}
+
+	all := merged.LookupAll("test", "", "key")
+	if len(all) != 2 {
+		t.Fatalf("expected 2 values, got %d", len(all))
+	}
+
+	if all[0].Value != "one" || all[1].Value != "two" {
+		t.Errorf("LookupAll = %q, %q, want %q, %q", all[0].Value, all[1].Value, "one", "two")
+	}
+
+	// Merging must not disturb the sources.
+	got, err = first.Lookup("test", "", "key").String()
+	if err != nil {
+		t.Fatalf("first test.key: %v", err)
+	}
+
+	if got != "one" {
+		t.Errorf("first test.key: got %q, want %q", got, "one")
+	}
+}
+
 func TestConfigLookupLastWinsOverValueless(t *testing.T) {
 	t.Parallel()
 

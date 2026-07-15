@@ -36,6 +36,24 @@ func Parse(r io.Reader) (*Config, error) {
 	return parser.parse()
 }
 
+// Merge combines configurations into one,
+// keeping the entries of each in the order given.
+//
+// A key declared in a later configuration
+// therefore takes precedence over the same key in an earlier one,
+// and [Config.LookupAll] reports the values of all of them in order.
+//
+// Labels: Life-Independent.
+func Merge(configs ...*Config) *Config {
+	merged := &Config{entries: nil}
+
+	for _, cfg := range configs {
+		merged.entries = append(merged.entries, cfg.entries...)
+	}
+
+	return merged
+}
+
 // Entry represents a single parsed configuration directive.
 type Entry struct {
 	// Section is the section name in canonical lowercase form.
