@@ -17,3 +17,7 @@
 * Pack store maint, gc, etc
 
 * which object ID length mismatches should panic vs error
+
+* Consider if there should be some way for an object store to mark if a
+  retrieved result can be considered fully owned by the caller to avoid extra
+  copies when the store is already copying, for example, via pread.
